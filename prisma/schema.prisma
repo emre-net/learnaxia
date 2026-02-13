@@ -1,0 +1,451 @@
+// Learnaxia v3.7 Master Schema (FINAL + TOKEN ECONOMY) - POSTGRESQL ADAPTED
+// Source of Truth: implementation_plan.md & Architecture Map
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Changed to PostgreSQL
+  url      = env("DATABASE_URL")
+}
+
+// --- IDENTITY & USER DOMAIN ---
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  handle    String?  @unique // Optional for OAuth
+  timezone  String   @default("UTC")
+  role      String   @default("USER")
+  status    String   @default("ACTIVE")
+  sessionVersion Int @default(1)
+  
+  settings  Json?    // Native JSON type
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  accounts          Account[]        
+  sessions          Session[]        
+  
+  modules           Module[]         @relation("OwnedModules")
+  createdModules    Module[]         @relation("CreatedModules")
+  collections       Collection[]     @relation("OwnedCollections")
+
+  itemProgress      ItemProgress[]
+  sm2Progress       SM2Progress[]
+  moduleLibrary     UserModuleLibrary[]
+  collectionLibrary UserCollectionLibrary[]
+  contentAccess     UserContentAccess[]
+  questionOverrides UserQuestionOverride[]
+  learningSessions  LearningSession[] 
+  itemSessions      ItemSession[]
+
+  // --- TOKEN ECONOMY ---
+  wallet            TokenWallet? // One-to-One
+  tokenTransactions TokenTransaction[]
+  
+  // --- MONETIZATION ---
+  subscription      Subscription?
+  paymentMethods    PaymentMethod[]
+  userRetention     UserRetention[]
+  
+  // --- NEW FEATURES ---
+  exams             Exam[]
+  examAttempts      ExamAttempt[]
+  pdfAssets         PDFAsset[]
+  weaknessReports   WeaknessReport[]
+
+  @@index([email])
+  @@index([handle])
+}
+
+// --- NEXTAUTH MODELS ---
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- TOKEN ECONOMY DOMAIN ---
+
+model TokenWallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  balance   Int      @default(50) // Starting Bonus
+  currency  String   @default("AXIA") 
+  
+  transactions TokenTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model TokenTransaction {
+  id        String   @id @default(uuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  walletId  String
+  wallet    TokenWallet @relation(fields: [walletId], references: [id])
+  
+  amount    Int // Positive (Earn) or Negative (Spend)
+  type      String // DAILY_LOGIN, AD_REWARD, GENERATE_COST, PDF_COST
+  
+  description String?
+  metadata    Json?    // Native JSON type
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+// --- MONETIZATION & SUBSCRIPTION DOMAIN ---
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String   @unique // FREE | PRO 
+  displayName String 
+  priceMonthly  Int? 
+  priceYearly   Int?
+  
+  // Token Benefits
+  monthlyTokenGrant Int @default(0)
+  tokenDiscountRate Float @default(0.0) // 0.0 - 1.0 (e.g. 0.5 for 50% off)
+  
+  features Json     // Native JSON type
+  isActive Boolean @default(true)
+  
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  
+  status    String   // ACTIVE | CANCELLED | PAST_DUE
+  
+  billingCycle    String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  
+  stripeCustomerId      String?  @unique
+  stripeSubscriptionId  String?  @unique
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id        String   @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amountDue  Int
+  amountPaid Int?
+  status String
+  stripeInvoiceId String? @unique
+  createdAt DateTime @default(now())
+}
+
+model PaymentMethod {
+  id       String @id @default(uuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  stripePaymentMethodId String @unique
+  type      String
+  last4     String?
+}
+
+// --- CONTENT DOMAIN & FEATURES ---
+
+model Module {
+  id               String   @id @default(uuid())
+  title            String
+  description      String?
+  type             String   
+  status           String   @default("DRAFT")
+  isForkable       Boolean  @default(true)
+  
+  ownerId          String
+  owner            User     @relation("OwnedModules", fields: [ownerId], references: [id])
+  creatorId        String
+  creator          User     @relation("CreatedModules", fields: [creatorId], references: [id])
+  
+  sourceModuleId   String?
+  sourceModule     Module?  @relation("ModuleForks", fields: [sourceModuleId], references: [id])
+  forks            Module[] @relation("ModuleForks")
+  
+  items            Item[]
+  userLibrary      UserModuleLibrary[]
+  generationStep   String? 
+  
+  // Added Back-Relations
+  sessions         LearningSession[]
+  collectionItems  CollectionItem[]
+
+  createdAt        DateTime @default(now())
+}
+
+model Item {
+  id           String  @id @default(uuid())
+  moduleId     String
+  module       Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  type         String 
+  content      Json    // Native JSON type
+  contentHash  String
+  order        Int
+  
+  sourceItemId String?
+  
+  itemProgress  ItemProgress[]
+  sm2Progress   SM2Progress[]
+  questionOverrides UserQuestionOverride[]
+  itemSessions  ItemSession[]
+}
+
+// --- NEW FEATURE: PDF PROCESSING ---
+model PDFAsset {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  fileName  String
+  s3Key     String
+  pageCount Int
+  
+  status    String   // UPLOADED | PARSING | PROCESSED | FAILED
+  ocrUsed   Boolean  @default(false)
+  
+  tokenCost Int      @default(0)
+  
+  metadata  Json?    // Native JSON type
+  
+  createdAt DateTime @default(now())
+}
+
+// --- NEW FEATURE: EXAMS ---
+model Exam {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  title     String
+  sourceModuleId String? // Optional link to source
+  
+  questions Json     // Native JSON type (Array of ExamQuestion objects)
+  timeLimit Int      // Minutes
+  
+  createdAt DateTime @default(now())
+  
+  attempts  ExamAttempt[]
+}
+
+model ExamAttempt {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  examId    String
+  exam      Exam     @relation(fields: [examId], references: [id])
+  
+  score     Int
+  maxScore  Int
+  answers   Json     // Native JSON type (User answers)
+  
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+}
+
+// --- NEW FEATURE: WEAKNESS ANALYSIS ---
+model WeaknessReport {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  analysisDate DateTime @default(now())
+  
+  // AI Insights
+  weakConcepts    Json    // Native JSON type
+  suggestedAction String
+  
+  // Linked Items to Review
+  targetItemIds   Json    // Native JSON type
+  
+  createdAt DateTime @default(now())
+}
+
+// --- REST OF THE MODELS (UNCHANGED) ---
+// (Collection, LearningSession, ItemSession, Progress, etc.)
+
+model Collection {
+  id          String   @id @default(uuid())
+  title       String
+  ownerId     String
+  owner       User     @relation("OwnedCollections", fields: [ownerId], references: [id])
+  items       CollectionItem[]
+  userLibrary UserCollectionLibrary[]
+  createdAt   DateTime @default(now())
+}
+
+model CollectionItem {
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  
+  moduleId     String
+  module       Module @relation(fields: [moduleId], references: [id]) // Added Relation
+
+  order        Int
+  @@id([collectionId, moduleId])
+}
+
+model ItemProgress {
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  itemId         String
+  item           Item     @relation(fields: [itemId], references: [id])
+  contentHash    String
+  correctCount   Int      @default(0)
+  wrongCount     Int      @default(0)
+  strengthScore  Float    @default(0.0)
+  lastResult     String?
+  lastReviewedAt DateTime @default(now())
+  aiMetadata     Json?    // Native JSON type
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@id([userId, itemId])
+}
+
+model SM2Progress {
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  itemId       String
+  item         Item     @relation(fields: [itemId], references: [id])
+  repetition   Int      @default(0)
+  interval     Int      @default(1)
+  easeFactor   Float    @default(2.5)
+  nextReviewAt DateTime
+  isRetired    Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+  
+  @@id([userId, itemId])
+}
+
+model UserModuleLibrary {
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  moduleId String
+  module Module @relation(fields: [moduleId], references: [id])
+  role String
+  lastInteractionAt DateTime @default(now())
+  @@id([userId, moduleId])
+}
+
+model UserCollectionLibrary {
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  collectionId String
+  collection Collection @relation(fields: [collectionId], references: [id])
+  role String
+  lastInteractionAt DateTime @default(now())
+  @@id([userId, collectionId])
+}
+
+model UserContentAccess {
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  resourceId String
+  resourceType String
+  accessLevel String
+  grantedAt DateTime @default(now())
+  @@id([userId, resourceId])
+}
+
+model LearningSession {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  moduleId String
+  module Module @relation(fields: [moduleId], references: [id])
+  startedAt DateTime @default(now())
+  itemSessions ItemSession[]
+}
+
+model ItemSession {
+  id String @id @default(uuid())
+  sessionId String
+  session LearningSession @relation(fields: [sessionId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  itemId String
+  item Item @relation(fields: [itemId], references: [id])
+  result String
+  durationMs Int
+  createdAt DateTime @default(now())
+}
+
+model UserQuestionOverride {
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  questionId String
+  item Item @relation(fields: [questionId], references: [id])
+  action String
+  @@id([userId, questionId])
+}
+
+model DailyMetrics {
+  id String @id
+  date DateTime @unique
+  totalUsers Int
+}
+
+model UserRetention {
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  cohortMonth DateTime
+  @@id([userId, cohortMonth])
+}
