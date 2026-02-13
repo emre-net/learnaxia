@@ -15,7 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            checks: ["state"], // Force usage of state only, disabling PKCE to avoid cookie mismatch issues
+            checks: ["none"], // DEBUG: Temporarily disable ALL checks (PKCE & State) to bypass Railway Proxy Cookie issues
             authorization: {
                 params: {
                     prompt: "consent",
