@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // Fixed import for build
 import { SM2_CONFIG } from "@/lib/sm2";
 
 export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW';
