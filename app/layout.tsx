@@ -3,8 +3,10 @@ import { Inter as FontSans } from "next/font/google"; // Using Inter
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 import SessionProvider from "@/components/providers/session-provider"
 import { auth } from "@/auth"
+import { ReactQueryProvider } from "@/components/providers/query-provider"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -32,14 +34,17 @@ export default async function RootLayout({
         )}
       >
         <SessionProvider session={session}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          <ReactQueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </ReactQueryProvider>
         </SessionProvider>
       </body>
     </html>
