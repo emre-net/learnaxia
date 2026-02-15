@@ -1,6 +1,7 @@
 
 import { ModuleDetailClient } from "@/components/module/module-detail-client";
 
-export default function ModuleDetailPage({ params }: { params: { id: string } }) {
-    return <ModuleDetailClient moduleId={params.id} />;
+export default async function ModuleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    return <ModuleDetailClient moduleId={id} />;
 }
