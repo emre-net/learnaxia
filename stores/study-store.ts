@@ -48,68 +48,76 @@ interface StudyState {
 }
 
 export const useStudyStore = create<StudyState>()(
-    //   persist(
-    (set, get) => ({
-        sessionId: null,
-        moduleId: null,
-        mode: 'NORMAL',
-        startTime: null,
-        items: [],
-        currentIndex: 0,
+    persist(
+        (set, get) => ({
+            sessionId: null,
+            moduleId: null,
+            mode: 'NORMAL',
+            startTime: null,
+            items: [],
+            currentIndex: 0,
 
-        isFlipped: false,
-        currentAnswer: null,
-        isChecked: false,
+            isFlipped: false,
+            currentAnswer: null,
+            isChecked: false,
 
-        results: { correct: 0, wrong: 0, skipped: 0 },
+            results: { correct: 0, wrong: 0, skipped: 0 },
 
-        initSession: (moduleId, items, mode) => {
-            set({
-                sessionId: crypto.randomUUID(),
-                moduleId,
-                items,
-                mode,
-                currentIndex: 0,
-                startTime: new Date(),
-                isFlipped: false,
-                currentAnswer: null,
-                isChecked: false,
-                results: { correct: 0, wrong: 0, skipped: 0 }
-            });
-        },
-
-        flipCard: () => set((state) => ({ isFlipped: !state.isFlipped })),
-
-        setAnswer: (answer) => set({ currentAnswer: answer }),
-
-        checkAnswer: () => {
-            // Logic to validate answer could be here or in component. 
-            // For Flashcards, "check" usually means "Flip".
-            // For MC, it means "Validation".
-            set({ isChecked: true });
-        },
-
-        nextItem: () => {
-            const { currentIndex, items } = get();
-            if (currentIndex < items.length - 1) {
+            initSession: (moduleId, items, mode) => {
                 set({
-                    currentIndex: currentIndex + 1,
+                    sessionId: crypto.randomUUID(),
+                    moduleId,
+                    items,
+                    mode,
+                    currentIndex: 0,
+                    startTime: new Date(),
                     isFlipped: false,
+                    currentAnswer: null,
                     isChecked: false,
-                    currentAnswer: null
+                    results: { correct: 0, wrong: 0, skipped: 0 }
+                });
+            },
+
+            flipCard: () => set((state) => ({ isFlipped: !state.isFlipped })),
+
+            setAnswer: (answer) => set({ currentAnswer: answer }),
+
+            checkAnswer: () => {
+                set({ isChecked: true });
+            },
+
+            nextItem: () => {
+                const { currentIndex, items } = get();
+                if (currentIndex < items.length - 1) {
+                    set({
+                        currentIndex: currentIndex + 1,
+                        isFlipped: false,
+                        isChecked: false,
+                        currentAnswer: null
+                    });
+                }
+            },
+
+            endSession: () => {
+                set({
+                    sessionId: null,
+                    moduleId: null,
+                    items: [],
+                    currentIndex: 0
                 });
             }
-        },
-
-        endSession: () => {
-            set({
-                sessionId: null,
-                moduleId: null,
-                items: [],
-                currentIndex: 0
-            });
+        }),
+        {
+            name: 'study-store',
+            partialize: (state) => ({
+                sessionId: state.sessionId,
+                moduleId: state.moduleId,
+                mode: state.mode,
+                startTime: state.startTime,
+                items: state.items,
+                currentIndex: state.currentIndex,
+                results: state.results,
+            }),
         }
-    }),
-    // { name: 'study-store' } // Persist disabled for now to avoid hydration issues during dev
-    //   )
+    )
 );

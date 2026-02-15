@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         return NextResponse.json(collection, { status: 201 });
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation Error", details: (error as z.ZodError).errors }, { status: 400 });
+            return NextResponse.json({ error: "Validation Error", details: (error as z.ZodError).issues }, { status: 400 });
         }
         console.error("Create Collection Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

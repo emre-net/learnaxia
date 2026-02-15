@@ -43,18 +43,15 @@ export default function CreatePage() {
                     </Card>
                 </Link>
 
-                {/* AI Generation Card (Future) */}
-                <div className="group opacity-75 grayscale hover:grayscale-0 transition-all hover:opacity-100 relative">
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute top-4 right-4 z-10">
-                        <span className="bg-amber-500/10 text-amber-500 text-xs font-bold px-2 py-1 rounded-full border border-amber-500/20">
-                            COMING SOON
-                        </span>
-                    </div>
+                {/* AI Generation Card */}
+                <Link href="/create/ai" className="group">
+                    <Card className="h-full border-purple-500/20 hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer flex flex-col relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Sparkles className="h-32 w-32 text-purple-500 rotate-12" />
+                        </div>
 
-                    <Card className="h-full border-dashed">
                         <CardHeader>
-                            <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 mb-4">
+                            <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 mb-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
                                 <Sparkles className="h-6 w-6" />
                             </div>
                             <CardTitle className="text-2xl">AI Generation</CardTitle>
@@ -62,21 +59,24 @@ export default function CreatePage() {
                                 Generate modules instantly from text, PDFs, or topic keywords.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex-1">
+                        <CardContent className="flex-1 relative z-10">
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex items-center">
-                                    <Sparkles className="h-4 w-4 mr-2" /> Text-to-Flashcard
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Text-to-Flashcard
                                 </li>
                                 <li className="flex items-center">
-                                    <Sparkles className="h-4 w-4 mr-2" /> PDF Processing
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Multi-Type Support
+                                </li>
+                                <li className="flex items-center">
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Instant ready-to-study
                                 </li>
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="secondary" className="w-full" disabled>Generate with AI</Button>
+                            <Button variant="secondary" className="w-full bg-purple-500/10 text-purple-600 hover:bg-purple-500 hover:text-white border-purple-200">Generate with AI</Button>
                         </CardFooter>
                     </Card>
-                </div>
+                </Link>
             </div>
         </div>
     );

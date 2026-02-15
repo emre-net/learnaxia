@@ -1,6 +1,16 @@
 
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { createHash } from 'crypto';
+
+/**
+ * Computes a deterministic content hash for an item.
+ * Used for duplicate detection and merge conflict resolution.
+ */
+function computeContentHash(content: unknown): string {
+    const normalized = JSON.stringify(content, Object.keys(content as object).sort());
+    return createHash('sha256').update(normalized).digest('hex').slice(0, 16);
+}
 
 // Types
 export type CreateModuleDto = {
@@ -42,13 +52,13 @@ export class ModuleService {
                 const itemsData = dto.items.map((item, index) => ({
                     moduleId: module.id,
                     type: dto.type, // All items inherit module type for now
-                    content: item as any, // Store full item content JSON
-                    contentHash: 'hash-placeholder', // TODO: Implement hashing util
+                    content: item as Prisma.InputJsonValue,
+                    contentHash: computeContentHash(item),
                     order: index,
                     // sourceItemId null for new items
                 }));
 
-                // @ts-ignore - Stale Prisma Client
+
                 await tx.item.createMany({
                     data: itemsData
                 });
@@ -128,7 +138,6 @@ export class ModuleService {
                     orderBy: { order: 'asc' }
                 },
                 owner: {
-                    // @ts-ignore - Local Prisma Client is stale due to lock, fields exist in DB
                     select: { handle: true, name: true, image: true }
                 }
             }
@@ -183,8 +192,8 @@ export class ModuleService {
             data: {
                 moduleId: moduleId,
                 type: itemData.type,
-                content: itemData.content,
-                contentHash: 'hash-placeholder', // TODO: Implement hashing
+                content: itemData.content as Prisma.InputJsonValue,
+                contentHash: computeContentHash(itemData.content),
                 order: newOrder
             }
         });

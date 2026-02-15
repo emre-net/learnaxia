@@ -9,10 +9,7 @@ import { Card } from "@/components/ui/card";
 import { BasicInfoStep } from "./basic-info-step";
 import { ContentEditorStep } from "./content-editor-step";
 import { ChevronRight, ChevronLeft, Save, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Assuming toast exists or will use console for now
 import { useRouter } from "next/navigation";
-import { ModuleService } from "@/domains/module/module.service"; // Wait, can't import service in client component!
-// I need an API call.
 
 // --- Schema Definition ---
 const moduleSchema = z.object({
@@ -20,10 +17,10 @@ const moduleSchema = z.object({
     description: z.string().max(500).optional(),
     type: z.enum(["FLASHCARD", "MC", "GAP"]),
     isForkable: z.boolean().default(true),
-    items: z.array(z.any()).default([]) // We'll refine Item schema later or in the step
+    items: z.array(z.any()).default([])
 });
 
-export type ModuleFormData = z.infer<typeof moduleSchema>;
+export type ModuleFormData = z.input<typeof moduleSchema>;
 
 export function ManualCreationWizard() {
     const [step, setStep] = useState(1);
@@ -40,7 +37,7 @@ export function ManualCreationWizard() {
         mode: "onChange"
     });
 
-    const { handleSubmit, trigger, formState: { isValid } } = methods;
+    const { handleSubmit, trigger } = methods;
 
     const nextStep = async () => {
         const isStepValid = await trigger(["title", "description", "type"]);
@@ -52,7 +49,7 @@ export function ManualCreationWizard() {
     const onSubmit = async (data: ModuleFormData) => {
         setIsSubmitting(true);
         try {
-            // 1. Create Module via API
+            // Fix #18: Send items along with module creation data
             const res = await fetch("/api/modules", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -61,29 +58,18 @@ export function ManualCreationWizard() {
                     description: data.description,
                     type: data.type,
                     isForkable: data.isForkable,
-                    status: 'ACTIVE' // Directly active for manual creation? Or DRAFT? Let's say ACTIVE for MVP simplicity.
+                    status: 'ACTIVE',
+                    items: data.items, // Now properly included
                 })
             });
 
             if (!res.ok) throw new Error("Failed to create module");
 
             const newModule = await res.json();
-
-            // 2. Add Items via API (Batch) - Not implemented yet in Phase 2.1
-            // I only implemented Module CRUD. Item CRUD is missing!
-            // I need to implement Item creation API.
-            // But for now, let's just redirect to the module page where they can add items?
-            // OR implement item addition in the wizard.
-            // The plan says "Manual Creation Forms (Wizard Step)". "Content Editor".
-            // So I SHOULD implement Item saving.
-
-            // I'll need to create an API endpoint for batch item creation or items.
-
             router.push(`/modules/${newModule.id}`);
 
         } catch (error) {
             console.error(error);
-            // toast({ title: "Error", description: "Failed to create module", variant: "destructive" });
         } finally {
             setIsSubmitting(false);
         }

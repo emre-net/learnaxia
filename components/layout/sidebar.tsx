@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { WalletDialog } from "@/components/wallet/wallet-dialog"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -65,22 +66,41 @@ export function Sidebar({ className }: SidebarProps) {
                         <h2 className="text-2xl font-bold tracking-tight">Learnaxia</h2>
                     </div>
                     <div className="space-y-1">
-                        {routes.map((route) => (
-                            <Button
-                                key={route.href}
-                                variant={route.active ? "secondary" : "ghost"}
-                                className={cn(
-                                    "w-full justify-start",
-                                    route.active && "bg-secondary"
-                                )}
-                                asChild
-                            >
-                                <Link href={route.href}>
-                                    <route.icon className="mr-2 h-5 w-5" />
-                                    {route.label}
-                                </Link>
-                            </Button>
-                        ))}
+                        {routes.map((route) => {
+                            if (route.label === "Jetonlar") {
+                                return (
+                                    <div key={route.href} className="px-0">
+                                        <div className="w-full justify-start relative">
+                                            <div className="absolute left-2 top-2 z-10 pointer-events-none">
+                                                {/* Optional: Icon overlay or styling */}
+                                            </div>
+                                            <WalletDialog />
+                                            {/* Note: WalletDialog has its own trigger button, 
+                                                we might need to styling it to look like a sidebar item 
+                                                OR we update WalletDialog to accept a custom trigger.
+                                                For now, let's just place it here.
+                                            */}
+                                        </div>
+                                    </div>
+                                )
+                            }
+                            return (
+                                <Button
+                                    key={route.href}
+                                    variant={route.active ? "secondary" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start",
+                                        route.active && "bg-secondary"
+                                    )}
+                                    asChild
+                                >
+                                    <Link href={route.href}>
+                                        <route.icon className="mr-2 h-5 w-5" />
+                                        {route.label}
+                                    </Link>
+                                </Button>
+                            )
+                        })}
                     </div>
                 </div>
             </div>

@@ -13,14 +13,15 @@ const UpdateModuleSchema = z.object({
     status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional()
 });
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const module = await ModuleService.getById(session.user.id, params.id);
+        const { id } = await params;
+        const module = await ModuleService.getById(session.user.id, id);
         if (!module) {
             return NextResponse.json({ error: "Module not found" }, { status: 404 });
         }
@@ -35,28 +36,23 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const { id } = await params;
         const body = await req.json();
         const validatedData = UpdateModuleSchema.parse(body);
 
-        // Note: 'status' in CreateModuleDto doesn't include 'ARCHIVED'? 
-        // The service expects Partial<CreateModuleDto>. 
-        // We might need to cast or ensure types align. Zod allows 'ARCHIVED'.
-        // create dto had 'DRAFT' | 'ACTIVE'. Service `update` uses `status: dto.status`.
-        // Schema.prisma status is String. So it's fine at runtime.
-
-        const updatedModule = await ModuleService.update(session.user.id, params.id, validatedData as any);
+        const updatedModule = await ModuleService.update(session.user.id, id, validatedData as any);
 
         return NextResponse.json(updatedModule);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation Error", details: error.errors }, { status: 400 });
+            return NextResponse.json({ error: "Validation Error", details: error.issues }, { status: 400 });
         }
         console.error("Update Module Error:", error);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
@@ -66,14 +62,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        await ModuleService.archive(session.user.id, params.id);
+        const { id } = await params;
+        await ModuleService.archive(session.user.id, id);
 
         return NextResponse.json({ success: true });
     } catch (error) {

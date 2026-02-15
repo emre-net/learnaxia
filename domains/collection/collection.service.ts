@@ -6,7 +6,6 @@ export class CollectionService {
 
     static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean }) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            // @ts-ignore - description/isPublic pending migration
             const collection = await tx.collection.create({
                 data: {
                     title: data.title,
@@ -84,8 +83,7 @@ export class CollectionService {
         if (!collection) throw new Error("Collection not found");
 
         // Extract modules from items
-        // @ts-ignore
-        const modules = collection.items.map(item => item.module);
+        const modules = collection.items.map((item: any) => item.module);
 
         return {
             ...collection,
@@ -118,12 +116,10 @@ export class CollectionService {
             // Update items if moduleIds provided
             if (data.moduleIds) {
                 // Delete existing items
-                // @ts-ignore
                 await tx.collectionItem.deleteMany({ where: { collectionId } });
 
                 // Create new items
                 if (data.moduleIds.length > 0) {
-                    // @ts-ignore
                     await tx.collectionItem.createMany({
                         data: data.moduleIds.map((moduleId, index) => ({
                             collectionId,

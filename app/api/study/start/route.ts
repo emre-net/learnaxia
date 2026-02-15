@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         return NextResponse.json(studyData);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Invalid Request", details: error.errors }, { status: 400 });
+            return NextResponse.json({ error: "Invalid Request", details: error.issues }, { status: 400 });
         }
         console.error("Start Session Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
