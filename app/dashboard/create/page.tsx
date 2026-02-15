@@ -16,7 +16,7 @@ export default function CreatePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Manual Creation Card */}
-                <Link href="/create/manual" className="group">
+                <Link href="/dashboard/create/manual" className="group">
                     <Card className="h-full hover:border-primary transition-all hover:shadow-lg cursor-pointer flex flex-col">
                         <CardHeader>
                             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -44,7 +44,7 @@ export default function CreatePage() {
                 </Link>
 
                 {/* AI Generation Card */}
-                <Link href="/create/ai" className="group">
+                <Link href="/dashboard/create/ai" className="group">
                     <Card className="h-full border-purple-500/20 hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer flex flex-col relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <Sparkles className="h-32 w-32 text-purple-500 rotate-12" />

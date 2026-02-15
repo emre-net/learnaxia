@@ -198,7 +198,7 @@ export function LibraryClient() {
                         </div>
                         <TabsContent value="modules" className="m-0 border-0 p-0">
                             <Button asChild>
-                                <Link href="/create">
+                                <Link href="/dashboard/create">
                                     <Plus className="mr-2 h-4 w-4" />
                                     New Module
                                 </Link>
@@ -221,7 +221,7 @@ export function LibraryClient() {
                                 You haven't created any modules yet.
                             </p>
                             <Button asChild>
-                                <Link href="/create">Create Module</Link>
+                                <Link href="/dashboard/create">Create Module</Link>
                             </Button>
                         </div>
                     ) : (
@@ -270,7 +270,7 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
                     </div>
                     <div>
                         <h3 className="font-semibold hover:underline cursor-pointer">
-                            <Link href={`/modules/${module.id}`}>{module.title}</Link>
+                            <Link href={`/dashboard/modules/${module.id}`}>{module.title}</Link>
                         </h3>
                         <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "No description"}</p>
                     </div>
@@ -297,7 +297,7 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
                     {module.status === 'DRAFT' && <Badge variant="secondary">Draft</Badge>}
                 </div>
                 <CardTitle className="group-hover:text-primary transition-colors">
-                    <Link href={`/modules/${module.id}`}>{module.title}</Link>
+                    <Link href={`/dashboard/modules/${module.id}`}>{module.title}</Link>
                 </CardTitle>
                 <CardDescription className="line-clamp-2 h-10">
                     {module.description || "No description provided."}
