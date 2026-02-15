@@ -94,77 +94,16 @@ export function LibraryClient() {
             {/* Header Section */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Library</h1>
-                    <p className="text-muted-foreground">Manage your learning modules and collections.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Kitaplık</h1>
+                    <p className="text-muted-foreground">Öğrenme modüllerini ve koleksiyonlarını yönet.</p>
                 </div>
             </div>
 
-            {/* Toolbar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Tabs defaultValue="modules" className="w-full">
-                        <TabsList>
-                            <TabsTrigger value="modules">Modules</TabsTrigger>
-                            <TabsTrigger value="collections">Collections</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search..."
-                            className="w-full sm:w-[260px] pl-9"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex items-center border rounded-md">
-                        <Button
-                            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                            size="icon"
-                            onClick={() => setViewMode('grid')}
-                            className="rounded-none rounded-l-md h-9 w-9"
-                        >
-                            <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                            size="icon"
-                            onClick={() => setViewMode('list')}
-                            className="rounded-none rounded-r-md h-9 w-9"
-                        >
-                            <ListIcon className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            <Tabs defaultValue="modules" className="space-y-6">
-                <TabsList className="hidden">
-                    {/* Hidden tabs list because we used a separate one in toolbar for layout, 
-                        BUT TabsContent needs to be inside Tabs. 
-                        Actually, it's better to wrap the whole content in Tabs.
-                    */}
-                    <TabsTrigger value="modules">Modules</TabsTrigger>
-                    <TabsTrigger value="collections">Collections</TabsTrigger>
-                </TabsList>
-
-                {/* Re-implementing the structure properly: 
-                    The Tabs component should wrap the Toolbar if the triggers are there.
-                */}
-            </Tabs>
-
-            {/* Let's redo the structure. We need state for active tab to filter or use Shadcn Tabs correctly.
-                Using local state for tab is easier given the layout.
-            */}
             <Tabs defaultValue="modules" className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <TabsList>
-                        <TabsTrigger value="modules">Modules</TabsTrigger>
-                        <TabsTrigger value="collections">Collections</TabsTrigger>
+                        <TabsTrigger value="modules">Modüller</TabsTrigger>
+                        <TabsTrigger value="collections">Koleksiyonlar</TabsTrigger>
                     </TabsList>
 
                     <div className="flex items-center gap-2">
@@ -172,7 +111,7 @@ export function LibraryClient() {
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Search..."
+                                placeholder="Ara..."
                                 className="w-full sm:w-[260px] pl-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -200,7 +139,7 @@ export function LibraryClient() {
                             <Button asChild>
                                 <Link href="/dashboard/create">
                                     <Plus className="mr-2 h-4 w-4" />
-                                    New Module
+                                    Yeni Modül
                                 </Link>
                             </Button>
                         </TabsContent>
@@ -216,12 +155,12 @@ export function LibraryClient() {
                     ) : !filteredModules || filteredModules.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
                             <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-semibold">No modules found</h3>
+                            <h3 className="text-lg font-semibold">Modül bulunamadı</h3>
                             <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                You haven't created any modules yet.
+                                Henüz hiç modül oluşturmadın.
                             </p>
                             <Button asChild>
-                                <Link href="/dashboard/create">Create Module</Link>
+                                <Link href="/dashboard/create">Modül Oluştur</Link>
                             </Button>
                         </div>
                     ) : (
@@ -239,12 +178,12 @@ export function LibraryClient() {
                     ) : !filteredCollections || filteredCollections.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
                             <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-semibold">No collections found</h3>
+                            <h3 className="text-lg font-semibold">Koleksiyon bulunamadı</h3>
                             <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                Group your modules into collections.
+                                Modüllerini koleksiyonlar halinde grupla.
                             </p>
                             <CreateCollectionDialog>
-                                <Button>Create Collection</Button>
+                                <Button>Koleksiyon Oluştur</Button>
                             </CreateCollectionDialog>
                         </div>
                     ) : (
@@ -272,15 +211,15 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
                         <h3 className="font-semibold hover:underline cursor-pointer">
                             <Link href={`/dashboard/modules/${module.id}`}>{module.title}</Link>
                         </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "No description"}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
-                        {module._count.items} items
+                        {module._count.items} öğe
                     </span>
-                    <span>{new Date(module.createdAt).toLocaleDateString()}</span>
+                    <span>{new Date(module.createdAt).toLocaleDateString("tr-TR")}</span>
                     <Button variant="ghost" size="icon">
                         <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -294,29 +233,29 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <Badge variant="outline" className="mb-2">{module.type}</Badge>
-                    {module.status === 'DRAFT' && <Badge variant="secondary">Draft</Badge>}
+                    {module.status === 'DRAFT' && <Badge variant="secondary">Taslak</Badge>}
                 </div>
                 <CardTitle className="group-hover:text-primary transition-colors">
                     <Link href={`/dashboard/modules/${module.id}`}>{module.title}</Link>
                 </CardTitle>
                 <CardDescription className="line-clamp-2 h-10">
-                    {module.description || "No description provided."}
+                    {module.description || "Açıklama yok."}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-1">
                 {/* Visual Placeholder for Progress or Preview */}
                 <div className="h-24 bg-muted/30 rounded-md flex items-center justify-center text-muted-foreground/50 text-sm">
-                    Preview Unavailable
+                    Önizleme Yok
                 </div>
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground flex justify-between border-t pt-4">
                 <span className="flex items-center gap-1">
                     <BookOpen className="h-3 w-3" />
-                    {module._count.items} Items
+                    {module._count.items} Öğe
                 </span>
                 <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {new Date(module.createdAt).toLocaleDateString()}
+                    {new Date(module.createdAt).toLocaleDateString("tr-TR")}
                 </span>
             </CardFooter>
         </Card>

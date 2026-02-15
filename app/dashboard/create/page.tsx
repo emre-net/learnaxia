@@ -8,9 +8,9 @@ export default function CreatePage() {
     return (
         <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold tracking-tight mb-4">Create New Module</h1>
+                <h1 className="text-4xl font-bold tracking-tight mb-4">Yeni Modül Oluştur</h1>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    Choose how you want to start building your learning content.
+                    Öğrenme içeriğini nasıl oluşturmak istediğini seç.
                 </p>
             </div>
 
@@ -22,23 +22,23 @@ export default function CreatePage() {
                             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                                 <PenTool className="h-6 w-6" />
                             </div>
-                            <CardTitle className="text-2xl">Manual Creation</CardTitle>
+                            <CardTitle className="text-2xl">Manuel Oluşturma</CardTitle>
                             <CardDescription>
-                                Build from scratch. Best for when you have specific content or notes ready.
+                                Sıfırdan oluştur. Hazır içeriğin veya notların olduğunda en iyisidir.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1">
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Full control over every item
+                                    <BookOpen className="h-4 w-4 mr-2" /> Her öğe üzerinde tam kontrol
                                 </li>
                                 <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Support for Flashcards, Multiple Choice, GAP
+                                    <BookOpen className="h-4 w-4 mr-2" /> Flashcard, Çoktan Seçmeli ve Boşluk Doldurma desteği
                                 </li>
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full">Start Manual</Button>
+                            <Button className="w-full">Manuel Başla</Button>
                         </CardFooter>
                     </Card>
                 </Link>
@@ -54,26 +54,26 @@ export default function CreatePage() {
                             <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 mb-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
                                 <Sparkles className="h-6 w-6" />
                             </div>
-                            <CardTitle className="text-2xl">AI Generation</CardTitle>
+                            <CardTitle className="text-2xl">Yapay Zeka ile Üret</CardTitle>
                             <CardDescription>
-                                Generate modules instantly from text, PDFs, or topic keywords.
+                                Metin, PDF veya konu başlıklarından anında modül oluştur.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1 relative z-10">
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex items-center">
-                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Text-to-Flashcard
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Metinden Flashcard'a
                                 </li>
                                 <li className="flex items-center">
-                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Multi-Type Support
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Çoklu Tür Desteği
                                 </li>
                                 <li className="flex items-center">
-                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Instant ready-to-study
+                                    <Sparkles className="h-4 w-4 mr-2 text-purple-500" /> Anında çalışmaya hazır
                                 </li>
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="secondary" className="w-full bg-purple-500/10 text-purple-600 hover:bg-purple-500 hover:text-white border-purple-200">Generate with AI</Button>
+                            <Button variant="secondary" className="w-full bg-purple-500/10 text-purple-600 hover:bg-purple-500 hover:text-white border-purple-200">Yapay Zeka ile Başla</Button>
                         </CardFooter>
                     </Card>
                 </Link>
