@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Sparkles, BookOpen, FolderPlus, FileQuestion } from "lucide-react";
+import { PenTool, Sparkles, BookOpen, FolderPlus, FileQuestion, BrainCircuit } from "lucide-react";
 import Link from "next/link";
 
 export default function CreatePage() {
@@ -105,86 +105,30 @@ export default function CreatePage() {
                     </Card>
                 </Link>
 
-                {/* Exam Creation Card */}
-                <Link href="/dashboard/exams/create" className="group">
-                    <Card className="h-full hover:border-orange-500 transition-all hover:shadow-lg cursor-pointer flex flex-col">
+                {/* Learning Mode Card */}
+                <Link href="/dashboard/learning/create" className="group">
+                    <Card className="h-full hover:border-indigo-500 transition-all hover:shadow-lg cursor-pointer flex flex-col">
                         <CardHeader>
-                            <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                                <FileQuestion className="h-6 w-6" />
+                            <div className="h-12 w-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                                <BrainCircuit className="h-6 w-6" />
                             </div>
-                            <CardTitle className="text-2xl">Sınav Hazırla</CardTitle>
+                            <CardTitle className="text-2xl">Öğrenme Modu</CardTitle>
                             <CardDescription>
-                                Kendini test etmek için özel sınavlar oluştur.
+                                Kendi hedeflerine ve hızına göre özelleştirilmiş çalışma planı oluştur.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1">
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Süreli denemeler
+                                    <BookOpen className="h-4 w-4 mr-2" /> Kişiselleştirilmiş rota
                                 </li>
                                 <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Modül bazlı sorular
+                                    <BookOpen className="h-4 w-4 mr-2" /> Zayıf yön analizi
                                 </li>
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="outline" className="w-full">Sınav Oluştur</Button>
-                        </CardFooter>
-                    </Card>
-                </Link>
-
-                {/* Collection Creation Card */}
-                <Link href="/dashboard/collections/create" className="group">
-                    <Card className="h-full hover:border-blue-500 transition-all hover:shadow-lg cursor-pointer flex flex-col">
-                        <CardHeader>
-                            <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                <FolderPlus className="h-6 w-6" />
-                            </div>
-                            <CardTitle className="text-2xl">Koleksiyon Oluştur</CardTitle>
-                            <CardDescription>
-                                Modülleri bir araya getirerek düzenli çalışma setleri kur.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Konulara göre grupla
-                                </li>
-                                <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Sıralı öğrenme yolu
-                                </li>
-                            </ul>
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="outline" className="w-full">Koleksiyon Başlat</Button>
-                        </CardFooter>
-                    </Card>
-                </Link>
-
-                {/* Exam Creation Card */}
-                <Link href="/dashboard/exams/create" className="group">
-                    <Card className="h-full hover:border-orange-500 transition-all hover:shadow-lg cursor-pointer flex flex-col">
-                        <CardHeader>
-                            <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                                <FileQuestion className="h-6 w-6" />
-                            </div>
-                            <CardTitle className="text-2xl">Sınav Hazırla</CardTitle>
-                            <CardDescription>
-                                Kendini test etmek için özel sınavlar oluştur.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Süreli denemeler
-                                </li>
-                                <li className="flex items-center">
-                                    <BookOpen className="h-4 w-4 mr-2" /> Modül bazlı sorular
-                                </li>
-                            </ul>
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="outline" className="w-full">Sınav Oluştur</Button>
+                            <Button variant="outline" className="w-full">Plan Oluştur</Button>
                         </CardFooter>
                     </Card>
                 </Link>

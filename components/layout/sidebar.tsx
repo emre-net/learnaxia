@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -110,8 +111,8 @@ export function Sidebar({ className }: SidebarProps) {
 
                     <Button
                         variant="ghost"
-                        className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-950/30"
-                        onClick={() => { /* Logout handled by auth usually via server action or separate button, keeping onClick placeholder */ }}
+                        className="w-full justify-start text-red-500 hover:text-red-400 hover:bg-red-950/30"
+                        onClick={() => signOut({ callbackUrl: "/" })}
                     >
                         <LogOut className="mr-2 h-5 w-5" />
                         Çıkış Yap
