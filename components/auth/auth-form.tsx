@@ -28,7 +28,7 @@ const loginSchema = z.object({
 })
 
 const registerSchema = z.object({
-    name: z.string().min(2, "İsim en az 2 karakter olmalıdır."),
+    username: z.string().min(3, "Kullanıcı adı en az 3 karakter olmalıdır.").regex(/^[a-zA-Z0-9_-]+$/, "Alfanumerik, tire veya alt çizgi kullanın."),
     email: z.string().email("Geçerli bir e-posta adresi giriniz."),
     password: z.string().min(6, "Parola en az 6 karakter olmalıdır."),
 })
@@ -50,7 +50,7 @@ export function AuthForm() {
     const registerForm = useForm<z.infer<typeof registerSchema>>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            name: "",
+            username: "",
             email: "",
             password: "",
         },
@@ -216,12 +216,12 @@ export function AuthForm() {
                                 <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                                     <FormField
                                         control={registerForm.control}
-                                        name="name"
+                                        name="username"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Ad Soyad</FormLabel>
+                                                <FormLabel>Kullanıcı Adı</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Adın Soyadın" {...field} disabled={isLoading} />
+                                                    <Input placeholder="kullanici_adi" {...field} disabled={isLoading} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

@@ -6,64 +6,53 @@ import prisma from "@/lib/prisma";
 import { slugify } from "@/lib/utils"; // Assuming utils has slugify or I'll implement a simple one
 
 const RegisterSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    username: z.string().min(3, "Kullanıcı adı en az 3 karakter olmalıdır.").regex(/^[a-zA-Z0-9_-]+$/, "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir."),
+    email: z.string().email("Geçersiz e-posta adresi"),
+    password: z.string().min(6, "Parola en az 6 karakter olmalıdır."),
 });
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { email, password, name } = RegisterSchema.parse(body);
+        const { email, password, username } = RegisterSchema.parse(body);
 
         // 1. Check if email already exists
-        const existingUser = await prisma.user.findUnique({
+        const existingUserEmail = await prisma.user.findUnique({
             where: { email },
         });
 
-        if (existingUser) {
+        if (existingUserEmail) {
             return NextResponse.json(
-                { error: "User with this email already exists" },
+                { error: "Bu e-posta adresi ile zaten kayıt olunmuş." },
                 { status: 409 }
             );
         }
 
-        // 2. Generate unique handle (username)
-        let handle = slugify(name);
-        let isUnique = false;
-        let attempts = 0;
+        // 2. Check if handle (username) already exists
+        const existingUserHandle = await prisma.user.findUnique({
+            where: { handle: username },
+        });
 
-        while (!isUnique && attempts < 10) {
-            const existingHandle = await prisma.user.findUnique({
-                where: { handle },
-            });
-
-            if (!existingHandle) {
-                isUnique = true;
-            } else {
-                // Append random 4-digit number
-                const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-                handle = `${slugify(name)}-${randomSuffix}`;
-                attempts++;
-            }
-        }
-
-        if (!isUnique) {
-            // Fallback to timestamp if random suffix fails 10 times (highly unlikely)
-            handle = `${slugify(name)}-${Date.now()}`;
+        if (existingUserHandle) {
+            return NextResponse.json(
+                { error: "Bu kullanıcı adı zaten alınmış." },
+                { status: 409 }
+            );
         }
 
         // 3. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // 4. Create User
+        // We use 'username' as both 'handle' and 'name' initially, or leave name generic.
+        // User requested name/surname might not be needed.
         const user = await prisma.user.create({
             data: {
-                name,
+                name: username, // Set display name to username initially
                 email,
                 password: hashedPassword,
-                handle,
-                image: `https://api.dicebear.com/7.x/initials/svg?seed=${handle}`, // Default avatar
+                handle: username,
+                image: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,
             },
         });
 
@@ -77,6 +66,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Validation Error", details: error.issues }, { status: 400 });
         }
         console.error("Registration Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "Kayıt işlemi sırasında bir hata oluştu." }, { status: 500 });
     }
 }
