@@ -5,23 +5,18 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
     Library,
     PlusCircle,
-    Settings,
     LogOut,
     Menu,
     BrainCircuit,
-    Wallet,
     Compass,
-    Activity,
     User,
     LayoutDashboard
 } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { WalletDialog } from "@/components/wallet/wallet-dialog"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -48,18 +43,14 @@ export function Sidebar({ className }: SidebarProps) {
             active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules"),
         },
         {
-            label: "Oluştur",
-            icon: PlusCircle,
-            href: "/dashboard/create",
-            active: pathname.startsWith("/dashboard/create"),
-        },
-        {
             label: "Profil",
             icon: User,
             href: "/dashboard/settings",
             active: pathname === "/dashboard/settings",
         },
     ]
+
+    const isCreateActive = pathname.startsWith("/dashboard/create")
 
     return (
         <div className={cn("pb-12 h-full bg-gradient-to-b from-slate-900 to-black text-white border-r border-slate-800", className)}>
@@ -73,6 +64,27 @@ export function Sidebar({ className }: SidebarProps) {
                             Learnaxia
                         </h2>
                     </div>
+
+                    {/* Oluştur — Featured CTA */}
+                    <div className="mb-6">
+                        <Link href="/dashboard/create">
+                            <div className={cn(
+                                "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300",
+                                isCreateActive
+                                    ? "bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/30"
+                                    : "bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/25"
+                            )}>
+                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm">
+                                    <PlusCircle className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-white">Oluştur</span>
+                                    <span className="text-[10px] text-white/60">Yeni modül veya koleksiyon</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
                     <div className="space-y-1">
                         {routes.map((route) => (
                             <Button
@@ -94,14 +106,6 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
 
                 <div className="mt-auto px-4 pb-4">
-                    {/* Unlimited Token Button Style */}
-                    <div className="mb-6 relative group cursor-pointer">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg blur opacity-50 group-hover:opacity-100 transition duration-200"></div>
-                        <div className="relative bg-slate-950 rounded-lg p-1">
-                            <WalletDialog />
-                        </div>
-                    </div>
-
                     <Button
                         variant="ghost"
                         className="w-full justify-start text-red-500 hover:text-red-400 hover:bg-red-950/30"

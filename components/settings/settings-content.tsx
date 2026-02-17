@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity } from "lucide-react";
+import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { DailyActivityChart } from "@/components/analytics/daily-activity-chart";
 import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
 import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 interface SettingsContentProps {
     user: {
@@ -18,12 +20,28 @@ interface SettingsContentProps {
     };
 }
 
-type Tab = "general" | "notifications" | "security" | "analytics";
+type Tab = "general" | "wallet" | "analytics" | "notifications" | "security";
+
+type Transaction = {
+    id: string;
+    amount: number;
+    type: string;
+    description: string | null;
+    createdAt: string;
+};
+
+type WalletData = {
+    balance: number;
+    currency: string;
+    history: Transaction[];
+};
 
 export function SettingsContent({ user }: SettingsContentProps) {
     const [activeTab, setActiveTab] = useState<Tab>("general");
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [walletData, setWalletData] = useState<WalletData | null>(null);
+    const [walletLoading, setWalletLoading] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -42,8 +60,25 @@ export function SettingsContent({ user }: SettingsContentProps) {
         }
     }, [activeTab, analyticsData, toast]);
 
+    useEffect(() => {
+        if (activeTab === "wallet" && !walletData) {
+            setWalletLoading(true);
+            fetch("/api/wallet")
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed");
+                    return res.json();
+                })
+                .then(setWalletData)
+                .catch(() => {
+                    toast({ title: "Hata", description: "Cüzdan verileri yüklenemedi.", variant: "destructive" });
+                })
+                .finally(() => setWalletLoading(false));
+        }
+    }, [activeTab, walletData, toast]);
+
     const tabs: { id: Tab; label: string; icon: typeof User }[] = [
         { id: "general", label: "Genel", icon: User },
+        { id: "wallet", label: "Cüzdan", icon: Coins },
         { id: "analytics", label: "İstatistikler", icon: BarChart2 },
         { id: "notifications", label: "Bildirimler", icon: Bell },
         { id: "security", label: "Güvenlik", icon: Shield },
@@ -67,6 +102,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
             {/* Content Area */}
             <div className="md:col-span-3 space-y-6">
+                {/* === GENEL === */}
                 {activeTab === "general" && (
                     <>
                         <Card>
@@ -101,6 +137,78 @@ export function SettingsContent({ user }: SettingsContentProps) {
                     </>
                 )}
 
+                {/* === CÜZDAN === */}
+                {activeTab === "wallet" && (
+                    <>
+                        {walletLoading ? (
+                            <div className="flex items-center justify-center py-16">
+                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : walletData ? (
+                            <>
+                                {/* Balance Card */}
+                                <Card className="border-yellow-500/20">
+                                    <CardContent className="pt-6">
+                                        <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-transparent rounded-xl">
+                                            <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Mevcut Bakiye</span>
+                                            <span className="text-5xl font-bold mt-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-amber-500">
+                                                {walletData.balance}
+                                            </span>
+                                            <span className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 font-medium">
+                                                {walletData.currency} Token
+                                            </span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Transaction History */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2 text-base">
+                                            <History className="h-4 w-4" /> İşlem Geçmişi
+                                        </CardTitle>
+                                        <CardDescription>Token kazanma ve harcama geçmişiniz.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {walletData.history.length === 0 ? (
+                                            <p className="text-center text-sm text-muted-foreground py-8">Henüz işlem yok.</p>
+                                        ) : (
+                                            <ScrollArea className="h-[300px]">
+                                                <div className="space-y-3">
+                                                    {walletData.history.map((tx) => (
+                                                        <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="text-sm font-medium">{tx.description || tx.type}</span>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {new Date(tx.createdAt).toLocaleDateString("tr-TR")}
+                                                                </span>
+                                                            </div>
+                                                            <span className={cn(
+                                                                "font-bold flex items-center text-sm",
+                                                                tx.amount > 0 ? "text-green-500" : "text-red-500"
+                                                            )}>
+                                                                {tx.amount > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                                                                {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </ScrollArea>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </>
+                        ) : (
+                            <Card>
+                                <CardContent className="flex items-center justify-center py-12">
+                                    <p className="text-muted-foreground">Cüzdan verisi bulunamadı.</p>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </>
+                )}
+
+                {/* === İSTATİSTİKLER === */}
                 {activeTab === "analytics" && (
                     <>
                         {analyticsLoading ? (
@@ -160,6 +268,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                     </>
                 )}
 
+                {/* === BİLDİRİMLER === */}
                 {activeTab === "notifications" && (
                     <Card>
                         <CardHeader>
@@ -172,6 +281,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                     </Card>
                 )}
 
+                {/* === GÜVENLİK === */}
                 {activeTab === "security" && (
                     <Card>
                         <CardHeader>
