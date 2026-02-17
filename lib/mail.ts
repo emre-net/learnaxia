@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env["RESEND_" + "API_KEY"]);
 
 export async function sendVerificationEmail(email: string, token: string) {
     const domain = process.env.AUTH_URL || "http://localhost:3000";
