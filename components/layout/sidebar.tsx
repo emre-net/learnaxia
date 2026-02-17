@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import {
     Library,
     PlusCircle,
-    BarChart2,
     Settings,
     LogOut,
     Menu,
@@ -53,12 +52,6 @@ export function Sidebar({ className }: SidebarProps) {
             icon: PlusCircle,
             href: "/dashboard/create",
             active: pathname.startsWith("/dashboard/create"),
-        },
-        {
-            label: "Analiz",
-            icon: BarChart2,
-            href: "/dashboard/analytics",
-            active: pathname === "/dashboard/analytics",
         },
         {
             label: "Profil",
