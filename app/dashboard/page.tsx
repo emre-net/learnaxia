@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Activity, BookOpen, Clock, Coins, Target } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface DashboardStats {
     totalStudyMinutes: number;
@@ -59,30 +61,44 @@ export default function DashboardPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Genel Bakış</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="p-6 bg-card rounded-xl border shadow-sm">
-                    <h3 className="font-medium text-sm text-muted-foreground">Toplam Çalışma</h3>
-                    <div className="text-2xl font-bold mt-2">
-                        {loading ? "..." : `${stats.totalStudyMinutes} dk`}
-                    </div>
-                </div>
-                <div className="p-6 bg-card rounded-xl border shadow-sm">
-                    <h3 className="font-medium text-sm text-muted-foreground">Aktif Modüller</h3>
-                    <div className="text-2xl font-bold mt-2">
-                        {loading ? "..." : stats.modulesStarted}
-                    </div>
-                </div>
-                <div className="p-6 bg-card rounded-xl border shadow-sm">
-                    <h3 className="font-medium text-sm text-muted-foreground">Jeton Bakiyesi</h3>
-                    <div className="text-2xl font-bold mt-2 text-primary">
-                        {loading ? "..." : `${stats.tokenBalance} 🪙`}
-                    </div>
-                </div>
-                <div className="p-6 bg-card rounded-xl border shadow-sm">
-                    <h3 className="font-medium text-sm text-muted-foreground">Doğruluk Oranı</h3>
-                    <div className="text-2xl font-bold mt-2">
-                        {loading ? "..." : `%${stats.accuracy}`}
-                    </div>
-                </div>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Toplam Çalışma</CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{loading ? "..." : `${stats.totalStudyMinutes} dk`}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Aktif Modüller</CardTitle>
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{loading ? "..." : stats.modulesStarted}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Jeton Bakiyesi</CardTitle>
+                        <Coins className="h-4 w-4 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                            {loading ? "..." : `${stats.tokenBalance} 🪙`}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Doğruluk Oranı</CardTitle>
+                        <Target className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{loading ? "..." : `%${stats.accuracy}`}</div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )
