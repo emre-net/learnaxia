@@ -32,7 +32,7 @@ export function Navbar() {
                         <Link href="/login">Giriş Yap</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/register">Kayıt Ol</Link>
+                        <Link href="/login">Kayıt Ol</Link>
                     </Button>
                 </nav>
             </div>
