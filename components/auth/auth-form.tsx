@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -36,6 +36,7 @@ const registerSchema = z.object({
 export function AuthForm() {
     const [isLoading, setIsLoading] = React.useState<boolean>(false)
     const [error, setError] = React.useState<string | null>(null)
+    const [success, setSuccess] = React.useState<string | null>(null)
     const [activeTab, setActiveTab] = React.useState<"login" | "register">("login")
     const router = useRouter()
 
@@ -83,6 +84,7 @@ export function AuthForm() {
     async function onRegister(values: z.infer<typeof registerSchema>) {
         setIsLoading(true)
         setError(null)
+        setSuccess(null)
 
         try {
             const response = await fetch("/api/auth/register", {
@@ -97,15 +99,7 @@ export function AuthForm() {
                 throw new Error(data.error || "Kayıt işlemi başarısız.")
             }
 
-            // Auto login after register
-            await signIn("credentials", {
-                email: values.email,
-                password: values.password,
-                redirect: false,
-            })
-
-            router.push("/dashboard")
-            router.refresh()
+            setSuccess(data.success || "Doğrulama e-postası gönderildi! Lütfen e-postanızı kontrol edin.")
         } catch (err: any) {
             setError(err.message)
         } finally {
@@ -135,6 +129,12 @@ export function AuthForm() {
                     <Alert variant="destructive" className="mb-4">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+                {success && (
+                    <Alert className="mb-4 border-green-500/50 bg-green-500/10">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <AlertDescription className="text-green-600">{success}</AlertDescription>
                     </Alert>
                 )}
 

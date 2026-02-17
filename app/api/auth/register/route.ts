@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
-import { slugify } from "@/lib/utils"; // Assuming utils has slugify or I'll implement a simple one
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/mail";
 
 const RegisterSchema = z.object({
     username: z.string().min(3, "Kullanıcı adı en az 3 karakter olmalıdır.").regex(/^[a-zA-Z0-9_-]+$/, "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir."),
@@ -43,12 +44,10 @@ export async function POST(req: Request) {
         // 3. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 4. Create User
-        // We use 'username' as both 'handle' and 'name' initially, or leave name generic.
-        // User requested name/surname might not be needed.
-        const user = await prisma.user.create({
+        // 4. Create User (emailVerified stays null until verification)
+        await prisma.user.create({
             data: {
-                name: username, // Set display name to username initially
+                name: username,
                 email,
                 password: hashedPassword,
                 handle: username,
@@ -56,10 +55,14 @@ export async function POST(req: Request) {
             },
         });
 
-        // Return user without password
-        const { password: _, ...userWithoutPassword } = user;
+        // 5. Generate verification token and send email
+        const verificationToken = await generateVerificationToken(email);
+        await sendVerificationEmail(email, verificationToken.token);
 
-        return NextResponse.json(userWithoutPassword, { status: 201 });
+        return NextResponse.json(
+            { success: "Doğrulama e-postası gönderildi! Lütfen e-postanızı kontrol edin." },
+            { status: 201 }
+        );
 
     } catch (error) {
         if (error instanceof z.ZodError) {
