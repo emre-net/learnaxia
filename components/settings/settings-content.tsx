@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,29 @@ type WalletData = {
 };
 
 export function SettingsContent({ user }: SettingsContentProps) {
-    const [activeTab, setActiveTab] = useState<Tab>("general");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    // Get tab from URL or default to "general"
+    const defaultTab = (searchParams.get("tab") as Tab) || "general";
+    const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
+
+    // Sync state with URL if URL changes externally (e.g. back button)
+    useEffect(() => {
+        const tabFromUrl = searchParams.get("tab") as Tab;
+        if (tabFromUrl && tabFromUrl !== activeTab) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [searchParams, activeTab]);
+
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab);
+        // Create new URLSearchParams object to update the URL
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("tab", tab);
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    };
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
     const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -93,7 +116,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         key={tab.id}
                         variant={activeTab === tab.id ? "secondary" : "ghost"}
                         className="w-full justify-start"
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleTabChange(tab.id)}
                     >
                         <tab.icon className="mr-2 h-4 w-4" /> {tab.label}
                     </Button>

@@ -1,4 +1,5 @@
-"use client"
+
+import Link from "next/link"
 
 import {
     Avatar,
@@ -50,17 +51,24 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        Profil
-                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Ayarlar
-                        <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Jeton Cüzdanı
-                    </DropdownMenuItem>
+                    <Link href="/dashboard/settings">
+                        <DropdownMenuItem>
+                            Profil
+                            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                    </Link>
+                    <Link href="/dashboard/settings">
+                        <DropdownMenuItem>
+                            Ayarlar
+                            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                    </Link>
+                    <Link href="/dashboard/settings?tab=wallet">
+                        <DropdownMenuItem>
+                            Cüzdan
+                            <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                    </Link>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
