@@ -14,10 +14,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     trustHost: true, // Explicitly trust proxy headers (Railway)
     secret: process.env.AUTH_SECRET,
     ...authConfig,
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token && session.user) {
+                session.user.id = token.id as string;
+            }
+            return session;
+        },
+    },
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
             authorization: {
                 params: {
                     prompt: "consent",
