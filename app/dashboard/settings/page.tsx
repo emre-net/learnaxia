@@ -1,12 +1,21 @@
 
-import { User, Bell, Shield, Lock } from "lucide-react";
+import { User, Bell, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+    const session = await auth();
+
+    if (!session?.user) {
+        redirect("/login");
+    }
+
+    const user = session.user;
+
     return (
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
             <div>
@@ -38,11 +47,11 @@ export default function SettingsPage() {
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Ad Soyad</Label>
-                                <Input id="name" placeholder="Adınız" defaultValue="Kullanıcı" />
+                                <Input id="name" placeholder="Adınız" defaultValue={user.name || ""} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">E-posta</Label>
-                                <Input id="email" placeholder="ornek@email.com" disabled />
+                                <Input id="email" defaultValue={user.email || ""} disabled />
                                 <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
                             </div>
                             <div className="flex justify-end pt-4">
@@ -65,3 +74,4 @@ export default function SettingsPage() {
         </div>
     );
 }
+
