@@ -1,13 +1,12 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-const domain = process.env.AUTH_URL || "http://localhost:3000";
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(email: string, token: string) {
+    const domain = process.env.AUTH_URL || "http://localhost:3000";
     const confirmLink = `${domain}/auth/verify?token=${token}`;
 
-    await resend.emails.send({
+    await getResend().emails.send({
         from: "Learnaxia <onboarding@resend.dev>",
         to: email,
         subject: "E-posta Adresinizi Doğrulayın — Learnaxia",
