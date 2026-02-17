@@ -18,6 +18,7 @@ interface SettingsContentProps {
         name?: string | null;
         email?: string | null;
         image?: string | null;
+        handle?: string | null;
     };
 }
 
@@ -61,6 +62,38 @@ export function SettingsContent({ user }: SettingsContentProps) {
         params.set("tab", tab);
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     };
+
+    const [name, setName] = useState(user.name || "");
+    const [handle, setHandle] = useState(user.handle || "");
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSaveProfile = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch("/api/user/profile", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, handle }),
+            });
+
+            if (!res.ok) {
+                const error = await res.text();
+                throw new Error(error);
+            }
+
+            toast({ title: "Başarılı", description: "Profiliniz güncellendi." });
+            router.refresh();
+        } catch (error: any) {
+            toast({
+                title: "Hata",
+                description: error.message || "Bir hata oluştu.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
     const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -135,8 +168,25 @@ export function SettingsContent({ user }: SettingsContentProps) {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Ad Soyad</Label>
-                                    <Input id="name" placeholder="Adınız" defaultValue={user.name || ""} />
+                                    <Label htmlFor="handle">Kullanıcı Adı (Benzersiz)</Label>
+                                    <Input
+                                        id="handle"
+                                        placeholder="Kullanıcı adınız"
+                                        value={handle}
+                                        onChange={(e) => setHandle(e.target.value)}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Benzersiz olmalıdır. Harf, rakam ve alt çizgi içerebilir.
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Görünen İsim (Ad Soyad)</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Adınız"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">E-posta</Label>
@@ -144,7 +194,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
                                 </div>
                                 <div className="flex justify-end pt-4">
-                                    <Button>Kaydet</Button>
+                                    <Button onClick={handleSaveProfile} disabled={isSaving}>
+                                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Kaydet
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
