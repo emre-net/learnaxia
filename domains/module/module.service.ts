@@ -168,7 +168,7 @@ export class ModuleService {
             throw new Error("Unauthorized Update Access");
         }
 
-        return await prisma.module.update({
+        await prisma.module.update({
             where: { id: moduleId },
             data: {
                 title: dto.title,
@@ -179,6 +179,69 @@ export class ModuleService {
                 category: dto.category,
                 subCategory: dto.subCategory,
             }
+        });
+
+        // Handle Items Synchronization if provided
+        if (dto.items) {
+            const items = dto.items; // Local variable for type narrowing
+            await prisma.$transaction(async (tx) => {
+                // 1. Fetch existing items to identify what to delete/update
+                const existingItems = await tx.item.findMany({
+                    where: { moduleId },
+                    select: { id: true }
+                });
+                const existingItemIds = new Set(existingItems.map(i => i.id));
+
+                // 2. Identify items to keep/update and items to create
+                // Filter items that have an ID and that ID exists in DB
+                const incomingItemIds = new Set(items.filter(i => i.id && existingItemIds.has(i.id)).map(i => i.id));
+
+                // Items to create: No ID, or ID not in DB
+                const itemsToCreate = items.filter(i => !i.id || !existingItemIds.has(i.id));
+
+                // 3. Delete items that are no longer in the incoming list
+                const itemsToDelete = existingItems.filter(i => !incomingItemIds.has(i.id)).map(i => i.id);
+                if (itemsToDelete.length > 0) {
+                    await tx.item.deleteMany({
+                        where: { id: { in: itemsToDelete } }
+                    });
+                }
+
+                // 4. Update existing items
+                for (const item of items) {
+                    if (item.id && existingItemIds.has(item.id)) {
+                        await tx.item.update({
+                            where: { id: item.id },
+                            data: {
+                                content: item.content as Prisma.InputJsonValue,
+                                contentHash: computeContentHash(item.content),
+                                order: item.order,
+                                type: dto.type // Ensure type consistency
+                            }
+                        });
+                    }
+                }
+
+                // 5. Create new items
+                if (itemsToCreate.length > 0) {
+                    // We need to handle order carefully. If we just append, it's easy.
+                    // But the incoming list likely has the correct 'order' values already set by frontend.
+                    await tx.item.createMany({
+                        data: itemsToCreate.map(item => ({
+                            moduleId: moduleId,
+                            type: dto.type || 'FLASHCARD', // Fallback, though type should be set
+                            content: item.content as Prisma.InputJsonValue,
+                            contentHash: computeContentHash(item.content),
+                            order: item.order
+                        }))
+                    });
+                }
+            });
+        }
+
+        return await prisma.module.findUnique({
+            where: { id: moduleId },
+            include: { items: { orderBy: { order: 'asc' } } }
         });
     }
 

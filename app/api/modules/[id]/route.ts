@@ -8,9 +8,12 @@ import { z } from "zod";
 const UpdateModuleSchema = z.object({
     title: z.string().min(1).max(100).optional(),
     description: z.string().optional(),
-    type: z.enum(['FLASHCARD', 'MC', 'GAP']).optional(),
+    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']).optional(),
     isForkable: z.boolean().optional(),
-    status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional()
+    status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional(),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
+    items: z.array(z.any()).optional(),
 });
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
