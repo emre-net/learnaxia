@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil, Copy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ type LibraryModule = {
         status: string;
         isForkable: boolean;
         createdAt: string;
+        sourceModuleId: string | null;
         _count: { items: number };
     };
 };
@@ -149,26 +150,62 @@ export function LibraryClient() {
                 </div>
 
                 <TabsContent value="modules" className="space-y-4">
-                    {isLoading ? (
-                        <LibrarySkeleton viewMode={viewMode} />
-                    ) : !filteredModules || filteredModules.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
-                            <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-semibold">Modül bulunamadı</h3>
-                            <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                Henüz hiç modül oluşturmadın.
-                            </p>
-                            <Button asChild>
-                                <Link href="/dashboard/create">Modül Oluştur</Link>
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                            {filteredModules.map((item) => (
-                                <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
-                            ))}
-                        </div>
-                    )}
+                    <Tabs defaultValue="all" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
+                            <TabsTrigger value="all">Tümü</TabsTrigger>
+                            <TabsTrigger value="created">Oluşturduklarım</TabsTrigger>
+                            <TabsTrigger value="forked">Kopyalar</TabsTrigger>
+                        </TabsList>
+
+                        {isLoading ? (
+                            <LibrarySkeleton viewMode={viewMode} />
+                        ) : !filteredModules || filteredModules.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
+                                <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
+                                <h3 className="text-lg font-semibold">Modül bulunamadı</h3>
+                                <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
+                                    Henüz hiç modül oluşturmadın veya kopyalamadın.
+                                </p>
+                                <Button asChild>
+                                    <Link href="/dashboard/create">Modül Oluştur</Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <TabsContent value="all" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredModules.map((item) => (
+                                            <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
+                                        ))}
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="created" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredModules.filter(m => !m.module.sourceModuleId).map((item) => (
+                                            <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
+                                        ))}
+                                        {filteredModules.filter(m => !m.module.sourceModuleId).length === 0 && (
+                                            <div className="col-span-full text-center py-12 text-muted-foreground">
+                                                Henüz orijinal bir modül oluşturmadınız.
+                                            </div>
+                                        )}
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="forked" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredModules.filter(m => m.module.sourceModuleId).map((item) => (
+                                            <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
+                                        ))}
+                                        {filteredModules.filter(m => m.module.sourceModuleId).length === 0 && (
+                                            <div className="col-span-full text-center py-12 text-muted-foreground">
+                                                Henüz kopyalanmış bir modülünüz yok.
+                                            </div>
+                                        )}
+                                    </div>
+                                </TabsContent>
+                            </>
+                        )}
+                    </Tabs>
                 </TabsContent>
 
                 <TabsContent value="collections" className="space-y-4">
@@ -294,13 +331,22 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
             </CardFooter>
 
             {/* Edit Button Overlay (Visible on Hover) */}
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                 <Button variant="secondary" size="icon" className="h-8 w-8 shadow-sm" asChild>
                     <Link href={`/dashboard/create/manual?edit=${module.id}`}>
                         <Pencil className="h-4 w-4" />
                     </Link>
                 </Button>
             </div>
+
+            {/* Fork Indicator */}
+            {module.sourceModuleId && (
+                <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
+                    <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-xs h-6">
+                        <Copy className="h-3 w-3 mr-1" /> Kopya
+                    </Badge>
+                </div>
+            )}
         </Card>
     );
 }

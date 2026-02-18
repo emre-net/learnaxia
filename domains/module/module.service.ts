@@ -102,6 +102,7 @@ export class ModuleService {
                         createdAt: true,
                         category: true,
                         subCategory: true,
+                        sourceModuleId: true,
                         _count: {
                             select: { items: true }
                         }
@@ -195,6 +196,74 @@ export class ModuleService {
                 contentHash: computeContentHash(itemData.content),
                 order: newOrder
             }
+        });
+    }
+
+    /**
+     * Forks (Deep Copies) a module for the current user.
+     */
+    static async fork(userId: string, sourceModuleId: string) {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            // 1. Fetch Source Module
+            const sourceModule = await tx.module.findUnique({
+                where: { id: sourceModuleId },
+                include: { items: true }
+            });
+
+            if (!sourceModule) throw new Error("Module not found");
+            if (!sourceModule.isForkable) throw new Error("This module cannot be forked");
+
+            // 2. Clone Module
+            const newModule = await tx.module.create({
+                data: {
+                    title: `${sourceModule.title} (Kopya)`,
+                    description: sourceModule.description,
+                    type: sourceModule.type,
+                    status: 'ACTIVE', // Forks start as active personal copies
+                    isForkable: true, // Forks are forkable by default
+                    ownerId: userId,
+                    creatorId: userId, // User becomes the creator of this copy
+                    sourceModuleId: sourceModule.id, // Link to original
+                    category: sourceModule.category,
+                    subCategory: sourceModule.subCategory,
+                }
+            });
+
+            // 3. Clone Items
+            if (sourceModule.items.length > 0) {
+                const itemsData = sourceModule.items.map(item => ({
+                    moduleId: newModule.id,
+                    type: item.type,
+                    content: item.content as Prisma.InputJsonValue,
+                    contentHash: item.contentHash,
+                    order: item.order,
+                    sourceItemId: item.id
+                }));
+
+                await tx.item.createMany({ data: itemsData });
+            }
+
+            // 4. Add to User Library (Read Model)
+            await tx.userModuleLibrary.create({
+                data: {
+                    userId: userId,
+                    moduleId: newModule.id,
+                    role: 'OWNER',
+                    lastInteractionAt: new Date(),
+                }
+            });
+
+            // 5. Grant Access
+            await tx.userContentAccess.create({
+                data: {
+                    userId: userId,
+                    resourceId: newModule.id,
+                    resourceType: 'MODULE',
+                    accessLevel: 'OWNER',
+                }
+            });
+
+            return newModule;
         });
     }
 }
