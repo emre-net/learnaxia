@@ -17,34 +17,48 @@ export function ItemEditorSheet({
     open,
     onOpenChange,
     onSave,
-    type
+    type,
+    initialData
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSave: (item: any) => void;
     type: ItemType;
+    initialData?: any;
 }) {
     const { toast } = useToast();
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState(""); // Back of card or correct answer
     const [solution, setSolution] = useState(""); // Detailed solution / explanation
     const [options, setOptions] = useState<string[]>(["", ""]); // For MC
+    const [id, setId] = useState<string | null>(null);
 
-    // Reset form when opening
+    // Reset or Populate form when opening
     useEffect(() => {
         if (open) {
-            setQuestion("");
-            setAnswer("");
-            setSolution("");
-            setOptions(["", ""]);
+            if (initialData) {
+                // Edit Mode
+                setId(initialData.id);
+                setQuestion(initialData.content?.question || "");
+                setAnswer(initialData.content?.answer || "");
+                setSolution(initialData.content?.solution || "");
+                setOptions(initialData.content?.options || ["", ""]);
+            } else {
+                // New Item Mode
+                setId(null);
+                setQuestion("");
+                setAnswer("");
+                setSolution("");
+                setOptions(["", ""]);
+            }
         }
-    }, [open]);
+    }, [open, initialData]);
 
     const handleSave = () => {
         if (!question || !answer) return; // Validation
 
         const newItem = {
-            id: generateId(),
+            id: id || generateId(), // Preserve ID if editing
             type: type, // Inherit from module type
             content: {
                 question: question,
@@ -60,12 +74,13 @@ export function ItemEditorSheet({
     };
 
     const getTitle = () => {
+        const action = initialData ? "Düzenle" : "Ekle";
         switch (type) {
-            case 'FLASHCARD': return 'Yeni Kart Ekle';
-            case 'MC': return 'Çoktan Seçmeli Soru Ekle';
-            case 'GAP': return 'Boşluk Doldurma Ekle';
-            case 'TRUE_FALSE': return 'Doğru / Yanlış Sorusu Ekle';
-            default: return 'Soru Ekle';
+            case 'FLASHCARD': return `Kart ${action}`;
+            case 'MC': return `Çoktan Seçmeli Soru ${action}`;
+            case 'GAP': return `Boşluk Doldurma ${action}`;
+            case 'TRUE_FALSE': return `Doğru / Yanlış Sorusu ${action}`;
+            default: return `Soru ${action}`;
         }
     };
 
@@ -75,7 +90,7 @@ export function ItemEditorSheet({
                 <SheetHeader>
                     <SheetTitle>{getTitle()}</SheetTitle>
                     <SheetDescription>
-                        İçeriğinizi oluşturun.
+                        {initialData ? "İçeriği güncelleyin." : "Yeni içerik oluşturun."}
                     </SheetDescription>
                 </SheetHeader>
 
@@ -234,7 +249,7 @@ export function ItemEditorSheet({
                         <Button type="button" variant="outline">İptal</Button>
                     </SheetClose>
                     <Button type="button" onClick={handleSave} disabled={!question || !answer}>
-                        <Save className="mr-2 h-4 w-4" /> Ekle
+                        <Save className="mr-2 h-4 w-4" /> {initialData ? "Güncelle" : "Ekle"}
                     </Button>
                 </SheetFooter>
             </SheetContent>
