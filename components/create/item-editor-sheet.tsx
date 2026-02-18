@@ -25,7 +25,7 @@ export function ItemEditorSheet({
 }) {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState(""); // Back of card or correct answer
-    const [explanation, setExplanation] = useState("");
+    const [solution, setSolution] = useState(""); // Detailed solution / explanation
     const [options, setOptions] = useState<string[]>(["", ""]); // For MC
 
     // Reset form when opening
@@ -33,7 +33,7 @@ export function ItemEditorSheet({
         if (open) {
             setQuestion("");
             setAnswer("");
-            setExplanation("");
+            setSolution("");
             setOptions(["", ""]);
         }
     }, [open]);
@@ -47,7 +47,7 @@ export function ItemEditorSheet({
             content: {
                 question: question,
                 answer: answer,
-                explanation: explanation,
+                solution: solution, // Renamed from explanation
                 options: type === 'MC' ? options : undefined
             },
             isSelected: false // Ensure new items are not selected by default
@@ -73,7 +73,7 @@ export function ItemEditorSheet({
                 <SheetHeader>
                     <SheetTitle>{getTitle()}</SheetTitle>
                     <SheetDescription>
-                        Modülünüz için yeni bir içerik oluşturun.
+                        İçeriğinizi oluşturun.
                     </SheetDescription>
                 </SheetHeader>
 
@@ -81,12 +81,12 @@ export function ItemEditorSheet({
                     {/* Question / Front */}
                     <div className="grid gap-2">
                         <Label htmlFor="question">
-                            {type === 'FLASHCARD' ? 'Ön Yüz (Soru/Kavram)' : 'Soru Metni'}
+                            {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
                         </Label>
                         <Textarea
                             id="question"
                             placeholder={type === 'GAP' ? "Örn: Ankara Türkiye'nin [...] şehridir." : "Sorunuzu buraya yazın..."}
-                            className="resize-none"
+                            className="resize-none min-h-[100px]"
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
                         />
@@ -95,11 +95,11 @@ export function ItemEditorSheet({
                     {/* Answer / Back (Flashcard) */}
                     {type === 'FLASHCARD' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="answer">Arka Yüz (Cevap/Tanım)</Label>
+                            <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
                             <Textarea
                                 id="answer"
                                 placeholder="Cevabı buraya yazın..."
-                                className="resize-none"
+                                className="resize-none min-h-[100px]"
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
                             />
@@ -185,15 +185,15 @@ export function ItemEditorSheet({
                         </div>
                     )}
 
-                    {/* Explanation */}
+                    {/* Solution / Explanation - Simplified and Renamed */}
                     <div className="grid gap-2">
-                        <Label htmlFor="explanation">Açıklama (Opsiyonel)</Label>
+                        <Label htmlFor="solution">Çözüm / Detaylı Açıklama (Opsiyonel)</Label>
                         <Textarea
-                            id="explanation"
-                            placeholder="Cevap hakkında ek bilgi veya ipucu..."
+                            id="solution"
+                            placeholder="Cevabın mantığını veya detayını buraya ekleyebilirsiniz."
                             className="resize-none"
-                            value={explanation}
-                            onChange={(e) => setExplanation(e.target.value)}
+                            value={solution}
+                            onChange={(e) => setSolution(e.target.value)}
                         />
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export function ItemEditorSheet({
                         <Button variant="outline">İptal</Button>
                     </SheetClose>
                     <Button onClick={handleSave} disabled={!question || !answer}>
-                        <Save className="mr-2 h-4 w-4" /> Kaydet
+                        <Save className="mr-2 h-4 w-4" /> Ekle
                     </Button>
                 </SheetFooter>
             </SheetContent>
