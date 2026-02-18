@@ -48,7 +48,6 @@ interface LibraryCollection {
         createdAt: string;
         updatedAt: string;
         owner: {
-            name: string | null;
             image: string | null;
             handle: string | null;
         };

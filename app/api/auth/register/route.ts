@@ -47,7 +47,6 @@ export async function POST(req: Request) {
         // 4. Create User (emailVerified stays null until verification)
         await prisma.user.create({
             data: {
-                name: username,
                 email,
                 password: hashedPassword,
                 handle: username,

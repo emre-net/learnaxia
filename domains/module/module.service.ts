@@ -138,7 +138,7 @@ export class ModuleService {
                     orderBy: { order: 'asc' }
                 },
                 owner: {
-                    select: { handle: true, name: true, image: true }
+                    select: { handle: true, image: true }
                 }
             }
         });
