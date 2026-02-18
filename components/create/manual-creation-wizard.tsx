@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { BasicInfoStep } from "./basic-info-step";
 import { ContentEditorStep } from "./content-editor-step";
 import { ChevronRight, ChevronLeft, Save, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 // --- Schema Definition ---
 const moduleSchema = z.object({
@@ -32,6 +33,7 @@ export function ManualCreationWizard() {
     const searchParams = useSearchParams();
     const editId = searchParams.get("edit");
     const isEditMode = !!editId;
+    const { toast } = useToast();
 
     const methods = useForm<ModuleFormData>({
         resolver: zodResolver(moduleSchema),
@@ -70,12 +72,16 @@ export function ManualCreationWizard() {
                     });
                 } catch (error) {
                     console.error("Failed to load module for editing:", error);
-                    // toast.error("Modül yüklenemedi");
+                    toast({
+                        title: "Hata",
+                        description: "Modül yüklenemedi",
+                        variant: "destructive"
+                    });
                 }
             };
             fetchModule();
         }
-    }, [editId, isEditMode, reset]);
+    }, [editId, isEditMode, reset, toast]);
 
     const nextStep = async () => {
         const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
@@ -107,10 +113,12 @@ export function ManualCreationWizard() {
 
         // Prevent empty module submission
         if (!data.items || data.items.length === 0) {
-            // alert("Lütfen en az bir içerik ekleyin."); // Better to use a toast if available, but alert works for now as safeguard
-            // Using a more UI-friendly approach if possible, but for now just return/log
             console.warn("Attempted to submit empty module");
-            alert("Lütfen en az bir içerik ekleyin.");
+            toast({
+                title: "Eksik İçerik",
+                description: "Lütfen en az bir içerik ekleyin.",
+                variant: "destructive"
+            });
             return;
         }
 
@@ -137,10 +145,19 @@ export function ManualCreationWizard() {
             if (!res.ok) throw new Error("İşlem başarısız");
 
             const result = await res.json();
+            toast({
+                title: "Başarılı",
+                description: isEditMode ? "Modül güncellendi." : "Modül başarıyla oluşturuldu.",
+            });
             router.push(`/dashboard/library`); // Redirect to library after creation/update
 
         } catch (error) {
             console.error(error);
+            toast({
+                title: "Hata",
+                description: "Bir hata oluştu. Lütfen tekrar deneyin.",
+                variant: "destructive"
+            });
         } finally {
             setIsSubmitting(false);
         }

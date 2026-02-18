@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 // Temporary ID generator for local items
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -23,6 +24,7 @@ export function ItemEditorSheet({
     onSave: (item: any) => void;
     type: ItemType;
 }) {
+    const { toast } = useToast();
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState(""); // Back of card or correct answer
     const [solution, setSolution] = useState(""); // Detailed solution / explanation
@@ -84,7 +86,13 @@ export function ItemEditorSheet({
                             <Label htmlFor="question">
                                 {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
                             </Label>
-                            <Button type="button" variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-muted-foreground hover:text-primary"
+                                onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
+                            >
                                 📷 Görsel Ekle
                             </Button>
                         </div>
@@ -102,7 +110,13 @@ export function ItemEditorSheet({
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
-                                <Button type="button" variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-muted-foreground hover:text-primary"
+                                    onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
+                                >
                                     📷 Görsel Ekle
                                 </Button>
                             </div>

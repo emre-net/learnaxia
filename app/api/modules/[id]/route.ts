@@ -7,7 +7,7 @@ import { z } from "zod";
 // Validation Schema for Update
 const ItemSchema = z.object({
     id: z.string().optional(),
-    content: z.record(z.any()), // Content is dynamic but should be an object
+    content: z.record(z.string(), z.any()), // Content is dynamic but should be an object with string keys
     order: z.number(),
     type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']).optional(),
 });
