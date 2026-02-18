@@ -1,5 +1,4 @@
 
-
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +49,8 @@ export function ItemEditorSheet({
                 answer: answer,
                 explanation: explanation,
                 options: type === 'MC' ? options : undefined
-            }
+            },
+            isSelected: false // Ensure new items are not selected by default
         };
 
         onSave(newItem);
