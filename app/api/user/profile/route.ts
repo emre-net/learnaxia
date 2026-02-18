@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const profileSchema = z.object({
-    name: z.string().min(2, "İsim en az 2 karakter olmalıdır.").optional(),
     handle: z.string()
         .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
         .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
@@ -21,7 +20,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { name, handle } = profileSchema.parse(body);
+        const { handle } = profileSchema.parse(body);
 
         // Check handle uniqueness if provided
         if (handle) {
@@ -37,7 +36,6 @@ export async function PATCH(req: Request) {
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
-                ...(name && { name }),
                 ...(handle && { handle }),
             },
         });
@@ -45,7 +43,7 @@ export async function PATCH(req: Request) {
         return NextResponse.json(updatedUser);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return new NextResponse((error as z.ZodError).errors[0].message, { status: 400 });
+            return new NextResponse((error as any).errors[0].message, { status: 400 });
         }
         console.error("[PROFILE_PATCH]", error);
         return new NextResponse("Internal Error", { status: 500 });

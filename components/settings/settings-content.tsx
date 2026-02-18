@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 
 interface SettingsContentProps {
     user: {
-        name?: string | null;
         email?: string | null;
         image?: string | null;
         handle?: string | null;
@@ -63,7 +62,6 @@ export function SettingsContent({ user }: SettingsContentProps) {
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
-    const [name, setName] = useState(user.name || "");
     const [handle, setHandle] = useState(user.handle || "");
     const [isSaving, setIsSaving] = useState(false);
 
@@ -73,7 +71,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, handle }),
+                body: JSON.stringify({ handle }),
             });
 
             if (!res.ok) {
@@ -178,15 +176,6 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     <p className="text-xs text-muted-foreground">
                                         Benzersiz olmalıdır. Harf, rakam ve alt çizgi içerebilir.
                                     </p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Görünen İsim (Ad Soyad)</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="Adınız"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">E-posta</Label>

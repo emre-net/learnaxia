@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
 import { Loader2 } from "lucide-react";
+import prisma from "@/lib/prisma";
 
 export default async function SettingsPage() {
     const session = await auth();
@@ -11,6 +12,18 @@ export default async function SettingsPage() {
     if (!session?.user) {
         redirect("/login");
     }
+
+    // Fetch fresh user data including handle
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+            email: true,
+            image: true,
+            handle: true,
+        },
+    });
+
+    if (!user) return null;
 
     return (
         <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
@@ -24,11 +37,7 @@ export default async function SettingsPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
             }>
-                <SettingsContent user={{
-                    name: session.user.name,
-                    email: session.user.email,
-                    image: session.user.image,
-                }} />
+                <SettingsContent user={user} />
             </Suspense>
         </div>
     );
