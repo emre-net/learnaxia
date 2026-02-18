@@ -84,7 +84,7 @@ export function ItemEditorSheet({
                             <Label htmlFor="question">
                                 {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
                             </Label>
-                            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                            <Button type="button" variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
                                 📷 Görsel Ekle
                             </Button>
                         </div>
@@ -102,7 +102,7 @@ export function ItemEditorSheet({
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
-                                <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                                <Button type="button" variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
                                     📷 Görsel Ekle
                                 </Button>
                             </div>
@@ -165,6 +165,7 @@ export function ItemEditorSheet({
                                         {answer === opt && opt !== "" && <Check className="h-5 w-5" />}
                                     </div>
                                     <Button
+                                        type="button"
                                         variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive"
                                         onClick={() => {
                                             const newOpts = options.filter((_, i) => i !== idx);
@@ -175,7 +176,7 @@ export function ItemEditorSheet({
                                     </Button>
                                 </div>
                             ))}
-                            <Button variant="outline" size="sm" onClick={() => setOptions([...options, ""])} className="w-fit">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setOptions([...options, ""])} className="w-fit">
                                 <Plus className="mr-2 h-4 w-4" /> Seçenek Ekle
                             </Button>
                         </div>
@@ -210,9 +211,9 @@ export function ItemEditorSheet({
 
                 <SheetFooter>
                     <SheetClose asChild>
-                        <Button variant="outline">İptal</Button>
+                        <Button type="button" variant="outline">İptal</Button>
                     </SheetClose>
-                    <Button onClick={handleSave} disabled={!question || !answer}>
+                    <Button type="button" onClick={handleSave} disabled={!question || !answer}>
                         <Save className="mr-2 h-4 w-4" /> Ekle
                     </Button>
                 </SheetFooter>

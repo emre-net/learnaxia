@@ -43,7 +43,7 @@ export function ContentEditorStep() {
         <div className="h-full flex flex-col gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Modül İçeriği</h3>
-                <Button onClick={() => setIsSheetOpen(true)}>
+                <Button type="button" onClick={() => setIsSheetOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" /> İçerik Ekle
                 </Button>
             </div>
@@ -53,7 +53,7 @@ export function ContentEditorStep() {
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
                         <Layers className="h-10 w-10 opacity-20" />
                         <p>Henüz içerik eklenmedi.</p>
-                        <Button variant="link" onClick={() => setIsSheetOpen(true)}>
+                        <Button type="button" variant="link" onClick={() => setIsSheetOpen(true)}>
                             İlk {getTypeLabel(type)} içeriğini ekle
                         </Button>
                     </div>
@@ -73,6 +73,7 @@ export function ContentEditorStep() {
                                     </div>
                                 </div>
                                 <Button
+                                    type="button"
                                     variant="ghost"
                                     size="icon"
                                     className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
