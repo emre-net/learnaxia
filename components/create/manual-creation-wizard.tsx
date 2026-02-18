@@ -25,9 +25,7 @@ const moduleSchema = z.object({
 export type ModuleFormData = z.input<typeof moduleSchema>;
 
 export function ManualCreationWizard() {
-    const [step, setStep] = useState(1);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const router = useRouter();
+    const [isTransitioning, setIsTransitioning] = useState(false); // CRITICAL FIX: Prevent double-click submission
 
     const methods = useForm<ModuleFormData>({
         resolver: zodResolver(moduleSchema),
@@ -46,18 +44,22 @@ export function ManualCreationWizard() {
     const nextStep = async () => {
         const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
         console.log("Step 1 Valid:", isStepValid); // Debugging
-        if (isStepValid) setStep(2);
+        if (isStepValid) {
+            setIsTransitioning(true); // Lock submission
+            setStep(2);
+            // Unlock after 500ms to prevent ghost clicks
+            setTimeout(() => setIsTransitioning(false), 500);
+        }
     };
 
     const prevStep = () => setStep(1);
 
     const onSubmit = async (data: ModuleFormData) => {
-        console.log("Submit triggered. Current Step:", step); // DEBUG
+        console.log("Submit triggered. Current Step:", step, "Transitioning:", isTransitioning); // DEBUG
 
         // CRITICAL FIX: Prevent premature submission
-        if (step !== 2) {
-            console.warn("Premature submission blocked. Current step:", step);
-            // alert("Hata: 1. Adımda kayıt yapılamaz. Lütfen 'İleri' butonunu kullanın."); // Optional user feedback
+        if (step !== 2 || isTransitioning) {
+            console.warn("Premature submission blocked. Step:", step, "Transitioning:", isTransitioning);
             return;
         }
 
@@ -127,7 +129,7 @@ export function ManualCreationWizard() {
                                     İleri <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>
                             ) : (
-                                <Button type="submit" disabled={isSubmitting}>
+                                <Button type="submit" disabled={isSubmitting || isTransitioning}>
                                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                     Modülü Oluştur
                                 </Button>
