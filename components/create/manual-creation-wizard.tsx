@@ -1,6 +1,5 @@
-"use client";
-
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,8 +8,19 @@ import { Card } from "@/components/ui/card";
 import { BasicInfoStep } from "./basic-info-step";
 import { ContentEditorStep } from "./content-editor-step";
 import { ChevronRight, ChevronLeft, Save, Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+
+// --- Schema Definition ---
+const moduleSchema = z.object({
+    title: z.string().min(3, "Başlık en az 3 karakter olmalıdır").max(100),
+    description: z.string().max(500).optional(),
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
+    isForkable: z.boolean().default(true),
+    items: z.array(z.any()).default([])
+});
+
+export type ModuleFormData = z.input<typeof moduleSchema>;
 
 export function ManualCreationWizard() {
     const [step, setStep] = useState(1);
