@@ -12,6 +12,55 @@ const profileSchema = z.object({
     language: z.enum(["tr", "en"]).optional(),
 });
 
+export async function GET(req: Request) {
+    try {
+        const session = await auth();
+        // Allow fetching other users' profiles via query param in future, 
+        // for now just current user or simple check
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("userId") || session?.user?.id;
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                handle: true,
+                image: true,
+                createdAt: true,
+                // Add Bio if it exists in schema, otherwise just these
+                _count: {
+                    select: {
+                        createdModules: true,
+                        collections: true,
+                    }
+                }
+            }
+        });
+
+        if (!user) {
+            return new NextResponse("User not found", { status: 404 });
+        }
+
+        // Calculate simple stats
+        // In a real app, we might aggregate forks/likes here
+        const stats = {
+            modules: user._count.createdModules,
+            collections: user._count.collections,
+        };
+
+        return NextResponse.json({ ...user, stats });
+
+    } catch (error) {
+        console.error("[PROFILE_GET]", error);
+        return new NextResponse("Internal Error", { status: 500 });
+    }
+}
+
 export async function PATCH(req: Request) {
     try {
         const session = await auth();
