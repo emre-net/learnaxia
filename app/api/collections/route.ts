@@ -8,6 +8,8 @@ const CreateCollectionSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
     isPublic: z.boolean().optional().default(false),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
 });
 
 export async function POST(req: Request) {

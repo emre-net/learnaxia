@@ -26,13 +26,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Assuming I fixed it manually
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CATEGORIES } from "@/lib/constants/categories";
 
 const formSchema = z.object({
     title: z.string().min(1, "Title is required").max(100),
     description: z.string().max(500).optional(),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
 });
 
 export function CreateCollectionDialog({ children }: { children?: React.ReactNode }) {
@@ -132,6 +136,57 @@ export function CreateCollectionDialog({ children }: { children?: React.ReactNod
                                 </FormItem>
                             )}
                         />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="category"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Category</FormLabel>
+                                        <Select onValueChange={(val) => {
+                                            field.onChange(val);
+                                            form.setValue("subCategory", "");
+                                        }} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Category" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {Object.keys(CATEGORIES).map((cat) => (
+                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="subCategory"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Sub Category</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value} disabled={!form.watch("category")}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Sub Category" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {form.watch("category") && CATEGORIES[form.watch("category")]?.map((sub) => (
+                                                    <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <DialogFooter>
                             <Button type="submit">Create Collection</Button>
                         </DialogFooter>

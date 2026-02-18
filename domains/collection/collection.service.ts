@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 
 export class CollectionService {
 
-    static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean }) {
+    static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean; category?: string; subCategory?: string }) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const collection = await tx.collection.create({
                 data: {
@@ -12,6 +12,8 @@ export class CollectionService {
                     // description: null, // Disabled due to migration failure
                     // isPublic: false,   // Disabled due to migration failure
                     ownerId: userId,
+                    category: data.category,
+                    subCategory: data.subCategory
                 }
             });
 
@@ -91,7 +93,7 @@ export class CollectionService {
         };
     }
 
-    static async update(userId: string, collectionId: string, data: { title?: string; description?: string; isPublic?: boolean; moduleIds?: string[] }) {
+    static async update(userId: string, collectionId: string, data: { title?: string; description?: string; isPublic?: boolean; moduleIds?: string[]; category?: string; subCategory?: string }) {
         // Check Access
         const access = await prisma.userContentAccess.findUnique({
             where: { userId_resourceId: { userId, resourceId: collectionId } }
@@ -110,6 +112,8 @@ export class CollectionService {
                     title: data.title,
                     // description: data.description,
                     // isPublic: data.isPublic,
+                    category: data.category,
+                    subCategory: data.subCategory
                 }
             });
 

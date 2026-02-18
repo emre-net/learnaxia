@@ -337,6 +337,11 @@ model Collection {
   owner       User     @relation("OwnedCollections", fields: [ownerId], references: [id])
   items       CollectionItem[]
   userLibrary UserCollectionLibrary[]
+  
+  // Categorization
+  category    String?
+  subCategory String?
+
   createdAt   DateTime @default(now())
 }
 
