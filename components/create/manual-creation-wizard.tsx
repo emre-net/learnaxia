@@ -52,6 +52,12 @@ export function ManualCreationWizard() {
     const prevStep = () => setStep(1);
 
     const onSubmit = async (data: ModuleFormData) => {
+        // CRITICAL FIX: Prevent premature submission
+        if (step !== 2) {
+            console.warn("Premature submission blocked. Current step:", step);
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const res = await fetch("/api/modules", {
