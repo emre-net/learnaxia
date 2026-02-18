@@ -28,7 +28,7 @@ export async function GET(req: Request) {
             where: { id: userId },
             select: {
                 id: true,
-                name: true,
+                // name: true, // Field does not exist in User model
                 handle: true,
                 image: true,
                 createdAt: true,

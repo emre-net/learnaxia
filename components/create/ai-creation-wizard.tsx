@@ -32,6 +32,20 @@ export function AICreationWizard() {
     const [generatedItems, setGeneratedItems] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+
+    const onFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Setup for future implementation
+        // For now just set the topic to prompt to show it's selected
+        setValue("topic", `[Dosya Seçildi: ${file.name}] Lütfen bu dosyadan içerik oluştur.`);
+
+        toast({
+            title: "Dosya Seçildi",
+            description: `${file.name} analize hazır. (Demo Modu)`,
+        });
+    };
     const [inputType, setInputType] = useState<"TEXT" | "FILE">("TEXT");
 
     const router = useRouter();

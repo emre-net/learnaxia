@@ -177,7 +177,7 @@ export function CreateCollectionDialog({ children }: { children?: React.ReactNod
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {form.watch("category") && CATEGORIES[form.watch("category")]?.map((sub) => (
+                                                {form.watch("category") && (CATEGORIES as Record<string, string[]>)[form.watch("category") || ""]?.map((sub) => (
                                                     <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                                                 ))}
                                             </SelectContent>

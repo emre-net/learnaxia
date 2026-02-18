@@ -172,7 +172,7 @@ export function ProfileClient() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {myCollections?.map((item: any) => (
-                                <CollectionCard key={item.collectionId} item={item} />
+                                <CollectionCard key={item.collectionId} item={item} viewMode="grid" />
                             ))}
                         </div>
                     )}

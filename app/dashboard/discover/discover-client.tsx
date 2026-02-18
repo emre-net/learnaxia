@@ -13,7 +13,7 @@ import { CATEGORIES } from "@/lib/constants/categories";
 import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { Separator } from "@/components/ui/separator";
-import { useDebounce } from "@/hooks/use-debounce"; // Assuming this hook exists, or I'll implement simple debounce
+// import { useDebounce } from "@/hooks/use-debounce"; // Removed: Using local implementation
 
 // If useDebounce doesn't exist, I'll inline a simple effect or use local state with delay
 // Let's check if useDebounce exists first. If not, I'll implement simple local debounce logic inside.
@@ -232,8 +232,6 @@ export function DiscoverClient() {
                                         <CollectionCard
                                             key={item.id}
                                             item={{
-                                                collectionId: item.id,
-                                                userId: item.ownerId, // Just for type compliance
                                                 role: 'VIEWER',
                                                 lastInteractionAt: item.createdAt,
                                                 collection: item
