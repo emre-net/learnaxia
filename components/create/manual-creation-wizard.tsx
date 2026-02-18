@@ -9,30 +9,23 @@ import { Card } from "@/components/ui/card";
 import { BasicInfoStep } from "./basic-info-step";
 import { ContentEditorStep } from "./content-editor-step";
 import { ChevronRight, ChevronLeft, Save, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-// --- Schema Definition ---
-const moduleSchema = z.object({
-    title: z.string().min(3, "Başlık en az 3 karakter olmalıdır").max(100),
-    description: z.string().max(500).optional(),
-    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]),
-    category: z.string().optional(),
-    subCategory: z.string().optional(),
-    isForkable: z.boolean().default(true),
-    items: z.array(z.any()).default([])
-});
-
-export type ModuleFormData = z.input<typeof moduleSchema>;
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export function ManualCreationWizard() {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false); // CRITICAL FIX: Prevent double-click submission
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const editId = searchParams.get("edit");
+    const isEditMode = !!editId;
 
     const methods = useForm<ModuleFormData>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
+            title: "",
+            description: "",
             type: "FLASHCARD",
             isForkable: true,
             items: [],
@@ -42,7 +35,35 @@ export function ManualCreationWizard() {
         mode: "onChange"
     });
 
-    const { handleSubmit, trigger } = methods;
+    const { handleSubmit, trigger, reset } = methods;
+
+    // Fetch data if in edit mode
+    useEffect(() => {
+        if (isEditMode) {
+            const fetchModule = async () => {
+                try {
+                    const res = await fetch(`/api/modules/${editId}`);
+                    if (!res.ok) throw new Error("Module not found");
+                    const data = await res.json();
+
+                    // Populate form
+                    reset({
+                        title: data.title,
+                        description: data.description || "",
+                        type: data.type,
+                        isForkable: data.isForkable,
+                        category: data.category || "",
+                        subCategory: data.subCategory || "",
+                        items: data.items || []
+                    });
+                } catch (error) {
+                    console.error("Failed to load module for editing:", error);
+                    // toast.error("Modül yüklenemedi");
+                }
+            };
+            fetchModule();
+        }
+    }, [editId, isEditMode, reset]);
 
     const nextStep = async () => {
         const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
@@ -68,8 +89,11 @@ export function ManualCreationWizard() {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch("/api/modules", {
-                method: "POST",
+            const url = isEditMode ? `/api/modules/${editId}` : "/api/modules";
+            const method = isEditMode ? "PATCH" : "POST";
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: data.title,
@@ -77,16 +101,16 @@ export function ManualCreationWizard() {
                     type: data.type,
                     isForkable: data.isForkable,
                     status: 'ACTIVE',
-                    items: data.items,
+                    items: data.items, // Ensure items are sent
                     category: data.category,
                     subCategory: data.subCategory
                 })
             });
 
-            if (!res.ok) throw new Error("Modül oluşturulamadı");
+            if (!res.ok) throw new Error("İşlem başarısız");
 
-            const newModule = await res.json();
-            router.push(`/dashboard/library`); // Redirect to library after creation
+            const result = await res.json();
+            router.push(`/dashboard/library`); // Redirect to library after creation/update
 
         } catch (error) {
             console.error(error);
@@ -98,7 +122,7 @@ export function ManualCreationWizard() {
     return (
         <div className="max-w-4xl mx-auto py-8">
             <h1 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                Yeni Modül Oluştur
+                {isEditMode ? "Modülü Düzenle" : "Yeni Modül Oluştur"}
             </h1>
 
             {/* Steps Indicator */}
@@ -134,7 +158,7 @@ export function ManualCreationWizard() {
                             ) : (
                                 <Button type="submit" disabled={isSubmitting || isTransitioning}>
                                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Modülü Oluştur
+                                    {isEditMode ? "Değişiklikleri Kaydet" : "Modülü Oluştur"}
                                 </Button>
                             )}
                         </div>
