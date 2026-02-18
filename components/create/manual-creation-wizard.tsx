@@ -25,7 +25,10 @@ const moduleSchema = z.object({
 export type ModuleFormData = z.input<typeof moduleSchema>;
 
 export function ManualCreationWizard() {
+    const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false); // CRITICAL FIX: Prevent double-click submission
+    const router = useRouter();
 
     const methods = useForm<ModuleFormData>({
         resolver: zodResolver(moduleSchema),
