@@ -52,9 +52,12 @@ export function ManualCreationWizard() {
     const prevStep = () => setStep(1);
 
     const onSubmit = async (data: ModuleFormData) => {
+        console.log("Submit triggered. Current Step:", step); // DEBUG
+
         // CRITICAL FIX: Prevent premature submission
         if (step !== 2) {
             console.warn("Premature submission blocked. Current step:", step);
+            // alert("Hata: 1. Adımda kayıt yapılamaz. Lütfen 'İleri' butonunu kullanın."); // Optional user feedback
             return;
         }
 
