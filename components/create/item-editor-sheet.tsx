@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
-// Temporary ID generator for local items
-const generateId = () => Math.random().toString(36).substr(2, 9);
+// Temporary ID generator for local items - REPLACED with UUID
+const generateId = () => uuidv4();
 
 type ItemType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
 
@@ -58,7 +59,7 @@ export function ItemEditorSheet({
         if (!question || !answer) return; // Validation
 
         const newItem = {
-            id: id || generateId(), // Preserve ID if editing
+            id: id || generateId(), // Preserve ID if editing, else generate UUID
             type: type, // Inherit from module type
             content: {
                 question: question,
