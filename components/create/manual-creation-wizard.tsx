@@ -44,7 +44,8 @@ export function ManualCreationWizard() {
     const { handleSubmit, trigger } = methods;
 
     const nextStep = async () => {
-        const isStepValid = await trigger(["title", "description", "type", "category", "subCategory"]);
+        const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
+        console.log("Step 1 Valid:", isStepValid); // Debugging
         if (isStepValid) setStep(2);
     };
 
