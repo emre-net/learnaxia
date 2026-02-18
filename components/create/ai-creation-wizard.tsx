@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Loader2, Save, Trash2, CheckCircle2, AlertCircle, FileText, UploadCloud, FileType, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 // --- Schema ---
 const aiConfigSchema = z.object({
@@ -105,7 +106,12 @@ export function AICreationWizard() {
             }
 
             const result = await res.json();
-            setGeneratedItems(result.items);
+            // Assign UUIDs to generated items for stable rendering and manipulation
+            const itemsWithIds = result.items.map((item: any) => ({
+                ...item,
+                id: uuidv4()
+            }));
+            setGeneratedItems(itemsWithIds);
             setStep("REVIEW");
         } catch (error: any) {
             console.error(error);
@@ -130,7 +136,7 @@ export function AICreationWizard() {
                     type: "FLASHCARD",
                     isForkable: true,
                     status: 'ACTIVE',
-                    items: generatedItems
+                    items: generatedItems // Now includes IDs, but API will ignore them for creation which is fine
                 })
             });
 
@@ -301,7 +307,7 @@ export function AICreationWizard() {
 
                     <div className="grid gap-4">
                         {generatedItems.map((item, idx) => (
-                            <Card key={idx} className="relative group hover:border-purple-500/50 transition-colors">
+                            <Card key={item.id || idx} className="relative group hover:border-purple-500/50 transition-colors">
                                 <CardContent className="p-4 grid gap-1">
                                     <div className="flex justify-between items-start">
                                         <div className="flex gap-2">
@@ -312,7 +318,7 @@ export function AICreationWizard() {
                                                 </span>
                                             )}
                                         </div>
-                                        <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-red-500" onClick={() => setGeneratedItems(items => items.filter((_, i) => i !== idx))}>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-red-500" onClick={() => setGeneratedItems(items => items.filter((t) => t.id !== item.id))}>
                                             <Trash2 className="h-3 w-3" />
                                         </Button>
                                     </div>
