@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,13 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
+
+    // Sync state with prop when user data loads
+    useEffect(() => {
+        if (user.handle) {
+            setHandle(user.handle);
+        }
+    }, [user.handle]);
 
     const handleSave = async () => {
         if (handle === user.handle) {
