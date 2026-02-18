@@ -16,8 +16,8 @@ const moduleSchema = z.object({
     title: z.string().min(3, "Başlık en az 3 karakter olmalıdır").max(100),
     description: z.string().max(500).optional(),
     type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]),
-    category: z.string().min(1, "Bir kategori seçmelisiniz"),
-    subCategory: z.string().min(1, "Bir alt kategori seçmelisiniz"),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
     isForkable: z.boolean().default(true),
     items: z.array(z.any()).default([])
 });

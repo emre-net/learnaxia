@@ -60,7 +60,7 @@ export function BasicInfoStep() {
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Açıklama</FormLabel>
+                        <FormLabel>Açıklama <span className="text-muted-foreground text-xs font-normal">(Opsiyonel)</span></FormLabel>
                         <FormControl>
                             <Textarea
                                 placeholder="Bu modülde ne öğreneceksiniz?"
@@ -80,7 +80,7 @@ export function BasicInfoStep() {
                     name="category"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Kategori</FormLabel>
+                            <FormLabel>Kategori <span className="text-muted-foreground text-xs font-normal">(Opsiyonel)</span></FormLabel>
                             <Select onValueChange={(val) => {
                                 field.onChange(val);
                                 setValue("subCategory", ""); // Reset sub on change
@@ -124,6 +124,44 @@ export function BasicInfoStep() {
                     )}
                 />
             </div>
+
+            {/* Visibility (Public/Private) */}
+            <FormField
+                control={control}
+                name="isForkable"
+                render={({ field }) => (
+                    <FormItem className="space-y-3">
+                        <FormLabel>Görünürlük</FormLabel>
+                        <FormControl>
+                            <RadioGroup
+                                onValueChange={(val) => field.onChange(val === "true")}
+                                defaultValue={field.value ? "true" : "false"}
+                                className="flex flex-col space-y-1"
+                            >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                        <RadioGroupItem value="true" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal cursor-pointer">
+                                        <span className="font-semibold block">Herkese Açık (Public)</span>
+                                        <span className="text-muted-foreground text-xs">Diğer kullanıcılar modülünüzü görebilir ve kopyalayabilir.</span>
+                                    </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                        <RadioGroupItem value="false" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal cursor-pointer">
+                                        <span className="font-semibold block">Gizli (Private)</span>
+                                        <span className="text-muted-foreground text-xs">Modülü sadece siz görebilirsiniz.</span>
+                                    </FormLabel>
+                                </FormItem>
+                            </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             {/* Type */}
             <FormField
