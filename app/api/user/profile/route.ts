@@ -43,6 +43,7 @@ export async function PATCH(req: Request) {
         return NextResponse.json(updatedUser);
     } catch (error) {
         if (error instanceof z.ZodError) {
+            // Explicitly cast to any to avoid TS build errors with ZodError types
             return new NextResponse((error as any).errors[0].message, { status: 400 });
         }
         console.error("[PROFILE_PATCH]", error);
