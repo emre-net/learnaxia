@@ -1,18 +1,17 @@
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from "@/components/ui/sheet";
+
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
-import { ModuleFormData } from "./manual-creation-wizard";
 
 // Temporary ID generator for local items
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-type ItemType = 'FLASHCARD' | 'MC' | 'GAP';
+type ItemType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
 
 export function ItemEditorSheet({
     open,
@@ -41,7 +40,7 @@ export function ItemEditorSheet({
     }, [open]);
 
     const handleSave = () => {
-        if (!question) return; // Validation
+        if (!question || !answer) return; // Validation
 
         const newItem = {
             id: generateId(),
@@ -58,72 +57,105 @@ export function ItemEditorSheet({
         onOpenChange(false);
     };
 
+    const getTitle = () => {
+        switch (type) {
+            case 'FLASHCARD': return 'Yeni Kart Ekle';
+            case 'MC': return 'Çoktan Seçmeli Soru Ekle';
+            case 'GAP': return 'Boşluk Doldurma Ekle';
+            case 'TRUE_FALSE': return 'Doğru / Yanlış Sorusu Ekle';
+            default: return 'Soru Ekle';
+        }
+    };
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="sm:max-w-xl overflow-y-auto">
                 <SheetHeader>
-                    <SheetTitle>Add {type === 'FLASHCARD' ? 'Flashcard' : type === 'MC' ? 'Question' : 'Gap Fill'}</SheetTitle>
+                    <SheetTitle>{getTitle()}</SheetTitle>
                     <SheetDescription>
-                        Create a new item for your module.
+                        Modülünüz için yeni bir içerik oluşturun.
                     </SheetDescription>
                 </SheetHeader>
 
                 <div className="grid gap-6 py-6">
                     {/* Question / Front */}
                     <div className="grid gap-2">
-                        <Label htmlFor="question">{type === 'FLASHCARD' ? 'Front (Question)' : 'Question Text'}</Label>
+                        <Label htmlFor="question">
+                            {type === 'FLASHCARD' ? 'Ön Yüz (Soru/Kavram)' : 'Soru Metni'}
+                        </Label>
                         <Textarea
                             id="question"
-                            placeholder="Enter the question or term..."
+                            placeholder={type === 'GAP' ? "Örn: Ankara Türkiye'nin [...] şehridir." : "Sorunuzu buraya yazın..."}
                             className="resize-none"
                             value={question}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setQuestion(e.target.value)}
+                            onChange={(e) => setQuestion(e.target.value)}
                         />
                     </div>
 
                     {/* Answer / Back (Flashcard) */}
                     {type === 'FLASHCARD' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="answer">Back (Answer)</Label>
+                            <Label htmlFor="answer">Arka Yüz (Cevap/Tanım)</Label>
                             <Textarea
                                 id="answer"
-                                placeholder="Enter the answer or definition..."
+                                placeholder="Cevabı buraya yazın..."
                                 className="resize-none"
                                 value={answer}
-                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswer(e.target.value)}
+                                onChange={(e) => setAnswer(e.target.value)}
                             />
+                        </div>
+                    )}
+
+                    {/* True / False */}
+                    {type === 'TRUE_FALSE' && (
+                        <div className="grid gap-4">
+                            <Label>Doğru Cevap</Label>
+                            <div className="flex gap-4">
+                                <Button
+                                    type="button"
+                                    variant={answer === "True" ? "default" : "outline"}
+                                    className={`flex-1 ${answer === "True" ? "bg-green-600 hover:bg-green-700" : ""}`}
+                                    onClick={() => setAnswer("True")}
+                                >
+                                    <Check className="mr-2 h-4 w-4" /> Doğru
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={answer === "False" ? "default" : "outline"}
+                                    className={`flex-1 ${answer === "False" ? "bg-red-600 hover:bg-red-700" : ""}`}
+                                    onClick={() => setAnswer("False")}
+                                >
+                                    <X className="mr-2 h-4 w-4" /> Yanlış
+                                </Button>
+                            </div>
                         </div>
                     )}
 
                     {/* Multiple Choice Options */}
                     {type === 'MC' && (
                         <div className="grid gap-4">
-                            <Label>answer Options</Label>
-                            <p className="text-xs text-muted-foreground mb-2">Check the correct answer.</p>
+                            <Label>Seçenekler</Label>
+                            <p className="text-xs text-muted-foreground mb-2">Doğru cevabı işaretlemeyi unutmayın.</p>
                             {options.map((opt, idx) => (
                                 <div key={idx} className="flex items-center gap-2">
                                     <Input
                                         value={opt}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                        onChange={(e) => {
                                             const newOpts = [...options];
                                             newOpts[idx] = e.target.value;
                                             setOptions(newOpts);
                                         }}
-                                        placeholder={`Option ${idx + 1}`}
+                                        placeholder={`Seçenek ${idx + 1}`}
                                     />
-                                    {/* Simple radio logic for MVP - just store index or text?
-                                Design mentions "Answer: Input".
-                                For MC, we need to know WHICH is correct.
-                                Let's assume 'answer' state holds the CORRECT option text.
-                            */}
                                     <div
-                                        className={`h-6 w-6 rounded-full border cursor-pointer flex items-center justify-center ${answer === opt && opt !== "" ? "bg-green-500 border-green-500 text-white" : "border-muted"}`}
+                                        className={`h-9 w-9 rounded-md border cursor-pointer flex items-center justify-center transition-all ${answer === opt && opt !== "" ? "bg-green-500 border-green-500 text-white shadow-md" : "border-muted hover:bg-muted"}`}
                                         onClick={() => setAnswer(opt)}
+                                        title="Doğru cevap olarak işaretle"
                                     >
-                                        {answer === opt && opt !== "" && "✓"}
+                                        {answer === opt && opt !== "" && <Check className="h-5 w-5" />}
                                     </div>
                                     <Button
-                                        variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                        variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive"
                                         onClick={() => {
                                             const newOpts = options.filter((_, i) => i !== idx);
                                             setOptions(newOpts);
@@ -134,44 +166,44 @@ export function ItemEditorSheet({
                                 </div>
                             ))}
                             <Button variant="outline" size="sm" onClick={() => setOptions([...options, ""])} className="w-fit">
-                                <Plus className="mr-2 h-4 w-4" /> Add Option
+                                <Plus className="mr-2 h-4 w-4" /> Seçenek Ekle
                             </Button>
                         </div>
                     )}
 
-                    {/* GAP Fill (Simple Text Input for now) */}
+                    {/* GAP Fill */}
                     {type === 'GAP' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="gap-answer">Answer (Missing Word)</Label>
+                            <Label htmlFor="gap-answer">Cevap (Eksik Kelime)</Label>
                             <Input
                                 id="gap-answer"
-                                placeholder="The word to fill in..."
+                                placeholder="Boşluğa gelecek kelimeyi yazın..."
                                 value={answer}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(e.target.value)}
+                                onChange={(e) => setAnswer(e.target.value)}
                             />
-                            <p className="text-xs text-muted-foreground">Tip: Use [...] in Question where you want the gap to appear.</p>
+                            <p className="text-xs text-muted-foreground">İpucu: Soruda boşluk bırakmak istediğiniz yere [...] yazın.</p>
                         </div>
                     )}
 
                     {/* Explanation */}
                     <div className="grid gap-2">
-                        <Label htmlFor="explanation">Explanation (Optional)</Label>
+                        <Label htmlFor="explanation">Açıklama (Opsiyonel)</Label>
                         <Textarea
                             id="explanation"
-                            placeholder="Context or why this is the answer..."
+                            placeholder="Cevap hakkında ek bilgi veya ipucu..."
                             className="resize-none"
                             value={explanation}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setExplanation(e.target.value)}
+                            onChange={(e) => setExplanation(e.target.value)}
                         />
                     </div>
                 </div>
 
                 <SheetFooter>
                     <SheetClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">İptal</Button>
                     </SheetClose>
                     <Button onClick={handleSave} disabled={!question || !answer}>
-                        <Save className="mr-2 h-4 w-4" /> Save Item
+                        <Save className="mr-2 h-4 w-4" /> Kaydet
                     </Button>
                 </SheetFooter>
             </SheetContent>

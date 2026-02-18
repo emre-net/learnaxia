@@ -6,12 +6,14 @@ import { z } from "zod";
 
 // Validation Schema
 const CreateModuleSchema = z.object({
-    title: z.string().min(1, "Title is required").max(100),
+    title: z.string().min(1, "Başlık zorunludur").max(100),
     description: z.string().optional(),
-    type: z.enum(['FLASHCARD', 'MC', 'GAP']),
+    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']),
     isForkable: z.boolean().optional(),
     status: z.enum(['DRAFT', 'ACTIVE']).optional(),
-    items: z.array(z.any()).optional()
+    items: z.array(z.any()).optional(),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
 });
 
 export async function POST(req: Request) {

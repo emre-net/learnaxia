@@ -21,6 +21,7 @@ model User {
   image     String?
   handle    String?  @unique // Optional for OAuth
   timezone  String   @default("UTC")
+  language  String   @default("tr") // 'tr' | 'en'
   role      String   @default("USER")
   status    String   @default("ACTIVE")
   sessionVersion Int @default(1)
@@ -227,6 +228,10 @@ model Module {
   items            Item[]
   userLibrary      UserModuleLibrary[]
   generationStep   String? 
+  
+  // Categorization
+  category         String?
+  subCategory      String?
   
   // Added Back-Relations
   sessions         LearningSession[]

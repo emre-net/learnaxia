@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History } from "lucide-react";
+import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Globe } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,15 @@ import { DailyActivityChart } from "@/components/analytics/daily-activity-chart"
 import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface SettingsContentProps {
     user: {
         email?: string | null;
         image?: string | null;
         handle?: string | null;
+        language?: string | null; // Added language
     };
 }
 
@@ -63,6 +66,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
     };
 
     const [handle, setHandle] = useState(user.handle || "");
+    const [language, setLanguage] = useState(user.language || "tr"); // Default TR
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSaveProfile = async () => {
@@ -71,7 +75,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ handle }),
+                body: JSON.stringify({ handle, language }),
             });
 
             if (!res.ok) {
@@ -162,7 +166,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Profil Bilgileri</CardTitle>
-                                <CardDescription>Başkalarının sizi nasıl göreceğini güncelleyin.</CardDescription>
+                                <CardDescription>Kişisel bilgilerinizi ve tercihlerinizi yönetin.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
@@ -177,11 +181,28 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         Benzersiz olmalıdır. Harf, rakam ve alt çizgi içerebilir.
                                     </p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">E-posta</Label>
-                                    <Input id="email" defaultValue={user.email || ""} disabled />
-                                    <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">E-posta</Label>
+                                        <Input id="email" defaultValue={user.email || ""} disabled />
+                                        <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="language">Dil Seçimi</Label>
+                                        <Select value={language} onValueChange={setLanguage}>
+                                            <SelectTrigger id="language">
+                                                <SelectValue placeholder="Dil seçin" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="tr">Türkçe 🇹🇷</SelectItem>
+                                                <SelectItem value="en">English 🇬🇧</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <p className="text-xs text-muted-foreground">Uygulama arayüz dili.</p>
+                                    </div>
                                 </div>
+
                                 <div className="flex justify-end pt-4">
                                     <Button onClick={handleSaveProfile} disabled={isSaving}>
                                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -341,7 +362,13 @@ export function SettingsContent({ user }: SettingsContentProps) {
                             <CardDescription>Bildirim tercihlerinizi yönetin.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">Bildirim ayarları yakında eklenecek.</p>
+                            <div className="flex items-center justify-between p-4 border rounded-lg">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">E-posta Bildirimleri</Label>
+                                    <p className="text-xs text-muted-foreground">Önemli güncellemeler hakkında e-posta al.</p>
+                                </div>
+                                <Switch disabled />
+                            </div>
                         </CardContent>
                     </Card>
                 )}

@@ -9,6 +9,7 @@ const profileSchema = z.object({
         .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
         .regex(/^[a-zA-Z0-9_]+$/, "Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir.")
         .optional(),
+    language: z.enum(["tr", "en"]).optional(),
 });
 
 export async function PATCH(req: Request) {
@@ -20,7 +21,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { handle } = profileSchema.parse(body);
+        const { handle, language } = profileSchema.parse(body);
 
         // Check handle uniqueness if provided
         if (handle) {
@@ -37,6 +38,7 @@ export async function PATCH(req: Request) {
             where: { id: session.user.id },
             data: {
                 ...(handle && { handle }),
+                ...(language && { language }),
             },
         });
 

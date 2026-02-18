@@ -13,9 +13,11 @@ import { useRouter } from "next/navigation";
 
 // --- Schema Definition ---
 const moduleSchema = z.object({
-    title: z.string().min(3, "Title must be at least 3 characters").max(100),
+    title: z.string().min(3, "Başlık en az 3 karakter olmalıdır").max(100),
     description: z.string().max(500).optional(),
-    type: z.enum(["FLASHCARD", "MC", "GAP"]),
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]),
+    category: z.string().min(1, "Bir kategori seçmelisiniz"),
+    subCategory: z.string().min(1, "Bir alt kategori seçmelisiniz"),
     isForkable: z.boolean().default(true),
     items: z.array(z.any()).default([])
 });
@@ -32,7 +34,9 @@ export function ManualCreationWizard() {
         defaultValues: {
             type: "FLASHCARD",
             isForkable: true,
-            items: []
+            items: [],
+            category: "",
+            subCategory: ""
         },
         mode: "onChange"
     });
@@ -40,7 +44,7 @@ export function ManualCreationWizard() {
     const { handleSubmit, trigger } = methods;
 
     const nextStep = async () => {
-        const isStepValid = await trigger(["title", "description", "type"]);
+        const isStepValid = await trigger(["title", "description", "type", "category", "subCategory"]);
         if (isStepValid) setStep(2);
     };
 
@@ -49,7 +53,6 @@ export function ManualCreationWizard() {
     const onSubmit = async (data: ModuleFormData) => {
         setIsSubmitting(true);
         try {
-            // Fix #18: Send items along with module creation data
             const res = await fetch("/api/modules", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -59,14 +62,16 @@ export function ManualCreationWizard() {
                     type: data.type,
                     isForkable: data.isForkable,
                     status: 'ACTIVE',
-                    items: data.items, // Now properly included
+                    items: data.items,
+                    category: data.category,
+                    subCategory: data.subCategory
                 })
             });
 
-            if (!res.ok) throw new Error("Failed to create module");
+            if (!res.ok) throw new Error("Modül oluşturulamadı");
 
             const newModule = await res.json();
-            router.push(`/modules/${newModule.id}`);
+            router.push(`/dashboard/library`); // Redirect to library after creation
 
         } catch (error) {
             console.error(error);
@@ -77,22 +82,26 @@ export function ManualCreationWizard() {
 
     return (
         <div className="max-w-4xl mx-auto py-8">
+            <h1 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                Yeni Modül Oluştur
+            </h1>
+
             {/* Steps Indicator */}
             <div className="flex items-center justify-center mb-8 gap-4">
                 <div className={`flex items-center gap-2 ${step === 1 ? "text-primary font-bold" : "text-muted-foreground"}`}>
                     <span className={`h-8 w-8 rounded-full flex items-center justify-center border ${step === 1 ? "bg-primary text-primary-foreground border-primary" : "border-muted-foreground"}`}>1</span>
-                    Basic Info
+                    Temel Bilgiler
                 </div>
                 <div className="h-px w-10 bg-border" />
                 <div className={`flex items-center gap-2 ${step === 2 ? "text-primary font-bold" : "text-muted-foreground"}`}>
                     <span className={`h-8 w-8 rounded-full flex items-center justify-center border ${step === 2 ? "bg-primary text-primary-foreground border-primary" : "border-muted-foreground"}`}>2</span>
-                    Content
+                    İçerik
                 </div>
             </div>
 
             <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Card className="p-6 min-h-[500px] flex flex-col">
+                    <Card className="p-6 min-h-[500px] flex flex-col border-2">
                         <div className="flex-1">
                             {step === 1 && <BasicInfoStep />}
                             {step === 2 && <ContentEditorStep />}
@@ -100,17 +109,17 @@ export function ManualCreationWizard() {
 
                         <div className="flex justify-between mt-8 pt-4 border-t">
                             <Button type="button" variant="outline" onClick={prevStep} disabled={step === 1}>
-                                <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                                <ChevronLeft className="mr-2 h-4 w-4" /> Geri
                             </Button>
 
                             {step === 1 ? (
                                 <Button type="button" onClick={nextStep}>
-                                    Next <ChevronRight className="ml-2 h-4 w-4" />
+                                    İleri <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>
                             ) : (
                                 <Button type="submit" disabled={isSubmitting}>
                                     {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Create Module
+                                    Modülü Oluştur
                                 </Button>
                             )}
                         </div>

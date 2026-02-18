@@ -20,6 +20,7 @@ export default async function SettingsPage() {
             email: true,
             image: true,
             handle: true,
+            language: true,
         },
     });
 
