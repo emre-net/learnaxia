@@ -84,7 +84,7 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                             <Select onValueChange={(val) => {
                                 field.onChange(val);
                                 setValue("subCategory", ""); // Reset sub on change
-                            }} defaultValue={field.value}>
+                            }} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Kategori Seçin" />
@@ -107,7 +107,7 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Alt Kategori</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategory}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder={selectedCategory ? "Alt Kategori Seçin" : "Önce Kategori Seçin"} />

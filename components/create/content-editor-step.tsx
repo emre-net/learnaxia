@@ -23,10 +23,13 @@ export function ContentEditorStep() {
     };
 
     const getAnswerDisplay = (field: any) => {
-        if (field.type === 'MC') return `Cevap: ${field.content?.answer}`;
-        if (field.type === 'TRUE_FALSE') return `Cevap: ${field.content?.answer === "True" ? "Doğru" : "Yanlış"}`;
-        if (field.type === 'FLASHCARD') return field.content?.answer;
-        return field.content?.answer;
+        const answer = field.content?.answer;
+        if (!answer) return "Cevap yok";
+
+        if (field.type === 'MC') return `Cevap: ${answer}`;
+        if (field.type === 'TRUE_FALSE') return `Cevap: ${answer === "True" ? "Doğru" : "Yanlış"}`;
+        if (field.type === 'FLASHCARD') return answer;
+        return answer;
     };
 
     const getTypeLabel = (t: string) => {
