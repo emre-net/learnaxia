@@ -80,9 +80,14 @@ export function ItemEditorSheet({
                 <div className="grid gap-6 py-6">
                     {/* Question / Front */}
                     <div className="grid gap-2">
-                        <Label htmlFor="question">
-                            {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="question">
+                                {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
+                            </Label>
+                            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                                📷 Görsel Ekle
+                            </Button>
+                        </div>
                         <Textarea
                             id="question"
                             placeholder={type === 'GAP' ? "Örn: Ankara Türkiye'nin [...] şehridir." : "Sorunuzu buraya yazın..."}
@@ -95,7 +100,12 @@ export function ItemEditorSheet({
                     {/* Answer / Back (Flashcard) */}
                     {type === 'FLASHCARD' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
+                                <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground hover:text-primary" onClick={() => alert("Görsel yükleme çok yakında!")}>
+                                    📷 Görsel Ekle
+                                </Button>
+                            </div>
                             <Textarea
                                 id="answer"
                                 placeholder="Cevabı buraya yazın..."
