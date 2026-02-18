@@ -152,8 +152,14 @@ export function ItemEditorSheet({
                                         value={opt}
                                         onChange={(e) => {
                                             const newOpts = [...options];
+                                            const oldValue = newOpts[idx];
                                             newOpts[idx] = e.target.value;
                                             setOptions(newOpts);
+
+                                            // If this option was selected as answer, update answer too
+                                            if (answer === oldValue) {
+                                                setAnswer(e.target.value);
+                                            }
                                         }}
                                         placeholder={`Seçenek ${idx + 1}`}
                                     />

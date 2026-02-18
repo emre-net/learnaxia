@@ -79,7 +79,7 @@ export function ManualCreationWizard() {
 
     const nextStep = async () => {
         const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
-        console.log("Step 1 Valid:", isStepValid); // Debugging
+
         if (isStepValid) {
             setIsTransitioning(true); // Lock submission
             setStep(2);
@@ -91,11 +91,26 @@ export function ManualCreationWizard() {
     const prevStep = () => setStep(1);
 
     const onSubmit = async (data: ModuleFormData) => {
-        console.log("Submit triggered. Current Step:", step, "Transitioning:", isTransitioning); // DEBUG
+
+
+        // Fix Enter key behavior in Step 1
+        if (step === 1) {
+            nextStep();
+            return;
+        }
 
         // CRITICAL FIX: Prevent premature submission
         if (step !== 2 || isTransitioning) {
             console.warn("Premature submission blocked. Step:", step, "Transitioning:", isTransitioning);
+            return;
+        }
+
+        // Prevent empty module submission
+        if (!data.items || data.items.length === 0) {
+            // alert("Lütfen en az bir içerik ekleyin."); // Better to use a toast if available, but alert works for now as safeguard
+            // Using a more UI-friendly approach if possible, but for now just return/log
+            console.warn("Attempted to submit empty module");
+            alert("Lütfen en az bir içerik ekleyin.");
             return;
         }
 
@@ -154,7 +169,7 @@ export function ManualCreationWizard() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Card className="p-6 min-h-[500px] flex flex-col border-2">
                         <div className="flex-1">
-                            {step === 1 && <BasicInfoStep />}
+                            {step === 1 && <BasicInfoStep isEditMode={isEditMode} />}
                             {step === 2 && <ContentEditorStep />}
                         </div>
 

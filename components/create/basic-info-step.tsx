@@ -23,7 +23,7 @@ const CATEGORIES: Record<string, string[]> = {
     "Diğer": ["Kişisel Gelişim", "Hobi", "Diğer"]
 };
 
-export function BasicInfoStep() {
+export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
     const { control, watch, setValue } = useFormContext<ModuleFormData>();
     const selectedCategory = watch("category");
 
@@ -174,13 +174,14 @@ export function BasicInfoStep() {
                             <RadioGroup
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
+                                disabled={isEditMode}
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
                             >
                                 <FormItem>
                                     <FormControl>
                                         <RadioGroupItem value="FLASHCARD" className="peer sr-only" />
                                     </FormControl>
-                                    <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <GalleryVerticalEnd className="mb-2 h-6 w-6" />
                                         <span className="font-semibold">Kartlar</span>
                                         <span className="text-xs text-muted-foreground text-center mt-1">Ön/Arka kartlar. Ezber için ideal.</span>
@@ -191,7 +192,7 @@ export function BasicInfoStep() {
                                     <FormControl>
                                         <RadioGroupItem value="MC" className="peer sr-only" />
                                     </FormControl>
-                                    <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <ListTodo className="mb-2 h-6 w-6" />
                                         <span className="font-semibold">Çoktan Seçmeli</span>
                                         <span className="text-xs text-muted-foreground text-center mt-1">Test usulü sorular.</span>
@@ -202,7 +203,7 @@ export function BasicInfoStep() {
                                     <FormControl>
                                         <RadioGroupItem value="GAP" className="peer sr-only" />
                                     </FormControl>
-                                    <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <Braces className="mb-2 h-6 w-6" />
                                         <span className="font-semibold">Boşluk Doldurma</span>
                                         <span className="text-xs text-muted-foreground text-center mt-1">Dil bilgisi için ideal.</span>
@@ -213,7 +214,7 @@ export function BasicInfoStep() {
                                     <FormControl>
                                         <RadioGroupItem value="TRUE_FALSE" className="peer sr-only" />
                                     </FormControl>
-                                    <FormLabel className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full">
+                                    <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <Split className="mb-2 h-6 w-6" />
                                         <span className="font-semibold">Doğru / Yanlış</span>
                                         <span className="text-xs text-muted-foreground text-center mt-1">Hızlı tekrar soruları.</span>
