@@ -285,7 +285,20 @@ export class ModuleService {
      */
     static async fork(userId: string, sourceModuleId: string) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            // 1. Fetch Source Module
+            // 1. Check Access to Source Module
+            const access = await tx.userContentAccess.findUnique({
+                where: { userId_resourceId: { userId, resourceId: sourceModuleId } }
+            });
+
+            if (!access) {
+                // If no explicit access record, check if it's a public module (via Collection?) 
+                // For now, MVP rule: You must have access record (Owner, Editor, Viewer)
+                // If it's a public collection's module, access logic might be different.
+                // Assuming standard access control:
+                throw new Error("Unauthorized Access to Source Module");
+            }
+
+            // 2. Fetch Source Module
             const sourceModule = await tx.module.findUnique({
                 where: { id: sourceModuleId },
                 include: { items: true }

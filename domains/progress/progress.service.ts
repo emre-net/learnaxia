@@ -20,9 +20,17 @@ export class ProgressService {
         }
     ) {
         return await prisma.$transaction(async (tx) => {
-            // 1. Fetch Item & Previous Progress
+            // 1. Validate Session & Ownership
+            const session = await tx.learningSession.findUnique({
+                where: { id: sessionId }
+            });
+            if (!session) throw new Error("Session not found");
+            if (session.userId !== userId) throw new Error("Unauthorized Session Access");
+
+            // 2. Fetch Item & Verify Module Consistency
             const item = await tx.item.findUnique({ where: { id: itemId } });
             if (!item) throw new Error("Item not found");
+            if (item.moduleId !== session.moduleId) throw new Error("Item does not belong to this session");
 
             const prevProgress = await tx.itemProgress.findUnique({
                 where: { userId_itemId: { userId, itemId } }

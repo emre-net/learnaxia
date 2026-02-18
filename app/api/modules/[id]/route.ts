@@ -5,6 +5,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 // Validation Schema for Update
+const ItemSchema = z.object({
+    id: z.string().optional(),
+    content: z.record(z.any()), // Content is dynamic but should be an object
+    order: z.number(),
+    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']).optional(),
+});
+
 const UpdateModuleSchema = z.object({
     title: z.string().min(1).max(100).optional(),
     description: z.string().optional(),
@@ -13,7 +20,7 @@ const UpdateModuleSchema = z.object({
     status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional(),
     category: z.string().optional(),
     subCategory: z.string().optional(),
-    items: z.array(z.any()).optional(),
+    items: z.array(ItemSchema).optional(),
 });
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
