@@ -22,6 +22,7 @@ type ModuleDetail = {
     isForkable: boolean;
     ownerId: string; // Added ownerId
     owner: { handle: string | null; name: string | null; image: string | null };
+    sourceModule?: { id: string; title: string; owner: { handle: string | null; name: string | null } } | null;
     items: any[]; // Typed loosely for now
     createdAt: string;
 };
@@ -129,6 +130,15 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                         <p className="text-muted-foreground text-lg max-w-2xl">{module.description || "Açıklama girilmemiş."}</p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
                             <span>Oluşturan: @{module.owner.handle || "kullanıcı"}</span>
+                            {module.sourceModule && (
+                                <>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1 text-muted-foreground/80">
+                                        <Copy className="h-3 w-3" />
+                                        Kaynak: @{module.sourceModule.owner.handle}
+                                    </span>
+                                </>
+                            )}
                             <span>•</span>
                             <span>{new Date(module.createdAt).toLocaleDateString("tr-TR")}</span>
                             <span>•</span>
@@ -140,7 +150,7 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                         {!isOwner && module.isForkable && (
                             <Button variant="secondary" onClick={handleFork} disabled={isForking}>
                                 {isForking ? <RotateCw className="mr-2 h-4 w-4 animate-spin" /> : <Copy className="mr-2 h-4 w-4" />}
-                                Kitaplığına Ekle (Kopyala)
+                                Kitaplığına Ekle
                             </Button>
                         )}
 

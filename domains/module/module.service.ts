@@ -40,8 +40,9 @@ export class ModuleService {
                     status: dto.status ?? 'DRAFT',
                     ownerId: userId,
                     creatorId: userId,
-                    category: dto.category,
-                    subCategory: dto.subCategory,
+                    // Category & SubCategory are optional but should be passed if present
+                    category: dto.category ?? null,
+                    subCategory: dto.subCategory ?? null,
                 },
             });
 
@@ -102,7 +103,15 @@ export class ModuleService {
                         createdAt: true,
                         category: true,
                         subCategory: true,
-                        sourceModuleId: true,
+                        sourceModule: {
+                            select: {
+                                id: true,
+                                title: true,
+                                owner: {
+                                    select: { handle: true, image: true }
+                                }
+                            }
+                        },
                         _count: {
                             select: { items: true }
                         }
@@ -133,6 +142,15 @@ export class ModuleService {
                 },
                 owner: {
                     select: { handle: true, image: true }
+                },
+                sourceModule: {
+                    select: {
+                        id: true,
+                        title: true,
+                        owner: {
+                            select: { handle: true }
+                        }
+                    }
                 }
             }
         });
@@ -216,7 +234,7 @@ export class ModuleService {
             // 2. Clone Module
             const newModule = await tx.module.create({
                 data: {
-                    title: `${sourceModule.title} (Kopya)`,
+                    title: sourceModule.title, // Keep original title, UI distinguishes via attribution
                     description: sourceModule.description,
                     type: sourceModule.type,
                     status: 'ACTIVE', // Forks start as active personal copies
@@ -229,8 +247,21 @@ export class ModuleService {
                 }
             });
 
-            // 3. Clone Items
             if (sourceModule.items.length > 0) {
+                // 3a. Fetch User's Existing Progress on Source Items
+                const sourceItemIds = sourceModule.items.map(i => i.id);
+                const existingProgress = await tx.itemProgress.findMany({
+                    where: { userId, itemId: { in: sourceItemIds } }
+                });
+                const existingSM2 = await tx.sM2Progress.findMany({
+                    where: { userId, itemId: { in: sourceItemIds } }
+                });
+
+                // Create Map for fast lookup
+                const progressMap = new Map(existingProgress.map(p => [p.itemId, p]));
+                const sm2Map = new Map(existingSM2.map(p => [p.itemId, p]));
+
+                // 3b. Prepare Items Data
                 const itemsData = sourceModule.items.map(item => ({
                     moduleId: newModule.id,
                     type: item.type,
@@ -240,7 +271,61 @@ export class ModuleService {
                     sourceItemId: item.id
                 }));
 
-                await tx.item.createMany({ data: itemsData });
+                // 3c. Create Items and Get Returned Objects (need IDs for progress)
+                // Note: createMany does not return IDs in all DBs, but Prisma 5+ with PG returns count.
+                // We need to create them one by one or use a strict order assumption if we want to link progress immediately.
+                // Better approach for data integrity: Create items, then fetch them back or use transaction result if available.
+                // Since we need to map OldItem -> NewItem to copy progress, and createMany doesn't return created records easily:
+                // We will iterate and create. For strictly better performance we could use raw query but createMany is safer.
+                // OPTIMIZATION: We can't use createMany AND copy progress easily without re-fetching.
+                // Strategy: Iterate. It's fewer queries than re-fetching and matching by order.
+
+                for (const item of sourceModule.items) {
+                    const newItem = await tx.item.create({
+                        data: {
+                            moduleId: newModule.id,
+                            type: item.type,
+                            content: item.content as Prisma.InputJsonValue,
+                            contentHash: item.contentHash,
+                            order: item.order,
+                            sourceItemId: item.id
+                        }
+                    });
+
+                    // 3d. Check & Copy Progress (Handbook Rule: Hash Match = Keep Progress)
+                    const srcProgress = progressMap.get(item.id);
+                    if (srcProgress && srcProgress.contentHash === item.contentHash) {
+                        await tx.itemProgress.create({
+                            data: {
+                                userId,
+                                itemId: newItem.id,
+                                contentHash: newItem.contentHash, // Ensure integrity
+                                correctCount: srcProgress.correctCount,
+                                wrongCount: srcProgress.wrongCount,
+                                strengthScore: srcProgress.strengthScore,
+                                lastResult: srcProgress.lastResult,
+                                lastReviewedAt: srcProgress.lastReviewedAt,
+                                aiMetadata: srcProgress.aiMetadata ?? Prisma.JsonNull,
+                            }
+                        });
+
+                        // Copy SM2 Data if active
+                        const srcSM2 = sm2Map.get(item.id);
+                        if (srcSM2) {
+                            await tx.sM2Progress.create({
+                                data: {
+                                    userId,
+                                    itemId: newItem.id,
+                                    repetition: srcSM2.repetition,
+                                    interval: srcSM2.interval,
+                                    easeFactor: srcSM2.easeFactor,
+                                    nextReviewAt: srcSM2.nextReviewAt,
+                                    isRetired: srcSM2.isRetired
+                                }
+                            });
+                        }
+                    }
+                }
             }
 
             // 4. Add to User Library (Read Model)

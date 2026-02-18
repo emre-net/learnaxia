@@ -28,7 +28,11 @@ type LibraryModule = {
         status: string;
         isForkable: boolean;
         createdAt: string;
-        sourceModuleId: string | null;
+        sourceModule: {
+            id: string;
+            title: string;
+            owner: { handle: string | null; name: string | null; image: string | null };
+        } | null;
         _count: { items: number };
     };
 };
@@ -154,7 +158,7 @@ export function LibraryClient() {
                         <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
                             <TabsTrigger value="all">Tümü</TabsTrigger>
                             <TabsTrigger value="created">Oluşturduklarım</TabsTrigger>
-                            <TabsTrigger value="forked">Kopyalar</TabsTrigger>
+                            <TabsTrigger value="forked">Kaydedilenler</TabsTrigger>
                         </TabsList>
 
                         {isLoading ? (
@@ -164,7 +168,7 @@ export function LibraryClient() {
                                 <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
                                 <h3 className="text-lg font-semibold">Modül bulunamadı</h3>
                                 <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                    Henüz hiç modül oluşturmadın veya kopyalamadın.
+                                    Henüz hiç modül oluşturmadın veya kaydetmedin.
                                 </p>
                                 <Button asChild>
                                     <Link href="/dashboard/create">Modül Oluştur</Link>
@@ -181,10 +185,10 @@ export function LibraryClient() {
                                 </TabsContent>
                                 <TabsContent value="created" className="mt-0">
                                     <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                                        {filteredModules.filter(m => !m.module.sourceModuleId).map((item) => (
+                                        {filteredModules.filter(m => !m.module.sourceModule).map((item) => (
                                             <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
                                         ))}
-                                        {filteredModules.filter(m => !m.module.sourceModuleId).length === 0 && (
+                                        {filteredModules.filter(m => !m.module.sourceModule).length === 0 && (
                                             <div className="col-span-full text-center py-12 text-muted-foreground">
                                                 Henüz orijinal bir modül oluşturmadınız.
                                             </div>
@@ -193,12 +197,12 @@ export function LibraryClient() {
                                 </TabsContent>
                                 <TabsContent value="forked" className="mt-0">
                                     <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                                        {filteredModules.filter(m => m.module.sourceModuleId).map((item) => (
+                                        {filteredModules.filter(m => m.module.sourceModule).map((item) => (
                                             <ModuleCard key={item.moduleId} module={item.module} viewMode={viewMode} />
                                         ))}
-                                        {filteredModules.filter(m => m.module.sourceModuleId).length === 0 && (
+                                        {filteredModules.filter(m => m.module.sourceModule).length === 0 && (
                                             <div className="col-span-full text-center py-12 text-muted-foreground">
-                                                Henüz kopyalanmış bir modülünüz yok.
+                                                Henüz kitaplığınıza eklediğiniz bir modül yok.
                                             </div>
                                         )}
                                     </div>
@@ -340,10 +344,11 @@ function ModuleCard({ module, viewMode }: { module: LibraryModule['module'], vie
             </div>
 
             {/* Fork Indicator */}
-            {module.sourceModuleId && (
+            {module.sourceModule && (
                 <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
                     <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-xs h-6">
-                        <Copy className="h-3 w-3 mr-1" /> Kopya
+                        <Copy className="h-3 w-3 mr-1" />
+                        @{module.sourceModule.owner.handle || "biri"}
                     </Badge>
                 </div>
             )}
