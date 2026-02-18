@@ -9,7 +9,7 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ContentEditorStep() {
-    const { control, watch } = useFormContext<ModuleFormData>();
+    const { control, watch, getValues } = useFormContext<ModuleFormData>();
     const { fields, append, remove, update } = useFieldArray({
         control,
         name: "items"
@@ -33,9 +33,11 @@ export function ContentEditorStep() {
         }
     };
 
-    const handleEditClick = (index: number, item: any) => {
+    const handleEditClick = (index: number) => {
+        // Use getValues to get the actual data, sidestepping RHF's field.id masking
+        const realItemData = getValues(`items.${index}`);
         setEditingItemIndex(index);
-        setEditingItemData(item);
+        setEditingItemData(realItemData);
         setIsSheetOpen(true);
     };
 
@@ -89,7 +91,7 @@ export function ContentEditorStep() {
                             <Card
                                 key={field.id}
                                 className="p-4 flex justify-between items-start group hover:border-primary transition-colors cursor-pointer"
-                                onClick={() => handleEditClick(index, field)}
+                                onClick={() => handleEditClick(index)}
                             >
                                 <div className="flex gap-3 pointer-events-none">
                                     <div className="bg-muted h-6 w-6 rounded-full flex items-center justify-center text-xs font-mono mt-1 shrink-0">
@@ -110,7 +112,7 @@ export function ContentEditorStep() {
                                         className="text-muted-foreground hover:text-primary transition-colors shrink-0"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleEditClick(index, field);
+                                            handleEditClick(index);
                                         }}
                                     >
                                         <Edit2 className="h-4 w-4" />
