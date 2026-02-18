@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Globe } from "lucide-react";
+import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Pencil, Check, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ interface SettingsContentProps {
         email?: string | null;
         image?: string | null;
         handle?: string | null;
-        language?: string | null; // Added language
+        language?: string | null;
     };
 }
 
@@ -45,11 +45,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Get tab from URL or default to "general"
     const defaultTab = (searchParams.get("tab") as Tab) || "general";
     const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
 
-    // Sync state with URL if URL changes externally (e.g. back button)
     useEffect(() => {
         const tabFromUrl = searchParams.get("tab") as Tab;
         if (tabFromUrl && tabFromUrl !== activeTab) {
@@ -59,23 +57,32 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
-        // Create new URLSearchParams object to update the URL
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", tab);
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
     const [handle, setHandle] = useState(user.handle || "");
-    const [language, setLanguage] = useState(user.language || "tr"); // Default TR
+    const [originalHandle, setOriginalHandle] = useState(user.handle || "");
+    const [isEditingHandle, setIsEditingHandle] = useState(false);
+
+    const [language, setLanguage] = useState(user.language || "tr");
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleSaveProfile = async () => {
+    const { toast } = useToast();
+
+    const saveHandle = async () => {
+        if (handle === originalHandle) {
+            setIsEditingHandle(false);
+            return;
+        }
+
         setIsSaving(true);
         try {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ handle, language }),
+                body: JSON.stringify({ handle }),
             });
 
             if (!res.ok) {
@@ -83,7 +90,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
                 throw new Error(error);
             }
 
-            toast({ title: "Başarılı", description: "Profiliniz güncellendi." });
+            toast({ title: "Başarılı", description: "Kullanıcı adı güncellendi." });
+            setOriginalHandle(handle);
+            setIsEditingHandle(false);
             router.refresh();
         } catch (error: any) {
             toast({
@@ -96,11 +105,36 @@ export function SettingsContent({ user }: SettingsContentProps) {
         }
     };
 
+    const cancelEditHandle = () => {
+        setHandle(originalHandle);
+        setIsEditingHandle(false);
+    };
+
+    const saveLanguage = async (newLang: string) => {
+        try {
+            const res = await fetch("/api/user/profile", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ language: newLang }),
+            });
+
+            if (!res.ok) throw new Error("Dil güncellenemedi");
+
+            toast({ title: "Başarılı", description: "Dil tercihi kaydedildi." });
+            router.refresh();
+        } catch (error: any) {
+            toast({
+                title: "Hata",
+                description: "Dil tercihi kaydedilemedi.",
+                variant: "destructive"
+            });
+        }
+    };
+
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
     const [walletData, setWalletData] = useState<WalletData | null>(null);
     const [walletLoading, setWalletLoading] = useState(false);
-    const { toast } = useToast();
 
     useEffect(() => {
         if (activeTab === "analytics" && !analyticsData) {
@@ -168,29 +202,77 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                 <CardTitle>Profil Bilgileri</CardTitle>
                                 <CardDescription>Kişisel bilgilerinizi ve tercihlerinizi yönetin.</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="space-y-6">
+                                {/* Handle (Username) - Inline Edit */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="handle">Kullanıcı Adı (Benzersiz)</Label>
-                                    <Input
-                                        id="handle"
-                                        placeholder="Kullanıcı adınız"
-                                        value={handle}
-                                        onChange={(e) => setHandle(e.target.value)}
-                                    />
+                                    <Label htmlFor="handle">Kullanıcı Adı</Label>
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                id="handle"
+                                                placeholder="Kullanıcı adınız"
+                                                value={handle}
+                                                onChange={(e) => setHandle(e.target.value)}
+                                                disabled={!isEditingHandle}
+                                                className={cn(
+                                                    "pr-10",
+                                                    !isEditingHandle && "bg-muted text-muted-foreground border-transparent px-0 pl-1 shadow-none h-auto py-1"
+                                                )}
+                                            />
+                                            {isEditingHandle && (
+                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-100"
+                                                        onClick={saveHandle}
+                                                        disabled={isSaving}
+                                                    >
+                                                        {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-4 w-4" />}
+                                                    </Button>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                                        onClick={cancelEditHandle}
+                                                        disabled={isSaving}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {!isEditingHandle && (
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                onClick={() => setIsEditingHandle(true)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         Benzersiz olmalıdır. Harf, rakam ve alt çizgi içerebilir.
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="email">E-posta</Label>
-                                        <Input id="email" defaultValue={user.email || ""} disabled />
+                                        <Input id="email" defaultValue={user.email || ""} disabled className="bg-muted" />
                                         <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="language">Dil Seçimi</Label>
-                                        <Select value={language} onValueChange={setLanguage}>
+                                        <Select
+                                            value={language}
+                                            onValueChange={(val) => {
+                                                setLanguage(val);
+                                                saveLanguage(val);
+                                            }}
+                                        >
                                             <SelectTrigger id="language">
                                                 <SelectValue placeholder="Dil seçin" />
                                             </SelectTrigger>
@@ -199,15 +281,8 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                                 <SelectItem value="en">English 🇬🇧</SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        <p className="text-xs text-muted-foreground">Uygulama arayüz dili.</p>
+                                        <p className="text-xs text-muted-foreground">Seçim otomatik olarak kaydedilir.</p>
                                     </div>
-                                </div>
-
-                                <div className="flex justify-end pt-4">
-                                    <Button onClick={handleSaveProfile} disabled={isSaving}>
-                                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Kaydet
-                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -262,9 +337,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             <ScrollArea className="h-[300px]">
                                                 <div className="space-y-3">
                                                     {walletData.history.map((tx) => (
-                                                        <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
-                                                            <div className="flex flex-col gap-0.5">
-                                                                <span className="text-sm font-medium">{tx.description || tx.type}</span>
+                                                        <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors gap-3">
+                                                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                                                <span className="text-sm font-medium truncate">{tx.description || tx.type}</span>
                                                                 <span className="text-xs text-muted-foreground">
                                                                     {new Date(tx.createdAt).toLocaleDateString("tr-TR")}
                                                                 </span>

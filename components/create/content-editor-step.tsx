@@ -75,7 +75,7 @@ export function ContentEditorStep() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
                                     onClick={() => remove(index)}
                                 >
                                     <Trash2 className="h-4 w-4" />
