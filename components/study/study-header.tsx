@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { useStudyStore } from "@/stores/study-store";
 import { X } from "lucide-react";
 import Link from "next/link";
+import { NotesSidebar } from "@/components/notes/notes-sidebar";
 
 export function StudyHeader() {
     const {
@@ -34,9 +35,11 @@ export function StudyHeader() {
                 </div>
             </div>
 
-            <div className="flex gap-4 text-sm font-medium">
-                <span className="text-green-500">{correctCount} Correct</span>
-                <span className="text-red-500">{wrongCount} Wrong</span>
+            <div className="flex gap-4 text-sm font-medium items-center">
+                <span className="text-green-500">{correctCount}</span>
+                <span className="text-red-500">{wrongCount}</span>
+                <div className="h-4 w-[1px] bg-border mx-2" />
+                <NotesSidebar moduleId={moduleId} itemId={items[currentIndex]?.id || undefined} />
             </div>
         </header>
     );

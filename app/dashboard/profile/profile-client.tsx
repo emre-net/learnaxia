@@ -20,7 +20,9 @@ export function ProfileClient() {
         queryFn: async () => {
             const res = await fetch('/api/user/profile');
             if (!res.ok) throw new Error('Failed to fetch profile');
-            return res.json();
+            const data = await res.json();
+            console.log("Profile Data:", data); // Debugging handle
+            return data;
         }
     });
 
