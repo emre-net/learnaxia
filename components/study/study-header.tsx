@@ -39,7 +39,8 @@ export function StudyHeader() {
                 <span className="text-green-500">{correctCount}</span>
                 <span className="text-red-500">{wrongCount}</span>
                 <div className="h-4 w-[1px] bg-border mx-2" />
-                <NotesSidebar moduleId={moduleId} itemId={items[currentIndex]?.id || undefined} />
+                <NotesSidebar moduleId={moduleId || ""} itemId={items[currentIndex]?.id || undefined} />
+                {/* Fallback empty string for moduleId if null, though logically valid in valid session */}
             </div>
         </header>
     );

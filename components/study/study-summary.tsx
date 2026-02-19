@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useStudyStore } from "@/stores/study-store";
-import { CheckCircle2, Home, RotateCcw, Trophy } from "lucide-react";
+import { CheckCircle2, Home, RotateCcw, Trophy, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -50,11 +50,20 @@ export function StudySummary() {
                     <Button variant="outline" className="h-12" onClick={() => window.location.reload()}>
                         <RotateCcw className="mr-2 h-4 w-4" /> Study Again
                     </Button>
-                    <Button className="h-12" asChild onClick={endSession}>
-                        <Link href={`/modules/${moduleId}`}>
-                            <Home className="mr-2 h-4 w-4" /> Back to Module
-                        </Link>
-                    </Button>
+
+                    {wrongCount > 0 ? (
+                        <Button className="h-12 bg-orange-600 hover:bg-orange-700 text-white" asChild onClick={endSession}>
+                            <Link href={`/study/${moduleId}?mode=WRONG_ONLY`}>
+                                <AlertTriangle className="mr-2 h-4 w-4" /> Review Wrong ({wrongCount})
+                            </Link>
+                        </Button>
+                    ) : (
+                        <Button className="h-12" asChild onClick={endSession}>
+                            <Link href={`/modules/${moduleId}`}>
+                                <Home className="mr-2 h-4 w-4" /> Back to Module
+                            </Link>
+                        </Button>
+                    )}
                 </div>
             </Card>
         </div>

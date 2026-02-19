@@ -21,22 +21,6 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
     const currentItem = items[currentIndex];
 
-    // Handle Keyboard Shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (mode === 'NORMAL' || mode === 'AI_SMART' || mode === 'SM2' || mode === 'WRONG_ONLY') { // Flashcard modes
-                    if (!isFlipped && !feedback) setIsFlipped(true); // Assuming flashcard
-                }
-            }
-            // Logic differs slightly per mode/type
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped]);
-
     const handleQuizCheck = () => {
         if (!selectedOption) return;
 
@@ -65,6 +49,43 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
         onNext({ itemId: currentItem.id, result, quality });
     };
+
+    // Handle Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // QUIZ / MC / GAP: Next Question
+            if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space')) {
+                    e.preventDefault();
+                    handleNextItem();
+                }
+                return;
+            }
+
+            // FLASHCARD: Flip & Vote
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!isFlipped) setIsFlipped(true);
+            } else if (isFlipped) {
+                switch (e.code) {
+                    case 'ArrowLeft': handleRate(1); break; // Again
+                    case 'ArrowDown': handleRate(2); break; // Hard
+                    case 'ArrowUp': handleRate(4); break;   // Good (Map to 4 for simple 3-button, or 3) -> 4 per button layout (Good is 4, Easy is 5? No, buttons are 1,2,4,5 in UI? Wait UI has 4 buttons: Again(1), Hard(2), Good(4), Easy(5)?? Let's check handleRate logic.)
+                    // UI calls: handleRate(1), (2), (4), (5).
+                    // Logic: 1->Again, 2->Hard, 4->Good, 5->Easy.
+                    // So Map: Left->1, Down->2, Up->4, Right->5?
+                    case 'ArrowRight': handleRate(5); break; // Easy
+                    case 'Digit1': handleRate(1); break;
+                    case 'Digit2': handleRate(2); break;
+                    case 'Digit3': handleRate(4); break;
+                    case 'Digit4': handleRate(5); break;
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]); // Added deps
 
     if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         if (!feedback) {

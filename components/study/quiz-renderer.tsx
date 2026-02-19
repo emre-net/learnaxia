@@ -3,12 +3,27 @@ import { Card } from "@/components/ui/card";
 import { useStudyStore } from "@/stores/study-store";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 
 export function QuizRenderer({ item }: { item: any }) {
     const { selectedOption, setSelectedOption, feedback } = useStudyStore();
 
     // Ensure options exist
     const options = item.content.options || [];
+
+    // Keyboard support for 1-4
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (feedback) return; // Disable input during feedback
+            const index = parseInt(e.key) - 1;
+            if (!isNaN(index) && index >= 0 && index < options.length) {
+                setSelectedOption(options[index]);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [options, setSelectedOption, feedback]);
 
     return (
         <div className="w-full max-w-2xl flex flex-col gap-8">
@@ -31,32 +46,80 @@ export function QuizRenderer({ item }: { item: any }) {
                     }
 
                     return (
-                        <Button
+                        <motion.div
                             key={idx}
-                            variant={variant as any}
-                            className={cn(
-                                "h-auto py-6 text-lg justify-start px-6 relative",
-                                isSelected && !feedback && "ring-2 ring-primary"
-                            )}
-                            onClick={() => !feedback && setSelectedOption(option)}
-                            disabled={!!feedback}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
                         >
-                            <span className="mr-auto">{option}</span>
-                            {feedback && isCorrect && <CheckCircle2 className="h-5 w-5 text-green-500 absolute right-4" />}
-                            {feedback && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-white absolute right-4" />}
-                        </Button>
+                            <Button
+                                variant={variant as any}
+                                className={cn(
+                                    "w-full h-auto py-6 text-lg justify-start px-6 relative transition-all duration-300",
+                                    isSelected && !feedback && "ring-2 ring-primary scale-[1.02]",
+                                    feedback && isCorrect && "bg-green-600 hover:bg-green-700 text-white border-green-600",
+                                    feedback && isSelected && !isCorrect && "bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                )}
+                                onClick={() => !feedback && setSelectedOption(option)}
+                                disabled={!!feedback}
+                            >
+                                <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center">
+                                    {idx + 1}
+                                </span>
+                                <span className="mr-auto text-left">{option}</span>
+                                {feedback && isCorrect && (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="absolute right-4"
+                                    >
+                                        <CheckCircle2 className="h-6 w-6 text-white" />
+                                    </motion.div>
+                                )}
+                                {feedback && isSelected && !isCorrect && (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="absolute right-4"
+                                    >
+                                        <XCircle className="h-6 w-6 text-white" />
+                                    </motion.div>
+                                )}
+                            </Button>
+                        </motion.div>
                     );
                 })}
             </div>
 
-            {feedback && (
-                <div className={cn(
-                    "p-4 rounded-lg text-center font-medium animate-in fade-in slide-in-from-bottom-2",
-                    feedback === 'CORRECT' ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                )}>
-                    {feedback === 'CORRECT' ? "Doğru! 🎉" : "Yanlış 😔"}
-                </div>
-            )}
+            <AnimatePresence>
+                {feedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className={cn(
+                            "p-6 rounded-xl text-center font-bold text-lg shadow-lg border-2",
+                            feedback === 'CORRECT'
+                                ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"
+                                : "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800"
+                        )}
+                    >
+                        <div className="flex items-center justify-center gap-3">
+                            {feedback === 'CORRECT' ? (
+                                <>
+                                    <CheckCircle2 className="h-8 w-8" />
+                                    <span>Doğru! Harika gidiyorsun! 🎉</span>
+                                </>
+                            ) : (
+                                <>
+                                    <XCircle className="h-8 w-8" />
+                                    <span>Yanlış. Cevap: {item.content.answer} 😔</span>
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

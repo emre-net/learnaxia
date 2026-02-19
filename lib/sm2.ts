@@ -68,12 +68,9 @@ export function calculateSM2(input: SM2Input): SM2Output {
     // 2. Incorrect Response (Quality < 3)
     else {
         nextRepetition = 0;
-        nextInterval = SM2_CONFIG.minInterval;
-        // Punishment logic for ease?
-        // In standard SM-2 output ease doesn't change on fail, but typically we might want to drop it slightly
-        // logic: keep logic simple, maintain ease or drop lightly.
-        // Standard SM-2: "If the quality response was lower than 3 then start repetitions for the item from the beginning without changing the E-Factor".
-        // We will stick to Standard SM-2 for failure: RESET interval, KEEP ease.
+        nextInterval = SM2_CONFIG.initialInterval; // STRICT HANDBOOK: Reset to 1
+        // HANDBOOK: "Standard SM-2 for failure: RESET interval, KEEP ease."
+        // We do not punish ease factor on failure in this variation to avoid "Ease Hell".
         nextEase = lastEase;
     }
 

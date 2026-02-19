@@ -60,7 +60,12 @@ export class StudyService {
 
         // 5. Apply Mode Filters
         if (mode === 'WRONG_ONLY') {
-            items = items.filter(i => i.lastResult === 'WRONG');
+            // Handbook Rule: "Item changed -> no longer wrong".
+            // Filter: lastResult == WRONG AND item.hash == progress.hash
+            items = items.filter(i => {
+                const progress = itemProgresses.find(p => p.itemId === i.id);
+                return i.lastResult === 'WRONG' && progress?.contentHash === i.hash;
+            });
         } else if (mode === 'SM2') {
             // SM-2 Filter: Due items only (or new)
             // Due: nextReviewAt <= NOW

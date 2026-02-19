@@ -12,8 +12,8 @@ export class CollectionService {
                     // description: null, // Disabled due to migration failure
                     // isPublic: false,   // Disabled due to migration failure
                     ownerId: userId,
-                    category: data.category,
-                    subCategory: data.subCategory
+                    // category: data.category,
+                    // subCategory: data.subCategory
                 }
             });
 
@@ -112,8 +112,8 @@ export class CollectionService {
                     title: data.title,
                     // description: data.description,
                     // isPublic: data.isPublic,
-                    category: data.category,
-                    subCategory: data.subCategory
+                    // category: data.category,
+                    // subCategory: data.subCategory
                 }
             });
 
