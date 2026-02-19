@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import { playStudySound } from "@/lib/audio";
 
 export function GapRenderer({ item }: { item: any }) {
     const { setFeedback, feedback, setCorrectCount, correctCount, setWrongCount, wrongCount } = useStudyStore();
@@ -44,7 +46,10 @@ export function GapRenderer({ item }: { item: any }) {
     };
 
     const checkAnswer = () => {
-        if (userAnswers.some(a => !a.trim())) return;
+        // Approval Item 5: Allow checking even if some gaps are empty. 
+        // We only return if ALL gaps are empty to prevent accidental clicks, 
+        // but user specifically asked to check even if "one box is empty".
+        if (userAnswers.every(a => !a.trim())) return;
 
         const correctAnswers = (item.content.answers || []).map(normalize);
 
@@ -57,6 +62,7 @@ export function GapRenderer({ item }: { item: any }) {
         const allCorrect = results.every((r: boolean) => r);
 
         setFeedback(allCorrect ? 'CORRECT' : 'WRONG');
+        playStudySound(allCorrect ? 'SUCCESS' : 'FAILURE');
 
         if (allCorrect) setCorrectCount(correctCount + 1);
         else setWrongCount(wrongCount + 1);
@@ -133,7 +139,11 @@ export function GapRenderer({ item }: { item: any }) {
                             );
                         }
 
-                        return <span key={i}>{part}</span>;
+                        return (
+                            <div key={i} className="inline prose dark:prose-invert prose-sm">
+                                <ReactMarkdown>{part}</ReactMarkdown>
+                            </div>
+                        );
                     })}
                 </div>
             </Card>
@@ -143,7 +153,7 @@ export function GapRenderer({ item }: { item: any }) {
                     className="w-full h-12 text-lg"
                     size="lg"
                     onClick={checkAnswer}
-                    disabled={userAnswers.some(a => !a.trim())}
+                    disabled={userAnswers.every(a => !a.trim())}
                 >
                     {dict.check}
                 </Button>

@@ -56,7 +56,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         const handleKeyDown = (e: KeyboardEvent) => {
             // QUIZ / MC / GAP: Next Question
             if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
-                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space')) {
+                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter')) {
                     e.preventDefault();
                     handleNextItem();
                 }

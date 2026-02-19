@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { playStudySound } from "@/lib/audio";
 
 export function QuizRenderer({ item }: { item: any }) {
     const {
@@ -43,8 +45,10 @@ export function QuizRenderer({ item }: { item: any }) {
 
     return (
         <div className="w-full max-w-2xl flex flex-col gap-8">
-            <Card className="p-8 text-center border-2 shadow-sm">
-                <h2 className="text-2xl font-semibold">{item.content.question}</h2>
+            <Card className="p-8 text-center border-2 shadow-sm prose dark:prose-invert max-w-none">
+                <div className="text-2xl font-semibold">
+                    <ReactMarkdown>{item.content.question}</ReactMarkdown>
+                </div>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,6 +87,7 @@ export function QuizRenderer({ item }: { item: any }) {
                                     // Immediate Check Logic
                                     const isCorrect = option === item.content.answer;
                                     setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
+                                    playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
 
                                     // Note: State updates might be batched, but we use the local variable isCorrect
                                     if (isCorrect) setCorrectCount(correctCount + 1);
@@ -90,14 +95,16 @@ export function QuizRenderer({ item }: { item: any }) {
                                 }}
                                 disabled={!!feedback}
                             >
-                                <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center">
+                                <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center shrink-0">
                                     {idx + 1}
                                 </span>
-                                <span className="mr-auto text-left">
-                                    {(option === 'True' || option === 'False')
-                                        ? (dict[option.toLowerCase() as 'true' | 'false'] as string)
-                                        : option}
-                                </span>
+                                <div className="mr-auto text-left prose dark:prose-invert prose-sm">
+                                    <ReactMarkdown>
+                                        {(option === 'True' || option === 'False')
+                                            ? (dict[option.toLowerCase() as 'true' | 'false'] as string)
+                                            : option}
+                                    </ReactMarkdown>
+                                </div>
                                 {feedback && isCorrect && (
                                     <motion.div
                                         initial={{ scale: 0 }}

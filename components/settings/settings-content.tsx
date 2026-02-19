@@ -72,7 +72,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
 
 
-    const { setLanguage: setStoreLanguage } = useSettingsStore();
+    const { setLanguage: setStoreLanguage, soundEnabled, setSoundEnabled } = useSettingsStore();
 
     // Sync Store with DB user language on mount
     useEffect(() => {
@@ -301,6 +301,17 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             </Select>
                                             <p className="text-xs text-muted-foreground">Seçim otomatik olarak kaydedilir.</p>
                                         </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Ses Efektleri</Label>
+                                            <p className="text-xs text-muted-foreground">Çalışma sırasında doğru/yanlış bildirimleri için ses çal.</p>
+                                        </div>
+                                        <Switch
+                                            checked={soundEnabled}
+                                            onCheckedChange={setSoundEnabled}
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>

@@ -7,6 +7,7 @@ import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 export function FlashcardRenderer({ item }: { item: any }) {
     const { isFlipped, setIsFlipped } = useStudyStore();
@@ -46,7 +47,9 @@ export function FlashcardRenderer({ item }: { item: any }) {
                 >
                     <div className="flex flex-col gap-4 select-none">
                         <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{dict.questionLabel}</span>
-                        <h2 className="text-3xl font-bold">{item.content.question || item.content.front}</h2>
+                        <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
+                            <ReactMarkdown>{item.content.question || item.content.front}</ReactMarkdown>
+                        </div>
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
                         )}
@@ -64,11 +67,13 @@ export function FlashcardRenderer({ item }: { item: any }) {
                 >
                     <div className="flex flex-col gap-4">
                         <span className="text-sm text-primary uppercase tracking-wider font-semibold">{dict.answerLabel}</span>
-                        <h2 className="text-3xl font-bold text-primary">{item.content.answer || item.content.back}</h2>
+                        <div className="text-3xl font-bold text-primary prose dark:prose-invert prose-primary max-w-none">
+                            <ReactMarkdown>{item.content.answer || item.content.back}</ReactMarkdown>
+                        </div>
                         {item.content.solution && (
-                            <p className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg">
-                                {item.content.solution}
-                            </p>
+                            <div className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg prose dark:prose-invert prose-sm max-w-none">
+                                <ReactMarkdown>{item.content.solution}</ReactMarkdown>
+                            </div>
                         )}
                     </div>
                 </Card>
