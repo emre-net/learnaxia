@@ -89,10 +89,22 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
     if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         if (!feedback) {
-            // GapRenderer handles its own check for now, but controls might need to hide
-            // actually GapRenderer has its own check button.
-            // StudyControls only needs to show "Next" when feedback is present.
-            return null;
+            // GapRenderer handles its own check button.
+            if (currentItem.type === 'GAP') return null;
+
+            // For MC/TF, show Check button
+            return (
+                <div className="flex gap-4 mt-8 w-full max-w-md">
+                    <Button
+                        className="w-full text-lg h-12"
+                        size="lg"
+                        onClick={handleQuizCheck}
+                        disabled={!selectedOption}
+                    >
+                        Kontrol Et
+                    </Button>
+                </div>
+            );
         }
 
         const isLastItem = currentIndex === items.length - 1;
