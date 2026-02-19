@@ -281,6 +281,64 @@ export class ModuleService {
     }
 
     /**
+     * Updates a single item.
+     */
+    static async updateItem(userId: string, moduleId: string, itemId: string, itemData: any) {
+        const access = await prisma.userContentAccess.findUnique({
+            where: { userId_resourceId: { userId, resourceId: moduleId } }
+        });
+
+        if (!access || access.accessLevel !== 'OWNER') {
+            throw new Error("Unauthorized Update Item Access");
+        }
+
+        // Verify item belongs to module
+        const existingItem = await prisma.item.findUnique({
+            where: { id: itemId }
+        });
+
+        if (!existingItem || existingItem.moduleId !== moduleId) {
+            throw new Error("Item not found in this module");
+        }
+
+        return await prisma.item.update({
+            where: { id: itemId },
+            data: {
+                content: itemData.content as Prisma.InputJsonValue,
+                contentHash: computeContentHash(itemData.content),
+                type: itemData.type,
+                // Order is typically strictly managed via reorder endpoint, not here, but can be allowed.
+            }
+        });
+    }
+
+    /**
+     * Deletes a single item.
+     */
+    static async deleteItem(userId: string, moduleId: string, itemId: string) {
+        const access = await prisma.userContentAccess.findUnique({
+            where: { userId_resourceId: { userId, resourceId: moduleId } }
+        });
+
+        if (!access || access.accessLevel !== 'OWNER') {
+            throw new Error("Unauthorized Delete Item Access");
+        }
+
+        // Verify item belongs to module
+        const existingItem = await prisma.item.findUnique({
+            where: { id: itemId }
+        });
+
+        if (!existingItem || existingItem.moduleId !== moduleId) {
+            throw new Error("Item not found in this module");
+        }
+
+        return await prisma.item.delete({
+            where: { id: itemId }
+        });
+    }
+
+    /**
      * Forks (Deep Copies) a module for the current user.
      */
     static async fork(userId: string, sourceModuleId: string) {

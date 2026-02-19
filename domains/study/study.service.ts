@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma"; // Fixed import for build
 import { SM2_CONFIG } from "@/lib/sm2";
 
-export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW';
+export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW' | 'QUIZ' | 'AI_SMART';
 
 export class StudyService {
     static async startSession(userId: string, moduleId: string, mode: StudyMode) {
@@ -69,7 +69,17 @@ export class StudyService {
                 if (!i.nextReviewAt) return true; // New items are due
                 return new Date(i.nextReviewAt) <= now;
             });
+        } else if (mode === 'AI_SMART') {
+            // Smart Order: Prioritize WRONG > New > Review
+            items = items.sort((a, b) => {
+                const scoreA = (a.lastResult === 'WRONG' ? 100 : 0) + (a.interval === 0 ? 50 : 0);
+                const scoreB = (b.lastResult === 'WRONG' ? 100 : 0) + (b.interval === 0 ? 50 : 0);
+                return scoreB - scoreA;
+            });
         }
+
+
+
 
         // 6. Create Session Log
         const session = await prisma.learningSession.create({

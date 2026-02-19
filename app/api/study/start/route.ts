@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const StartSessionSchema = z.object({
     moduleId: z.string(),
-    mode: z.enum(['NORMAL', 'WRONG_ONLY', 'SM2', 'REVIEW']).default('NORMAL'),
+    mode: z.enum(['NORMAL', 'WRONG_ONLY', 'SM2', 'REVIEW', 'QUIZ', 'AI_SMART']).default('NORMAL'),
 });
 
 export async function POST(req: Request) {

@@ -1,59 +1,59 @@
+import { Card } from "@/components/ui/card";
 import { useStudyStore } from "@/stores/study-store";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeftRight } from "lucide-react";
 
-export function FlashcardRenderer() {
-    const { items, currentIndex, isFlipped, flipCard } = useStudyStore();
-    const currentItem = items[currentIndex];
-
-    // Ensure content structure (Flashcard usually has 'front' and 'back' in JSON)
-    const content = currentItem?.content as { front: string; back: string } | undefined;
-
-    if (!content) return null;
+export function FlashcardRenderer({ item }: { item: any }) {
+    const { isFlipped, setIsFlipped } = useStudyStore();
 
     return (
         <div
-            className="w-full max-w-2xl aspect-[4/3] perspective-1000 cursor-pointer"
-            onClick={flipCard}
+            className="w-full max-w-2xl h-[400px] cursor-pointer"
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{ perspective: '1000px' }}
         >
-            <div className={cn(
-                "relative w-full h-full transition-all duration-500 transform-style-3d",
-                isFlipped ? "rotate-y-180" : ""
-            )}>
-                {/* Front Face */}
-                <div className="absolute w-full h-full backface-hidden">
-                    <Card className="w-full h-full flex flex-col items-center justify-center p-8 bg-card border shadow-xl hover:shadow-2xl transition-shadow">
-                        <CardContent className="text-center">
-                            <h3 className="text-2xl sm:text-3xl font-medium leading-relaxed">
-                                {content.front}
-                            </h3>
-                            <div className="absolute bottom-4 right-4 text-xs text-muted-foreground flex items-center gap-1 opacity-50">
-                                <ArrowLeftRight className="h-3 w-3" />
-                                Tap to flip
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+            <div
+                className={cn(
+                    "relative w-full h-full transition-transform duration-500",
+                )}
+                style={{
+                    transformStyle: 'preserve-3d',
+                    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                }}
+            >
+                {/* Front */}
+                <Card
+                    className="absolute w-full h-full flex items-center justify-center p-8 text-center bg-background border-2 shadow-xl hover:shadow-2xl transition-shadow"
+                    style={{ backfaceVisibility: 'hidden' }}
+                >
+                    <div className="flex flex-col gap-4">
+                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">SORU</span>
+                        <h2 className="text-3xl font-bold">{item.content.question || item.content.front}</h2>
+                        {/* Image placeholder */}
+                        {item.content.image && (
+                            <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
+                        )}
+                    </div>
+                </Card>
 
-                {/* Back Face */}
-                <div className="absolute w-full h-full backface-hidden rotate-y-180">
-                    <Card className="w-full h-full flex flex-col items-center justify-center p-8 bg-card border-2 border-primary/20 shadow-xl">
-                        <CardContent className="text-center">
-                            <h3 className="text-xl sm:text-2xl font-normal leading-relaxed text-foreground/90">
-                                {content.back}
-                            </h3>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* Back */}
+                <Card
+                    className="absolute w-full h-full flex items-center justify-center p-8 text-center bg-secondary/10 border-2 border-primary/20 shadow-xl"
+                    style={{
+                        backfaceVisibility: 'hidden',
+                        transform: 'rotateY(180deg)'
+                    }}
+                >
+                    <div className="flex flex-col gap-4">
+                        <span className="text-sm text-primary uppercase tracking-wider font-semibold">CEVAP</span>
+                        <h2 className="text-3xl font-bold text-primary">{item.content.answer || item.content.back}</h2>
+                        {item.content.solution && (
+                            <p className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg">
+                                {item.content.solution}
+                            </p>
+                        )}
+                    </div>
+                </Card>
             </div>
-
-            <style jsx global>{`
-                .perspective-1000 { perspective: 1000px; }
-                .transform-style-3d { transform-style: preserve-3d; }
-                .backface-hidden { backface-visibility: hidden; }
-                .rotate-y-180 { transform: rotateY(180deg); }
-            `}</style>
         </div>
     );
 }

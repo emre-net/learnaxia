@@ -62,4 +62,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
+    events: {
+        async signIn({ user }) {
+            if (user.id && !user.handle && user.email) {
+                const emailPrefix = user.email.split('@')[0];
+                const baseHandle = emailPrefix.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                let handle = baseHandle || `user${Math.floor(Math.random() * 10000)}`;
+
+                // Ensure uniqueness
+                const existing = await prisma.user.findUnique({ where: { handle } });
+                if (existing) {
+                    handle = `${handle}${Math.floor(Math.random() * 1000)}`;
+                }
+
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { handle }
+                });
+            }
+        }
+    }
 })

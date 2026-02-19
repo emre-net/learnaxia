@@ -2,12 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // Types
-export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW';
+export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW' | 'QUIZ' | 'AI_SMART';
 
 export interface StudyItem {
     id: string;
     moduleId: string;
     type: 'FLASHCARD' | 'MC' | 'GAP';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     content: any; // JSONB content
     hash: string;
     // Progress snapshot
@@ -28,21 +29,21 @@ interface StudyState {
 
     // Runtime State
     isFlipped: boolean; // For flashcards
-    currentAnswer: any | null; // For MC/GAP input
-    isChecked: boolean; // Have we shown the result?
+    selectedOption: string | null; // For Quiz
+    feedback: 'CORRECT' | 'WRONG' | null; // For Quiz / Feedback state
 
     // Stats for this session
-    results: {
-        correct: number;
-        wrong: number;
-        skipped: number;
-    };
+    correctCount: number;
+    wrongCount: number;
+    skipped: number;
 
     // Actions
     initSession: (moduleId: string, items: StudyItem[], mode: StudyMode) => void;
-    flipCard: () => void;
-    setAnswer: (answer: any) => void;
-    checkAnswer: () => void;
+    setIsFlipped: (value: boolean) => void;
+    setSelectedOption: (option: string | null) => void;
+    setFeedback: (feedback: 'CORRECT' | 'WRONG' | null) => void;
+    setCorrectCount: (count: number) => void;
+    setWrongCount: (count: number) => void;
     nextItem: () => void;
     endSession: () => void;
 }
@@ -58,10 +59,12 @@ export const useStudyStore = create<StudyState>()(
             currentIndex: 0,
 
             isFlipped: false,
-            currentAnswer: null,
-            isChecked: false,
+            selectedOption: null,
+            feedback: null,
 
-            results: { correct: 0, wrong: 0, skipped: 0 },
+            correctCount: 0,
+            wrongCount: 0,
+            skipped: 0,
 
             initSession: (moduleId, items, mode) => {
                 set({
@@ -72,19 +75,19 @@ export const useStudyStore = create<StudyState>()(
                     currentIndex: 0,
                     startTime: new Date(),
                     isFlipped: false,
-                    currentAnswer: null,
-                    isChecked: false,
-                    results: { correct: 0, wrong: 0, skipped: 0 }
+                    selectedOption: null,
+                    feedback: null,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    skipped: 0
                 });
             },
 
-            flipCard: () => set((state) => ({ isFlipped: !state.isFlipped })),
-
-            setAnswer: (answer) => set({ currentAnswer: answer }),
-
-            checkAnswer: () => {
-                set({ isChecked: true });
-            },
+            setIsFlipped: (value) => set({ isFlipped: value }),
+            setSelectedOption: (option) => set({ selectedOption: option }),
+            setFeedback: (feedback) => set({ feedback }),
+            setCorrectCount: (count) => set({ correctCount: count }),
+            setWrongCount: (count) => set({ wrongCount: count }),
 
             nextItem: () => {
                 const { currentIndex, items } = get();
@@ -92,8 +95,8 @@ export const useStudyStore = create<StudyState>()(
                     set({
                         currentIndex: currentIndex + 1,
                         isFlipped: false,
-                        isChecked: false,
-                        currentAnswer: null
+                        selectedOption: null,
+                        feedback: null
                     });
                 }
             },
@@ -103,7 +106,11 @@ export const useStudyStore = create<StudyState>()(
                     sessionId: null,
                     moduleId: null,
                     items: [],
-                    currentIndex: 0
+                    currentIndex: 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    selectedOption: null,
+                    feedback: null
                 });
             }
         }),
@@ -116,7 +123,9 @@ export const useStudyStore = create<StudyState>()(
                 startTime: state.startTime,
                 items: state.items,
                 currentIndex: state.currentIndex,
-                results: state.results,
+                correctCount: state.correctCount,
+                wrongCount: state.wrongCount
+                // Don't persist UI states like flipped/feedback across reloads necessarily, or do if needed.
             }),
         }
     )

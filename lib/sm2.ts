@@ -36,7 +36,8 @@ export interface SM2Output {
  * @returns New state including next interval, ease factor, and review date.
  */
 export function calculateSM2(input: SM2Input): SM2Output {
-    let { quality, lastInterval, lastEase, repetition } = input;
+    let { quality } = input;
+    const { lastInterval, lastEase, repetition } = input;
 
     // 0. Input Guard
     if (quality < 0) quality = 0;

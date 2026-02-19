@@ -12,6 +12,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Trash2 } from "lucide-react";
 
 type ModuleDetail = {
     id: string;
@@ -89,8 +91,30 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
 
     const handleSaveItem = async (item: any) => {
         try {
-            const res = await fetch(`/api/modules/${moduleId}/items`, {
-                method: 'POST',
+            const url = item.id && !item.id.includes('-') // Check if real ID (assuming UUID without dashes is not possible, but UUID has dashes. UUID v4 has dashes.)
+            // Actually, item.id is set to uuidv4() in ItemEditorSheet for NEW items too.
+            // But ItemEditorSheet's generatedId is passed to onSave.
+            // We need to distinguish between "New Item (client-side ID)" and "Existing Item (database ID)".
+            // BUT, `setEditingItem(item)` passes an existing DB item.
+            // `ItemEditorSheet` uses that ID.
+            // If it's a NEW item, ItemEditorSheet generates a UUID.
+            // So BOTH have IDs.
+            // We need to know if we are in "Edit Mode".
+            // `editingItem` state tells us if we started from an existing item!
+            // BUT `handleSaveItem` receives `item`, it doesn't know about `editingItem` state directly inside the closure if we assume it might lack context?
+            // Actually it can access `editingItem`.
+            // If `editingItem` is set, we are updating.
+
+            let method = 'POST';
+            let endpoint = `/api/modules/${moduleId}/items`;
+
+            if (editingItem) {
+                method = 'PATCH';
+                endpoint = `/api/modules/${moduleId}/items/${item.id}`;
+            }
+
+            const res = await fetch(endpoint, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(item)
             });
@@ -104,6 +128,24 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
         } catch (err) {
             console.error(err);
             toast({ title: "Hata", description: "Öğe eklenemedi", variant: "destructive" });
+        }
+    };
+
+    const handleDeleteItem = async (itemId: string) => {
+        if (!confirm("Bu öğeyi silmek istediğinize emin misiniz?")) return;
+
+        try {
+            const res = await fetch(`/api/modules/${moduleId}/items/${itemId}`, {
+                method: 'DELETE'
+            });
+
+            if (!res.ok) throw new Error("Failed to delete item");
+
+            await refetch();
+            toast({ title: "Başarılı", description: "Öğe silindi" });
+        } catch (err) {
+            console.error(err);
+            toast({ title: "Hata", description: "Öğe silinemedi", variant: "destructive" });
         }
     };
 
@@ -201,12 +243,24 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                     </div>
                                 </div>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" onClick={() => {
+                                        setEditingItem(item);
+                                        setIsSheetOpen(true);
+                                    }}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeleteItem(item.id)}>
+                                                <Trash2 className="mr-2 h-4 w-4" /> Sil
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             </Card>
                         ))}

@@ -1,97 +1,120 @@
 import { Button } from "@/components/ui/button";
-import { useStudyStore, StudyMode } from "@/stores/study-store";
-import { ChevronRight, Eye, RefreshCcw, ThumbsUp, ThumbsDown, Zap } from "lucide-react";
-import { calculateSM2 } from "@/lib/sm2"; // We might move logic to store later
+import { useStudyStore } from "@/stores/study-store";
+import { ArrowRight, Check, RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 
-export function StudyControls() {
+export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     const {
-        isFlipped,
-        flipCard,
-        nextItem,
         items,
         currentIndex,
-        mode
+        mode,
+        isFlipped,
+        setIsFlipped,
+        selectedOption,
+        feedback,
+        setFeedback,
+        correctCount,
+        setCorrectCount,
+        wrongCount,
+        setWrongCount
     } = useStudyStore();
 
-    // Handler for SM-2 Grading
-    const handleGrade = async (quality: number) => {
-        const { sessionId } = useStudyStore.getState();
-        const currentItem = items[currentIndex];
+    const currentItem = items[currentIndex];
 
-        if (currentItem && sessionId) {
-            try {
-                // Determine duration (simple version: now - last action time)
-                // For MVP: default to 1000ms until we track time per card
-                const durationMs = 1000;
-
-                await fetch('/api/study/log', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sessionId,
-                        itemId: currentItem.id,
-                        quality,
-                        durationMs
-                    })
-                });
-            } catch (e) {
-                console.error("Failed to log progress", e);
+    // Handle Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (mode === 'NORMAL' || mode === 'AI_SMART' || mode === 'SM2' || mode === 'WRONG_ONLY') { // Flashcard modes
+                    if (!isFlipped && !feedback) setIsFlipped(true); // Assuming flashcard
+                }
             }
-        }
+            // Logic differs slightly per mode/type
+        };
 
-        nextItem();
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped]);
+
+    const handleQuizCheck = () => {
+        if (!selectedOption) return;
+
+        const isCorrect = selectedOption === currentItem.content.answer;
+        setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
+
+        if (isCorrect) setCorrectCount(correctCount + 1);
+        else setWrongCount(wrongCount + 1);
     };
 
-    if (!isFlipped) {
+    const handleNextItem = () => {
+        onNext({ itemId: currentItem.id, result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG', quality: 3 });
+    };
+
+    const handleRate = (quality: number) => {
+        // Quality: 0-1 (Wrong/Hard), 2-3 (Good/Ok), 4-5 (Easy/Perfect)
+        // Map to: "AGAIN", "HARD", "GOOD", "EASY"
+        let result = "GOOD";
+        if (quality <= 1) result = "AGAIN";
+        else if (quality <= 3) result = "HARD";
+        else if (quality >= 5) result = "EASY";
+
+        const isCorrect = quality > 1;
+        if (isCorrect) setCorrectCount(correctCount + 1);
+        else setWrongCount(wrongCount + 1);
+
+        onNext({ itemId: currentItem.id, result, quality });
+    };
+
+    if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+        if (!feedback) {
+            // GapRenderer handles its own check for now, but controls might need to hide
+            // actually GapRenderer has its own check button.
+            // StudyControls only needs to show "Next" when feedback is present.
+            return null;
+        }
         return (
-            <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-background/95 backdrop-blur z-50 flex justify-center">
-                <Button size="lg" className="w-full max-w-sm text-lg h-14" onClick={flipCard}>
-                    <Eye className="mr-2 h-5 w-5" />
-                    Show Answer
+            <div className="flex gap-4 mt-8 w-full max-w-md">
+                <Button className="w-full text-lg h-12" size="lg" onClick={handleNextItem}>
+                    Next Question <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
             </div>
         );
     }
 
-    // Flipped State Controls
+    // Flashcard Controls
+    if (!isFlipped) {
+        return (
+            <div className="mt-8 text-muted-foreground text-sm">
+                Press <kbd className="px-2 py-1 bg-muted rounded border">Space</kbd> or click card to flip
+            </div>
+        );
+    }
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-background/95 backdrop-blur z-50">
-            <div className="max-w-2xl mx-auto grid grid-cols-4 gap-2">
-                <Button
-                    variant="destructive"
-                    className="flex flex-col h-16 gap-1"
-                    onClick={() => handleGrade(0)}
-                >
-                    <RefreshCcw className="h-4 w-4" />
-                    <span className="text-xs">Again</span>
+        <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
+            <div className="grid grid-cols-4 gap-4">
+                <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
+                    <RotateCcw className="h-5 w-5" />
+                    <span>Again</span>
+                    <span className="text-xs opacity-70">&lt; 1m</span>
                 </Button>
-
-                <Button
-                    variant="secondary"
-                    className="flex flex-col h-16 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                    onClick={() => handleGrade(3)}
-                >
-                    <ThumbsDown className="h-4 w-4" />
-                    <span className="text-xs">Hard</span>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
+                    <span className="text-lg font-bold">Hard</span>
+                    <span className="text-xs opacity-70">2d</span>
                 </Button>
-
-                <Button
-                    variant="secondary"
-                    className="flex flex-col h-16 gap-1 bg-green-100 hover:bg-green-200 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    onClick={() => handleGrade(4)}
-                >
-                    <ThumbsUp className="h-4 w-4" />
-                    <span className="text-xs">Good</span>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
+                    <span className="text-lg font-bold">Good</span>
+                    <span className="text-xs opacity-70">4d</span>
                 </Button>
-
-                <Button
-                    variant="secondary"
-                    className="flex flex-col h-16 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                    onClick={() => handleGrade(5)}
-                >
-                    <Zap className="h-4 w-4" />
-                    <span className="text-xs">Easy</span>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
+                    <Check className="h-5 w-5" />
+                    <span>Easy</span>
+                    <span className="text-xs opacity-70">7d</span>
                 </Button>
+            </div>
+            <div className="text-center text-xs text-muted-foreground mt-2">
+                Use number keys <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> to rate
             </div>
         </div>
     );

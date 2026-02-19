@@ -7,32 +7,62 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Placeholder for the actual study interface (we'll build this next)
+import { StudyHeader } from "@/components/study/study-header";
+import { FlashcardRenderer } from "@/components/study/flashcard-renderer";
+import { QuizRenderer } from "@/components/study/quiz-renderer";
+import { GapRenderer } from "@/components/study/gap-renderer";
+import { StudyControls } from "@/components/study/study-controls";
+import { StudySummary } from "@/components/study/study-summary";
+
+// Placeholder for the actual study interface (we'll build this next)
 function StudyInterface() {
-    const { items, currentIndex, mode } = useStudyStore();
+    const { items, currentIndex, mode, nextItem, sessionId } = useStudyStore();
     const currentItem = items[currentIndex];
 
-    // Check if finished
+    // Handle session end
     if (!currentItem) {
-        return (
-            <div className="flex flex-col items-center justify-center h-screen text-center p-4">
-                <h1 className="text-2xl font-bold mb-4">Session Complete! 🎉</h1>
-                <p className="text-muted-foreground mb-8">You have reviewed all items in this session.</p>
-                <div className="flex gap-4">
-                    <Button onClick={() => window.location.href = '/library'}>Back to Library</Button>
-                </div>
-            </div>
-        )
+        return <StudySummary />;
     }
 
+    const handleNext = async (result: any) => {
+        // Optimistic update handled in store/controls
+        // Call API to log result
+        try {
+            await fetch('/api/study/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId,
+                    itemId: result.itemId,
+                    quality: result.quality, // 0-5
+                    durationMs: 1000 // Placeholder, implement timer later
+                })
+            });
+        } catch (error) {
+            console.error("Failed to log progress", error);
+        }
+
+        // Advance
+        nextItem();
+    };
+
     return (
-        <div className="flex flex-col items-center justify-center h-screen p-4">
-            <div className="mb-4 text-sm text-muted-foreground">
-                Mode: {mode} | Item {currentIndex + 1} of {items.length}
+        <div className="flex flex-col items-center min-h-screen p-4 bg-slate-50 dark:bg-slate-950">
+            <StudyHeader />
+
+            <div className="flex-1 w-full flex flex-col items-center justify-center max-w-5xl">
+                {/* Content Renderer */}
+                {mode === 'QUIZ' || currentItem.type === 'MC' ? (
+                    <QuizRenderer item={currentItem} />
+                ) : currentItem.type === 'GAP' ? (
+                    <GapRenderer item={currentItem} />
+                ) : (
+                    <FlashcardRenderer item={currentItem} />
+                )}
+
+                {/* Controls */}
+                <StudyControls onNext={handleNext} />
             </div>
-            <div className="p-8 border rounded-lg shadow-lg max-w-md w-full bg-card min-h-[300px] flex items-center justify-center">
-                <pre>{JSON.stringify(currentItem, null, 2)}</pre>
-            </div>
-            {/* Controls will go here */}
         </div>
     );
 }
