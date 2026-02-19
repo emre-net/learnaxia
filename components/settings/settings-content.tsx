@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { EditProfileDialog } from "./edit-profile-dialog";
+import { useSettingsStore } from "@/stores/settings-store";
 
 interface SettingsContentProps {
     user: {
@@ -71,8 +72,18 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
 
 
+    const { setLanguage: setStoreLanguage } = useSettingsStore();
+
+    // Sync Store with DB user language on mount
+    useEffect(() => {
+        if (user.language) {
+            setStoreLanguage(user.language as any);
+        }
+    }, [user.language, setStoreLanguage]);
+
     const saveLanguage = async (newLang: string) => {
         try {
+            setStoreLanguage(newLang as any); // Update global store immediately
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },

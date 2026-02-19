@@ -1,13 +1,20 @@
+"use client";
+
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useSettingsStore } from "@/stores/settings-store";
+import { useStudyStore } from "@/stores/study-store";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useStudyStore } from "@/stores/study-store";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 export function GapRenderer({ item }: { item: any }) {
     const { setFeedback, feedback, setCorrectCount, correctCount, setWrongCount, wrongCount } = useStudyStore();
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
+
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
     const [parts, setParts] = useState<string[]>([]);
     const [gapIndices, setGapIndices] = useState<number[]>([]);
@@ -49,9 +56,6 @@ export function GapRenderer({ item }: { item: any }) {
         const allCorrect = results.every((r: boolean) => r);
 
         setFeedback(allCorrect ? 'CORRECT' : 'WRONG');
-
-        // Store result for specific inputs (optional, or just rely on global feedback)
-        // For UI, we can re-calculate validity during render if feedback is present.
 
         if (allCorrect) setCorrectCount(correctCount + 1);
         else setWrongCount(wrongCount + 1);
@@ -111,7 +115,6 @@ export function GapRenderer({ item }: { item: any }) {
                                             if (e.key === 'Enter') {
                                                 // If it's the last input, check answer
                                                 if (gapIndex === gapIndices.length - 1) checkAnswer();
-                                                // Else focus next? (Browser default tab works usually)
                                             }
                                         }}
                                     />
@@ -131,7 +134,7 @@ export function GapRenderer({ item }: { item: any }) {
                     onClick={checkAnswer}
                     disabled={userAnswers.some(a => !a.trim())}
                 >
-                    Kontrol Et
+                    {dict.check}
                 </Button>
             )}
 
@@ -145,16 +148,16 @@ export function GapRenderer({ item }: { item: any }) {
                     {feedback === 'CORRECT' ? (
                         <div className="flex flex-col gap-2 items-center">
                             <CheckCircle2 className="h-8 w-8 text-green-600 mb-1" />
-                            <span className="text-xl font-bold">Harika! Hepsi Doğru 🎉</span>
+                            <span className="text-xl font-bold">{dict.correct}</span>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-center gap-2 text-xl font-bold text-red-600">
                                 <XCircle className="h-6 w-6" />
-                                <span>Bazı Cevaplar Yanlış</span>
+                                <span>{dict.partialWrong}</span>
                             </div>
                             <div className="text-sm opacity-90 mt-2 bg-background/50 p-4 rounded-md inline-block max-w-lg mx-auto">
-                                <span className="block mb-2 font-semibold text-foreground/80">Doğru Cevaplar:</span>
+                                <span className="block mb-2 font-semibold text-foreground/80">{dict.correctAnswers}</span>
                                 <div className="flex flex-wrap gap-2 justify-center">
                                     {item.content.answers.map((ans: string, i: number) => (
                                         <span key={i} className="px-2 py-1 bg-primary/10 rounded border border-primary/20 text-primary font-mono">

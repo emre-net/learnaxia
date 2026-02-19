@@ -1,5 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { useStudyStore } from "@/stores/study-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 
@@ -19,17 +23,10 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         setWrongCount
     } = useStudyStore();
 
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
+
     const currentItem = items[currentIndex];
-
-    const handleQuizCheck = () => {
-        if (!selectedOption) return;
-
-        const isCorrect = selectedOption === currentItem.content.answer;
-        setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
-
-        if (isCorrect) setCorrectCount(correctCount + 1);
-        else setWrongCount(wrongCount + 1);
-    };
 
     const handleNextItem = () => {
         onNext({ itemId: currentItem.id, result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG', quality: 3 });
@@ -70,10 +67,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                 switch (e.code) {
                     case 'ArrowLeft': handleRate(1); break; // Again
                     case 'ArrowDown': handleRate(2); break; // Hard
-                    case 'ArrowUp': handleRate(4); break;   // Good (Map to 4 for simple 3-button, or 3) -> 4 per button layout (Good is 4, Easy is 5? No, buttons are 1,2,4,5 in UI? Wait UI has 4 buttons: Again(1), Hard(2), Good(4), Easy(5)?? Let's check handleRate logic.)
-                    // UI calls: handleRate(1), (2), (4), (5).
-                    // Logic: 1->Again, 2->Hard, 4->Good, 5->Easy.
-                    // So Map: Left->1, Down->2, Up->4, Right->5?
+                    case 'ArrowUp': handleRate(4); break;   // Good 
                     case 'ArrowRight': handleRate(5); break; // Easy
                     case 'Digit1': handleRate(1); break;
                     case 'Digit2': handleRate(2); break;
@@ -85,7 +79,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]); // Added deps
+    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]);
 
     if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         if (!feedback) {
@@ -107,9 +101,9 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                     onClick={handleNextItem}
                 >
                     {isLastItem ? (
-                        <>Çalışmayı Bitir <Check className="ml-2 h-5 w-5" /></>
+                        <>{dict.finishSession} <Check className="ml-2 h-5 w-5" /></>
                     ) : (
-                        <>Sonraki Soru <ArrowRight className="ml-2 h-5 w-5" /></>
+                        <>{dict.nextQuestion} <ArrowRight className="ml-2 h-5 w-5" /></>
                     )}
                 </Button>
             </div>
@@ -120,39 +114,35 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     if (!isFlipped) {
         return (
             <div className="mt-8 text-muted-foreground text-sm">
-                Çevirmek için <kbd className="px-2 py-1 bg-muted rounded border">Boşluk</kbd> tuşuna basın veya karta tıklayın
+                {dict.flipInstruction}
             </div>
         );
     }
-
-    // Check if last item for Flashcards too (though UI doesn't change much for rating buttons)
-    // We could add a "Finish" indicator, but the rating action naturally moves forward.
-    // The store update will handle the redirection.
 
     return (
         <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-4 gap-4">
                 <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
                     <RotateCcw className="h-5 w-5" />
-                    <span>Tekrar</span>
+                    <span>{dict.rate.again}</span>
                     <span className="text-xs opacity-70">&lt; 1d</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
-                    <span className="text-lg font-bold">Zor</span>
+                    <span className="text-lg font-bold">{dict.rate.hard}</span>
                     <span className="text-xs opacity-70">2g</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
-                    <span className="text-lg font-bold">İyi</span>
+                    <span className="text-lg font-bold">{dict.rate.good}</span>
                     <span className="text-xs opacity-70">4g</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
                     <Check className="h-5 w-5" />
-                    <span>Kolay</span>
+                    <span>{dict.rate.easy}</span>
                     <span className="text-xs opacity-70">7g</span>
                 </Button>
             </div>
             <div className="text-center text-xs text-muted-foreground mt-2">
-                Puanlamak için <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> tuşlarını kullanın
+                {dict.keyboardHint}
             </div>
         </div>
     );

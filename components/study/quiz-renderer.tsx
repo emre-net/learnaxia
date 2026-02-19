@@ -1,6 +1,10 @@
+"use client";
+
+import { useStudyStore } from "@/stores/study-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useStudyStore } from "@/stores/study-store";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +21,9 @@ export function QuizRenderer({ item }: { item: any }) {
         setWrongCount,
         wrongCount
     } = useStudyStore();
+
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
 
     // Ensure options exist
     const options = item.content.options || [];
@@ -128,12 +135,12 @@ export function QuizRenderer({ item }: { item: any }) {
                             {feedback === 'CORRECT' ? (
                                 <>
                                     <CheckCircle2 className="h-8 w-8" />
-                                    <span>Doğru! Harika gidiyorsun! 🎉</span>
+                                    <span>{dict.correct}</span>
                                 </>
                             ) : (
                                 <>
                                     <XCircle className="h-8 w-8" />
-                                    <span>Yanlış. Cevap: {item.content.answer} 😔</span>
+                                    <span>{dict.wrong.replace('{answer}', item.content.answer)}</span>
                                 </>
                             )}
                         </div>

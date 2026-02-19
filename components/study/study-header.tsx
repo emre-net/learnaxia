@@ -1,6 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useStudyStore } from "@/stores/study-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { NotesSidebar } from "@/components/notes/notes-sidebar";
@@ -14,9 +18,12 @@ export function StudyHeader() {
         moduleId
     } = useStudyStore();
 
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
+
     if (!items.length) return null;
 
-    const progress = ((currentIndex) / items.length) * 100;
+    const progressValue = ((currentIndex) / items.length) * 100;
 
     return (
         <header className="w-full max-w-5xl flex items-center justify-between py-4 mb-8">
@@ -28,10 +35,10 @@ export function StudyHeader() {
                 </Button>
                 <div className="flex flex-col w-full max-w-xs gap-1">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Progress</span>
+                        <span>{dict.progress}</span>
                         <span>{currentIndex + 1} / {items.length}</span>
                     </div>
-                    <Progress value={progress} className="h-2" />
+                    <Progress value={progressValue} className="h-2" />
                 </div>
             </div>
 

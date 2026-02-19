@@ -1,11 +1,17 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { useStudyStore } from "@/stores/study-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 
 export function FlashcardRenderer({ item }: { item: any }) {
     const { isFlipped, setIsFlipped } = useStudyStore();
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
 
     // Keyboard Shortcuts
     useEffect(() => {
@@ -39,12 +45,12 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     style={{ backfaceVisibility: 'hidden' }}
                 >
                     <div className="flex flex-col gap-4 select-none">
-                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">SORU</span>
+                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{dict.questionLabel}</span>
                         <h2 className="text-3xl font-bold">{item.content.question || item.content.front}</h2>
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
                         )}
-                        <span className="mt-8 text-xs text-muted-foreground font-mono">[Boşluk Tuşu ile Çevir]</span>
+                        <span className="mt-8 text-xs text-muted-foreground font-mono">[{dict.flipInstruction}]</span>
                     </div>
                 </Card>
 
@@ -57,7 +63,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     }}
                 >
                     <div className="flex flex-col gap-4">
-                        <span className="text-sm text-primary uppercase tracking-wider font-semibold">CEVAP</span>
+                        <span className="text-sm text-primary uppercase tracking-wider font-semibold">{dict.answerLabel}</span>
                         <h2 className="text-3xl font-bold text-primary">{item.content.answer || item.content.back}</h2>
                         {item.content.solution && (
                             <p className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg">
