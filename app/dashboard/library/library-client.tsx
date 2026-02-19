@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil, Copy } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil, Copy, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useSettingsStore } from "@/stores/settings-store";
 import { CreateCollectionDialog } from "@/components/collection/create-collection-dialog";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { ModuleCard } from "@/components/module/module-card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 // Types (Mirroring API response)
 type LibraryModule = {
@@ -64,6 +67,11 @@ interface LibraryCollection {
 export function LibraryClient() {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedType, setSelectedType] = useState<string>("ALL");
+
+    const { language } = useSettingsStore();
+    const dictionary = getDictionary(language);
+    const studyDict = dictionary.study;
 
     const { data: modules, isLoading: isLoadingModules } = useQuery<LibraryModule[]>({
         queryKey: ['library-modules'], // Changed key to avoid conflict and be more specific
@@ -83,10 +91,12 @@ export function LibraryClient() {
         }
     });
 
-    const filteredModules = modules?.filter(item =>
-        item.module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.module.description && item.module.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const filteredModules = modules?.filter(item => {
+        const matchesSearch = item.module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.module.description && item.module.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesType = selectedType === "ALL" || item.module.type === selectedType;
+        return matchesSearch && matchesType;
+    });
 
     const filteredCollections = collections?.filter(item =>
         item.collection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,6 +133,21 @@ export function LibraryClient() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+
+                        <Select value={selectedType} onValueChange={setSelectedType}>
+                            <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
+                                <Filter className="mr-2 h-4 w-4 opacity-70" />
+                                <SelectValue placeholder={studyDict.moduleTypes?.title || "Tip"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">{studyDict.moduleTypes?.all || "Tümü"}</SelectItem>
+                                <SelectItem value="FLASHCARD">{studyDict.moduleTypes?.flashcard || "Kartlar"}</SelectItem>
+                                <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
+                                <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
+                                <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
+                            </SelectContent>
+                        </Select>
+
                         <div className="flex items-center border rounded-md">
                             <Button
                                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}

@@ -15,25 +15,20 @@ export async function GET(req: Request) {
         const category = searchParams.get("category");
         const subCategory = searchParams.get("subCategory");
         const type = searchParams.get("type") || "MODULE"; // MODULE | COLLECTION
+        const moduleType = searchParams.get("moduleType"); // FLASHCARD, MC, GAP, TRUE_FALSE
         const search = searchParams.get("search");
         const limit = parseInt(searchParams.get("limit") || "20");
         const offset = parseInt(searchParams.get("offset") || "0");
 
         if (type === "COLLECTION") {
+            // ... (rest of collection logic remains same)
             const collections = await prisma.collection.findMany({
                 where: {
-                    // For now, show all collections or filter by public logic if added
-                    // Assuming for now, we show all active collections (no explicit status field yet, but we can filter by non-empty or just all)
-                    // If we want to show only "Public" collections, we need that field back or logic. 
-                    // Let's assume for MVP all collections are "discoverable" or we filter by simple existence.
-                    // Wait, Modules have `isForkable` or `status: ACTIVE`. Collections don't have explicit status yet in schema except for `createdAt`.
-                    // Let's just filter by Category for now.
                     ...(category && { category }),
                     ...(subCategory && { subCategory }),
                     ...(search && {
                         OR: [
                             { title: { contains: search, mode: "insensitive" } },
-                            // { description: { contains: search, mode: "insensitive" } } // Description commented out in migration
                         ]
                     })
                 },
@@ -50,8 +45,9 @@ export async function GET(req: Request) {
             // MODULES
             const modules = await prisma.module.findMany({
                 where: {
-                    isForkable: true, // Only show public/forkable modules
+                    isForkable: true,
                     status: "ACTIVE",
+                    ...(moduleType && { type: moduleType as any }),
                     ...(category && { category }),
                     ...(subCategory && { subCategory }),
                     ...(search && {

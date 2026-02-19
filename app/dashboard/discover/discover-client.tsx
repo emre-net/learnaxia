@@ -13,6 +13,8 @@ import { CATEGORIES } from "@/lib/constants/categories";
 import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { Separator } from "@/components/ui/separator";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { useSettingsStore } from "@/stores/settings-store";
 // import { useDebounce } from "@/hooks/use-debounce"; // Removed: Using local implementation
 
 // If useDebounce doesn't exist, I'll inline a simple effect or use local state with delay
@@ -34,13 +36,18 @@ function useDebounceValue<T>(value: T, delay: number): T {
 export function DiscoverClient() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+    const [selectedModuleType, setSelectedModuleType] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState("modules"); // 'modules' | 'collections'
+
+    const { language } = useSettingsStore();
+    const dictionary = getDictionary(language);
+    const studyDict = dictionary.study;
 
     const debouncedSearch = useDebounceValue(searchQuery, 500);
 
     const { data: results, isLoading, isError } = useQuery({
-        queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, debouncedSearch],
+        queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (activeTab === "modules") params.set("type", "MODULE");
@@ -48,6 +55,7 @@ export function DiscoverClient() {
 
             if (selectedCategory) params.set("category", selectedCategory);
             if (selectedSubCategory) params.set("subCategory", selectedSubCategory);
+            if (selectedModuleType) params.set("moduleType", selectedModuleType);
             if (debouncedSearch) params.set("search", debouncedSearch);
 
             const res = await fetch(`/api/discover?${params.toString()}`);
@@ -90,6 +98,57 @@ export function DiscoverClient() {
                     </div>
 
                     <Separator />
+
+                    {activeTab === "modules" && (
+                        <>
+                            <div className="space-y-1">
+                                <h3 className="text-sm font-medium mb-2 text-muted-foreground">{studyDict.moduleTypes?.title || "Modül Tipi"}</h3>
+                                <div className="space-y-1">
+                                    <Button
+                                        variant={selectedModuleType === null ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="w-full justify-start font-normal"
+                                        onClick={() => setSelectedModuleType(null)}
+                                    >
+                                        {studyDict.moduleTypes?.all || "Tümü"}
+                                    </Button>
+                                    <Button
+                                        variant={selectedModuleType === "FLASHCARD" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="w-full justify-start font-normal"
+                                        onClick={() => setSelectedModuleType("FLASHCARD")}
+                                    >
+                                        {studyDict.moduleTypes?.flashcard || "Kartlar"}
+                                    </Button>
+                                    <Button
+                                        variant={selectedModuleType === "MC" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="w-full justify-start font-normal"
+                                        onClick={() => setSelectedModuleType("MC")}
+                                    >
+                                        {studyDict.moduleTypes?.mc || "Çoktan Seçmeli"}
+                                    </Button>
+                                    <Button
+                                        variant={selectedModuleType === "TRUE_FALSE" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="w-full justify-start font-normal"
+                                        onClick={() => setSelectedModuleType("TRUE_FALSE")}
+                                    >
+                                        {studyDict.moduleTypes?.true_false || "Doğru / Yanlış"}
+                                    </Button>
+                                    <Button
+                                        variant={selectedModuleType === "GAP" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="w-full justify-start font-normal"
+                                        onClick={() => setSelectedModuleType("GAP")}
+                                    >
+                                        {studyDict.moduleTypes?.gap || "Boşluk Doldurma"}
+                                    </Button>
+                                </div>
+                            </div>
+                            <Separator />
+                        </>
+                    )}
 
                     <div className="space-y-1">
                         <h3 className="text-sm font-medium mb-2 text-muted-foreground">Kategoriler</h3>
@@ -136,10 +195,10 @@ export function DiscoverClient() {
                         </ScrollArea>
                     </div>
                 </div>
-            </aside>
+            </aside >
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto pb-10">
+            < main className="flex-1 overflow-y-auto pb-10" >
                 <div className="flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -150,10 +209,11 @@ export function DiscoverClient() {
                                     : "Topluluk tarafından oluşturulan en yeni içerikler"}
                             </p>
                         </div>
-                        {(selectedCategory || searchQuery) && (
+                        {(selectedCategory || searchQuery || selectedModuleType) && (
                             <Button variant="ghost" size="sm" onClick={() => {
                                 setSelectedCategory(null);
                                 setSelectedSubCategory(null);
+                                setSelectedModuleType(null);
                                 setSearchQuery("");
                             }}>
                                 <X className="h-4 w-4 mr-2" /> Filtreleri Temizle
@@ -244,8 +304,8 @@ export function DiscoverClient() {
                         </TabsContent>
                     </Tabs>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
 

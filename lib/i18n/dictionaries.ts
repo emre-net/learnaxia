@@ -50,6 +50,14 @@ const en = {
             optionsTitle: "Select Study Mode",
             startStudy: "Start Studying",
             resumeStudy: "Continue Studying"
+        },
+        moduleTypes: {
+            title: "Module Type",
+            all: "All Types",
+            flashcard: "Flashcards",
+            mc: "Multiple Choice",
+            true_false: "True / False",
+            gap: "Gap Fill"
         }
     }
 };
@@ -105,6 +113,14 @@ const tr = {
             optionsTitle: "Çalışma Modu Seçin",
             startStudy: "Çalışmaya Başla",
             resumeStudy: "Çalışmaya Devam Et"
+        },
+        moduleTypes: {
+            title: "Modül Tipi",
+            all: "Tüm Tipler",
+            flashcard: "Kartlar",
+            mc: "Çoktan Seçmeli",
+            true_false: "Doğru / Yanlış",
+            gap: "Boşluk Doldurma"
         }
     }
 };
