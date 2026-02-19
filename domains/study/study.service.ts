@@ -48,10 +48,13 @@ export class StudyService {
             if (type === 'MULTIPLE_CHOICE') type = 'MC';
             if (type === 'GAP_FILL') type = 'GAP';
             if (type === 'TF' || type === 'TRUE_FALSE') {
-                type = 'FLASHCARD'; // Render TF as Flashcard for now
-                if (!content.question && !content.front && content.statement) {
-                    content.front = content.statement;
+                type = 'MC'; // Render TF as Multiple Choice (Quiz)
+                if (!content.question && content.statement) {
                     content.question = content.statement;
+                }
+                // Ensure options exist for TF
+                if (!content.options || content.options.length === 0) {
+                    content.options = ["True", "False"];
                 }
             }
 
