@@ -18,11 +18,24 @@ export function GapRenderer({ item }: { item: any }) {
     const checkAnswer = () => {
         if (!userAnswer.trim()) return;
 
-        // Normalize answers (case insensitive, trim)
-        const normalize = (s: string) => s.toLowerCase().trim();
+        // Normalize answers:
+        // 1. Lowercase with Turkish locale support
+        // 2. Remove punctuation (.,!?)
+        // 3. Trim extra whitespace
+        const normalize = (s: string) => {
+            return s
+                .toLocaleLowerCase('tr') // Handle I/ı and İ/i correctly
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") // Remove punctuation
+                .replace(/\s{2,}/g, " ") // Normalize spaces
+                .trim();
+        };
+
         const correctAnswers = (item.content.answers || []).map(normalize);
         const input = normalize(userAnswer);
 
+        // Check exact match after normalization
+        // Also check if input allows for simple ASCII fallback (optional but good for strict keyboards)
+        // For now, robust Turkish normalization should cover most cases.
         const isCorrect = correctAnswers.includes(input);
 
         setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
