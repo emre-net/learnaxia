@@ -41,11 +41,33 @@ export class StudyService {
             const progress = itemProgresses.find(p => p.itemId === item.id);
             const sm2 = sm2Progresses.find(p => p.itemId === item.id);
 
+            // Normalize Type & Content
+            let type: any = item.type;
+            let content: any = { ...item.content as object };
+
+            if (type === 'MULTIPLE_CHOICE') type = 'MC';
+            if (type === 'GAP_FILL') type = 'GAP';
+            if (type === 'TF' || type === 'TRUE_FALSE') {
+                type = 'FLASHCARD'; // Render TF as Flashcard for now
+                if (!content.question && !content.front && content.statement) {
+                    content.front = content.statement;
+                    content.question = content.statement;
+                }
+            }
+
+            // Ensure Flashcard has front/back
+            if (type === 'FLASHCARD' && !content.front && content.question) {
+                content.front = content.question;
+            }
+            if (type === 'FLASHCARD' && !content.back && content.answer) {
+                content.back = content.answer;
+            }
+
             return {
                 id: item.id,
                 moduleId: item.moduleId,
-                type: item.type,
-                content: item.content,
+                type: type,
+                content: content,
                 hash: item.contentHash,
                 // Progress Data
                 lastResult: progress?.lastResult,
