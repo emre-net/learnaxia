@@ -52,32 +52,54 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         onNext({ itemId: currentItem.id, result, quality });
     };
 
+    const handleShowAnswer = () => {
+        setFeedback('WRONG');
+        playStudySound('FAILURE');
+        setWrongCount(wrongCount + 1);
+    };
+
+    const handleQuizStep = () => {
+        if (!feedback) {
+            handleShowAnswer();
+        } else {
+            handleNextItem();
+        }
+    };
+
     // Handle Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // QUIZ / MC / GAP: Next Question
+            // QUIZ / MC / GAP: Next Question or Show Answer
             if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
-                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter')) {
+                if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+                    e.preventDefault();
+                    handleQuizStep();
+                    return;
+                }
+                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space')) {
                     e.preventDefault();
                     handleNextItem();
+                    return;
                 }
-                return;
+                // No need to return here, let it fall through if needed
             }
 
             // FLASHCARD: Flip & Vote
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (!isFlipped) setIsFlipped(true);
-            } else if (isFlipped) {
-                switch (e.code) {
-                    case 'ArrowLeft': handleRate(1); break; // Again
-                    case 'ArrowDown': handleRate(2); break; // Hard
-                    case 'ArrowUp': handleRate(4); break;   // Good 
-                    case 'ArrowRight': handleRate(5); break; // Easy
-                    case 'Digit1': handleRate(1); break;
-                    case 'Digit2': handleRate(2); break;
-                    case 'Digit3': handleRate(4); break;
-                    case 'Digit4': handleRate(5); break;
+            if (mode !== 'QUIZ' && currentItem.type === 'FLASHCARD') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (!isFlipped) setIsFlipped(true);
+                } else if (isFlipped) {
+                    switch (e.code) {
+                        case 'ArrowLeft': handleRate(1); break; // Again
+                        case 'ArrowDown': handleRate(2); break; // Hard
+                        case 'ArrowUp': handleRate(4); break;   // Good 
+                        case 'ArrowRight': handleRate(5); break; // Easy
+                        case 'Digit1': handleRate(1); break;
+                        case 'Digit2': handleRate(2); break;
+                        case 'Digit3': handleRate(4); break;
+                        case 'Digit4': handleRate(5); break;
+                    }
                 }
             }
         };
@@ -86,41 +108,34 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]);
 
-    const handleQuizStep = () => {
-        if (!feedback) {
-            // First step: Reveal feedback
-            const isCorrect = selectedOption === currentItem.content.answer;
-            setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
-            playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
-
-            if (isCorrect) setCorrectCount(correctCount + 1);
-            else setWrongCount(wrongCount + 1);
-        } else {
-            // Second step: Go to next
-            handleNextItem();
-        }
-    };
-
     if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         const isLastItem = currentIndex === items.length - 1;
 
-        if (currentItem.type === 'GAP' && !feedback) return null; // GapRenderer has own check button
-
         return (
             <div className="flex gap-4 mt-8 w-full max-w-md">
-                <Button
-                    className={isLastItem && feedback ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
-                    size="lg"
-                    onClick={handleQuizStep}
-                >
-                    {!feedback ? (
-                        <>{dict.showAnswer || "Cevabı Gör"} <ArrowRight className="ml-2 h-5 w-5" /></>
-                    ) : isLastItem ? (
-                        <>{dict.finishSession} <Check className="ml-2 h-5 w-5" /></>
-                    ) : (
-                        <>{dict.nextQuestion} <ArrowRight className="ml-2 h-5 w-5" /></>
-                    )}
-                </Button>
+                {!feedback ? (
+                    <Button
+                        variant="outline"
+                        className="w-full text-lg h-12 border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-all"
+                        size="lg"
+                        onClick={handleShowAnswer}
+                    >
+                        <RotateCcw className="mr-2 h-5 w-5 opacity-50" />
+                        {dict.showAnswer || "Cevabı Gör"}
+                    </Button>
+                ) : (
+                    <Button
+                        className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
+                        size="lg"
+                        onClick={handleNextItem}
+                    >
+                        {isLastItem ? (
+                            <>{dict.finishSession} <Check className="ml-2 h-5 w-5" /></>
+                        ) : (
+                            <>{dict.nextQuestion} <ArrowRight className="ml-2 h-5 w-5" /></>
+                        )}
+                    </Button>
+                )}
             </div>
         );
     }
