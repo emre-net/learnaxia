@@ -105,9 +105,9 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                     onClick={handleNextItem}
                 >
                     {isLastItem ? (
-                        <>Finish Session <Check className="ml-2 h-5 w-5" /></>
+                        <>Çalışmayı Bitir <Check className="ml-2 h-5 w-5" /></>
                     ) : (
-                        <>Next Question <ArrowRight className="ml-2 h-5 w-5" /></>
+                        <>Sonraki Soru <ArrowRight className="ml-2 h-5 w-5" /></>
                     )}
                 </Button>
             </div>
@@ -118,7 +118,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     if (!isFlipped) {
         return (
             <div className="mt-8 text-muted-foreground text-sm">
-                Press <kbd className="px-2 py-1 bg-muted rounded border">Space</kbd> or click card to flip
+                Çevirmek için <kbd className="px-2 py-1 bg-muted rounded border">Boşluk</kbd> tuşuna basın veya karta tıklayın
             </div>
         );
     }
@@ -132,25 +132,25 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
             <div className="grid grid-cols-4 gap-4">
                 <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
                     <RotateCcw className="h-5 w-5" />
-                    <span>Again</span>
-                    <span className="text-xs opacity-70">&lt; 1m</span>
+                    <span>Tekrar</span>
+                    <span className="text-xs opacity-70">&lt; 1d</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
-                    <span className="text-lg font-bold">Hard</span>
-                    <span className="text-xs opacity-70">2d</span>
+                    <span className="text-lg font-bold">Zor</span>
+                    <span className="text-xs opacity-70">2g</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
-                    <span className="text-lg font-bold">Good</span>
-                    <span className="text-xs opacity-70">4d</span>
+                    <span className="text-lg font-bold">İyi</span>
+                    <span className="text-xs opacity-70">4g</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
                     <Check className="h-5 w-5" />
-                    <span>Easy</span>
-                    <span className="text-xs opacity-70">7d</span>
+                    <span>Kolay</span>
+                    <span className="text-xs opacity-70">7g</span>
                 </Button>
             </div>
             <div className="text-center text-xs text-muted-foreground mt-2">
-                Use number keys <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> to rate
+                Puanlamak için <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> tuşlarını kullanın
             </div>
         </div>
     );
