@@ -44,10 +44,10 @@ export class NoteService {
 
                 if (!module) throw new Error("Module not found");
 
-                // If module is private and not owned by user, access denied (unless explicitly shared)
-                // But for now, let's be permissive about creating PERSONAL notes.
-                // A note is private to the user. Does it matter if they have 'access' to the module technically?
-                // Yes, to prevent junk data linking.
+                // SECURITY FIX: If module is not forkable (public) and user is not owner, deny access.
+                if (!module.isForkable && module.ownerId !== userId) {
+                    throw new Error("Access Denied: Cannot take notes on a private module you do not own.");
+                }
             }
         }
 

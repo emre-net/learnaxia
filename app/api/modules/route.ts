@@ -5,13 +5,19 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 // Validation Schema
+const ItemSchema = z.object({
+    content: z.record(z.string(), z.any()),
+    order: z.number().optional(),
+    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']).optional(),
+});
+
 const CreateModuleSchema = z.object({
     title: z.string().min(1, "Başlık zorunludur").max(100),
     description: z.string().optional(),
     type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']),
     isForkable: z.boolean().optional(),
     status: z.enum(['DRAFT', 'ACTIVE']).optional(),
-    items: z.array(z.any()).optional(),
+    items: z.array(ItemSchema).optional(),
     category: z.string().optional(),
     subCategory: z.string().optional(),
 });
