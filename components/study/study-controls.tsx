@@ -125,20 +125,20 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                 <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
                     <RotateCcw className="h-5 w-5" />
                     <span>{dict.rate.again}</span>
-                    <span className="text-xs opacity-70">&lt; 1d</span>
+                    <span className="text-xs opacity-70">{dict.rate.againTime}</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
                     <span className="text-lg font-bold">{dict.rate.hard}</span>
-                    <span className="text-xs opacity-70">2g</span>
+                    <span className="text-xs opacity-70">{dict.rate.hardTime}</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
                     <span className="text-lg font-bold">{dict.rate.good}</span>
-                    <span className="text-xs opacity-70">4g</span>
+                    <span className="text-xs opacity-70">{dict.rate.goodTime}</span>
                 </Button>
                 <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
                     <Check className="h-5 w-5" />
                     <span>{dict.rate.easy}</span>
-                    <span className="text-xs opacity-70">7g</span>
+                    <span className="text-xs opacity-70">{dict.rate.easyTime}</span>
                 </Button>
             </div>
             <div className="text-center text-xs text-muted-foreground mt-2">

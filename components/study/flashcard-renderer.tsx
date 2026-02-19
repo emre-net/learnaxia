@@ -50,7 +50,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
                         )}
-                        <span className="mt-8 text-xs text-muted-foreground font-mono">[{dict.flipInstruction}]</span>
+                        <span className="mt-8 text-xs text-muted-foreground font-mono">[{dict.flipHint}]</span>
                     </div>
                 </Card>
 

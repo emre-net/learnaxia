@@ -21,8 +21,13 @@ const en = {
             again: "Again",
             hard: "Hard",
             good: "Good",
-            easy: "Easy"
+            easy: "Easy",
+            againTime: "< 1m",
+            hardTime: "2d",
+            goodTime: "4d",
+            easyTime: "7d"
         },
+        flipHint: "Space or Click to Flip",
         keyboardHint: "Use keys 1-4 to rate",
         summary: {
             title: "Session Complete!",
@@ -59,8 +64,13 @@ const tr = {
             again: "Tekrar",
             hard: "Zor",
             good: "İyi",
-            easy: "Kolay"
+            easy: "Kolay",
+            againTime: "< 1dk",
+            hardTime: "2g",
+            goodTime: "4g",
+            easyTime: "7g"
         },
+        flipHint: "Çevirmek için Boşluk veya Tıkla",
         keyboardHint: "Puanlamak için 1-4 tuşlarını kullanın",
         summary: {
             title: "Çalışma Tamamlandı!",

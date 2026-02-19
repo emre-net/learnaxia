@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useRef } from "react";
 
 export function GapRenderer({ item }: { item: any }) {
     const { setFeedback, feedback, setCorrectCount, correctCount, setWrongCount, wrongCount } = useStudyStore();
@@ -73,6 +74,8 @@ export function GapRenderer({ item }: { item: any }) {
         return gapIndices.indexOf(partIndex);
     };
 
+    const inputRefs = useRef<HTMLInputElement[]>([]);
+
     return (
         <div className="w-full max-w-3xl flex flex-col gap-8">
             <Card className="p-8 text-center border-2 shadow-sm min-h-[300px] flex flex-col items-center justify-center gap-8">
@@ -102,6 +105,9 @@ export function GapRenderer({ item }: { item: any }) {
                             return (
                                 <span key={i} className="inline-block mx-1 align-middle">
                                     <Input
+                                        ref={(el) => {
+                                            if (el) inputRefs.current[gapIndex] = el;
+                                        }}
                                         value={answer}
                                         onChange={(e) => handleInputChange(gapIndex, e.target.value)}
                                         className={cn(
@@ -114,7 +120,12 @@ export function GapRenderer({ item }: { item: any }) {
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 // If it's the last input, check answer
-                                                if (gapIndex === gapIndices.length - 1) checkAnswer();
+                                                if (gapIndex === gapIndices.length - 1) {
+                                                    checkAnswer();
+                                                } else {
+                                                    // Focus next gap
+                                                    inputRefs.current[gapIndex + 1]?.focus();
+                                                }
                                             }
                                         }}
                                     />
