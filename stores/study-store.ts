@@ -91,7 +91,8 @@ export const useStudyStore = create<StudyState>()(
 
             nextItem: () => {
                 const { currentIndex, items } = get();
-                if (currentIndex < items.length - 1) {
+                // Allow going past the last item to trigger "completion" state
+                if (currentIndex < items.length) {
                     set({
                         currentIndex: currentIndex + 1,
                         isFlipped: false,

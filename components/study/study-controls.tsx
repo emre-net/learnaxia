@@ -94,10 +94,21 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
             // StudyControls only needs to show "Next" when feedback is present.
             return null;
         }
+
+        const isLastItem = currentIndex === items.length - 1;
+
         return (
             <div className="flex gap-4 mt-8 w-full max-w-md">
-                <Button className="w-full text-lg h-12" size="lg" onClick={handleNextItem}>
-                    Next Question <ArrowRight className="ml-2 h-5 w-5" />
+                <Button
+                    className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
+                    size="lg"
+                    onClick={handleNextItem}
+                >
+                    {isLastItem ? (
+                        <>Finish Session <Check className="ml-2 h-5 w-5" /></>
+                    ) : (
+                        <>Next Question <ArrowRight className="ml-2 h-5 w-5" /></>
+                    )}
                 </Button>
             </div>
         );
@@ -111,6 +122,10 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
             </div>
         );
     }
+
+    // Check if last item for Flashcards too (though UI doesn't change much for rating buttons)
+    // We could add a "Finish" indicator, but the rating action naturally moves forward.
+    // The store update will handle the redirection.
 
     return (
         <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
