@@ -157,8 +157,10 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
         <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-8">
             {/* Header */}
             <div className="flex flex-col gap-4">
-                <Button variant="ghost" className="w-fit -ml-4" onClick={() => router.back()}>
-                    <ChevronLeft className="mr-2 h-4 w-4" /> Kitaplığa Dön
+                <Button variant="ghost" className="w-fit -ml-4" asChild>
+                    <Link href="/dashboard/library">
+                        <ChevronLeft className="mr-2 h-4 w-4" /> Kitaplığa Dön
+                    </Link>
                 </Button>
 
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
