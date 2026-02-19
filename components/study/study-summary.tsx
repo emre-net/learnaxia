@@ -9,12 +9,18 @@ import { useRouter } from "next/navigation";
 
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { useSettingsStore } from "@/stores/settings-store";
+import { playStudySound } from "@/lib/audio";
+import { useEffect } from "react";
 
 export function StudySummary() {
     const { correctCount, wrongCount, moduleId, endSession } = useStudyStore();
     const router = useRouter();
     const { language } = useSettingsStore();
     const dict = getDictionary(language).study.summary;
+
+    useEffect(() => {
+        playStudySound('SUCCESS');
+    }, []);
 
     const total = correctCount + wrongCount;
     const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;

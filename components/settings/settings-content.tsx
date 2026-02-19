@@ -308,10 +308,22 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                             <Label className="text-base">Ses Efektleri</Label>
                                             <p className="text-xs text-muted-foreground">Çalışma sırasında doğru/yanlış bildirimleri için ses çal.</p>
                                         </div>
-                                        <Switch
-                                            checked={soundEnabled}
-                                            onCheckedChange={setSoundEnabled}
-                                        />
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-xs h-7 px-2"
+                                                onClick={() => {
+                                                    import("@/lib/audio").then(m => m.playStudySound('SUCCESS'));
+                                                }}
+                                            >
+                                                Test Et
+                                            </Button>
+                                            <Switch
+                                                checked={soundEnabled}
+                                                onCheckedChange={setSoundEnabled}
+                                            />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
