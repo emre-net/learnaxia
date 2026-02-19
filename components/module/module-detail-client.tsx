@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useSettingsStore } from "@/stores/settings-store";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, Play, Plus, Edit, MoreVertical, Layers, ArrowRight, Copy, RotateCw } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -236,7 +238,9 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                     {index + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-lg mb-1">{item.content?.question || item.content?.front || "Untitled Item"}</p>
+                                    <p className="font-medium text-lg mb-1">
+                                        {item.content?.question || item.content?.front || item.content?.statement || getStudyDictionary(useSettingsStore.getState().language).untitledItem}
+                                    </p>
                                     <div className="text-muted-foreground flex items-center gap-2">
                                         <ArrowRight className="h-4 w-4" />
                                         <span className="line-clamp-1">
