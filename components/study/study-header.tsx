@@ -22,7 +22,7 @@ export function StudyHeader() {
         <header className="w-full max-w-5xl flex items-center justify-between py-4 mb-8">
             <div className="flex items-center gap-4 flex-1">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/modules/${moduleId}`}>
+                    <Link href={`/dashboard/modules/${moduleId}`}>
                         <X className="h-5 w-5" />
                     </Link>
                 </Button>

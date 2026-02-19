@@ -59,7 +59,7 @@ export function StudySummary() {
                         </Button>
                     ) : (
                         <Button className="h-12" asChild onClick={endSession}>
-                            <Link href={`/modules/${moduleId}`}>
+                            <Link href={`/dashboard/modules/${moduleId}`}>
                                 <Home className="mr-2 h-4 w-4" /> Back to Module
                             </Link>
                         </Button>
