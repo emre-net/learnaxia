@@ -54,7 +54,7 @@ export class StudyService {
                 }
                 // Ensure options exist for TF
                 if (!content.options || content.options.length === 0) {
-                    content.options = ["Doğru", "Yanlış"];
+                    content.options = ["True", "False"];
                 }
             }
 

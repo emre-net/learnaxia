@@ -93,7 +93,11 @@ export function QuizRenderer({ item }: { item: any }) {
                                 <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center">
                                     {idx + 1}
                                 </span>
-                                <span className="mr-auto text-left">{option}</span>
+                                <span className="mr-auto text-left">
+                                    {(option === 'True' || option === 'False')
+                                        ? (dict[option.toLowerCase() as 'true' | 'false'] as string)
+                                        : option}
+                                </span>
                                 {feedback && isCorrect && (
                                     <motion.div
                                         initial={{ scale: 0 }}
@@ -140,7 +144,11 @@ export function QuizRenderer({ item }: { item: any }) {
                             ) : (
                                 <>
                                     <XCircle className="h-8 w-8" />
-                                    <span>{dict.wrong.replace('{answer}', item.content.answer)}</span>
+                                    <span>
+                                        {dict.wrong.replace('{answer}', (item.content.answer === 'True' || item.content.answer === 'False')
+                                            ? (dict[item.content.answer.toLowerCase() as 'true' | 'false'] as string)
+                                            : item.content.answer)}
+                                    </span>
                                 </>
                             )}
                         </div>
