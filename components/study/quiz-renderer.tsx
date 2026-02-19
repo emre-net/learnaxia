@@ -7,7 +7,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 
 export function QuizRenderer({ item }: { item: any }) {
-    const { selectedOption, setSelectedOption, feedback } = useStudyStore();
+    const {
+        selectedOption,
+        setSelectedOption,
+        feedback,
+        setFeedback,
+        setCorrectCount,
+        correctCount,
+        setWrongCount,
+        wrongCount
+    } = useStudyStore();
 
     // Ensure options exist
     const options = item.content.options || [];
@@ -60,7 +69,18 @@ export function QuizRenderer({ item }: { item: any }) {
                                     feedback && isCorrect && "bg-green-600 hover:bg-green-700 text-white border-green-600",
                                     feedback && isSelected && !isCorrect && "bg-red-600 hover:bg-red-700 text-white border-red-600"
                                 )}
-                                onClick={() => !feedback && setSelectedOption(option)}
+                                onClick={() => {
+                                    if (feedback) return;
+                                    setSelectedOption(option);
+
+                                    // Immediate Check Logic
+                                    const isCorrect = option === item.content.answer;
+                                    setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
+
+                                    // Note: State updates might be batched, but we use the local variable isCorrect
+                                    if (isCorrect) setCorrectCount(correctCount + 1);
+                                    else setWrongCount(wrongCount + 1);
+                                }}
                                 disabled={!!feedback}
                             >
                                 <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center">

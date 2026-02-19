@@ -92,19 +92,9 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
             // GapRenderer handles its own check button.
             if (currentItem.type === 'GAP') return null;
 
-            // For MC/TF, show Check button
-            return (
-                <div className="flex gap-4 mt-8 w-full max-w-md">
-                    <Button
-                        className="w-full text-lg h-12"
-                        size="lg"
-                        onClick={handleQuizCheck}
-                        disabled={!selectedOption}
-                    >
-                        Kontrol Et
-                    </Button>
-                </div>
-            );
+            // For MC/TF, check is now immediate upon selection.
+            // So we wait for feedback to appear.
+            return null;
         }
 
         const isLastItem = currentIndex === items.length - 1;
