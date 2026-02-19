@@ -98,7 +98,7 @@ export default function StudyPage() {
                     return;
                 }
 
-                initSession(moduleId, data.items, mode);
+                initSession(moduleId, data.items, mode, data.resumedFromIndex);
             } catch (err: any) {
                 console.error(err);
                 setError(err.message || dict.errorStarting);

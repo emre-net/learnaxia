@@ -89,7 +89,7 @@ export class ModuleService {
      * Retrieves user's library modules.
      */
     static async getUserLibrary(userId: string) {
-        return await prisma.userModuleLibrary.findMany({
+        const library = await prisma.userModuleLibrary.findMany({
             where: { userId },
             include: {
                 module: {
@@ -120,6 +120,41 @@ export class ModuleService {
             },
             orderBy: { lastInteractionAt: 'desc' }
         });
+
+        // Fetch solved counts for each module
+        const moduleIds = library.map(item => item.moduleId);
+        const progressCounts = await prisma.itemProgress.groupBy({
+            by: ['itemId'],
+            where: {
+                userId,
+                itemId: { in: (await prisma.item.findMany({ where: { moduleId: { in: moduleIds } }, select: { id: true } })).map(i => i.id) }
+            },
+            _count: true
+        });
+
+        // Map counts back to modules
+        // Note: Faster to just get counts per module if possible. 
+        // Let's just fetch all ItemProgress for these modules and group by moduleId.
+        const allProgress = await prisma.itemProgress.findMany({
+            where: {
+                userId,
+                item: { moduleId: { in: moduleIds } }
+            },
+            select: {
+                item: { select: { moduleId: true } }
+            }
+        });
+
+        const solvedMap = allProgress.reduce((acc, curr) => {
+            const mid = curr.item.moduleId;
+            acc[mid] = (acc[mid] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return library.map(item => ({
+            ...item,
+            solvedCount: solvedMap[item.moduleId] || 0
+        }));
     }
 
     /**

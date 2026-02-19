@@ -128,7 +128,8 @@ export class StudyService {
                 type: module.type
             },
             items,
-            mode
+            mode,
+            resumedFromIndex: itemProgresses.length > 0 && itemProgresses.length < module.items.length ? itemProgresses.length : 0
         };
     }
 }

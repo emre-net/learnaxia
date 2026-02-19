@@ -46,7 +46,9 @@ const en = {
             focusMistakes: "Focus on Mistakes",
             shuffle: "Shuffle Review",
             delete: "Delete Item",
-            optionsTitle: "Select Study Mode"
+            optionsTitle: "Select Study Mode",
+            startStudy: "Start Studying",
+            resumeStudy: "Continue Studying"
         }
     }
 };
@@ -98,7 +100,9 @@ const tr = {
             focusMistakes: "Yanlışlara Odaklan",
             shuffle: "Karışık Tekrar",
             delete: "Öğeyi Sil",
-            optionsTitle: "Çalışma Modu Seçin"
+            optionsTitle: "Çalışma Modu Seçin",
+            startStudy: "Çalışmaya Başla",
+            resumeStudy: "Çalışmaya Devam Et"
         }
     }
 };

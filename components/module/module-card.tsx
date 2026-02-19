@@ -29,11 +29,12 @@ export type ModuleCardProps = {
         owner?: { handle: string | null; image?: string | null };
         _count: { items: number };
     };
+    solvedCount?: number;
     viewMode?: 'grid' | 'list';
     showOwner?: boolean; // New prop to show owner in Discover page
 };
 
-export function ModuleCard({ module, viewMode = 'grid', showOwner = false }: ModuleCardProps) {
+export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwner = false }: ModuleCardProps) {
     const router = useRouter();
     const { language } = useSettingsStore();
     const dict = getStudyDictionary(language);
@@ -69,7 +70,10 @@ export function ModuleCard({ module, viewMode = 'grid', showOwner = false }: Mod
         <div className="grid gap-3 pt-4">
             <Button className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/study/${module.id}`)}>
                 <Play className="h-6 w-6 fill-current" />
-                {dict.moduleActions?.study || "Çalış"}
+                {solvedCount > 0
+                    ? (dict.moduleActions?.resumeStudy || "Çalışmaya Devam Et")
+                    : (dict.moduleActions?.startStudy || "Çalışmaya Başla")
+                }
             </Button>
 
             <Button variant="outline" className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/dashboard/modules/${module.id}`)}>

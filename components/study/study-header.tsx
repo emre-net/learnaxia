@@ -6,10 +6,12 @@ import { useStudyStore } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { X } from "lucide-react";
-import Link from "next/link";
 import { NotesSidebar } from "@/components/notes/notes-sidebar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 export function StudyHeader() {
+    const router = useRouter();
     const {
         items,
         currentIndex,
@@ -25,14 +27,40 @@ export function StudyHeader() {
 
     const progressValue = ((currentIndex) / items.length) * 100;
 
+    const handleExit = () => {
+        router.push(`/dashboard/modules/${moduleId}`);
+    };
+
     return (
         <header className="w-full max-w-5xl flex items-center justify-between py-4 mb-8">
             <div className="flex items-center gap-4 flex-1">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/dashboard/modules/${moduleId}`}>
-                        <X className="h-5 w-5" />
-                    </Link>
-                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <X className="h-5 w-5" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                {language === 'tr' ? 'Çıkmak istediğine emin misin?' : 'Are you sure you want to exit?'}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {language === 'tr'
+                                    ? `İlerlemen (${currentIndex + 1}/${items.length}) kaydedilecek. İstediğin zaman kaldığın yerden devam edebilirsin.`
+                                    : `Your progress (${currentIndex + 1}/${items.length}) will be saved. You can resume anytime from where you left off.`}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>
+                                {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+                            </AlertDialogCancel>
+                            <AlertDialogAction onClick={handleExit} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                {language === 'tr' ? 'Çıkış Yap' : 'Exit'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <div className="flex flex-col w-full max-w-xs gap-1">
                     <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{dict.progress}</span>

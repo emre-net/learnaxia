@@ -38,7 +38,7 @@ interface StudyState {
     skipped: number;
 
     // Actions
-    initSession: (moduleId: string, items: StudyItem[], mode: StudyMode) => void;
+    initSession: (moduleId: string, items: StudyItem[], mode: StudyMode, startIndex?: number) => void;
     setIsFlipped: (value: boolean) => void;
     setSelectedOption: (option: string | null) => void;
     setFeedback: (feedback: 'CORRECT' | 'WRONG' | null) => void;
@@ -66,18 +66,18 @@ export const useStudyStore = create<StudyState>()(
             wrongCount: 0,
             skipped: 0,
 
-            initSession: (moduleId, items, mode) => {
+            initSession: (moduleId, items, mode, startIndex = 0) => {
                 set({
                     sessionId: crypto.randomUUID(),
                     moduleId,
                     items,
                     mode,
-                    currentIndex: 0,
+                    currentIndex: startIndex,
                     startTime: new Date(),
                     isFlipped: false,
                     selectedOption: null,
                     feedback: null,
-                    correctCount: 0,
+                    correctCount: startIndex, // Assume already solved are correct for stats? User didn't specify, but better than 0 if we want accuracy.
                     wrongCount: 0,
                     skipped: 0
                 });
