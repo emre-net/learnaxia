@@ -121,35 +121,30 @@ export class ModuleService {
             orderBy: { lastInteractionAt: 'desc' }
         });
 
-        // Fetch solved counts for each module
+        // Fetch solved counts for each module safely
         const moduleIds = library.map(item => item.moduleId);
-        const progressCounts = await prisma.itemProgress.groupBy({
-            by: ['itemId'],
-            where: {
-                userId,
-                itemId: { in: (await prisma.item.findMany({ where: { moduleId: { in: moduleIds } }, select: { id: true } })).map(i => i.id) }
-            },
-            _count: true
+
+        // Strategy: Get count of unique solved items per module for this user
+        const solvedCounts = await Promise.all(moduleIds.map(async (mid) => {
+            const count = await prisma.itemProgress.count({
+                where: {
+                    userId,
+                    lastResult: 'CORRECT',
+                    item: { moduleId: mid }
+                }
+            });
+            return { mid, count };
+        }));
+
+        const solvedMap: Record<string, number> = {};
+        solvedCounts.forEach(({ mid, count }) => {
+            solvedMap[mid] = count;
         });
 
-        // Map counts back to modules
-        // Note: Faster to just get counts per module if possible. 
-        // Let's just fetch all ItemProgress for these modules and group by moduleId.
-        const allProgress = await prisma.itemProgress.findMany({
-            where: {
-                userId,
-                item: { moduleId: { in: moduleIds } }
-            },
-            select: {
-                item: { select: { moduleId: true } }
-            }
-        });
-
-        const solvedMap = allProgress.reduce((acc, curr) => {
-            const mid = curr.item.moduleId;
-            acc[mid] = (acc[mid] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
+        return library.map(item => ({
+            ...item,
+            solvedCount: solvedMap[item.moduleId] || 0
+        }));
 
         return library.map(item => ({
             ...item,

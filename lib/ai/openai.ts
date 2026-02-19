@@ -31,7 +31,7 @@ const GapSchema = z.object({
 });
 
 const TFSchema = z.object({
-    type: z.literal("TF"),
+    type: z.literal("TRUE_FALSE"),
     statement: z.string(),
     answer: z.enum(["True", "False"]),
     explanation: z.string().optional()
@@ -70,7 +70,7 @@ export class OpenAIService {
           { "type": "FLASHCARD", "front": "...", "back": "..." },
           { "type": "MC", "question": "...", "options": ["..."], "answer": "...", "explanation": "..." },
           { "type": "GAP", "text": "The {{capital}} is...", "answers": ["capital"] },
-          { "type": "TF", "statement": "...", "answer": "True", "explanation": "..." }
+          { "type": "TRUE_FALSE", "statement": "...", "answer": "True", "explanation": "..." }
         ]
       }
     `;
@@ -99,7 +99,7 @@ export class OpenAIService {
             { type: "FLASHCARD", front: `${topic} Basic Concept`, back: "A fundamental idea." },
             { type: "MC", question: `What is true about ${topic}?`, options: ["Option A", "Option B", "Option C", "Option D"], answer: "Option A", explanation: "Because it is true." },
             { type: "GAP", text: `This is a {{gap}} fill exercise about ${topic}.`, answers: ["gap"] },
-            { type: "TF", statement: `${topic} is interesting.`, answer: "True", explanation: "Subjective but accepted." }
+            { type: "TRUE_FALSE", statement: `${topic} is interesting.`, answer: "True", explanation: "Subjective but accepted." }
         ];
     }
 }

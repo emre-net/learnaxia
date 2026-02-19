@@ -84,7 +84,7 @@ async function main() {
             type: "TRUE_FALSE",
             items: [
                 {
-                    type: "TF", // Testing TF normalization
+                    type: "TRUE_FALSE", // Testing TF normalization
                     content: {
                         statement: "Dünya düzdür.",
                         answer: "False",
@@ -100,7 +100,7 @@ async function main() {
                     }
                 },
                 {
-                    type: "TF",
+                    type: "TRUE_FALSE",
                     content: {
                         statement: "İnsan vücudundaki en büyük organ deridir.",
                         answer: "True",

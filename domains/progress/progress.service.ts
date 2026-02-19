@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { calculateSM2, SM2Input, SM2_CONFIG } from "@/lib/sm2";
+import { ItemType } from "@/lib/types";
 
 export class ProgressService {
 

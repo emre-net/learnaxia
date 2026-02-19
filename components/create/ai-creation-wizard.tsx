@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 const aiConfigSchema = z.object({
     topic: z.string().min(10, "Text must be at least 10 characters").max(20000), // Increased for large docs
     count: z.number().min(3).max(20),
-    type: z.enum(["FLASHCARD", "MC", "GAP", "TF"]) // Changed to single type
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]) // Changed to single type
 });
 
 type AIConfig = z.infer<typeof aiConfigSchema>;
@@ -209,7 +209,7 @@ export function AICreationWizard() {
                             <div className="space-y-3">
                                 <Label>Content Type</Label>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {["FLASHCARD", "MC", "GAP", "TF"].map((type) => (
+                                    {["FLASHCARD", "MC", "GAP", "TRUE_FALSE"].map((type) => (
                                         <div
                                             key={type}
                                             className={`flex items-center space-x-2 border p-3 rounded-lg cursor-pointer transition-all ${config.type === type ? 'border-purple-500 bg-purple-500/5 ring-1 ring-purple-500' : 'hover:bg-muted/50'}`}
@@ -219,7 +219,7 @@ export function AICreationWizard() {
                                                 {config.type === type && <div className="h-2 w-2 rounded-full bg-purple-500" />}
                                             </div>
                                             <label className="text-sm font-medium leading-none cursor-pointer w-full">
-                                                {type === 'MC' ? 'Multiple Choice' : type === 'TF' ? 'True/False' : type === 'GAP' ? 'Gap Fill' : 'Flashcard'}
+                                                {type === 'MC' ? 'Multiple Choice' : type === 'TRUE_FALSE' ? 'True/False' : type === 'GAP' ? 'Gap Fill' : 'Flashcard'}
                                             </label>
                                         </div>
                                     ))}
@@ -329,7 +329,7 @@ export function AICreationWizard() {
                                         </div>
                                     )}
 
-                                    {item.type === 'TF' && (
+                                    {item.type === 'TRUE_FALSE' && (
                                         <div className="mt-2">
                                             <p className="font-medium">{item.statement}</p>
                                             <p className={`mt-1 font-bold ${item.answer === 'True' ? 'text-green-500' : 'text-red-500'}`}>{item.answer}</p>

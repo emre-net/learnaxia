@@ -98,11 +98,14 @@ export function QuizRenderer({ item }: { item: any }) {
                                     {idx + 1}
                                 </span>
                                 <div className="mr-auto text-left prose dark:prose-invert prose-sm">
-                                    <ReactMarkdown>
-                                        {(option === 'True' || option === 'False')
-                                            ? (dict[option.toLowerCase() as 'true' | 'false'] as string)
-                                            : option}
-                                    </ReactMarkdown>
+                                    {/* Robust T/F Localization */}
+                                    {item.type === 'TRUE_FALSE' || item.type === 'TF' ? (
+                                        <ReactMarkdown>
+                                            {option === 'True' ? dict.true : option === 'False' ? dict.false : option}
+                                        </ReactMarkdown>
+                                    ) : (
+                                        <ReactMarkdown>{option}</ReactMarkdown>
+                                    )}
                                 </div>
                                 {feedback && isCorrect && (
                                     <motion.div

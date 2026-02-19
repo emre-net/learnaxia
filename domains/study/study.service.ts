@@ -1,7 +1,5 @@
-import prisma from "@/lib/prisma"; // Fixed import for build
-import { SM2_CONFIG } from "@/lib/sm2";
-
-export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW' | 'QUIZ' | 'AI_SMART';
+import prisma from "@/lib/prisma";
+import { ItemType, StudyMode } from "@/lib/types";
 
 export class StudyService {
     static async startSession(userId: string, moduleId: string, mode: StudyMode) {
@@ -47,7 +45,7 @@ export class StudyService {
 
             if (type === 'MULTIPLE_CHOICE') type = 'MC';
             if (type === 'GAP_FILL') type = 'GAP';
-            if (type === 'TF' || type === 'TRUE_FALSE') {
+            if (type === 'TRUE_FALSE') {
                 type = 'MC'; // Render TF as Multiple Choice (Quiz)
                 if (!content.question && content.statement) {
                     content.question = content.statement;
@@ -111,7 +109,14 @@ export class StudyService {
 
 
 
-        // 6. Create Session Log
+        // 6. Find Resumption Index (Improved)
+        // Find the index of the first item that doesn't have a CORRECT progress
+        const firstUnsolvedIndex = module.items.findIndex(item => {
+            const progress = itemProgresses.find(p => p.itemId === item.id);
+            return !progress || progress.lastResult !== 'CORRECT';
+        });
+
+        // 7. Create Session Log
         const session = await prisma.learningSession.create({
             data: {
                 userId,
@@ -129,7 +134,7 @@ export class StudyService {
             },
             items,
             mode,
-            resumedFromIndex: itemProgresses.length > 0 && itemProgresses.length < module.items.length ? itemProgresses.length : 0
+            resumedFromIndex: firstUnsolvedIndex >= 0 ? firstUnsolvedIndex : 0
         };
     }
 }
