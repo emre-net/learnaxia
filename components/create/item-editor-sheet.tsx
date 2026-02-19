@@ -56,18 +56,55 @@ export function ItemEditorSheet({
     }, [open, initialData]);
 
     const handleSave = () => {
-        if (!question || !answer) return; // Validation
+        // Validation
+        if (!question) return;
+        if (type !== 'GAP' && !answer) return; // Flashcard/MC/TF needs explict answer field
+        if (type === 'GAP' && !question.includes('{{')) {
+            toast({ title: "Hata", description: "Lütfen en az bir boşluk ekleyin (metni seçip gizleyin).", variant: "destructive" });
+            return;
+        }
+
+        // Logic to extract answers for GAP
+        let finalAnswer = answer;
+        let finalSolution = solution;
+        let finalOptions = type === 'MC' ? options : undefined;
+        let finalQuestion = question;
+
+        if (type === 'GAP') {
+            // Extract content between {{ }}
+            const matches = question.match(/\{\{(.*?)\}\}/g);
+            if (matches) {
+                const answers = matches.map(m => m.slice(2, -2));
+                // For GAP, we store the full text with braces in 'text' (mapped to question/front for now)
+                // And answers array.
+                // But our schema uses 'question' in general. 
+                // Let's store: content: { text: question, answers: [...] }
+                // The main handler expects 'question', 'answer'.
+
+                // Let's map it to match existing GapRenderer expectations
+                // Renderer uses: item.content.text and item.content.answers
+
+                // We'll return a structure that the parent (ContentEditorStep) and Service can handle.
+                // Ideally we normalize here.
+                finalQuestion = question; // The text with {{words}}
+                finalAnswer = answers[0]; // Primary answer (legacy support)
+            }
+        }
 
         const newItem = {
-            id: id || generateId(), // Preserve ID if editing, else generate UUID
-            type: type, // Inherit from module type
+            id: id || generateId(),
+            type: type,
             content: {
-                question: question,
-                answer: answer,
-                solution: solution, // Renamed from explanation
-                options: type === 'MC' ? options : undefined
+                question: finalQuestion, // Used for generic view
+                answer: finalAnswer,
+                solution: finalSolution,
+                options: finalOptions,
+
+                // Specific fields for GAP
+                text: type === 'GAP' ? finalQuestion : undefined,
+                answers: type === 'GAP' ? (question.match(/\{\{(.*?)\}\}/g) || []).map(m => m.slice(2, -2)) : undefined
             },
-            isSelected: false // Ensure new items are not selected by default
+            isSelected: false
         };
 
         onSave(newItem);
@@ -96,30 +133,32 @@ export function ItemEditorSheet({
                 </SheetHeader>
 
                 <div className="grid gap-6 py-6">
-                    {/* Question / Front */}
-                    <div className="grid gap-2">
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="question">
-                                {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
-                            </Label>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs text-muted-foreground hover:text-primary"
-                                onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
-                            >
-                                📷 Görsel Ekle
-                            </Button>
+                    {/* Question / Front - Hide for GAP (handled separately) */}
+                    {type !== 'GAP' && (
+                        <div className="grid gap-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="question">
+                                    {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
+                                </Label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-muted-foreground hover:text-primary"
+                                    onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
+                                >
+                                    📷 Görsel Ekle
+                                </Button>
+                            </div>
+                            <Textarea
+                                id="question"
+                                placeholder="Sorunuzu buraya yazın..."
+                                className="resize-none min-h-[100px]"
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
+                            />
                         </div>
-                        <Textarea
-                            id="question"
-                            placeholder={type === 'GAP' ? "Örn: Ankara Türkiye'nin [...] şehridir." : "Sorunuzu buraya yazın..."}
-                            className="resize-none min-h-[100px]"
-                            value={question}
-                            onChange={(e) => setQuestion(e.target.value)}
-                        />
-                    </div>
+                    )}
 
                     {/* Answer / Back (Flashcard) */}
                     {type === 'FLASHCARD' && (
@@ -221,14 +260,66 @@ export function ItemEditorSheet({
                     {/* GAP Fill */}
                     {type === 'GAP' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="gap-answer">Cevap (Eksik Kelime)</Label>
-                            <Input
-                                id="gap-answer"
-                                placeholder="Boşluğa gelecek kelimeyi yazın..."
-                                value={answer}
-                                onChange={(e) => setAnswer(e.target.value)}
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="question">Boşluk Doldurma Cümlesi</Label>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                    onClick={() => {
+                                        const textarea = document.getElementById('question') as HTMLTextAreaElement;
+                                        if (!textarea) return;
+
+                                        const start = textarea.selectionStart;
+                                        const end = textarea.selectionEnd;
+                                        const text = question;
+
+                                        if (start === end) {
+                                            toast({ title: "Metin Seçilmedi", description: "Lütfen gizlemek istediğiniz kelimeyi seçin.", variant: "destructive" });
+                                            return;
+                                        }
+
+                                        const selected = text.substring(start, end);
+                                        const before = text.substring(0, start);
+                                        const after = text.substring(end);
+
+                                        // Wrap in double curly braces
+                                        const newText = `${before}{{${selected}}}${after}`;
+                                        setQuestion(newText);
+
+                                        // Auto-extract answers for preview/validation
+                                        // Note: Logic handles extraction on Save/Render
+                                    }}
+                                >
+                                    Seçili Alanı Gizle (Boşluk Yap)
+                                </Button>
+                            </div>
+                            <Textarea
+                                id="question"
+                                placeholder="Cümleyi yazın, gizlemek istediğiniz kelimeyi seçip butona basın."
+                                className="resize-none min-h-[100px] font-mono text-sm"
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
                             />
-                            <p className="text-xs text-muted-foreground">İpucu: Soruda boşluk bırakmak istediğiniz yere [...] yazın.</p>
+
+                            {/* Live Preview of Blanks */}
+                            <div className="p-3 bg-muted/50 rounded-md text-sm">
+                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">Önizleme:</span>
+                                {question.split(/(\{\{.*?\}\})/).map((part, i) => {
+                                    if (part.startsWith('{{') && part.endsWith('}}')) {
+                                        return (
+                                            <span key={i} className="bg-primary/20 text-primary px-1.5 py-0.5 rounded mx-0.5 font-medium border border-primary/30">
+                                                {part.slice(2, -2)}
+                                            </span>
+                                        );
+                                    }
+                                    return <span key={i}>{part}</span>;
+                                })}
+                                {question && !question.includes('{{') && (
+                                    <span className="text-muted-foreground italic opacity-70">Henüz hiç boşluk eklenmedi.</span>
+                                )}
+                            </div>
                         </div>
                     )}
 
