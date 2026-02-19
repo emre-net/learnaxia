@@ -83,15 +83,6 @@ export function QuizRenderer({ item }: { item: any }) {
                                 onClick={() => {
                                     if (feedback) return;
                                     setSelectedOption(option);
-
-                                    // Immediate Check Logic
-                                    const isCorrect = option === item.content.answer;
-                                    setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
-                                    playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
-
-                                    // Note: State updates might be batched, but we use the local variable isCorrect
-                                    if (isCorrect) setCorrectCount(correctCount + 1);
-                                    else setWrongCount(wrongCount + 1);
                                 }}
                                 disabled={!!feedback}
                             >

@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
+import { playStudySound } from "@/lib/audio";
 
 export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     const {
@@ -85,26 +86,36 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]);
 
-    if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+    const handleQuizStep = () => {
         if (!feedback) {
-            // GapRenderer handles its own check button.
-            if (currentItem.type === 'GAP') return null;
+            // First step: Reveal feedback
+            const isCorrect = selectedOption === currentItem.content.answer;
+            setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
+            playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
 
-            // For MC/TF, check is now immediate upon selection.
-            // So we wait for feedback to appear.
-            return null;
+            if (isCorrect) setCorrectCount(correctCount + 1);
+            else setWrongCount(wrongCount + 1);
+        } else {
+            // Second step: Go to next
+            handleNextItem();
         }
+    };
 
+    if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         const isLastItem = currentIndex === items.length - 1;
+
+        if (currentItem.type === 'GAP' && !feedback) return null; // GapRenderer has own check button
 
         return (
             <div className="flex gap-4 mt-8 w-full max-w-md">
                 <Button
-                    className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
+                    className={isLastItem && feedback ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
                     size="lg"
-                    onClick={handleNextItem}
+                    onClick={handleQuizStep}
                 >
-                    {isLastItem ? (
+                    {!feedback ? (
+                        <>{dict.showAnswer || "Cevabı Gör"} <ArrowRight className="ml-2 h-5 w-5" /></>
+                    ) : isLastItem ? (
                         <>{dict.finishSession} <Check className="ml-2 h-5 w-5" /></>
                     ) : (
                         <>{dict.nextQuestion} <ArrowRight className="ml-2 h-5 w-5" /></>
