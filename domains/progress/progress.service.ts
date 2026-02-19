@@ -69,6 +69,7 @@ export class ProgressService {
                     correctCount: { increment: isCorrect ? 1 : 0 },
                     wrongCount: { increment: isCorrect ? 0 : 1 },
                     lastResult: isCorrect ? 'CORRECT' : 'WRONG',
+                    contentHash: item.contentHash,
                     lastReviewedAt: new Date(),
                     // Strength score logic would go here (simplified for now)
                 }

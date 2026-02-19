@@ -29,7 +29,11 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     const currentItem = items[currentIndex];
 
     const handleNextItem = () => {
-        onNext({ itemId: currentItem.id, result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG', quality: 3 });
+        onNext({
+            itemId: currentItem.id,
+            result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG',
+            quality: feedback === 'CORRECT' ? 5 : 1
+        });
     };
 
     const handleRate = (quality: number) => {
