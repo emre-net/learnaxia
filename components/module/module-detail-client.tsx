@@ -249,24 +249,15 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                     </div>
                                 </div>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                                    <Button variant="ghost" size="icon" onClick={() => {
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
                                         setEditingItem(item);
                                         setIsSheetOpen(true);
                                     }}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeleteItem(item.id)}>
-                                                <Trash2 className="mr-2 h-4 w-4" /> Sil
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteItem(item.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             </Card>
                         ))}

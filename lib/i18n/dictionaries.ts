@@ -39,6 +39,14 @@ const en = {
             studyAgain: "Study Again",
             reviewWrong: "Review Wrong ({count})",
             backToModule: "Back to Module"
+        },
+        moduleActions: {
+            study: "Study",
+            review: "Review",
+            focusMistakes: "Focus on Mistakes",
+            shuffle: "Shuffle Review",
+            delete: "Delete Item",
+            optionsTitle: "Select Study Mode"
         }
     }
 };
@@ -79,10 +87,18 @@ const tr = {
             subtitle: "Harika iş çıkardın.",
             accuracy: "Doğruluk",
             correct: "Doğru",
-            review: "Tekrar",
+            review: "Gözden Geçir",
             studyAgain: "Tekrar Çalış",
             reviewWrong: "Yanlışları Çalış ({count})",
             backToModule: "Modüle Dön"
+        },
+        moduleActions: {
+            study: "Çalış",
+            review: "Gözden Geçir",
+            focusMistakes: "Yanlışlara Odaklan",
+            shuffle: "Karışık Tekrar",
+            delete: "Öğeyi Sil",
+            optionsTitle: "Çalışma Modu Seçin"
         }
     }
 };
