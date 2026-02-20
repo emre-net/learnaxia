@@ -1,22 +1,23 @@
 import { Resend } from "resend";
 
 const getResend = () => {
-    const key = process.env.RESEND_API_KEY || "re_build_dummy_key";
-    return new Resend(key);
+  const key = process.env.RESEND_API_KEY || "re_build_dummy_key";
+  return new Resend(key);
 };
 
 export async function sendVerificationEmail(email: string, token: string) {
-    const domain = process.env.AUTH_URL || "http://localhost:3000";
-    const confirmLink = `${domain}/auth/verify?token=${token}`;
+  const domain = process.env.AUTH_URL || "http://localhost:3000";
+  const confirmLink = `${domain}/auth/verify?token=${token}`;
 
-    console.log(`[Mail] Sending verification email to: ${email}`);
+  console.log(`[Mail] Sending verification email to: ${email}`);
 
-    try {
-        const response = await getResend().emails.send({
-            from: process.env.MAIL_FROM || "Learnaxia <no-reply@learnaxia.com>",
-            to: email,
-            subject: "Hesabınızı Aktifleştirin — Learnaxia",
-            html: `
+  try {
+    const response = await getResend().emails.send({
+      from: process.env.MAIL_FROM || "Learnaxia <no-reply@learnaxia.com>",
+      to: email,
+      subject: "Hesabınızı Aktifleştirin — Learnaxia",
+      text: `Learnaxia'ya Hoş Geldiniz! Hesabınızı doğrulamak için şu bağlantıya tıklayın: ${confirmLink}`,
+      html: `
 <div style="background-color: #050510; color: #ffffff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; text-align: center; line-height: 1.5;">
   <div style="max-width: 500px; margin: 0 auto; background: #0f1120; border: 1px solid #1e293b; border-radius: 24px; padding: 48px 32px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);">
     
@@ -55,17 +56,17 @@ export async function sendVerificationEmail(email: string, token: string) {
   </div>
 </div>
             `,
-        });
+    });
 
-        if (response.error) {
-            console.error("[Mail] Resend API Error:", response.error);
-            throw new Error(response.error.message);
-        }
-
-        console.log("[Mail] Email sent successfully:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error("[Mail] Resend Error:", error);
-        throw error;
+    if (response.error) {
+      console.error("[Mail] Resend API Error:", response.error);
+      throw new Error(response.error.message);
     }
+
+    console.log("[Mail] Email sent successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("[Mail] Resend Error:", error);
+    throw error;
+  }
 }
