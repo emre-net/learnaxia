@@ -39,30 +39,47 @@ export default function NewCollectionPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [scope, setScope] = useState<"library" | "discover">("library");
 
-    const { data: libraryItems, isLoading, error, refetch } = useQuery<any[]>({
-        queryKey: ['collection-wizard-modules', scope, scope === 'discover' ? searchQuery : ''],
+    const { data: rawItems, isLoading, error, refetch } = useQuery<any[]>({
+        queryKey: scope === 'library'
+            ? ['library-modules', 'wizard'] // Unified with LibraryClient
+            : ['collection-wizard-discover', searchQuery],
         queryFn: async () => {
+            // Add timestamp to library requests to bypass intermediate caches
             const url = scope === 'discover'
                 ? `/api/modules?scope=discover&search=${encodeURIComponent(searchQuery)}`
-                : '/api/modules';
+                : `/api/modules?v=${new Date().getTime()}`;
 
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch modules');
             const data = await res.json();
 
+            console.log(`[Wizard] API returned ${data.length} items for scope: ${scope}`);
+
             // Normalize data: If scope=library, data is UserModuleLibrary[]. If discover, it's Module[].
             return data.map((item: any) => {
                 const module = item.module || item; // item.module for library, item for discover
+                if (!module || !module.id) {
+                    console.warn("[Wizard] Invalid item structure:", item);
+                    return null;
+                }
                 return {
                     id: module.id,
-                    title: module.title,
-                    type: module.type,
+                    title: module.title || "Başlıksız",
+                    type: module.type || "MODÜL",
                     category: module.category,
                     owner: item.owner || module.owner || null,
                     _count: module._count
                 };
-            });
+            }).filter(Boolean);
         }
+    });
+
+    // Local filtering for library items (matches LibraryClient behavior)
+    const libraryItems = (rawItems || []).filter(item => {
+        if (scope === 'discover') return true; // Server already filtered
+        const query = searchQuery.toLowerCase();
+        return item.title.toLowerCase().includes(query) ||
+            (item.category && item.category.toLowerCase().includes(query));
     });
 
     const handleNext = () => {
@@ -437,6 +454,29 @@ export default function NewCollectionPage() {
                     </div>
                 </div>
             )}
+            {/* Debug Section (Only visible during troubleshooting) */}
+            <div className="mt-20 p-4 border-t border-dashed opacity-20 hover:opacity-100 transition-opacity">
+                <details>
+                    <summary className="text-xs font-mono cursor-pointer uppercase tracking-widest">Sistem Bilgileri (Hata Ayıklama)</summary>
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-[10px] font-mono bg-muted p-4 rounded text-muted-foreground">
+                        <div>
+                            <p>Scope: {scope}</p>
+                            <p>URL: {scope === 'discover' ? `/api/modules?scope=discover&search=${searchQuery}` : '/api/modules'}</p>
+                            <p>Raw Items: {rawItems?.length || 0}</p>
+                            <p>Filtered Items: {libraryItems?.length || 0}</p>
+                        </div>
+                        <div>
+                            <p>Search Query: "{searchQuery}"</p>
+                            <p>Loading: {isLoading ? "Evet" : "Hayır"}</p>
+                            <p>Error: {error ? (error as any).message : "Yok"}</p>
+                            <p>Time: {new Date().toLocaleTimeString()}</p>
+                        </div>
+                        <div className="col-span-2 pt-2 border-t border-border/10">
+                            <p>Raw Data Sample: {JSON.stringify(rawItems?.slice(0, 1), null, 2)}</p>
+                        </div>
+                    </div>
+                </details>
+            </div>
         </div>
     );
 }
