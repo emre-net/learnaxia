@@ -1,8 +1,8 @@
 import { useSettingsStore } from "@/stores/settings-store";
 
 const SOUND_URLS = {
-    SUCCESS: "https://www.soundjay.com/buttons/sounds/button-37.mp3",
-    FAILURE: "https://www.soundjay.com/buttons/sounds/button-10.mp3",
+    SUCCESS: "/sounds/success.ogg",
+    FAILURE: "/sounds/failure.ogg",
 };
 
 export function playStudySound(type: 'SUCCESS' | 'FAILURE') {
