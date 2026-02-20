@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Layers, BookCopy, Heart, Play } from "lucide-react";
+import { Layers, BookCopy, Bookmark, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -79,8 +79,8 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                     <p className="text-sm text-muted-foreground line-clamp-1">{collection.description || "Açıklama yok"}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-red-500">
-                        <Heart className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-primary">
+                        <Bookmark className="h-5 w-5" />
                     </Button>
                     <Link href={`/dashboard/collections/${collection.id}`}>
                         <Button variant="outline" size="sm" className="rounded-lg px-4 h-9">Görüntüle</Button>
@@ -118,7 +118,7 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                         <span>{moduleCount} MODÜL</span>
                     </div>
                     <div className="flex items-center gap-1.5 uppercase tracking-wider">
-                        <Heart className="h-3.5 w-3.5 text-red-500" />
+                        <Bookmark className="h-3.5 w-3.5 text-primary" />
                         <span>{saveCount} KAYDEDİLME</span>
                     </div>
                 </div>
@@ -130,8 +130,8 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                         <span className="text-xs font-semibold text-muted-foreground">@{collection.owner.handle || "user"}</span>
                     </div>
                     <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl transition-all hover:bg-red-50 hover:text-red-500" onClick={handleSave} disabled={isSaving}>
-                            <Heart className="h-4 w-4" />
+                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl transition-all hover:bg-primary/5 hover:text-primary" onClick={handleSave} disabled={isSaving}>
+                            <Bookmark className="h-4 w-4" />
                         </Button>
                         <Button variant="default" className="h-9 rounded-xl px-4 font-bold active:scale-95 transition-transform">
                             Aç <Play className="ml-1.5 h-3.5 w-3.5 fill-current" />

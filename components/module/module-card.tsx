@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, CheckCircle2, FileText, CheckSquare, Pencil, MoreVertical, Layers, Clock, Copy, Play, Save, Heart } from "lucide-react";
+import { BookOpen, CheckCircle2, FileText, CheckSquare, Pencil, MoreVertical, Layers, Clock, Copy, Play, Bookmark } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -122,8 +122,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-red-500">
-                        <Heart className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-primary">
+                        <Bookmark className="h-5 w-5" />
                     </Button>
                     <Button variant="default" onClick={() => setIsOptionsOpen(true)}>Çalış</Button>
                 </div>
@@ -171,7 +171,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <span>{module._count?.items || 0} İçerik</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-semibold">
-                        <Heart className="h-3.5 w-3.5 text-muted-foreground fill-red-500/10 text-red-500" />
+                        <Bookmark className="h-3.5 w-3.5 text-primary" />
                         <span>{saveCount} Kaydedilme</span>
                     </div>
                 </div>
@@ -179,8 +179,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
             <div className="p-5 pt-0 mt-auto flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all border-muted/50" onClick={handleSave} disabled={isSaving}>
-                        <Heart className="h-4 w-4" />
+                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-primary/5 hover:text-primary transition-all border-muted/50" onClick={handleSave} disabled={isSaving}>
+                        <Bookmark className="h-4 w-4" />
                     </Button>
                     {!module.sourceModule && (
                         <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50" title="Kendi kitaplığına ekle ve düzenle" onClick={handleFork}>

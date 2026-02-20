@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Layers, Play, BookOpen, Clock, ChevronLeft, Save, Copy } from "lucide-react";
+import { Layers, Play, BookOpen, Clock, ChevronLeft, Bookmark, Copy } from "lucide-react";
 import Link from "next/link";
 import { ModuleCard } from "@/components/module/module-card";
 import { useState } from "react";
@@ -68,7 +68,7 @@ export function CollectionDetailClient({ collection }: { collection: any }) {
 
                     <div className="flex flex-wrap gap-3 shrink-0">
                         <Button variant="outline" size="lg" className="h-12 px-6 rounded-xl transition-all hover:shadow-md" onClick={handleSave} disabled={isSaving}>
-                            <Save className="mr-2 h-5 w-5" />
+                            <Bookmark className="mr-2 h-5 w-5" />
                             Kitaplığa Kaydet
                         </Button>
                         <Button size="lg" className="h-12 px-8 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all font-bold">
