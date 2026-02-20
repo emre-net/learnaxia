@@ -14,22 +14,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     trustHost: true, // Explicitly trust proxy headers (Railway)
     secret: process.env.AUTH_SECRET,
     ...authConfig,
-    callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.role = (user as any).role || 'USER';
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (token && session.user) {
-                session.user.id = token.id as string;
-                (session.user as any).role = token.role;
-            }
-            return session;
-        },
-    },
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,

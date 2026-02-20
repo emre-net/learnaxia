@@ -5,6 +5,20 @@ export const authConfig = {
         signIn: '/login',
     },
     callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                token.role = (user as any).role || 'USER';
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token && session.user) {
+                session.user.id = token.id as string;
+                (session.user as any).role = token.role;
+            }
+            return session;
+        },
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
@@ -21,9 +35,8 @@ export const authConfig = {
 
             if (isOnDashboard) {
                 if (isLoggedIn) return true;
-                return false; // Redirect unauthenticated users to login page
+                return false; // Redirect to login
             } else if (isLoggedIn) {
-                // Redirect logged-in users away from login page
                 if (nextUrl.pathname === '/login') {
                     return Response.redirect(new URL('/dashboard', nextUrl));
                 }
