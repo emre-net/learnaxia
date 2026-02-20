@@ -52,6 +52,7 @@ export async function GET(req: Request) {
         }
 
         const library = await ModuleService.getUserLibrary(session.user.id);
+        console.log(`[API/MODULES] Fetched library for user ${session.user.id}. Count: ${library.length}`);
         return NextResponse.json(library);
     } catch (error) {
         console.error("Get Library Error:", error);

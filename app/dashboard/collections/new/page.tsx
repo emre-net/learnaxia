@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, ArrowLeft, FolderPlus, Info, BookOpen, Layers, Check, Search, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, FolderPlus, Info, BookOpen, Layers, Check, Search, AlertCircle, Loader2, RotateCw } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants/categories";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,7 +31,7 @@ export default function NewCollectionPage() {
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const { data: libraryItems, isLoading, error } = useQuery<any[]>({
+    const { data: libraryItems, isLoading, error, refetch } = useQuery<any[]>({
         queryKey: ['library-modules'],
         queryFn: async () => {
             console.log("Fetching modules for collection wizard...");
@@ -247,31 +248,42 @@ export default function NewCollectionPage() {
                                     {selectedModuleIds.length} Modül Seçildi
                                 </Badge>
                             </div>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Modüllerde ara..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 h-10 border-2"
-                                />
-                                {/* Hidden Debug Info (Visible only if empty and has libraryItems) */}
-                                {libraryItems && libraryItems.length > 0 && filteredModules?.length === 0 && (
-                                    <div className="mt-2 text-[10px] text-muted-foreground opacity-30 overflow-hidden max-h-20">
-                                        Debug: Items={libraryItems.length}, Raw={JSON.stringify(libraryItems[0]).slice(0, 100)}...
-                                    </div>
-                                )}
-                                {libraryItems && libraryItems.length === 0 && (
-                                    <div className="mt-2 text-[10px] text-muted-foreground opacity-30">
-                                        Debug: API returned empty array.
-                                    </div>
-                                )}
-                                {error && (
-                                    <div className="mt-2 text-[10px] text-red-500 opacity-50">
-                                        Debug Error: {(error as any).message}
-                                    </div>
-                                )}
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Modüllerde ara..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10 h-10 border-2"
+                                    />
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => refetch()}
+                                    title="Kitaplığı Yenile"
+                                    className="h-10 w-10 shrink-0"
+                                >
+                                    <RotateCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                                </Button>
                             </div>
+
+                            {/* Hidden Debug Info (Visible only if empty and has libraryItems) */}
+                            {libraryItems && (
+                                <div className="mt-2 text-[10px] text-muted-foreground opacity-30 flex justify-between items-center">
+                                    <span>Debug: Items={libraryItems.length}</span>
+                                    {libraryItems.length > 0 && (
+                                        <span className="truncate ml-2">Raw={JSON.stringify(libraryItems[0]).slice(0, 50)}...</span>
+                                    )}
+                                </div>
+                            )}
+
+                            {error && (
+                                <div className="mt-2 text-[10px] text-red-500 opacity-50">
+                                    Debug Error: {(error as any).message}
+                                </div>
+                            )}
                         </CardHeader>
                         <CardContent className="p-0 flex-1 overflow-auto max-h-[500px]">
                             {isLoading ? (
@@ -280,10 +292,22 @@ export default function NewCollectionPage() {
                                     <p className="text-muted-foreground font-medium">Modüller yükleniyor...</p>
                                 </div>
                             ) : filteredModules?.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                                    <AlertCircle className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                                    <h3 className="text-lg font-bold">Modül Bulunamadı</h3>
-                                    <p className="text-muted-foreground max-w-xs">Arama kriterlerine uygun modül yok veya kitaplığın boş.</p>
+                                <div className="flex flex-col items-center justify-center p-12 text-center h-full">
+                                    <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                        <Search className="h-8 w-8 text-muted-foreground opacity-20" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Modül Bulunamadı</h3>
+                                    <p className="text-muted-foreground max-w-xs mb-6">
+                                        Kitaplığınızda seçebileceğiniz modül bulunmuyor. Yeni bir modül oluşturun veya keşfetten ekleyin.
+                                    </p>
+                                    <div className="flex gap-3">
+                                        <Button asChild variant="default">
+                                            <Link href="/dashboard/create">Modül Oluştur</Link>
+                                        </Button>
+                                        <Button asChild variant="outline">
+                                            <Link href="/dashboard/discover">Keşfet'e Git</Link>
+                                        </Button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-border">
