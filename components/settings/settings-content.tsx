@@ -21,7 +21,6 @@ import { useSettingsStore } from "@/stores/settings-store";
 
 interface SettingsContentProps {
     user: {
-        name?: string | null;
         email?: string | null;
         image?: string | null;
         handle?: string | null;
@@ -257,20 +256,15 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                 <CardContent className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <Label>Ad Soyad</Label>
-                                            <Input value={user.name || "Ad Belirtilmemiş"} disabled className="bg-muted" />
-                                        </div>
-                                        <div className="space-y-2">
                                             <Label>Kullanıcı Adı</Label>
                                             <div className="flex items-center gap-2">
                                                 <Input value={user.handle || ""} disabled className="bg-muted" />
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>E-posta</Label>
-                                        <Input value={user.email || ""} disabled className="bg-muted" />
-                                        <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
+                                        <div className="space-y-2">
+                                            <Label>E-posta</Label>
+                                            <Input value={user.email || ""} disabled className="bg-muted" />
+                                        </div>
                                     </div>
                                     <div className="pt-2">
                                         <EditProfileDialog user={user} trigger={

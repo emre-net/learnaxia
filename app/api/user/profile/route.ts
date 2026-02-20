@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const profileSchema = z.object({
-    name: z.string().min(1, "İsim boş olamaz.").max(50, "İsim çok uzun.").optional(),
     handle: z.string()
         .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
         .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
@@ -30,7 +29,6 @@ export async function GET(req: Request) {
             where: { id: userId },
             select: {
                 id: true,
-                name: true,
                 handle: true,
                 image: true,
                 createdAt: true,
@@ -72,7 +70,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { handle, name, image, language } = profileSchema.parse(body);
+        const { handle, image, language } = profileSchema.parse(body);
 
         // Check handle uniqueness if provided
         if (handle) {
@@ -89,7 +87,6 @@ export async function PATCH(req: Request) {
             where: { id: session.user.id },
             data: {
                 ...(handle && { handle }),
-                ...(name && { name }),
                 ...(image !== undefined && { image }),
                 ...(language && { language }),
             },

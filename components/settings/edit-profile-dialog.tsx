@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 
 interface EditProfileDialogProps {
     user: {
-        name?: string | null;
         handle?: string | null;
         image?: string | null;
     };
@@ -20,7 +19,6 @@ interface EditProfileDialogProps {
 
 export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(user.name || "");
     const [handle, setHandle] = useState(user.handle || "");
     const [image, setImage] = useState(user.image || "");
     const [isLoading, setIsLoading] = useState(false);
@@ -30,9 +28,8 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
     // Sync state with prop when user data loads
     useEffect(() => {
         if (user.handle) setHandle(user.handle);
-        if (user.name) setName(user.name);
         if (user.image) setImage(user.image);
-    }, [user.handle, user.name, user.image]);
+    }, [user.handle, user.image]);
 
     const handleSave = async () => {
         setIsLoading(true);
@@ -40,7 +37,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ handle, name, image }),
+                body: JSON.stringify({ handle, image }),
             });
 
             if (!res.ok) {
@@ -76,15 +73,6 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">İsim</Label>
-                        <Input
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Adınız"
-                        />
-                    </div>
-                    <div className="grid gap-2">
                         <Label htmlFor="handle">Kullanıcı Adı (Handle)</Label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
@@ -114,7 +102,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                     <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
                         İptal
                     </Button>
-                    <Button onClick={handleSave} disabled={isLoading || !handle || !name}>
+                    <Button onClick={handleSave} disabled={isLoading || !handle}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Kaydet
                     </Button>

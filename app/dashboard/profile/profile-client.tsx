@@ -71,10 +71,10 @@ export function ProfileClient() {
                 <div className="flex items-center gap-6">
                     <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
                         <AvatarImage src={profile?.image} />
-                        <AvatarFallback className="text-2xl">{profile?.name?.charAt(0) || "U"}</AvatarFallback>
+                        <AvatarFallback className="text-2xl">{profile?.handle?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold">{profile?.name}</h1>
+                        <h1 className="text-3xl font-bold">@{profile?.handle || "kullanici"}</h1>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <span className="font-medium">@{profile?.handle || "kullanici"}</span>
                             <span>•</span>
@@ -87,7 +87,7 @@ export function ProfileClient() {
                 </div>
                 <div className="flex gap-2">
                     <EditProfileDialog
-                        user={{ name: profile?.name, handle: profile?.handle, image: profile?.image }}
+                        user={{ handle: profile?.handle, image: profile?.image }}
                         trigger={
                             <Button variant="outline">
                                 <Edit className="h-4 w-4 mr-2" /> Profili Düzenle
