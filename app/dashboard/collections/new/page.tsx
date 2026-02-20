@@ -30,18 +30,26 @@ export default function NewCollectionPage() {
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const { data: libraryItems, isLoading } = useQuery<any[]>({
+    const { data: libraryItems, isLoading, error } = useQuery<any[]>({
         queryKey: ['library-modules'],
         queryFn: async () => {
+            console.log("Fetching modules for collection wizard...");
             const res = await fetch('/api/modules');
-            if (!res.ok) throw new Error('Failed to fetch modules');
-            return res.json();
+            if (!res.ok) {
+                console.error("Failed to fetch modules:", res.status);
+                throw new Error('Failed to fetch modules');
+            }
+            const data = await res.json();
+            console.log("Fetched modules count:", data?.length);
+            return data;
         }
     });
 
-    const filteredModules = libraryItems?.filter(item =>
-        item.module.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredModules = libraryItems?.filter(item => {
+        if (!item || !item.module) return false;
+        const search = searchQuery.trim().toLowerCase();
+        return item.module.title.toLowerCase().includes(search);
+    });
 
     const handleNext = () => {
         if (step === 1 && title.trim()) {
@@ -247,6 +255,22 @@ export default function NewCollectionPage() {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-10 h-10 border-2"
                                 />
+                                {/* Hidden Debug Info (Visible only if empty and has libraryItems) */}
+                                {libraryItems && libraryItems.length > 0 && filteredModules?.length === 0 && (
+                                    <div className="mt-2 text-[10px] text-muted-foreground opacity-30 overflow-hidden max-h-20">
+                                        Debug: Items={libraryItems.length}, Raw={JSON.stringify(libraryItems[0]).slice(0, 100)}...
+                                    </div>
+                                )}
+                                {libraryItems && libraryItems.length === 0 && (
+                                    <div className="mt-2 text-[10px] text-muted-foreground opacity-30">
+                                        Debug: API returned empty array.
+                                    </div>
+                                )}
+                                {error && (
+                                    <div className="mt-2 text-[10px] text-red-500 opacity-50">
+                                        Debug Error: {(error as any).message}
+                                    </div>
+                                )}
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 flex-1 overflow-auto max-h-[500px]">
