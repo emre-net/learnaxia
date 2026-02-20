@@ -12,7 +12,7 @@ export async function sendVerificationEmail(email: string, token: string) {
     console.log(`[Mail] Sending verification email to: ${email}`);
 
     try {
-        const data = await getResend().emails.send({
+        const response = await getResend().emails.send({
             from: process.env.MAIL_FROM || "Learnaxia <no-reply@learnaxia.com>",
             to: email,
             subject: "E-posta Adresinizi Doğrulayın — Learnaxia",
@@ -32,8 +32,14 @@ export async function sendVerificationEmail(email: string, token: string) {
                 </div>
             `,
         });
-        console.log("[Mail] Resend Response:", data);
-        return data;
+
+        if (response.error) {
+            console.error("[Mail] Resend API Error:", response.error);
+            throw new Error(response.error.message);
+        }
+
+        console.log("[Mail] Email sent successfully:", response.data);
+        return response.data;
     } catch (error) {
         console.error("[Mail] Resend Error:", error);
         throw error;
