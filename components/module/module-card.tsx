@@ -185,12 +185,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         {module.description || t('common.noDescription')}
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 pb-2">
-                    <div className="h-24 bg-gradient-to-br from-muted/50 to-muted/10 rounded-md flex items-center justify-center text-muted-foreground/30 border border-dashed">
-                        <span className="text-xs font-medium">{t('common.preview')}</span>
-                    </div>
-                </CardContent>
-                <CardFooter className="text-xs text-muted-foreground flex justify-between border-t py-3 bg-muted/5">
+                <CardFooter className="text-xs text-muted-foreground flex justify-between border-t py-3 bg-muted/5 mt-auto">
                     <span className="flex items-center gap-1 font-medium">
                         <Layers className="h-3 w-3" />
                         {t('common.itemsCount', { count: module._count.items })}

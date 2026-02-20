@@ -77,89 +77,81 @@ export function DiscoverClient() {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-[calc(100vh-100px)] gap-6">
+        <div className="flex flex-col md:flex-row h-full gap-8">
             {/* Sidebar / Filters */}
-            <aside className="w-full md:w-64 flex-shrink-0 space-y-6 md:border-r md:pr-6 overflow-y-auto h-full pb-10">
-                <div className="space-y-4">
-                    <div className="font-semibold flex items-center gap-2">
-                        <Filter className="h-4 w-4" /> Filtreler
+            <aside className="w-full md:w-72 flex-shrink-0 space-y-6 md:border-r md:pr-8 h-fit md:sticky md:top-0">
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="font-bold flex items-center gap-2 text-lg">
+                            <Filter className="h-5 w-5 text-primary" /> Filtreler
+                        </div>
+                        {(selectedCategory || searchQuery || selectedModuleType) && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+                                onClick={() => {
+                                    setSelectedCategory(null);
+                                    setSelectedSubCategory(null);
+                                    setSelectedModuleType(null);
+                                    setSearchQuery("");
+                                }}
+                            >
+                                <X className="h-3 w-3 mr-1" /> Sıfırla
+                            </Button>
+                        )}
                     </div>
 
                     {/* Search Mobile/Desktop */}
                     <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
-                            placeholder="Ara..."
-                            className="pl-9"
+                            placeholder="İçeriklerde ara..."
+                            className="pl-10 bg-muted/30 border-none focus-visible:ring-1"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
 
-                    <Separator />
+                    <Separator className="opacity-50" />
 
                     {activeTab === "modules" && (
-                        <>
-                            <div className="space-y-1">
-                                <h3 className="text-sm font-medium mb-2 text-muted-foreground">{studyDict.moduleTypes?.title || "Modül Tipi"}</h3>
-                                <div className="space-y-1">
+                        <div className="space-y-3">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{studyDict.moduleTypes?.title || "Modül Tipi"}</h3>
+                            <div className="grid grid-cols-1 gap-1">
+                                {[
+                                    { id: null, label: studyDict.moduleTypes?.all || "Tümü" },
+                                    { id: "FLASHCARD", label: studyDict.moduleTypes?.flashcard || "Kartlar" },
+                                    { id: "MC", label: studyDict.moduleTypes?.mc || "Çoktan Seçmeli" },
+                                    { id: "TRUE_FALSE", label: studyDict.moduleTypes?.true_false || "Doğru / Yanlış" },
+                                    { id: "GAP", label: studyDict.moduleTypes?.gap || "Boşluk Doldurma" }
+                                ].map((type) => (
                                     <Button
-                                        variant={selectedModuleType === null ? "secondary" : "ghost"}
+                                        key={type.id || 'all'}
+                                        variant={selectedModuleType === type.id ? "secondary" : "ghost"}
                                         size="sm"
-                                        className="w-full justify-start font-normal"
-                                        onClick={() => setSelectedModuleType(null)}
+                                        className={`w-full justify-start font-medium transition-all ${selectedModuleType === type.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`}
+                                        onClick={() => setSelectedModuleType(type.id)}
                                     >
-                                        {studyDict.moduleTypes?.all || "Tümü"}
+                                        {type.label}
                                     </Button>
-                                    <Button
-                                        variant={selectedModuleType === "FLASHCARD" ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className="w-full justify-start font-normal"
-                                        onClick={() => setSelectedModuleType("FLASHCARD")}
-                                    >
-                                        {studyDict.moduleTypes?.flashcard || "Kartlar"}
-                                    </Button>
-                                    <Button
-                                        variant={selectedModuleType === "MC" ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className="w-full justify-start font-normal"
-                                        onClick={() => setSelectedModuleType("MC")}
-                                    >
-                                        {studyDict.moduleTypes?.mc || "Çoktan Seçmeli"}
-                                    </Button>
-                                    <Button
-                                        variant={selectedModuleType === "TRUE_FALSE" ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className="w-full justify-start font-normal"
-                                        onClick={() => setSelectedModuleType("TRUE_FALSE")}
-                                    >
-                                        {studyDict.moduleTypes?.true_false || "Doğru / Yanlış"}
-                                    </Button>
-                                    <Button
-                                        variant={selectedModuleType === "GAP" ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className="w-full justify-start font-normal"
-                                        onClick={() => setSelectedModuleType("GAP")}
-                                    >
-                                        {studyDict.moduleTypes?.gap || "Boşluk Doldurma"}
-                                    </Button>
-                                </div>
+                                ))}
                             </div>
-                            <Separator />
-                        </>
+                            <Separator className="opacity-50 mt-4" />
+                        </div>
                     )}
 
-                    <div className="space-y-1">
-                        <h3 className="text-sm font-medium mb-2 text-muted-foreground">Kategoriler</h3>
-                        <ScrollArea className="h-[400px] pr-3">
+                    <div className="space-y-3">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">Kategoriler</h3>
+                        <ScrollArea className="h-[calc(100vh-450px)] min-h-[300px] pr-4">
                             <div className="space-y-1">
                                 {Object.keys(CATEGORIES).map(cat => (
                                     <div key={cat} className="space-y-1">
                                         <Button
                                             variant={selectedCategory === cat ? "secondary" : "ghost"}
                                             size="sm"
-                                            className="w-full justify-start font-normal"
+                                            className={`w-full justify-start font-medium h-9 ${selectedCategory === cat ? 'bg-primary/10 text-primary' : ''}`}
                                             onClick={() => handleCategorySelect(cat)}
                                         >
                                             {cat}
@@ -167,11 +159,11 @@ export function DiscoverClient() {
 
                                         {/* Subcategories (Accordion-like) */}
                                         {selectedCategory === cat && (
-                                            <div className="ml-4 border-l pl-2 space-y-1 animate-in slide-in-from-left-2 duration-200">
+                                            <div className="ml-3 border-l-2 border-primary/20 pl-3 py-1 space-y-1 animate-in slide-in-from-left-2 duration-200">
                                                 <Button
                                                     variant={selectedSubCategory === null ? "secondary" : "ghost"}
                                                     size="sm"
-                                                    className="w-full justify-start text-xs h-7"
+                                                    className="w-full justify-start text-xs h-8"
                                                     onClick={() => setSelectedSubCategory(null)}
                                                 >
                                                     Tümü
@@ -181,7 +173,7 @@ export function DiscoverClient() {
                                                         key={sub}
                                                         variant={selectedSubCategory === sub ? "secondary" : "ghost"}
                                                         size="sm"
-                                                        className="w-full justify-start text-xs h-7"
+                                                        className={`w-full justify-start text-xs h-8 ${selectedSubCategory === sub ? 'text-primary font-bold' : ''}`}
                                                         onClick={() => setSelectedSubCategory(sub === selectedSubCategory ? null : sub)}
                                                     >
                                                         {sub}
@@ -198,40 +190,33 @@ export function DiscoverClient() {
             </aside >
 
             {/* Main Content */}
-            < main className="flex-1 overflow-y-auto pb-10" >
-                <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
+            < main className="flex-1 min-w-0" >
+                <div className="flex flex-col gap-8">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Keşfet</h1>
-                            <p className="text-muted-foreground">
+                            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Keşfet</h1>
+                            <p className="text-muted-foreground mt-1 text-lg">
                                 {selectedCategory
-                                    ? `${selectedCategory} ${selectedSubCategory ? `> ${selectedSubCategory}` : ''} alanındaki içerikler`
+                                    ? `${selectedCategory} ${selectedSubCategory ? `> ${selectedSubCategory}` : ''}`
                                     : "Topluluk tarafından oluşturulan en yeni içerikler"}
+                                {searchQuery && (
+                                    <span className="ml-2 italic text-primary">"{searchQuery}" araması için</span>
+                                )}
                             </p>
                         </div>
-                        {(selectedCategory || searchQuery || selectedModuleType) && (
-                            <Button variant="ghost" size="sm" onClick={() => {
-                                setSelectedCategory(null);
-                                setSelectedSubCategory(null);
-                                setSelectedModuleType(null);
-                                setSearchQuery("");
-                            }}>
-                                <X className="h-4 w-4 mr-2" /> Filtreleri Temizle
-                            </Button>
-                        )}
                     </div>
 
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 max-w-[400px] mb-6">
-                            <TabsTrigger value="modules">Modüller</TabsTrigger>
-                            <TabsTrigger value="collections">Koleksiyonlar</TabsTrigger>
+                        <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground mb-8">
+                            <TabsTrigger value="modules" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Modüller</TabsTrigger>
+                            <TabsTrigger value="collections" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Koleksiyonlar</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="modules" className="mt-0">
+                        <TabsContent value="modules" className="mt-0 focus-visible:outline-none">
                             {isLoading ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                                     {[1, 2, 3, 4, 5, 6].map(i => (
-                                        <div key={i} className="h-[250px] w-full bg-muted/20 animate-pulse rounded-xl" />
+                                        <div key={i} className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl border border-dashed" />
                                     ))}
                                 </div>
                             ) : isError ? (
@@ -239,20 +224,23 @@ export function DiscoverClient() {
                                     Bir hata oluştu. Lütfen tekrar deneyin.
                                 </div>
                             ) : results?.items?.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center bg-muted/5">
-                                    <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                                    <h3 className="text-lg font-semibold">Sonuç Bulunamadı</h3>
-                                    <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                        Bu kriterlere uygun modül bulunamadı. Filtreleri değiştirmeyi deneyin.
+                                <div className="flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed rounded-3xl p-12 text-center bg-muted/5">
+                                    <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                                        <BookOpen className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Sonuç Bulunamadı</h3>
+                                    <p className="text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
+                                        Seçtiğiniz kriterlere uygun veya aradığınız isimde bir içerik şu an mevcut değil.
                                     </p>
-                                    <Button variant="outline" onClick={() => {
+                                    <Button variant="outline" className="rounded-xl px-8" onClick={() => {
                                         setSelectedCategory(null);
                                         setSelectedSubCategory(null);
+                                        setSelectedModuleType(null);
                                         setSearchQuery("");
-                                    }}>Tümünü Göster</Button>
+                                    }}>Tüm Filtreleri Kaldır</Button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in-50">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     {results?.items?.map((item: any) => (
                                         <ModuleCard key={item.id} module={item} showOwner={true} />
                                     ))}
@@ -260,35 +248,31 @@ export function DiscoverClient() {
                             )}
                         </TabsContent>
 
-                        <TabsContent value="collections" className="mt-0">
+                        <TabsContent value="collections" className="mt-0 focus-visible:outline-none">
                             {isLoading ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                                     {[1, 2, 3, 4, 5, 6].map(i => (
-                                        <div key={i} className="h-[250px] w-full bg-muted/20 animate-pulse rounded-xl" />
+                                        <div key={i} className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl border border-dashed" />
                                     ))}
                                 </div>
                             ) : results?.items?.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center bg-muted/5">
-                                    <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                                    <h3 className="text-lg font-semibold">Sonuç Bulunamadı</h3>
-                                    <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                        Bu kriterlere uygun koleksiyon bulunamadı.
+                                <div className="flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed rounded-3xl p-12 text-center bg-muted/5">
+                                    <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                                        <Layers className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Henüz Koleksiyon Yok</h3>
+                                    <p className="text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
+                                        Bu kategoride hazırlanmış bir koleksiyon bulunamadı. Kendi koleksiyonunu oluşturmaya ne dersin?
                                     </p>
-                                    <Button variant="outline" onClick={() => {
+                                    <Button variant="outline" className="rounded-xl px-8" onClick={() => {
                                         setSelectedCategory(null);
                                         setSelectedSubCategory(null);
                                         setSearchQuery("");
-                                    }}>Tümünü Göster</Button>
+                                    }}>Tümünü Keşfet</Button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in-50">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     {results?.items?.map((item: any) => (
-                                        // CollectionCard expects LibraryCollection wrapper type usually
-                                        // But here we get raw Collection. We need to adapt or ensure CollectionCard handles raw collection.
-                                        // Inspecting LibraryClient, it uses LibraryCollection type. 
-                                        // CollectionCard props says `item: LibraryCollection`. 
-                                        // Warning: This API returns raw collections. We need to mock the wrapper or update Component.
-                                        // Let's wrap it to match LibraryCollection structure to avoid breaking `CollectionCard`.
                                         <CollectionCard
                                             key={item.id}
                                             item={{
