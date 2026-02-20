@@ -92,7 +92,7 @@ export default function CreatePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Collection Creation Card */}
-                    <Link href="/dashboard/collections/create" className="group">
+                    <Link href="/dashboard/collections/new" className="group">
                         <Card className="h-full hover:border-blue-500 transition-all hover:shadow-lg cursor-pointer flex flex-col">
                             <CardHeader>
                                 <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">

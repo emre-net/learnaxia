@@ -74,6 +74,7 @@ export function LibraryClient() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedType, setSelectedType] = useState<string>("ALL");
     const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+    const [activeTab, setActiveTab] = useState("modules");
 
     const { language } = useSettingsStore();
     const dictionary = getDictionary(language);
@@ -126,7 +127,7 @@ export function LibraryClient() {
                 </div>
             </div>
 
-            <Tabs defaultValue="modules" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <TabsList>
                         <TabsTrigger value="modules">Modüller</TabsTrigger>
@@ -145,19 +146,21 @@ export function LibraryClient() {
                             />
                         </div>
 
-                        <Select value={selectedType} onValueChange={setSelectedType}>
-                            <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
-                                <Filter className="mr-2 h-4 w-4 opacity-70" />
-                                <SelectValue placeholder={studyDict.moduleTypes?.title || "Tip"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">{studyDict.moduleTypes?.all || "Tümü"}</SelectItem>
-                                <SelectItem value="FLASHCARD">{studyDict.moduleTypes?.flashcard || "Kartlar"}</SelectItem>
-                                <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
-                                <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
-                                <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        {activeTab === "modules" && (
+                            <Select value={selectedType} onValueChange={setSelectedType}>
+                                <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
+                                    <Filter className="mr-2 h-4 w-4 opacity-70" />
+                                    <SelectValue placeholder={studyDict.moduleTypes?.title || "Tip"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">{studyDict.moduleTypes?.all || "Tümü"}</SelectItem>
+                                    <SelectItem value="FLASHCARD">{studyDict.moduleTypes?.flashcard || "Kartlar"}</SelectItem>
+                                    <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
+                                    <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
+                                    <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
 
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                             <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
@@ -198,7 +201,12 @@ export function LibraryClient() {
                             </Button>
                         </TabsContent>
                         <TabsContent value="collections" className="m-0 border-0 p-0">
-                            <CreateCollectionDialog />
+                            <Button asChild>
+                                <Link href="/dashboard/collections/new">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Yeni Koleksiyon
+                                </Link>
+                            </Button>
                         </TabsContent>
                     </div>
                 </div>
@@ -272,9 +280,9 @@ export function LibraryClient() {
                             <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
                                 Modüllerini koleksiyonlar halinde grupla.
                             </p>
-                            <CreateCollectionDialog>
-                                <Button>Koleksiyon Oluştur</Button>
-                            </CreateCollectionDialog>
+                            <Button asChild>
+                                <Link href="/dashboard/collections/new">Koleksiyon Oluştur</Link>
+                            </Button>
                         </div>
                     ) : (
                         <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
