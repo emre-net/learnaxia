@@ -76,6 +76,77 @@ const en = {
         noDescription: "No description provided.",
         itemsCount: "{count} Items",
         byAuthor: "by @{author}"
+    },
+    admin: {
+        dashboard: {
+            title: "Admin Dashboard",
+            description: "Overview of system-wide data and statistics.",
+            stats: {
+                users: "Total Users",
+                modules: "Global Modules",
+                items: "Total Items",
+                library: "Library Connections"
+            },
+            recentActivity: "Recent Activity",
+            noActivity: "No activity recorded yet.",
+            health: "System Health",
+            dbConnected: "CONNECTED",
+            operational: "OPERATIONAL",
+            production: "PRODUCTION"
+        },
+        users: {
+            title: "User Management",
+            description: "View and manage all users in the system.",
+            searchPlaceholder: "Search users...",
+            table: {
+                user: "User",
+                role: "Role",
+                status: "Status",
+                date: "Registration Date",
+                actions: "Actions"
+            },
+            noUsers: "No users found yet."
+        },
+        modules: {
+            title: "Module Moderation",
+            description: "Monitor, archive or moderate all modules.",
+            searchPlaceholder: "Search modules...",
+            filter: "Filter",
+            noModules: "No modules created yet.",
+            items: "{count} Items",
+            archived: "Archived",
+            seeConnections: "See Connections"
+        },
+        system: {
+            title: "System Health",
+            description: "Monitor server performance and database status.",
+            serverStatus: "Server Status",
+            dbHealth: "Database Health",
+            lastBackup: "Last Backup"
+        },
+        tools: {
+            title: "Database & Maintenance Tools",
+            description: "Advanced tools to repair, clean or sync system data.",
+            rescue: {
+                title: "Data Repair (Rescue)",
+                description: "Detects missing modules in user libraries and restores them automatically.",
+                button: "Start Reputation Repair"
+            },
+            cleanup: {
+                title: "Dangerous Area (Cleanup)",
+                description: "Permanently deletes all modules, items and sessions. Undoing is not possible.",
+                button: "Reset Database (CAUTION!)"
+            },
+            cache: {
+                title: "Cache & Session",
+                description: "Clears global application cache.",
+                button: "Global Cache Purge"
+            },
+            confirm: "Are you sure you want to proceed?",
+            successRepair: "{count} library entries repaired successfully.",
+            successReset: "System content reset successfully.",
+            error: "An error occurred."
+        }
     }
 };
 
@@ -156,6 +227,77 @@ const tr = {
         noDescription: "Açıklama girilmemiş.",
         itemsCount: "{count} Öğe",
         byAuthor: "yazar: @{author}"
+    },
+    admin: {
+        dashboard: {
+            title: "Yönetim Paneli",
+            description: "Sistem genelindeki verilere ve istatistiklere genel bakış.",
+            stats: {
+                users: "Toplam Kullanıcı",
+                modules: "Global Modüller",
+                items: "Toplam Öğe",
+                library: "Kütüphane Bağlantıları"
+            },
+            recentActivity: "Son Aktiviteler",
+            noActivity: "Henüz aktivite kaydı bulunmuyor.",
+            health: "Sistem Sağlığı",
+            dbConnected: "BAĞLI",
+            operational: "ÇALIŞIYOR",
+            production: "CANLI"
+        },
+        users: {
+            title: "Kullanıcı Yönetimi",
+            description: "Sistemdeki tüm kullanıcıları görüntüleyin ve yönetin.",
+            searchPlaceholder: "Kullanıcı ara...",
+            table: {
+                user: "Kullanıcı",
+                role: "Rol",
+                status: "Durum",
+                date: "Kayıt Tarihi",
+                actions: "İşlemler"
+            },
+            noUsers: "Henüz kullanıcı bulunmuyor."
+        },
+        modules: {
+            title: "Modül Moderasyonu",
+            description: "Sistemdeki tüm modülleri izleyin, arşivleyin veya içeriklerini denetleyin.",
+            searchPlaceholder: "Modül ara...",
+            filter: "Filtre",
+            noModules: "Henüz modül oluşturulmamış.",
+            items: "{count} Öğe",
+            archived: "Arşiviendi",
+            seeConnections: "Bağlantılara Bak"
+        },
+        system: {
+            title: "Sistem Sağlığı",
+            description: "Sunucu performansı, veritabanı durumu ve güvenlik yapılandırmalarını izleyin.",
+            serverStatus: "Sunucu Durumu",
+            dbHealth: "Veritabanı Sağlığı",
+            lastBackup: "Son Yedekleme"
+        },
+        tools: {
+            title: "Veritabanı ve Bakım Araçları",
+            description: "Sistemi onarmak, temizlemek veya verileri senkronize etmek için gelişmiş araçlar.",
+            rescue: {
+                title: "Veri Onarım (Rescue)",
+                description: "Kullanıcı kütüphanelerinde eksik olan modülleri tespit eder ve otomatik olarak geri ekler.",
+                button: "Reputation Repair Başlat"
+            },
+            cleanup: {
+                title: "Tehlikeli Alan (Cleanup)",
+                description: "Tüm modülleri, öğeleri ve çalışma oturumlarını kalıcı olarak siler. Geri dönüşü yoktur.",
+                button: "Veritabanını Sıfırla (DİKKAT!)"
+            },
+            cache: {
+                title: "Cache & Session",
+                description: "Uygulama genelindeki önbelleği (API Cache) temizler.",
+                button: "Global Cache Purge"
+            },
+            confirm: "Bu işlemi gerçekleştirmek istediğinize emin misiniz?",
+            successRepair: "{count} kütüphane kaydı başarıyla onarıldı.",
+            successReset: "Sistem içerikleri başarıyla sıfırlandı.",
+            error: "Bir hata oluştu."
+        }
     }
 };
 

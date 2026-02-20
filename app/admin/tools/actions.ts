@@ -21,7 +21,7 @@ export async function repairLibrariesAction() {
     try {
         // 1. Get all content access entries (grants of access)
         const allAccess = await prisma.userContentAccess.findMany({
-            where: { contentType: 'MODULE' }
+            where: { resourceType: 'MODULE' }
         });
 
         let repairedCount = 0;
@@ -32,7 +32,7 @@ export async function repairLibrariesAction() {
                 where: {
                     userId_moduleId: {
                         userId: access.userId,
-                        moduleId: access.contentId
+                        moduleId: access.resourceId
                     }
                 }
             });
@@ -41,8 +41,8 @@ export async function repairLibrariesAction() {
                 await prisma.userModuleLibrary.create({
                     data: {
                         userId: access.userId,
-                        moduleId: access.contentId,
-                        order: 0
+                        moduleId: access.resourceId,
+                        role: 'OWNER' // Default role for repaired items
                     }
                 });
                 repairedCount++;
