@@ -23,12 +23,22 @@ export async function POST(req: Request) {
         });
 
         if (existingUserEmail) {
-            // If user exists but email is NOT verified, resend verification token
+            // If user exists but email is NOT verified, resend verification token and update data
             if (!existingUserEmail.emailVerified) {
+                const hashedPassword = await bcrypt.hash(password, 10);
+
+                await prisma.user.update({
+                    where: { email },
+                    data: {
+                        handle: username,
+                        password: hashedPassword,
+                    }
+                });
+
                 const verificationToken = await generateVerificationToken(email);
                 await sendVerificationEmail(email, verificationToken.token);
                 return NextResponse.json(
-                    { success: "Hesabınız henüz doğrulanmamış. Yeni bir doğrulama e-postası gönderildi!" },
+                    { success: "Hesabınız henüz doğrulanmamış. Bilgileriniz güncellendi ve yeni bir doğrulama e-postası gönderildi!" },
                     { status: 200 }
                 );
             }
