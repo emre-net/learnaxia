@@ -20,6 +20,7 @@ export type ModuleCardProps = {
         status: string;
         isForkable: boolean;
         createdAt: string | Date;
+        isVerified?: boolean;
         sourceModule?: {
             id: string;
             title: string;
@@ -37,6 +38,13 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const router = useRouter();
     const { t } = useTranslation();
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+
+    const VerifiedBadge = () => (
+        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1 px-1.5 h-5 font-bold animate-in fade-in zoom-in duration-300">
+            <CheckCircle2 className="h-3 w-3 fill-blue-600 text-white" />
+            V
+        </Badge>
+    );
 
     const getTypeIcon = (type: string) => {
         switch (type) {
@@ -101,9 +109,12 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                             {getTypeIcon(module.type)}
                         </div>
                         <div>
-                            <h3 className="font-semibold hover:text-primary">
-                                {module.title}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                                <h3 className="font-semibold hover:text-primary">
+                                    {module.title}
+                                </h3>
+                                {module.isVerified && <VerifiedBadge />}
+                            </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Badge variant="outline" className="text-xs font-normal h-5 px-1.5">{getTypeLabel(module.type)}</Badge>
                                 <span className="line-clamp-1 border-l pl-2">{module.description || t('common.noDescription')}</span>
@@ -137,7 +148,10 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 <Dialog open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle>{module.title}</DialogTitle>
+                            <DialogTitle className="flex items-center gap-2">
+                                {module.title}
+                                {module.isVerified && <VerifiedBadge />}
+                            </DialogTitle>
                             <DialogDescription>
                                 {t('study.moduleActions.optionsTitle')}
                             </DialogDescription>
@@ -163,8 +177,9 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         </div>
                         {module.status === 'DRAFT' && <Badge variant="secondary">{t('study.moduleStates.draft') || 'Draft'}</Badge>}
                     </div>
-                    <CardTitle className="mt-2 group-hover:text-primary transition-colors leading-tight">
+                    <CardTitle className="mt-2 group-hover:text-primary transition-colors leading-tight flex items-center gap-1.5">
                         {module.title}
+                        {module.isVerified && <VerifiedBadge />}
                     </CardTitle>
                     <CardDescription className="line-clamp-2 min-h-[2.5rem] mt-1">
                         {module.description || t('common.noDescription')}

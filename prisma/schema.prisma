@@ -179,6 +179,7 @@ model Module {
   category        String?
   subCategory     String?
   archivedAt      DateTime?
+  isVerified      Boolean             @default(false)
   collectionItems CollectionItem[]
   items           Item[]
   sessions        LearningSession[]
@@ -263,6 +264,7 @@ model Collection {
   isPublic    Boolean                 @default(false)
   category    String?
   subCategory String?
+  isVerified  Boolean                 @default(false)
   ownerId     String
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
