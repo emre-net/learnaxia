@@ -397,16 +397,6 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         <p className="text-xs text-muted-foreground">Doğru/yanlış bildirimleri için ses çal.</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-xs h-7 px-2"
-                                            onClick={() => {
-                                                import("@/lib/audio").then(m => m.playStudySound('SUCCESS'));
-                                            }}
-                                        >
-                                            Test Et
-                                        </Button>
                                         <Switch
                                             checked={soundEnabled}
                                             onCheckedChange={setSoundEnabled}
