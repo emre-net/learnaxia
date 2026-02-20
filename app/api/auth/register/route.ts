@@ -23,6 +23,16 @@ export async function POST(req: Request) {
         });
 
         if (existingUserEmail) {
+            // If user exists but email is NOT verified, resend verification token
+            if (!existingUserEmail.emailVerified) {
+                const verificationToken = await generateVerificationToken(email);
+                await sendVerificationEmail(email, verificationToken.token);
+                return NextResponse.json(
+                    { success: "Hesabınız henüz doğrulanmamış. Yeni bir doğrulama e-postası gönderildi!" },
+                    { status: 200 }
+                );
+            }
+
             return NextResponse.json(
                 { error: "Bu e-posta adresi ile zaten kayıt olunmuş." },
                 { status: 409 }

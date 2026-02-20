@@ -13,7 +13,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 
     try {
         const data = await getResend().emails.send({
-            from: process.env.MAIL_FROM || "Learnaxia <onboarding@resend.dev>",
+            from: process.env.MAIL_FROM || "Learnaxia <no-reply@learnaxia.com>",
             to: email,
             subject: "E-posta Adresinizi Doğrulayın — Learnaxia",
             html: `
