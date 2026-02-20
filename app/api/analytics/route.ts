@@ -14,11 +14,24 @@ export async function GET(req: Request) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(now.getDate() - 30);
 
-        // 1. Total Study Time (All time) — uses durationMs (schema field)
         const totalDuration = await prisma.itemSession.aggregate({
             _sum: { durationMs: true },
             where: { userId }
         });
+
+        // 1.1 Global Accuracy & Total Items Solved
+        const globalProgress = await prisma.itemProgress.aggregate({
+            _sum: {
+                correctCount: true,
+                wrongCount: true,
+            },
+            where: { userId }
+        });
+
+        const totalCorrect = globalProgress._sum.correctCount || 0;
+        const totalWrong = globalProgress._sum.wrongCount || 0;
+        const totalSolved = totalCorrect + totalWrong;
+        const globalAccuracy = totalSolved > 0 ? Math.round((totalCorrect / totalSolved) * 100) : 0;
 
         // 2. Daily Activity (Last 30 days)
         const lastMonthSessions = await prisma.itemSession.findMany({
@@ -42,6 +55,21 @@ export async function GET(req: Request) {
             date,
             duration: Math.round(durationMs / 60000) // Milliseconds → Minutes
         })).sort((a, b) => a.date.localeCompare(b.date));
+
+        // 2.1 Calculate Streak
+        let streak = 0;
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+        // Simple streak: check back day by day
+        let checkDate = activityMap.has(today) ? today : (activityMap.has(yesterday) ? yesterday : null);
+        if (checkDate) {
+            let tempDate = new Date(checkDate);
+            while (activityMap.has(tempDate.toISOString().split('T')[0])) {
+                streak++;
+                tempDate.setDate(tempDate.getDate() - 1);
+            }
+        }
 
 
         // 3. Module Performance — single grouped query (Fix #9: N+1)
@@ -99,6 +127,9 @@ export async function GET(req: Request) {
             stats: {
                 totalStudyMinutes: Math.round((totalDuration._sum.durationMs || 0) / 60000),
                 modulesStarted: activeModules.length,
+                totalSolved,
+                globalAccuracy,
+                streak,
             },
             dailyActivity,
             moduleStats

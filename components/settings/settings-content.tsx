@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Pencil, Check, X } from "lucide-react";
+import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Pencil, Check, X, Flame, Target, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,7 +155,33 @@ export function SettingsContent({ user }: SettingsContentProps) {
             {/* New Profile Header - Professional & Clean */}
             <div className="relative mb-8">
                 {/* Cover Area */}
-                <div className="h-48 w-full rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-white/10 relative overflow-hidden">
+                <div className="h-48 w-full rounded-xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border-b border-white/10 relative overflow-hidden">
+                    {/* Animated Background Elements */}
+                    <div className="absolute inset-0 opacity-30">
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.2, 1],
+                                rotate: [0, 90, 0],
+                                x: [0, 50, 0],
+                                y: [0, -20, 0]
+                            }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px]"
+                        />
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.5, 1],
+                                rotate: [0, -120, 0],
+                                x: [0, -40, 0],
+                                y: [0, 30, 0]
+                            }}
+                            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                            className="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px]"
+                        />
+                    </div>
+
+                    {/* Subtle Particles placeholder (can use CSS or more motion divs) */}
+                    <div className="absolute inset-0 bg-[#00000020] backdrop-blur-[2px]"></div>
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent"></div>
                 </div>
 
@@ -181,24 +208,86 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         <p className="text-muted-foreground font-medium">@{user.handle || "kullanici"}</p>
                     </div>
 
-                    {/* Desktop Stats - Moved higher & overlapping */}
-                    <div className="hidden md:flex gap-8 mb-6 ml-12 bg-background/60 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-lg -translate-y-4">
-                        <div className="flex flex-col">
-                            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Modül Sayısı</span>
-                            <span className="text-2xl font-bold text-foreground">
-                                {analyticsData?.stats?.modulesStarted ?? "--"}
-                            </span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Çalışma Süresi</span>
-                            <span className="text-2xl font-bold text-foreground">
-                                {analyticsData ? (
-                                    analyticsData.stats.totalStudyMinutes > 60
-                                        ? `${Math.floor(analyticsData.stats.totalStudyMinutes / 60)}s ${(analyticsData.stats.totalStudyMinutes % 60)}dk`
-                                        : `${analyticsData.stats.totalStudyMinutes}dk`
-                                ) : "--"}
-                            </span>
-                        </div>
+                    {/* Desktop Stats - Enhanced with Animations */}
+                    <div className="hidden lg:flex gap-6 mb-6 ml-12 -translate-y-4">
+                        <AnimatePresence>
+                            {analyticsData?.stats && (
+                                <>
+                                    {/* Streak Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
+                                    >
+                                        <div className="bg-orange-500/20 p-2 rounded-lg">
+                                            <Flame className="h-6 w-6 text-orange-500 fill-orange-500/20" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Seri</span>
+                                            <span className="text-2xl font-black text-foreground tabular-nums">
+                                                {analyticsData.stats.streak}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Accuracy Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 }}
+                                        className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
+                                    >
+                                        <div className="bg-blue-500/20 p-2 rounded-lg">
+                                            <Target className="h-6 w-6 text-blue-500" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Başarı</span>
+                                            <span className="text-2xl font-black text-foreground tabular-nums">
+                                                %{analyticsData.stats.globalAccuracy}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Total Solved Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
+                                    >
+                                        <div className="bg-purple-500/20 p-2 rounded-lg">
+                                            <Zap className="h-6 w-6 text-purple-500 fill-purple-500/20" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Soru</span>
+                                            <span className="text-2xl font-black text-foreground tabular-nums">
+                                                {analyticsData.stats.totalSolved}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Original Time Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                        className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
+                                    >
+                                        <div className="bg-emerald-500/20 p-2 rounded-lg">
+                                            <Clock className="h-6 w-6 text-emerald-500" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Süre</span>
+                                            <span className="text-2xl font-black text-foreground tabular-nums">
+                                                {analyticsData.stats.totalStudyMinutes > 60
+                                                    ? `${Math.floor(analyticsData.stats.totalStudyMinutes / 60)}s`
+                                                    : `${analyticsData.stats.totalStudyMinutes}dk`}
+                                            </span>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </div>
@@ -207,16 +296,28 @@ export function SettingsContent({ user }: SettingsContentProps) {
             <div className="h-16 md:h-20"></div>
 
             {/* Mobile Stats Row */}
-            <div className="md:hidden flex justify-around py-4 border-y bg-muted/20">
+            <div className="lg:hidden grid grid-cols-2 md:grid-cols-4 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
                 <div className="flex flex-col items-center">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Modül</span>
-                    <span className="text-xl font-bold">
-                        {analyticsData?.stats?.modulesStarted ?? "--"}
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Seri</span>
+                    <span className="text-xl font-black text-orange-500">
+                        {analyticsData?.stats?.streak ?? "--"}
                     </span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Süre</span>
-                    <span className="text-xl font-bold">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Başarı</span>
+                    <span className="text-xl font-black text-blue-500">
+                        {analyticsData?.stats ? `%${analyticsData.stats.globalAccuracy}` : "--"}
+                    </span>
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Soru</span>
+                    <span className="text-xl font-black text-purple-500">
+                        {analyticsData?.stats?.totalSolved ?? "--"}
+                    </span>
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Süre</span>
+                    <span className="text-xl font-black text-emerald-500">
                         {analyticsData ? (
                             analyticsData.stats.totalStudyMinutes > 60
                                 ? `${Math.floor(analyticsData.stats.totalStudyMinutes / 60)}s`
@@ -337,12 +438,30 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-base">Bildirimler</Label>
-                                        <p className="text-xs text-muted-foreground">E-posta bildirimlerini aç/kapat.</p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">E-posta Bildirimleri</Label>
+                                            <p className="text-xs text-muted-foreground">Önemli güncellemeleri e-posta ile al.</p>
+                                        </div>
+                                        <Switch defaultChecked />
                                     </div>
-                                    <Switch disabled />
+
+                                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Uygulama İçi Bildirimler</Label>
+                                            <p className="text-xs text-muted-foreground">Yeni modül hatırlatıcıları ve başarılar.</p>
+                                        </div>
+                                        <Switch defaultChecked />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Modül Hatırlatıcıları</Label>
+                                            <p className="text-xs text-muted-foreground">Yarım kalan çalışmaları günlük olarak hatırlat.</p>
+                                        </div>
+                                        <Switch defaultChecked />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
