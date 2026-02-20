@@ -73,11 +73,14 @@ export async function POST(req: Request) {
             { status: 201 }
         );
 
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Validation Error", details: error.issues }, { status: 400 });
         }
         console.error("Registration Error:", error);
-        return NextResponse.json({ error: "Kayıt işlemi sırasında bir hata oluştu." }, { status: 500 });
+        return NextResponse.json(
+            { error: error.message || "Kayıt işlemi sırasında bir hata oluştu." },
+            { status: 500 }
+        );
     }
 }
