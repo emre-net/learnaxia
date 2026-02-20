@@ -1,21 +1,22 @@
+"use client";
 
-import { Module } from "@prisma/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, CheckSquare, FileText, CheckCircle2, Pencil, MoreVertical, Layers, Clock, Copy, Play, Eye, RotateCw, XCircle } from "lucide-react";
+import { BookOpen, CheckCircle2, FileText, CheckSquare, Pencil, MoreVertical, Layers, Clock, Copy, Play, Save, Heart } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useTranslation } from "@/lib/i18n/i18n";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
-// Type definition compatible with what we fetch
 export type ModuleCardProps = {
     module: {
         id: string;
         title: string;
         description: string | null;
+        category: string | null;
         type: string;
         status: string;
         isForkable: boolean;
@@ -27,20 +28,23 @@ export type ModuleCardProps = {
             owner: { handle: string | null; name?: string | null; image?: string | null };
         } | null;
         owner?: { handle: string | null; image?: string | null };
-        _count: { items: number };
+        _count: { items: number; userLibrary?: number };
     };
     solvedCount?: number;
     viewMode?: 'grid' | 'list';
-    showOwner?: boolean; // New prop to show owner in Discover page
+    showOwner?: boolean;
 };
 
 export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwner = false }: ModuleCardProps) {
     const router = useRouter();
     const { t } = useTranslation();
+    const { toast } = useToast();
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
 
     const VerifiedBadge = () => (
-        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1 px-1.5 h-5 font-bold animate-in fade-in zoom-in duration-300">
+        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1 px-1.5 h-5 font-bold">
             <CheckCircle2 className="h-3 w-3 fill-blue-600 text-white" />
             V
         </Badge>
@@ -56,182 +60,149 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         }
     };
 
-    const getTypeLabel = (type: string) => {
-        switch (type) {
-            case 'FLASHCARD': return t('study.moduleTypes.flashcard');
-            case 'MC': return t('study.moduleTypes.mc');
-            case 'GAP': return t('study.moduleTypes.gap');
-            case 'TRUE_FALSE': return t('study.moduleTypes.true_false');
-            default: return type;
+    const handleSave = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsSaving(true);
+        try {
+            const res = await fetch(`/api/modules/${module.id}/save`, { method: 'POST' });
+            if (res.ok) {
+                setSaveCount(prev => prev + 1);
+                toast({ title: "Başarılı", description: "Modül kitaplığına kaydedildi." });
+            }
+        } catch (error) {
+            toast({ title: "Hata", description: "İşlem gerçekleştirilemedi.", variant: "destructive" });
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    const handleCardClick = (e: React.MouseEvent) => {
-        // Prevent click when clicking buttons inside
-        if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
-        setIsOptionsOpen(true);
+    const handleFork = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            const res = await fetch(`/api/modules/${module.id}/fork`, { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                toast({ title: "Modül Kopyalandı", description: "İlerlemenle birlikte kendi kütüphanene eklendi. Artık istediğin gibi düzenleyebilirsin!" });
+                router.push(`/dashboard/modules/${data.id}`);
+            }
+        } catch (error) {
+            toast({ title: "Hata", description: "Kopyalama işlemi başarısız.", variant: "destructive" });
+        }
     };
 
     const StudyModeOptions = () => (
         <div className="grid gap-3 pt-4">
             <Button className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/study/${module.id}`)}>
                 <Play className="h-6 w-6 fill-current" />
-                {solvedCount > 0
-                    ? t('study.moduleActions.resumeStudy')
-                    : t('study.moduleActions.startStudy')
-                }
+                {solvedCount > 0 ? t('study.moduleActions.resumeStudy') : t('study.moduleActions.startStudy')}
             </Button>
-
             <Button variant="outline" className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/dashboard/modules/${module.id}`)}>
-                <Eye className="h-6 w-6" />
+                <BookOpen className="h-6 w-6" />
                 {t('study.moduleActions.review')}
-            </Button>
-
-            <Button variant="secondary" className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/study/${module.id}?mode=${module.type === 'FLASHCARD' ? 'SHUFFLE' : 'WRONG_ONLY'}`)}>
-                {module.type === 'FLASHCARD' ? <RotateCw className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
-                {module.type === 'FLASHCARD'
-                    ? t('study.moduleActions.shuffle')
-                    : t('study.moduleActions.focusMistakes')
-                }
             </Button>
         </div>
     );
 
     if (viewMode === 'list') {
         return (
-            <>
-                <Card
-                    className="flex flex-row items-center justify-between p-4 group hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={handleCardClick}
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded bg-muted/50 flex items-center justify-center">
-                            {getTypeIcon(module.type)}
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h3 className="font-semibold hover:text-primary">
-                                    {module.title}
-                                </h3>
-                                {module.isVerified && <VerifiedBadge />}
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Badge variant="outline" className="text-xs font-normal h-5 px-1.5">{getTypeLabel(module.type)}</Badge>
-                                <span className="line-clamp-1 border-l pl-2">{module.description || t('common.noDescription')}</span>
-                                {showOwner && module.owner?.handle && (
-                                    <span className="border-l pl-2 text-xs">{t('common.byAuthor', { author: module.owner.handle })}</span>
-                                )}
-                            </div>
-                        </div>
+            <Card className="flex flex-row items-center gap-4 p-4 hover:shadow-md transition-all group border-muted/50">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    {getTypeIcon(module.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                        <Link href={`/dashboard/modules/${module.id}`} className="font-bold text-lg hover:underline truncate">
+                            {module.title}
+                        </Link>
+                        {module.isVerified && <VerifiedBadge />}
+                        {module.category && <Badge variant="secondary" className="text-[10px] h-5">{module.category}</Badge>}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-green-500" />
-                            {t('common.itemsCount', { count: module._count.items })}
-                        </span>
-                        <span className="hidden sm:inline-block">{new Date(module.createdAt).toLocaleDateString("tr-TR")}</span>
-                        <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                            {!showOwner && (
-                                <Button variant="ghost" size="icon" asChild>
-                                    <Link href={`/dashboard/create/manual?edit=${module.id}`}>
-                                        <Pencil className="h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            )}
-                            <Button variant="ghost" size="icon" onClick={() => setIsOptionsOpen(true)}>
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                </Card>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-red-500">
+                        <Heart className="h-5 w-5" />
+                    </Button>
+                    <Button variant="default" onClick={() => setIsOptionsOpen(true)}>Çalış</Button>
+                </div>
 
                 <Dialog open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                {module.title}
-                                {module.isVerified && <VerifiedBadge />}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {t('study.moduleActions.optionsTitle')}
-                            </DialogDescription>
+                            <DialogTitle>{module.title}</DialogTitle>
                         </DialogHeader>
                         <StudyModeOptions />
                     </DialogContent>
                 </Dialog>
-            </>
-        )
+            </Card>
+        );
     }
 
     return (
-        <>
-            <Card
-                className="flex flex-col h-full hover:border-primary/50 transition-colors group relative overflow-hidden cursor-pointer"
-                onClick={handleCardClick}
-            >
-                <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
-                            {getTypeIcon(module.type)}
-                            <Badge variant="outline">{getTypeLabel(module.type)}</Badge>
-                        </div>
-                        {module.status === 'DRAFT' && <Badge variant="secondary">{t('study.moduleStates.draft') || 'Draft'}</Badge>}
+        <Card
+            className="flex flex-col hover:shadow-xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-2xl cursor-pointer"
+            onClick={() => setIsOptionsOpen(true)}
+        >
+            <div className="p-5 flex-grow space-y-4">
+                <div className="flex justify-between items-start gap-3">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                        {getTypeIcon(module.type)}
                     </div>
-                    <CardTitle className="mt-2 group-hover:text-primary transition-colors leading-tight flex items-center gap-1.5">
-                        {module.title}
+                    <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary bg-primary/5 uppercase">{module.type}</Badge>
                         {module.isVerified && <VerifiedBadge />}
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <CardTitle className="leading-tight text-xl font-extrabold group-hover:text-primary transition-colors">
+                        {module.title}
                     </CardTitle>
-                    <CardDescription className="line-clamp-2 min-h-[2.5rem] mt-1">
-                        {module.description || t('common.noDescription')}
-                    </CardDescription>
-                </CardHeader>
-                <CardFooter className="text-xs text-muted-foreground flex justify-between border-t py-3 bg-muted/5 mt-auto">
-                    <span className="flex items-center gap-1 font-medium">
-                        <Layers className="h-3 w-3" />
-                        {t('common.itemsCount', { count: module._count.items })}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        {showOwner && module.owner?.handle && (
-                            <span className="text-primary/80">@{module.owner.handle}</span>
-                        )}
-                        <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {new Date(module.createdAt).toLocaleDateString("tr-TR")}
-                        </span>
-                    </div>
-                </CardFooter>
+                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+                        {module.description || "Bu modül için henüz bir açıklama girilmemiş."}
+                    </p>
+                </div>
 
-                {!showOwner && (
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1" onClick={e => e.stopPropagation()}>
-                        <Button variant="secondary" size="icon" className="h-8 w-8 shadow-sm" asChild>
-                            <Link href={`/dashboard/create/manual?edit=${module.id}`}>
-                                <Pencil className="h-4 w-4" />
-                            </Link>
+                <div className="flex items-center gap-4 py-2 border-y border-muted/30">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold">
+                        <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>{module._count?.items || 0} İçerik</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold">
+                        <Heart className="h-3.5 w-3.5 text-muted-foreground fill-red-500/10 text-red-500" />
+                        <span>{saveCount} Kaydedilme</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-5 pt-0 mt-auto flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all border-muted/50" onClick={handleSave} disabled={isSaving}>
+                        <Heart className="h-4 w-4" />
+                    </Button>
+                    {!module.sourceModule && (
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50" title="Kendi kitaplığına ekle ve düzenle" onClick={handleFork}>
+                            <Copy className="h-4 w-4" />
                         </Button>
-                    </div>
-                )}
+                    )}
+                </div>
 
-                {module.sourceModule && (
-                    <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
-                        <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-xs h-6">
-                            <Copy className="h-3 w-3 mr-1" />
-                            {t('common.byAuthor', { author: module.sourceModule.owner.handle || "unknown" })}
-                        </Badge>
-                    </div>
-                )}
-            </Card>
+                <Button className="h-10 rounded-xl px-5 font-bold shadow-sm hover:shadow-primary/20 transition-all">
+                    Çalış <Play className="ml-2 h-4 w-4 fill-current" />
+                </Button>
+            </div>
 
             <Dialog open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>{module.title}</DialogTitle>
-                        <DialogDescription>
-                            {t('study.moduleActions.optionsTitle')}
-                        </DialogDescription>
+                        <DialogDescription>{t('study.moduleActions.optionsTitle')}</DialogDescription>
                     </DialogHeader>
                     <StudyModeOptions />
                 </DialogContent>
             </Dialog>
-        </>
+        </Card>
     );
 }

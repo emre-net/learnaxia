@@ -305,7 +305,7 @@ export function ItemEditorSheet({
 
                             {/* Live Preview of Blanks */}
                             <div className="p-3 bg-muted/50 rounded-md text-sm">
-                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">Önizleme:</span>
+                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">Canlı Görünüm:</span>
                                 {question.split(/(\{\{.*?\}\})/).map((part, i) => {
                                     if (part.startsWith('{{') && part.endsWith('}}')) {
                                         return (

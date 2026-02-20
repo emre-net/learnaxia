@@ -6,7 +6,7 @@ export class CollectionService {
 
     static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean; category?: string; subCategory?: string }) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            const collection = await tx.collection.create({
+            const collection = await (tx as any).collection.create({
                 data: {
                     title: data.title,
                     description: data.description ?? null,
@@ -50,7 +50,8 @@ export class CollectionService {
                         owner: {
                             select: { handle: true }
                         },
-                        items: { select: { moduleId: true } } // Fetch item count
+                        items: { select: { moduleId: true } }, // Fetch item count
+                        _count: { select: { userLibrary: true } }
                     }
                 }
             },
@@ -78,7 +79,8 @@ export class CollectionService {
                         }
                     },
                     orderBy: { order: 'asc' }
-                }
+                },
+                _count: { select: { items: true, userLibrary: true } }
             }
         });
 
@@ -106,14 +108,15 @@ export class CollectionService {
         // Transaction to update details and items
         return await prisma.$transaction(async (tx) => {
             // Update basic details
-            await tx.collection.update({
+            await (tx as any).collection.update({
                 where: { id: collectionId },
                 data: {
                     title: data.title,
-                    description: data.description,
-                    isPublic: data.isPublic,
-                    category: data.category,
-                    subCategory: data.subCategory
+                    description: data.description || null,
+                    isPublic: data.isPublic || false,
+                    category: data.category || null,
+                    subCategory: data.subCategory || null,
+                    ownerId: userId
                 }
             });
 

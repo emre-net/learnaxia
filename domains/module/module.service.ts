@@ -106,7 +106,7 @@ export class ModuleService {
                                 owner: { select: { handle: true, image: true } }
                             }
                         },
-                        _count: { select: { items: true } }
+                        _count: { select: { items: true, userLibrary: true } }
                     }
                 }
             },
@@ -214,7 +214,7 @@ export class ModuleService {
                     select: { handle: true, image: true }
                 },
                 _count: {
-                    select: { items: true }
+                    select: { items: true, userLibrary: true }
                 }
             },
             take: 20,
@@ -364,7 +364,7 @@ export class ModuleService {
             data: {
                 status: 'ARCHIVED',
                 archivedAt: new Date()
-            }
+            } as any
         });
     }
 
