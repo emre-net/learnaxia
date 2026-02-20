@@ -3,8 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useStudyStore } from "@/stores/study-store";
-import { useSettingsStore } from "@/stores/settings-store";
-import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { X } from "lucide-react";
 import { NotesSidebar } from "@/components/notes/notes-sidebar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -20,8 +19,7 @@ export function StudyHeader() {
         moduleId
     } = useStudyStore();
 
-    const { language } = useSettingsStore();
-    const dict = getStudyDictionary(language);
+    const { t } = useTranslation();
 
     if (!items.length) return null;
 
@@ -43,27 +41,25 @@ export function StudyHeader() {
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
-                                {language === 'tr' ? 'Çıkmak istediğine emin misin?' : 'Are you sure you want to exit?'}
+                                {t('common.confirmExit')}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                                {language === 'tr'
-                                    ? `İlerlemen (${currentIndex + 1}/${items.length}) kaydedilecek. İstediğin zaman kaldığın yerden devam edebilirsin.`
-                                    : `Your progress (${currentIndex + 1}/${items.length}) will be saved. You can resume anytime from where you left off.`}
+                                {t('common.exitDescription', { progress: `${currentIndex + 1}/${items.length}` })}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>
-                                {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+                                {t('common.cancel')}
                             </AlertDialogCancel>
                             <AlertDialogAction onClick={handleExit} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                {language === 'tr' ? 'Çıkış Yap' : 'Exit'}
+                                {t('common.exit')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
                 <div className="flex flex-col w-full max-w-xs gap-1">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{dict.progress}</span>
+                        <span>{t('study.progress')}</span>
                         <span>{currentIndex + 1} / {items.length}</span>
                     </div>
                     <Progress value={progressValue} className="h-2" />

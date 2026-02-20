@@ -59,6 +59,23 @@ const en = {
             true_false: "True / False",
             gap: "Gap Fill"
         }
+    },
+    common: {
+        cancel: "Cancel",
+        exit: "Exit",
+        confirmExit: "Are you sure you want to exit?",
+        exitDescription: "Your progress ({progress}) will be saved. You can resume anytime from where you left off.",
+        back: "Back",
+        save: "Save",
+        delete: "Delete",
+        edit: "Edit",
+        loading: "Loading...",
+        error: "An error occurred",
+        success: "Success",
+        preview: "Preview",
+        noDescription: "No description provided.",
+        itemsCount: "{count} Items",
+        byAuthor: "by @{author}"
     }
 };
 
@@ -115,13 +132,30 @@ const tr = {
             resumeStudy: "Çalışmaya Devam Et"
         },
         moduleTypes: {
-            title: "Modül Tipi",
+            title: "Module Type",
             all: "Tüm Tipler",
             flashcard: "Kartlar",
             mc: "Çoktan Seçmeli",
             true_false: "Doğru / Yanlış",
             gap: "Boşluk Doldurma"
         }
+    },
+    common: {
+        cancel: "Vazgeç",
+        exit: "Çıkış Yap",
+        confirmExit: "Çıkmak istediğine emin misin?",
+        exitDescription: "İlerlemen ({progress}) kaydedilecek. İstediğin zaman kaldığın yerden devam edebilirsin.",
+        back: "Geri",
+        save: "Kaydet",
+        delete: "Sil",
+        edit: "Düzenle",
+        loading: "Yükleniyor...",
+        error: "Bir hata oluştu",
+        success: "Başarılı",
+        preview: "Önizleme",
+        noDescription: "Açıklama girilmemiş.",
+        itemsCount: "{count} Öğe",
+        byAuthor: "yazar: @{author}"
     }
 };
 

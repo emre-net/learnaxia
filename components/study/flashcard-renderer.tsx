@@ -2,8 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useStudyStore } from "@/stores/study-store";
-import { useSettingsStore } from "@/stores/settings-store";
-import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
@@ -11,8 +10,7 @@ import ReactMarkdown from "react-markdown";
 
 export function FlashcardRenderer({ item }: { item: any }) {
     const { isFlipped, setIsFlipped } = useStudyStore();
-    const { language } = useSettingsStore();
-    const dict = getStudyDictionary(language);
+    const { t } = useTranslation();
 
     // Keyboard Shortcuts
     useEffect(() => {
@@ -46,14 +44,14 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     style={{ backfaceVisibility: 'hidden' }}
                 >
                     <div className="flex flex-col gap-4 select-none">
-                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{dict.questionLabel}</span>
+                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{t('study.questionLabel')}</span>
                         <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
                             <ReactMarkdown>{item.content.question || item.content.front}</ReactMarkdown>
                         </div>
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
                         )}
-                        <span className="mt-8 text-xs text-muted-foreground font-mono">[{dict.flipHint}]</span>
+                        <span className="mt-8 text-xs text-muted-foreground font-mono">[{t('study.flipHint')}]</span>
                     </div>
                 </Card>
 
@@ -66,7 +64,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     }}
                 >
                     <div className="flex flex-col gap-4">
-                        <span className="text-sm text-primary uppercase tracking-wider font-semibold">{dict.answerLabel}</span>
+                        <span className="text-sm text-primary uppercase tracking-wider font-semibold">{t('study.answerLabel')}</span>
                         <div className="text-3xl font-bold text-primary prose dark:prose-invert prose-primary max-w-none">
                             <ReactMarkdown>{item.content.answer || item.content.back}</ReactMarkdown>
                         </div>

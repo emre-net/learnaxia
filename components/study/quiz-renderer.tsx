@@ -1,8 +1,7 @@
 "use client";
 
 import { useStudyStore } from "@/stores/study-store";
-import { useSettingsStore } from "@/stores/settings-store";
-import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -24,8 +23,7 @@ export function QuizRenderer({ item }: { item: any }) {
         wrongCount
     } = useStudyStore();
 
-    const { language } = useSettingsStore();
-    const dict = getStudyDictionary(language);
+    const { t } = useTranslation();
 
     // Ensure options exist
     const options = item.content.options || [];
@@ -101,7 +99,7 @@ export function QuizRenderer({ item }: { item: any }) {
                                     {/* Robust T/F Localization */}
                                     {item.type === 'TRUE_FALSE' || item.type === 'TF' ? (
                                         <ReactMarkdown>
-                                            {option === 'True' ? dict.true : option === 'False' ? dict.false : option}
+                                            {option === 'True' ? t('study.true') : option === 'False' ? t('study.false') : option}
                                         </ReactMarkdown>
                                     ) : (
                                         <ReactMarkdown>{option}</ReactMarkdown>
@@ -148,15 +146,17 @@ export function QuizRenderer({ item }: { item: any }) {
                             {feedback === 'CORRECT' ? (
                                 <>
                                     <CheckCircle2 className="h-8 w-8" />
-                                    <span>{dict.correct}</span>
+                                    <span>{t('study.correct')}</span>
                                 </>
                             ) : (
                                 <>
                                     <XCircle className="h-8 w-8" />
                                     <span>
-                                        {dict.wrong.replace('{answer}', (item.content.answer === 'True' || item.content.answer === 'False')
-                                            ? (dict[item.content.answer.toLowerCase() as 'true' | 'false'] as string)
-                                            : item.content.answer)}
+                                        {t('study.wrong', {
+                                            answer: (item.content.answer === 'True' || item.content.answer === 'False')
+                                                ? t(`study.${item.content.answer.toLowerCase()}`)
+                                                : item.content.answer
+                                        })}
                                     </span>
                                 </>
                             )}

@@ -134,7 +134,18 @@ export class ModuleService {
         });
 
         if (ownedModules.length > 0) {
-            console.log(`[ModuleService] Rescued ${ownedModules.length} owned modules for user ${userId}.`);
+            console.log(`[ModuleService] Rescuing ${ownedModules.length} owned modules for user ${userId}. Adding to join table.`);
+
+            // Approval Item 3: Ensure data integrity by creating missing library entries
+            await prisma.userModuleLibrary.createMany({
+                data: ownedModules.map(m => ({
+                    userId,
+                    moduleId: m.id,
+                    role: 'OWNER',
+                    lastInteractionAt: new Date()
+                })),
+                skipDuplicates: true
+            });
         }
 
         // 3. Normalization & Merge
@@ -337,10 +348,24 @@ export class ModuleService {
     // Other methods remain largely unchanged, but keeping them here for completeness if needed
     // Assuming Archive/AddItem logic is standard.
     /**
-     * Archives a module (Soft Delete).
+     * Archives a module (Soft Delete according to Rule 115).
      */
     static async archive(userId: string, moduleId: string) {
-        return await this.update(userId, moduleId, { status: 'ARCHIVED' } as any);
+        const access = await prisma.userContentAccess.findUnique({
+            where: { userId_resourceId: { userId, resourceId: moduleId } }
+        });
+
+        if (!access || access.accessLevel !== 'OWNER') {
+            throw new Error("Unauthorized Archive Access");
+        }
+
+        return await prisma.module.update({
+            where: { id: moduleId },
+            data: {
+                status: 'ARCHIVED',
+                archivedAt: new Date()
+            }
+        });
     }
 
     static async addItem(userId: string, moduleId: string, itemData: any) {

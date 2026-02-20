@@ -7,8 +7,7 @@ import { BookOpen, CheckSquare, FileText, CheckCircle2, Pencil, MoreVertical, La
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useSettingsStore } from "@/stores/settings-store";
-import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { useRouter } from "next/navigation";
 
 // Type definition compatible with what we fetch
@@ -36,8 +35,7 @@ export type ModuleCardProps = {
 
 export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwner = false }: ModuleCardProps) {
     const router = useRouter();
-    const { language } = useSettingsStore();
-    const dict = getStudyDictionary(language);
+    const { t } = useTranslation();
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
     const getTypeIcon = (type: string) => {
@@ -52,10 +50,10 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
     const getTypeLabel = (type: string) => {
         switch (type) {
-            case 'FLASHCARD': return 'Kartlar';
-            case 'MC': return 'Çoktan Seçmeli';
-            case 'GAP': return 'Boşluk Doldurma';
-            case 'TRUE_FALSE': return 'Doğru / Yanlış';
+            case 'FLASHCARD': return t('study.moduleTypes.flashcard');
+            case 'MC': return t('study.moduleTypes.mc');
+            case 'GAP': return t('study.moduleTypes.gap');
+            case 'TRUE_FALSE': return t('study.moduleTypes.true_false');
             default: return type;
         }
     };
@@ -71,21 +69,21 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
             <Button className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/study/${module.id}`)}>
                 <Play className="h-6 w-6 fill-current" />
                 {solvedCount > 0
-                    ? (dict.moduleActions?.resumeStudy || "Çalışmaya Devam Et")
-                    : (dict.moduleActions?.startStudy || "Çalışmaya Başla")
+                    ? t('study.moduleActions.resumeStudy')
+                    : t('study.moduleActions.startStudy')
                 }
             </Button>
 
             <Button variant="outline" className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/dashboard/modules/${module.id}`)}>
                 <Eye className="h-6 w-6" />
-                {dict.moduleActions?.review || "Gözden Geçir"}
+                {t('study.moduleActions.review')}
             </Button>
 
             <Button variant="secondary" className="w-full h-14 justify-start text-lg gap-3" onClick={() => router.push(`/study/${module.id}?mode=${module.type === 'FLASHCARD' ? 'SHUFFLE' : 'WRONG_ONLY'}`)}>
                 {module.type === 'FLASHCARD' ? <RotateCw className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
                 {module.type === 'FLASHCARD'
-                    ? (dict.moduleActions?.shuffle || "Karışık Tekrar")
-                    : (dict.moduleActions?.focusMistakes || "Yanlışlara Odaklan")
+                    ? t('study.moduleActions.shuffle')
+                    : t('study.moduleActions.focusMistakes')
                 }
             </Button>
         </div>
@@ -108,9 +106,9 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Badge variant="outline" className="text-xs font-normal h-5 px-1.5">{getTypeLabel(module.type)}</Badge>
-                                <span className="line-clamp-1 border-l pl-2">{module.description || "Açıklama yok"}</span>
+                                <span className="line-clamp-1 border-l pl-2">{module.description || t('common.noDescription')}</span>
                                 {showOwner && module.owner?.handle && (
-                                    <span className="border-l pl-2 text-xs">by @{module.owner.handle}</span>
+                                    <span className="border-l pl-2 text-xs">{t('common.byAuthor', { author: module.owner.handle })}</span>
                                 )}
                             </div>
                         </div>
@@ -118,7 +116,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                            {module._count.items} öğe
+                            {t('common.itemsCount', { count: module._count.items })}
                         </span>
                         <span className="hidden sm:inline-block">{new Date(module.createdAt).toLocaleDateString("tr-TR")}</span>
                         <div className="flex gap-1" onClick={e => e.stopPropagation()}>
@@ -141,7 +139,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <DialogHeader>
                             <DialogTitle>{module.title}</DialogTitle>
                             <DialogDescription>
-                                {dict.moduleActions?.optionsTitle || "Çalışma Modu Seçin"}
+                                {t('study.moduleActions.optionsTitle')}
                             </DialogDescription>
                         </DialogHeader>
                         <StudyModeOptions />
@@ -163,24 +161,24 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                             {getTypeIcon(module.type)}
                             <Badge variant="outline">{getTypeLabel(module.type)}</Badge>
                         </div>
-                        {module.status === 'DRAFT' && <Badge variant="secondary">Taslak</Badge>}
+                        {module.status === 'DRAFT' && <Badge variant="secondary">{t('study.moduleStates.draft') || 'Draft'}</Badge>}
                     </div>
                     <CardTitle className="mt-2 group-hover:text-primary transition-colors leading-tight">
                         {module.title}
                     </CardTitle>
                     <CardDescription className="line-clamp-2 min-h-[2.5rem] mt-1">
-                        {module.description || "Açıklama girilmemiş."}
+                        {module.description || t('common.noDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 pb-2">
                     <div className="h-24 bg-gradient-to-br from-muted/50 to-muted/10 rounded-md flex items-center justify-center text-muted-foreground/30 border border-dashed">
-                        <span className="text-xs font-medium">Önizleme</span>
+                        <span className="text-xs font-medium">{t('common.preview')}</span>
                     </div>
                 </CardContent>
                 <CardFooter className="text-xs text-muted-foreground flex justify-between border-t py-3 bg-muted/5">
                     <span className="flex items-center gap-1 font-medium">
                         <Layers className="h-3 w-3" />
-                        {module._count.items} Öğe
+                        {t('common.itemsCount', { count: module._count.items })}
                     </span>
                     <div className="flex items-center gap-2">
                         {showOwner && module.owner?.handle && (
@@ -207,7 +205,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
                         <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-xs h-6">
                             <Copy className="h-3 w-3 mr-1" />
-                            @{module.sourceModule.owner.handle || "biri"}
+                            {t('common.byAuthor', { author: module.sourceModule.owner.handle || "unknown" })}
                         </Badge>
                     </div>
                 )}
@@ -218,7 +216,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     <DialogHeader>
                         <DialogTitle>{module.title}</DialogTitle>
                         <DialogDescription>
-                            {dict.moduleActions?.optionsTitle || "Çalışma Modu Seçin"}
+                            {t('study.moduleActions.optionsTitle')}
                         </DialogDescription>
                     </DialogHeader>
                     <StudyModeOptions />

@@ -178,6 +178,7 @@ model Module {
   createdAt       DateTime            @default(now())
   category        String?
   subCategory     String?
+  archivedAt      DateTime?
   collectionItems CollectionItem[]
   items           Item[]
   sessions        LearningSession[]
