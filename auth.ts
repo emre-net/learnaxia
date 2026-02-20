@@ -67,20 +67,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     events: {
         async signIn({ user }) {
-            if (user.id && !user.handle && user.email) {
+            // Only generate handle if it doesn't exist (e.g. first time Google login)
+            if (user.id && !(user as any).handle && user.email) {
                 const emailPrefix = user.email.split('@')[0];
                 const baseHandle = emailPrefix.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
                 let handle = baseHandle || `user${Math.floor(Math.random() * 10000)}`;
 
-                // Ensure uniqueness
-                const existing = await prisma.user.findUnique({ where: { handle } });
-                if (existing) {
-                    handle = `${handle}${Math.floor(Math.random() * 1000)}`;
+                // Robust uniqueness check
+                let isUnique = false;
+                let finalHandle = handle;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 10) {
+                    const existing = await prisma.user.findUnique({ where: { handle: finalHandle } });
+                    if (!existing) {
+                        isUnique = true;
+                    } else {
+                        attempts++;
+                        finalHandle = `${handle}${Math.floor(Math.random() * 10000)}`;
+                    }
                 }
 
                 await prisma.user.update({
                     where: { id: user.id },
-                    data: { handle }
+                    data: { handle: finalHandle }
                 });
             }
         }
