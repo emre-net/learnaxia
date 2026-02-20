@@ -53,7 +53,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { email, password } = parsedCredentials.data;
 
                     // 1. Check Virtual Admin (Override)
+                    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+                        console.error("[Auth] ADMIN_EMAIL or ADMIN_PASSWORD is NOT set in environment variables!");
+                    }
+
                     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+                        console.log("[Auth] Virtual Admin login successful");
                         return {
                             id: "virtual-admin",
                             email: email,
