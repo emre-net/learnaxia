@@ -87,7 +87,7 @@ export function ProfileClient() {
                 </div>
                 <div className="flex gap-2">
                     <EditProfileDialog
-                        user={{ handle: profile?.handle, image: profile?.image }}
+                        user={{ name: profile?.name, handle: profile?.handle, image: profile?.image }}
                         trigger={
                             <Button variant="outline">
                                 <Edit className="h-4 w-4 mr-2" /> Profili Düzenle

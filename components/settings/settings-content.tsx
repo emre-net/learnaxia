@@ -21,6 +21,7 @@ import { useSettingsStore } from "@/stores/settings-store";
 
 interface SettingsContentProps {
     user: {
+        name?: string | null;
         email?: string | null;
         image?: string | null;
         handle?: string | null;
@@ -28,7 +29,7 @@ interface SettingsContentProps {
     };
 }
 
-type Tab = "general" | "wallet" | "analytics" | "notifications" | "security";
+type Tab = "account" | "wallet" | "analytics" | "settings";
 
 type Transaction = {
     id: string;
@@ -49,7 +50,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
     const router = useRouter();
     const pathname = usePathname();
 
-    const defaultTab = (searchParams.get("tab") as Tab) || "general";
+    const defaultTab = (searchParams.get("tab") as Tab) || "account";
     const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
 
     useEffect(() => {
@@ -143,11 +144,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
     }, [activeTab, walletData, toast]);
 
     const tabs: { id: Tab; label: string; icon: typeof User }[] = [
-        { id: "general", label: "Genel", icon: User },
-        { id: "wallet", label: "Cüzdan", icon: Coins },
+        { id: "account", label: "Hesap", icon: User },
+        { id: "settings", label: "Ayarlar", icon: Pencil },
         { id: "analytics", label: "İstatistikler", icon: BarChart2 },
-        { id: "notifications", label: "Bildirimler", icon: Bell },
-        { id: "security", label: "Güvenlik", icon: Shield },
+        { id: "wallet", label: "Cüzdan", icon: Coins },
     ];
 
     return (
@@ -182,8 +182,8 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         <p className="text-muted-foreground font-medium">@{user.handle || "kullanici"}</p>
                     </div>
 
-                    {/* Desktop Stats */}
-                    <div className="hidden md:flex gap-8 mb-6 ml-12">
+                    {/* Desktop Stats - Moved higher & overlapping */}
+                    <div className="hidden md:flex gap-8 mb-6 ml-12 bg-background/60 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-lg -translate-y-4">
                         <div className="flex flex-col">
                             <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Modül Sayısı</span>
                             <span className="text-2xl font-bold text-foreground">
@@ -246,91 +246,45 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
                 {/* Content Area */}
                 <div className="md:col-span-3 space-y-6">
-                    {/* === GENEL === */}
-                    {activeTab === "general" && (
+                    {/* === HESAP === */}
+                    {activeTab === "account" && (
                         <>
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Profil Bilgileri</CardTitle>
-                                    <CardDescription>Kişisel bilgilerinizi ve tercihlerinizi yönetin.</CardDescription>
+                                    <CardDescription>İsim, kullanıcı adı ve hesap resminizi yönetin.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
-                                    {/* Handle (Username) - Read Only */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="handle">Kullanıcı Adı</Label>
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                id="handle"
-                                                defaultValue={user.handle || ""}
-                                                disabled
-                                                className="bg-muted"
-                                            />
-                                            <EditProfileDialog user={user} trigger={
-                                                <Button variant="ghost" size="icon">
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                            } />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Kullanıcı adınızı değiştirmek için kalem ikonuna veya yukarıdaki düzenle butonuna tıklayın.
-                                        </p>
-                                    </div>
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="email">E-posta</Label>
-                                            <Input id="email" defaultValue={user.email || ""} disabled className="bg-muted" />
-                                            <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
+                                            <Label>Ad Soyad</Label>
+                                            <Input value={user.name || "Ad Belirtilmemiş"} disabled className="bg-muted" />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="language">Dil Seçimi</Label>
-                                            <Select
-                                                value={language}
-                                                onValueChange={(val) => {
-                                                    setLanguage(val);
-                                                    saveLanguage(val);
-                                                }}
-                                            >
-                                                <SelectTrigger id="language">
-                                                    <SelectValue placeholder="Dil seçin" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="tr">Türkçe 🇹🇷</SelectItem>
-                                                    <SelectItem value="en">English 🇬🇧</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <p className="text-xs text-muted-foreground">Seçim otomatik olarak kaydedilir.</p>
+                                            <Label>Kullanıcı Adı</Label>
+                                            <div className="flex items-center gap-2">
+                                                <Input value={user.handle || ""} disabled className="bg-muted" />
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-base">Ses Efektleri</Label>
-                                            <p className="text-xs text-muted-foreground">Çalışma sırasında doğru/yanlış bildirimleri için ses çal.</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-xs h-7 px-2"
-                                                onClick={() => {
-                                                    import("@/lib/audio").then(m => m.playStudySound('SUCCESS'));
-                                                }}
-                                            >
-                                                Test Et
+                                    <div className="space-y-2">
+                                        <Label>E-posta</Label>
+                                        <Input value={user.email || ""} disabled className="bg-muted" />
+                                        <p className="text-xs text-muted-foreground">E-posta adresi değiştirilemez.</p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <EditProfileDialog user={user} trigger={
+                                            <Button variant="outline" className="w-full md:w-auto">
+                                                <Pencil className="h-4 w-4 mr-2" /> Profili Düzenle
                                             </Button>
-                                            <Switch
-                                                checked={soundEnabled}
-                                                onCheckedChange={setSoundEnabled}
-                                            />
-                                        </div>
+                                        } />
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Şifre</CardTitle>
-                                    <CardDescription>Hesap güvenliğinizi sağlamak için güçlü bir şifre kullanın.</CardDescription>
+                                    <CardTitle>Güvenlik</CardTitle>
+                                    <CardDescription>Şifrenizi buradan güncelleyebilirsiniz.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Button variant="outline">Şifre Değiştir</Button>
@@ -339,165 +293,63 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         </>
                     )}
 
-                    {/* === CÜZDAN === */}
-                    {activeTab === "wallet" && (
-                        <>
-                            {walletLoading ? (
-                                <div className="flex items-center justify-center py-16">
-                                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                                </div>
-                            ) : walletData ? (
-                                <>
-                                    {/* Balance Card */}
-                                    <Card className="border-yellow-500/20">
-                                        <CardContent className="pt-6">
-                                            <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-yellow-500/10 via-amber-500/5 to-transparent rounded-xl">
-                                                <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Mevcut Bakiye</span>
-                                                <span className="text-5xl font-bold mt-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-amber-500">
-                                                    {walletData.balance}
-                                                </span>
-                                                <span className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 font-medium">
-                                                    {walletData.currency} Token
-                                                </span>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-
-                                    {/* Transaction History */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2 text-base">
-                                                <History className="h-4 w-4" /> İşlem Geçmişi
-                                            </CardTitle>
-                                            <CardDescription>Token kazanma ve harcama geçmişiniz.</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            {walletData.history.length === 0 ? (
-                                                <p className="text-center text-sm text-muted-foreground py-8">Henüz işlem yok.</p>
-                                            ) : (
-                                                <ScrollArea className="h-[300px]">
-                                                    <div className="space-y-3">
-                                                        {walletData.history.map((tx) => (
-                                                            <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors gap-3">
-                                                                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                                                                    <span className="text-sm font-medium truncate">{tx.description || tx.type}</span>
-                                                                    <span className="text-xs text-muted-foreground">
-                                                                        {new Date(tx.createdAt).toLocaleDateString("tr-TR")}
-                                                                    </span>
-                                                                </div>
-                                                                <span className={cn(
-                                                                    "font-bold flex items-center text-sm",
-                                                                    tx.amount > 0 ? "text-green-500" : "text-red-500"
-                                                                )}>
-                                                                    {tx.amount > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                                                                    {tx.amount > 0 ? '+' : ''}{tx.amount}
-                                                                </span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </ScrollArea>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                </>
-                            ) : (
-                                <Card>
-                                    <CardContent className="flex items-center justify-center py-12">
-                                        <p className="text-muted-foreground">Cüzdan verisi bulunamadı.</p>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </>
-                    )}
-
-                    {/* === İSTATİSTİKLER === */}
-                    {activeTab === "analytics" && (
-                        <>
-                            {analyticsLoading ? (
-                                <div className="flex items-center justify-center py-16">
-                                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                                </div>
-                            ) : analyticsData ? (
-                                <>
-                                    <div className="grid gap-4 md:grid-cols-3">
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">Toplam Çalışma Süresi</CardTitle>
-                                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="text-2xl font-bold">{analyticsData.stats.totalStudyMinutes}dk</div>
-                                                <p className="text-xs text-muted-foreground">Toplam öğrenme süresi.</p>
-                                            </CardContent>
-                                        </Card>
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">Başlanan Modüller</CardTitle>
-                                                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="text-2xl font-bold">{analyticsData.stats.modulesStarted}</div>
-                                                <p className="text-xs text-muted-foreground">Kütüphanenizdeki aktif modüller.</p>
-                                            </CardContent>
-                                        </Card>
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">Günlük Seri</CardTitle>
-                                                <Activity className="h-4 w-4 text-muted-foreground" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="text-2xl font-bold">--</div>
-                                                <p className="text-xs text-muted-foreground">Yakında...</p>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                                        <div className="col-span-4">
-                                            <DailyActivityChart data={analyticsData.dailyActivity} />
-                                        </div>
-                                        <div className="col-span-3">
-                                            <ModulePerformanceList data={analyticsData.moduleStats} />
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <Card>
-                                    <CardContent className="flex items-center justify-center py-12">
-                                        <p className="text-muted-foreground">Henüz istatistik verisi yok.</p>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </>
-                    )}
-
-                    {/* === BİLDİRİMLER === */}
-                    {activeTab === "notifications" && (
+                    {/* === AYARLAR === */}
+                    {activeTab === "settings" && (
                         <Card>
                             <CardHeader>
-                                <CardTitle>Bildirimler</CardTitle>
-                                <CardDescription>Bildirim tercihlerinizi yönetin.</CardDescription>
+                                <CardTitle>Sistem Ayarları</CardTitle>
+                                <CardDescription>Dil ve uygulama tercihlerini yönetin.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <CardContent className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="language">Dil Seçimi</Label>
+                                    <Select
+                                        value={language}
+                                        onValueChange={(val) => {
+                                            setLanguage(val);
+                                            saveLanguage(val);
+                                        }}
+                                    >
+                                        <SelectTrigger id="language">
+                                            <SelectValue placeholder="Dil seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="tr">Türkçe 🇹🇷</SelectItem>
+                                            <SelectItem value="en">English 🇬🇧</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                                     <div className="space-y-0.5">
-                                        <Label className="text-base">E-posta Bildirimleri</Label>
-                                        <p className="text-xs text-muted-foreground">Önemli güncellemeler hakkında e-posta al.</p>
+                                        <Label className="text-base">Ses Efektleri</Label>
+                                        <p className="text-xs text-muted-foreground">Doğru/yanlış bildirimleri için ses çal.</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-xs h-7 px-2"
+                                            onClick={() => {
+                                                import("@/lib/audio").then(m => m.playStudySound('SUCCESS'));
+                                            }}
+                                        >
+                                            Test Et
+                                        </Button>
+                                        <Switch
+                                            checked={soundEnabled}
+                                            onCheckedChange={setSoundEnabled}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Bildirimler</Label>
+                                        <p className="text-xs text-muted-foreground">E-posta bildirimlerini aç/kapat.</p>
                                     </div>
                                     <Switch disabled />
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* === GÜVENLİK === */}
-                    {activeTab === "security" && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Güvenlik</CardTitle>
-                                <CardDescription>Hesap güvenlik ayarlarınızı yönetin.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground">Güvenlik ayarları yakında eklenecek.</p>
                             </CardContent>
                         </Card>
                     )}
