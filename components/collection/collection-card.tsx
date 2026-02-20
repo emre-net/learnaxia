@@ -13,13 +13,15 @@ interface LocalCollection {
     isPublic: boolean;
     ownerId: string;
     moduleIds: string[];
+    category: string | null;
+    subCategory: string | null;
     createdAt: string;
     updatedAt: string;
     owner: {
         handle: string | null;
     };
     _count?: {
-        modules: number
+        items: number
     }
 }
 
@@ -35,8 +37,8 @@ interface CollectionCardProps {
 export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     const { collection, role } = item;
 
-    // Approximate module count from moduleIds length if _count not available
-    const moduleCount = collection.moduleIds.length;
+    // Use _count.items if available, fallback to moduleIds length
+    const moduleCount = collection._count?.items ?? collection.moduleIds.length;
 
     if (viewMode === 'list') {
         return (
@@ -50,6 +52,7 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                             {collection.title}
                         </Link>
                         {!collection.isPublic && <Badge variant="secondary" className="text-[10px] h-5">Private</Badge>}
+                        {collection.category && <Badge variant="outline" className="text-[10px] h-5">{collection.category}</Badge>}
                         {role === 'OWNER' && <Badge variant="outline" className="text-[10px] h-5">Owner</Badge>}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">
@@ -82,8 +85,9 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                     <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center shrink-0 mb-2">
                         <Layers className="h-5 w-5 text-primary" />
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap justify-end">
                         {!collection.isPublic && <Badge variant="secondary" className="text-[10px] h-5 px-1">Private</Badge>}
+                        {collection.category && <Badge variant="outline" className="text-[10px] h-5 px-1 bg-background">{collection.category}</Badge>}
                         {role === 'OWNER' && <Badge variant="outline" className="text-[10px] h-5 px-1 bg-background">Owner</Badge>}
                     </div>
                 </div>

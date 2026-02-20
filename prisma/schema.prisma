@@ -258,8 +258,13 @@ model WeaknessReport {
 model Collection {
   id          String                  @id @default(uuid())
   title       String
+  description String?
+  isPublic    Boolean                 @default(false)
+  category    String?
+  subCategory String?
   ownerId     String
   createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
   owner       User                    @relation("OwnedCollections", fields: [ownerId], references: [id])
   items       CollectionItem[]
   userLibrary UserCollectionLibrary[]

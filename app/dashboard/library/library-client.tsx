@@ -17,6 +17,7 @@ import { CollectionCard } from "@/components/collection/collection-card";
 import { ModuleCard } from "@/components/module/module-card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { CATEGORIES } from "@/lib/constants/categories";
 
 // Types (Mirroring API response)
 type LibraryModule = {
@@ -33,6 +34,8 @@ type LibraryModule = {
         status: string;
         isForkable: boolean;
         createdAt: string;
+        category: string | null;
+        subCategory: string | null;
         sourceModule: {
             id: string;
             title: string;
@@ -55,6 +58,8 @@ interface LibraryCollection {
         isPublic: boolean;
         ownerId: string;
         moduleIds: string[];
+        category: string | null;
+        subCategory: string | null;
         createdAt: string;
         updatedAt: string;
         owner: {
@@ -68,6 +73,7 @@ export function LibraryClient() {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedType, setSelectedType] = useState<string>("ALL");
+    const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
     const { language } = useSettingsStore();
     const dictionary = getDictionary(language);
@@ -95,13 +101,18 @@ export function LibraryClient() {
         const matchesSearch = item.module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (item.module.description && item.module.description.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesType = selectedType === "ALL" || item.module.type === selectedType;
-        return matchesSearch && matchesType;
+        const matchesCategory = selectedCategory === "ALL" || item.module.category === selectedCategory;
+        return matchesSearch && matchesType && matchesCategory;
     });
 
-    const filteredCollections = collections?.filter(item =>
-        item.collection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.collection.description && item.collection.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const filteredCollections = collections?.filter(item => {
+        const matchesSearch = item.collection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.collection.description && item.collection.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        const matchesCategory = selectedCategory === "ALL" || item.collection.category === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+    });
 
     const isLoading = isLoadingModules || isLoadingCollections;
 
@@ -145,6 +156,18 @@ export function LibraryClient() {
                                 <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
                                 <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
                                 <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                            <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
+                                <SelectValue placeholder="Kategori" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tüm Kategoriler</SelectItem>
+                                {Object.keys(CATEGORIES).map(cat => (
+                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
 

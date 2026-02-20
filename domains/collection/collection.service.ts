@@ -9,11 +9,11 @@ export class CollectionService {
             const collection = await tx.collection.create({
                 data: {
                     title: data.title,
-                    // description: null, // Disabled due to migration failure
-                    // isPublic: false,   // Disabled due to migration failure
+                    description: data.description ?? null,
+                    isPublic: data.isPublic ?? false,
                     ownerId: userId,
-                    // category: data.category,
-                    // subCategory: data.subCategory
+                    category: data.category ?? null,
+                    subCategory: data.subCategory ?? null
                 }
             });
 
@@ -110,10 +110,10 @@ export class CollectionService {
                 where: { id: collectionId },
                 data: {
                     title: data.title,
-                    // description: data.description,
-                    // isPublic: data.isPublic,
-                    // category: data.category,
-                    // subCategory: data.subCategory
+                    description: data.description,
+                    isPublic: data.isPublic,
+                    category: data.category,
+                    subCategory: data.subCategory
                 }
             });
 
