@@ -464,6 +464,7 @@ export default function NewCollectionPage() {
                             <p>URL: {scope === 'discover' ? `/api/modules?scope=discover&search=${searchQuery}` : '/api/modules'}</p>
                             <p>Raw Items: {rawItems?.length || 0}</p>
                             <p>Filtered Items: {libraryItems?.length || 0}</p>
+                            <p>User ID (First Item): {rawItems?.[0]?.userId?.slice(0, 8) || "Bulunamadı"}...</p>
                         </div>
                         <div>
                             <p>Search Query: "{searchQuery}"</p>

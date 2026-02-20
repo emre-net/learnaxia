@@ -86,49 +86,78 @@ export class ModuleService {
     }
 
     /**
-     * Retrieves user's library modules.
+     * Retrieves all modules in the user's library.
+     * Includes modules created by the user and modules they have saved/forked.
      */
     static async getUserLibrary(userId: string) {
-        console.log(`[ModuleService] Fetching library for user: ${userId}`);
-        const library = await prisma.userModuleLibrary.findMany({
+        console.log(`[ModuleService] Fetching inclusive library for user: ${userId}`);
+
+        // 1. Get modules from the join table (standard library)
+        const libraryEntries = await prisma.userModuleLibrary.findMany({
             where: { userId },
             include: {
                 module: {
-                    select: {
-                        id: true,
-                        title: true,
-                        description: true,
-                        type: true,
-                        status: true,
-                        isForkable: true,
-                        createdAt: true,
-                        category: true,
-                        subCategory: true,
+                    include: {
+                        owner: { select: { id: true, handle: true, image: true } },
                         sourceModule: {
                             select: {
                                 id: true,
                                 title: true,
-                                owner: {
-                                    select: { handle: true, image: true }
-                                }
+                                owner: { select: { handle: true, image: true } }
                             }
                         },
-                        _count: {
-                            select: { items: true }
-                        }
+                        _count: { select: { items: true } }
                     }
                 }
             },
             orderBy: { lastInteractionAt: 'desc' }
         });
 
-        console.log(`[ModuleService] Found ${library.length} items in library.`);
+        // 2. RESCUE: Get modules where user is owner but NOT in join table
+        const entryModuleIds = libraryEntries.map(e => e.moduleId);
+        const ownedModules = await prisma.module.findMany({
+            where: {
+                ownerId: userId,
+                id: { notIn: entryModuleIds }
+            },
+            include: {
+                owner: { select: { id: true, handle: true, image: true } },
+                sourceModule: {
+                    select: {
+                        id: true,
+                        title: true,
+                        owner: { select: { handle: true, image: true } }
+                    }
+                },
+                _count: { select: { items: true } }
+            }
+        });
 
-        // Fetch solved counts for each module safely
-        const moduleIds = library.map(item => item.moduleId);
+        if (ownedModules.length > 0) {
+            console.log(`[ModuleService] Rescued ${ownedModules.length} owned modules for user ${userId}.`);
+        }
+
+        // 3. Normalization & Merge
+        const standardResults = libraryEntries.map(e => ({
+            ...e,
+            solvedCount: 0
+        }));
+
+        const rescueResults = ownedModules.map(m => ({
+            userId,
+            moduleId: m.id,
+            role: 'OWNER',
+            lastInteractionAt: m.createdAt,
+            module: m,
+            solvedCount: 0
+        }));
+
+        const allItems = [...standardResults, ...rescueResults];
+
+        // 4. Fetch solved counts for all items
+        const moduleIds = allItems.map(item => item.moduleId);
         if (moduleIds.length === 0) return [];
 
-        // Strategy: Get count of unique solved items per module for this user
         const solvedCounts = await Promise.all(moduleIds.map(async (mid) => {
             const count = await prisma.itemProgress.count({
                 where: {
@@ -145,10 +174,12 @@ export class ModuleService {
             solvedMap[mid] = count;
         });
 
-        return library.map(item => ({
+        return allItems.map(item => ({
             ...item,
             solvedCount: solvedMap[item.moduleId] || 0
-        }));
+        })).sort((a: any, b: any) =>
+            new Date(b.lastInteractionAt).getTime() - new Date(a.lastInteractionAt).getTime()
+        );
     }
 
     /**
