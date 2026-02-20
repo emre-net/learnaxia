@@ -56,21 +56,6 @@ export async function GET(req: Request) {
             duration: Math.round(durationMs / 60000) // Milliseconds → Minutes
         })).sort((a, b) => a.date.localeCompare(b.date));
 
-        // 2.1 Calculate Streak
-        let streak = 0;
-        const today = new Date().toISOString().split('T')[0];
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-        // Simple streak: check back day by day
-        let checkDate = activityMap.has(today) ? today : (activityMap.has(yesterday) ? yesterday : null);
-        if (checkDate) {
-            let tempDate = new Date(checkDate);
-            while (activityMap.has(tempDate.toISOString().split('T')[0])) {
-                streak++;
-                tempDate.setDate(tempDate.getDate() - 1);
-            }
-        }
-
 
         // 3. Module Performance — single grouped query (Fix #9: N+1)
         const activeModules = await prisma.userModuleLibrary.findMany({
@@ -129,7 +114,6 @@ export async function GET(req: Request) {
                 modulesStarted: activeModules.length,
                 totalSolved,
                 globalAccuracy,
-                streak,
             },
             dailyActivity,
             moduleStats

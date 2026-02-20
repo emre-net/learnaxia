@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Pencil, Check, X, Flame, Target, Zap } from "lucide-react";
+import { User, Bell, Shield, BarChart2, Loader2, Clock, BookOpen, Activity, Coins, TrendingUp, TrendingDown, History, Pencil, Check, X, Target, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -213,28 +213,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
                         <AnimatePresence>
                             {analyticsData?.stats && (
                                 <>
-                                    {/* Streak Widget */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
-                                    >
-                                        <div className="bg-orange-500/20 p-2 rounded-lg">
-                                            <Flame className="h-6 w-6 text-orange-500 fill-orange-500/20" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Seri</span>
-                                            <span className="text-2xl font-black text-foreground tabular-nums">
-                                                {analyticsData.stats.streak}
-                                            </span>
-                                        </div>
-                                    </motion.div>
-
                                     {/* Accuracy Widget */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.1 }}
                                         className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
                                     >
                                         <div className="bg-blue-500/20 p-2 rounded-lg">
@@ -252,7 +234,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.2 }}
+                                        transition={{ delay: 0.1 }}
                                         className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
                                     >
                                         <div className="bg-purple-500/20 p-2 rounded-lg">
@@ -270,7 +252,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.3 }}
+                                        transition={{ delay: 0.2 }}
                                         className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
                                     >
                                         <div className="bg-emerald-500/20 p-2 rounded-lg">
@@ -296,13 +278,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
             <div className="h-16 md:h-20"></div>
 
             {/* Mobile Stats Row */}
-            <div className="lg:hidden grid grid-cols-2 md:grid-cols-4 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
-                <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Seri</span>
-                    <span className="text-xl font-black text-orange-500">
-                        {analyticsData?.stats?.streak ?? "--"}
-                    </span>
-                </div>
+            <div className="lg:hidden grid grid-cols-1 md:grid-cols-3 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
                 <div className="flex flex-col items-center">
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Başarı</span>
                     <span className="text-xl font-black text-blue-500">
