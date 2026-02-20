@@ -18,12 +18,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.role = (user as any).role || 'USER';
             }
             return token;
         },
         async session({ session, token }) {
             if (token && session.user) {
                 session.user.id = token.id as string;
+                (session.user as any).role = token.role;
             }
             return session;
         },
@@ -49,6 +51,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
+
+                    // 1. Check Virtual Admin (Override)
+                    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+                        return {
+                            id: "virtual-admin",
+                            email: email,
+                            name: "Virtual Admin",
+                            role: "ADMIN"
+                        } as any;
+                    }
+
+                    // 2. Database User
                     const user = await prisma.user.findUnique({ where: { email } });
                     if (!user || !user.password) return null;
 
