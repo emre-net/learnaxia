@@ -51,11 +51,20 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const { searchParams } = new URL(req.url);
+        const scope = searchParams.get("scope") || "library";
+        const search = searchParams.get("search") || "";
+
+        if (scope === "discover") {
+            const modules = await ModuleService.getDiscoverModules(session.user.id, search);
+            return NextResponse.json(modules);
+        }
+
         const library = await ModuleService.getUserLibrary(session.user.id);
         console.log(`[API/MODULES] Fetched library for user ${session.user.id}. Count: ${library.length}`);
         return NextResponse.json(library);
     } catch (error) {
-        console.error("Get Library Error:", error);
+        console.error("Get Modules Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

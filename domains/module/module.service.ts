@@ -89,6 +89,7 @@ export class ModuleService {
      * Retrieves user's library modules.
      */
     static async getUserLibrary(userId: string) {
+        console.log(`[ModuleService] Fetching library for user: ${userId}`);
         const library = await prisma.userModuleLibrary.findMany({
             where: { userId },
             include: {
@@ -121,8 +122,11 @@ export class ModuleService {
             orderBy: { lastInteractionAt: 'desc' }
         });
 
+        console.log(`[ModuleService] Found ${library.length} items in library.`);
+
         // Fetch solved counts for each module safely
         const moduleIds = library.map(item => item.moduleId);
+        if (moduleIds.length === 0) return [];
 
         // Strategy: Get count of unique solved items per module for this user
         const solvedCounts = await Promise.all(moduleIds.map(async (mid) => {
@@ -145,11 +149,35 @@ export class ModuleService {
             ...item,
             solvedCount: solvedMap[item.moduleId] || 0
         }));
+    }
 
-        return library.map(item => ({
-            ...item,
-            solvedCount: solvedMap[item.moduleId] || 0
-        }));
+    /**
+     * Retrieves public modules for Discovery.
+     */
+    static async getDiscoverModules(userId: string, search?: string) {
+        return await prisma.module.findMany({
+            where: {
+                status: 'ACTIVE',
+                isForkable: true,
+                NOT: { ownerId: userId },
+                ...(search && {
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } }
+                    ]
+                })
+            },
+            include: {
+                owner: {
+                    select: { handle: true, image: true }
+                },
+                _count: {
+                    select: { items: true }
+                }
+            },
+            take: 20,
+            orderBy: { createdAt: 'desc' }
+        });
     }
 
     /**

@@ -8,12 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, ArrowLeft, FolderPlus, Info, BookOpen, Layers, Check, Search, AlertCircle, Loader2, RotateCw } from "lucide-react";
-import { CATEGORIES } from "@/lib/constants/categories";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    ArrowRight, ArrowLeft, FolderPlus, Info, BookOpen, Layers,
+    Check, Search, AlertCircle, Loader2, RotateCw, Globe,
+    Lock, Sparkles, Search as SearchIcon
+} from "lucide-react";
+import { CATEGORIES } from "@/lib/constants/categories";
+import Link from "next/link";
 
 export default function NewCollectionPage() {
     const router = useRouter();
@@ -26,34 +32,57 @@ export default function NewCollectionPage() {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
     const [subCategory, setSubCategory] = useState("");
+    const [isPublic, setIsPublic] = useState(false);
 
     // Step 2: Module Selection State
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [scope, setScope] = useState<"library" | "discover">("library");
 
     const { data: libraryItems, isLoading, error, refetch } = useQuery<any[]>({
-        queryKey: ['library-modules'],
+        queryKey: ['collection-wizard-modules', scope, scope === 'discover' ? searchQuery : ''],
         queryFn: async () => {
-            console.log("Fetching modules for collection wizard...");
-            const res = await fetch('/api/modules');
-            if (!res.ok) {
-                console.error("Failed to fetch modules:", res.status);
-                throw new Error('Failed to fetch modules');
-            }
+            const url = scope === 'discover'
+                ? `/api/modules?scope=discover&search=${encodeURIComponent(searchQuery)}`
+                : '/api/modules';
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to fetch modules');
             const data = await res.json();
-            console.log("Fetched modules count:", data?.length);
-            return data;
+
+            // Normalize data: If scope=library, data is UserModuleLibrary[]. If discover, it's Module[].
+            return data.map((item: any) => {
+                const module = item.module || item; // item.module for library, item for discover
+                return {
+                    id: module.id,
+                    title: module.title,
+                    type: module.type,
+                    category: module.category,
+                    owner: item.owner || module.owner || null,
+                    _count: module._count
+                };
+            });
         }
     });
 
-    const filteredModules = libraryItems?.filter(item => {
-        if (!item || !item.module) return false;
-        const search = searchQuery.trim().toLowerCase();
-        return item.module.title.toLowerCase().includes(search);
-    });
-
     const handleNext = () => {
-        if (step === 1 && title.trim()) {
+        if (step === 1) {
+            if (!title.trim()) {
+                toast({
+                    title: "Hata",
+                    description: "Lütfen bir başlık girin",
+                    variant: "destructive"
+                });
+                return;
+            }
+            if (isPublic && (!category || !subCategory)) {
+                toast({
+                    title: "Eksik Bilgi",
+                    description: "Herkese açık koleksiyonlar için kategori ve alt kategori seçimi zorunludur.",
+                    variant: "destructive"
+                });
+                return;
+            }
             setStep(2);
         }
     };
@@ -75,14 +104,7 @@ export default function NewCollectionPage() {
     };
 
     const finalizeCollection = async () => {
-        if (!title.trim()) {
-            toast({
-                title: "Hata",
-                description: "Lütfen bir başlık girin",
-                variant: "destructive"
-            });
-            return;
-        }
+        if (!title.trim()) return;
 
         setIsSubmitting(true);
         try {
@@ -95,7 +117,7 @@ export default function NewCollectionPage() {
                     description,
                     category,
                     subCategory,
-                    isPublic: false
+                    isPublic
                 })
             });
 
@@ -197,7 +219,7 @@ export default function NewCollectionPage() {
                                 <div className="grid gap-2">
                                     <label className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Kategori</label>
                                     <Select value={category} onValueChange={(val) => { setCategory(val); setSubCategory(""); }}>
-                                        <SelectTrigger className="h-12 border-2 text-foreground">
+                                        <SelectTrigger className="h-12 border-2">
                                             <SelectValue placeholder="Kategori Seç" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -211,7 +233,7 @@ export default function NewCollectionPage() {
                                 <div className="grid gap-2">
                                     <label className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Alt Kategori</label>
                                     <Select value={subCategory} onValueChange={setSubCategory} disabled={!category}>
-                                        <SelectTrigger className="h-12 border-2 text-foreground">
+                                        <SelectTrigger className="h-12 border-2">
                                             <SelectValue placeholder="Alt Kategori Seç" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -222,11 +244,42 @@ export default function NewCollectionPage() {
                                     </Select>
                                 </div>
                             </div>
+
+                            <div className="pt-4 border-t flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-base font-bold">Herkese Açık</label>
+                                        <Badge variant="outline" className="text-[10px] uppercase">Önerilen</Badge>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        Bu koleksiyon keşfet sayfasında görünebilir hale gelir.
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-3 bg-muted/30 p-2 rounded-lg px-4 border border-border">
+                                    {isPublic ? <Globe className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
+                                    <Switch
+                                        checked={isPublic}
+                                        onCheckedChange={setIsPublic}
+                                    />
+                                </div>
+                            </div>
+
+                            {isPublic && (!category || !subCategory) && (
+                                <div className="flex items-center gap-2 text-xs text-amber-500 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20 animate-in fade-in slide-in-from-top-2">
+                                    <AlertCircle className="h-4 w-4 shrink-0" />
+                                    <span>Herkese açık koleksiyonlar için kategori seçimi zorunludur.</span>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
                     <div className="flex justify-end pt-6">
-                        <Button size="lg" disabled={!title.trim()} onClick={handleNext} className="px-10 h-14 text-lg font-bold shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05] active:scale-[0.98]">
+                        <Button
+                            size="lg"
+                            disabled={!title.trim()}
+                            onClick={handleNext}
+                            className="px-10 h-14 text-lg font-bold shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05] active:scale-[0.98]"
+                        >
                             Sonraki Adım <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
                     </div>
@@ -235,53 +288,60 @@ export default function NewCollectionPage() {
                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                     <div className="space-y-1">
                         <h1 className="text-4xl font-extrabold tracking-tight">Modülleri Seç</h1>
-                        <p className="text-muted-foreground text-lg">Kitaplığından koleksiyona eklenecek modülleri işaretle.</p>
+                        <p className="text-muted-foreground text-lg">Hangi modülleri bu koleksiyona eklemek istersin?</p>
                     </div>
 
-                    <Card className="border-2 shadow-xl min-h-[500px] flex flex-col backdrop-blur-sm bg-card/50">
-                        <CardHeader className="border-b bg-muted/20 space-y-4">
+                    <Card className="border-2 shadow-xl min-h-[600px] flex flex-col backdrop-blur-sm bg-card/50">
+                        <CardHeader className="border-b bg-muted/20 space-y-6">
                             <div className="flex items-center justify-between">
-                                <CardTitle className="flex items-center gap-2 text-2xl">
-                                    <Layers className="h-6 w-6 text-primary" /> Kitaplığın
-                                </CardTitle>
-                                <Badge variant="secondary" className="px-3 py-1 text-sm font-bold">
+                                <div className="space-y-1">
+                                    <CardTitle className="text-2xl flex items-center gap-2">
+                                        {scope === 'library' ? <Layers className="h-6 w-6 text-primary" /> : <Sparkles className="h-6 w-6 text-amber-500" />}
+                                        {scope === 'library' ? 'Kitaplığım' : 'Keşfet'}
+                                    </CardTitle>
+                                    <CardDescription>Koleksiyona eklenecek modülleri seçin.</CardDescription>
+                                </div>
+                                <Badge variant="secondary" className="px-3 py-1 text-sm font-bold h-fit">
                                     {selectedModuleIds.length} Modül Seçildi
                                 </Badge>
                             </div>
-                            <div className="flex items-center justify-between gap-4">
+
+                            <Tabs value={scope} onValueChange={(val: any) => setScope(val)} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 h-12">
+                                    <TabsTrigger value="library" className="text-sm font-bold">
+                                        <Layers className="h-4 w-4 mr-2" /> Kitaplığım
+                                    </TabsTrigger>
+                                    <TabsTrigger value="discover" className="text-sm font-bold">
+                                        <SearchIcon className="h-4 w-4 mr-2" /> Keşfet
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+
+                            <div className="flex items-center justify-between gap-4 pt-2">
                                 <div className="relative flex-1">
-                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Modüllerde ara..."
+                                        placeholder={scope === 'library' ? "Kitaplığında ara..." : "Keşfette ara..."}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-10 h-10 border-2"
+                                        className="pl-10 h-11 border-2"
                                     />
                                 </div>
                                 <Button
                                     variant="outline"
                                     size="icon"
                                     onClick={() => refetch()}
-                                    title="Kitaplığı Yenile"
-                                    className="h-10 w-10 shrink-0"
+                                    title="Yenile"
+                                    className="h-11 w-11 shrink-0"
                                 >
                                     <RotateCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                                 </Button>
                             </div>
 
-                            {/* Hidden Debug Info (Visible only if empty and has libraryItems) */}
-                            {libraryItems && (
-                                <div className="mt-2 text-[10px] text-muted-foreground opacity-30 flex justify-between items-center">
-                                    <span>Debug: Items={libraryItems.length}</span>
-                                    {libraryItems.length > 0 && (
-                                        <span className="truncate ml-2">Raw={JSON.stringify(libraryItems[0]).slice(0, 50)}...</span>
-                                    )}
-                                </div>
-                            )}
-
                             {error && (
-                                <div className="mt-2 text-[10px] text-red-500 opacity-50">
-                                    Debug Error: {(error as any).message}
+                                <div className="text-[10px] text-red-500 opacity-50 flex items-center gap-2">
+                                    <AlertCircle className="h-3 w-3" />
+                                    Sunucu Hatası: {(error as any).message}
                                 </div>
                             )}
                         </CardHeader>
@@ -291,36 +351,36 @@ export default function NewCollectionPage() {
                                     <Loader2 className="h-10 w-10 text-primary animate-spin" />
                                     <p className="text-muted-foreground font-medium">Modüller yükleniyor...</p>
                                 </div>
-                            ) : filteredModules?.length === 0 ? (
+                            ) : libraryItems?.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                                     <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
                                         <Search className="h-8 w-8 text-muted-foreground opacity-20" />
                                     </div>
                                     <h3 className="text-xl font-bold mb-2">Modül Bulunamadı</h3>
                                     <p className="text-muted-foreground max-w-xs mb-6">
-                                        Kitaplığınızda seçebileceğiniz modül bulunmuyor. Yeni bir modül oluşturun veya keşfetten ekleyin.
+                                        Bu alanda seçecek bir modül bulunmuyor. Yeni bir tane oluşturmaya ne dersin?
                                     </p>
                                     <div className="flex gap-3">
                                         <Button asChild variant="default">
                                             <Link href="/dashboard/create">Modül Oluştur</Link>
                                         </Button>
                                         <Button asChild variant="outline">
-                                            <Link href="/dashboard/discover">Keşfet'e Git</Link>
+                                            <Link href="/dashboard/discover">Keşfet'i Gez</Link>
                                         </Button>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-border">
-                                    {filteredModules?.map((item: any) => {
-                                        const isSelected = selectedModuleIds.includes(item.moduleId);
+                                    {libraryItems?.map((item: any) => {
+                                        const isSelected = selectedModuleIds.includes(item.id);
                                         return (
                                             <div
-                                                key={item.moduleId}
+                                                key={item.id}
                                                 className={cn(
                                                     "flex items-center gap-4 p-4 transition-colors cursor-pointer hover:bg-muted/30",
                                                     isSelected && "bg-primary/5"
                                                 )}
-                                                onClick={() => toggleModule(item.moduleId)}
+                                                onClick={() => toggleModule(item.id)}
                                             >
                                                 <div className={cn(
                                                     "h-6 w-6 rounded-md border-2 flex items-center justify-center transition-all",
@@ -329,13 +389,19 @@ export default function NewCollectionPage() {
                                                     {isSelected && <Check className="h-4 w-4 text-white" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="font-bold truncate text-base">{item.module.title}</h4>
+                                                    <h4 className="font-bold truncate text-base">{item.title}</h4>
                                                     <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
                                                         <span className="flex items-center gap-1">
-                                                            <BookOpen className="h-3 w-3" /> {item.module.type}
+                                                            <BookOpen className="h-3 w-3" /> {item.type}
                                                         </span>
                                                         <span>•</span>
-                                                        <span>{item.module.category || "Genel"}</span>
+                                                        <span>{item.category || "Genel"}</span>
+                                                        {item.owner && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span className="text-primary/70">@{item.owner.handle}</span>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -346,7 +412,7 @@ export default function NewCollectionPage() {
                         </CardContent>
                         <CardFooter className="p-6 bg-muted/10 border-t">
                             <p className="text-sm text-muted-foreground font-medium">
-                                İpucu: Modülleri seçtikten sonra sıralamayı koleksiyon detay sayfasından düzenleyebilirsin.
+                                İpucu: Seçtiğin modüller otomatik olarak koleksiyona dahil edilir.
                             </p>
                         </CardFooter>
                     </Card>
