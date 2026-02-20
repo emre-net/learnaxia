@@ -4,7 +4,8 @@ import { CollectionService } from "@/domains/collection/collection.service";
 import { redirect, notFound } from "next/navigation";
 import { CollectionDetailClient } from "@/app/dashboard/collections/[id]/collection-detail-client";
 
-export default async function CollectionDetailPage({ params }: { params: { id: string } }) {
+export default async function CollectionDetailPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const session = await auth();
     if (!session || !session.user?.id) {
         redirect("/auth/login");
