@@ -13,11 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     debug: true, // Hata ayıklama için geçici olarak true
     ...authConfig,
     providers: [
-        Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
-        }),
+        ...authConfig.providers,
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
