@@ -4,25 +4,7 @@ export const authConfig = {
     pages: {
         signIn: '/login',
     },
-    // Production'da session doğrulama sorunlarını çözmek için kritik
-    trustHost: true,
-    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    providers: [], // Providers auth.ts içinde tanımlanacak
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.role = (user as any).role || 'USER';
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (token && session.user) {
-                session.user.id = token.id as string;
-                (session.user as any).role = token.role;
-            }
-            return session;
-        },
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
@@ -48,4 +30,5 @@ export const authConfig = {
             return true;
         },
     },
+    providers: [], // Required by type
 } satisfies NextAuthConfig;

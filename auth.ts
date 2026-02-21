@@ -8,16 +8,33 @@ import { z } from "zod"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
-    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
     trustHost: true,
     debug: true,
+    pages: authConfig.pages,
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                token.role = (user as any).role || 'USER';
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token && session.user) {
+                session.user.id = token.id as string;
+                (session.user as any).role = token.role;
+            }
+            return session;
+        },
+        ...authConfig.callbacks,
+    },
     providers: [
         Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET,
             allowDangerousEmailAccountLinking: true,
         }),
         Credentials({
