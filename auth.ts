@@ -11,8 +11,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     debug: process.env.NODE_ENV === 'development',
-    trustHost: true, // Explicitly trust proxy headers (Railway)
-    secret: process.env.AUTH_SECRET,
     ...authConfig,
     providers: [
         Google({

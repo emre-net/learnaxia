@@ -4,6 +4,8 @@ export const authConfig = {
     pages: {
         signIn: '/login',
     },
+    trustHost: true,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
