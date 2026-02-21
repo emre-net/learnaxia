@@ -46,5 +46,5 @@ export const authConfig = {
             return true;
         },
     },
-    providers: [], // Configured in auth.ts
+    providers: [],
 } satisfies NextAuthConfig;

@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs"
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
-    debug: process.env.NODE_ENV === 'development',
+    debug: true, // Hata ayıklama için geçici olarak true
     ...authConfig,
     providers: [
         Google({
@@ -65,31 +65,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     events: {
         async signIn({ user }) {
-            // Only generate handle if it doesn't exist (e.g. first time Google login)
-            if (user.id && !(user as any).handle && user.email) {
-                const emailPrefix = user.email.split('@')[0];
-                const baseHandle = emailPrefix.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-                let handle = baseHandle || `user${Math.floor(Math.random() * 10000)}`;
+            try {
+                // Only generate handle if it doesn't exist (e.g. first time Google login)
+                if (user.id && !(user as any).handle && user.email) {
+                    const emailPrefix = user.email.split('@')[0];
+                    const baseHandle = emailPrefix.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                    let handle = baseHandle || `user${Math.floor(Math.random() * 10000)}`;
 
-                // Robust uniqueness check
-                let isUnique = false;
-                let finalHandle = handle;
-                let attempts = 0;
+                    // Robust uniqueness check
+                    let isUnique = false;
+                    let finalHandle = handle;
+                    let attempts = 0;
 
-                while (!isUnique && attempts < 10) {
-                    const existing = await prisma.user.findUnique({ where: { handle: finalHandle } });
-                    if (!existing) {
-                        isUnique = true;
-                    } else {
-                        attempts++;
-                        finalHandle = `${handle}${Math.floor(Math.random() * 10000)}`;
+                    while (!isUnique && attempts < 10) {
+                        const existing = await prisma.user.findUnique({ where: { handle: finalHandle } });
+                        if (!existing) {
+                            isUnique = true;
+                        } else {
+                            attempts++;
+                            finalHandle = `${handle}${Math.floor(Math.random() * 10000)}`;
+                        }
                     }
-                }
 
-                await prisma.user.update({
-                    where: { id: user.id },
-                    data: { handle: finalHandle }
-                });
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: { handle: finalHandle }
+                    });
+                }
+            } catch (error) {
+                console.error("[Auth Event] Error in signIn event:", error);
+                // Don't throw to avoid blocking login even if handle generation fails
             }
         }
     }
