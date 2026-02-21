@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth"
+import Google from "next-auth/providers/google"
 
 export const authConfig = {
     pages: {
@@ -33,5 +34,11 @@ export const authConfig = {
     // Production environment stability
     trustHost: true,
     secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    providers: [], // Required by type
+    providers: [
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET,
+            allowDangerousEmailAccountLinking: true,
+        }),
+    ],
 } satisfies NextAuthConfig;
