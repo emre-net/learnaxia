@@ -8,10 +8,14 @@ import { z } from "zod"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     debug: true,
+    trustHost: true,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    pages: {
+        signIn: '/login',
+    },
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -27,7 +31,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return session;
         },
-        ...authConfig.callbacks,
+        authorized({ auth, request: { nextUrl } }) {
+            const isLoggedIn = !!auth?.user;
+            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+            const isOnAdmin = nextUrl.pathname.startsWith('/admin');
+
+            if (isOnAdmin) {
+                if (isLoggedIn) {
+                    const userRole = (auth.user as any)?.role;
+                    if (userRole === "ADMIN") return true;
+                    return Response.redirect(new URL('/dashboard', nextUrl));
+                }
+                return false;
+            }
+
+            if (isOnDashboard) {
+                if (isLoggedIn) return true;
+                return false;
+            } else if (isLoggedIn) {
+                if (nextUrl.pathname === '/login') {
+                    return Response.redirect(new URL('/dashboard', nextUrl));
+                }
+            }
+            return true;
+        },
     },
     providers: [
         Google({
@@ -45,12 +72,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { email, password } = parsedCredentials.data;
 
                     // 1. Check Virtual Admin (Override)
-                    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
-                        console.error("[Auth] ADMIN_EMAIL or ADMIN_PASSWORD is NOT set in environment variables!");
-                    }
+                    // if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+                    //     console.error("[Auth] ADMIN_EMAIL or ADMIN_PASSWORD is NOT set in environment variables!");
+                    // }
 
                     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-                        console.log("[Auth] Virtual Admin login successful");
+                        // console.log("[Auth] Virtual Admin login successful");
                         return {
                             id: "virtual-admin",
                             email: email,
