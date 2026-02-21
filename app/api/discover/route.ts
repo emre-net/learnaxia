@@ -21,52 +21,64 @@ export async function GET(req: Request) {
         const offset = parseInt(searchParams.get("offset") || "0");
 
         if (type === "COLLECTION") {
-            // ... (rest of collection logic remains same)
-            const collections = await prisma.collection.findMany({
-                where: {
-                    ...(category && { category }),
-                    ...(subCategory && { subCategory }),
-                    ...(search && {
-                        OR: [
-                            { title: { contains: search, mode: "insensitive" } },
-                            { description: { contains: search, mode: "insensitive" } }
-                        ]
-                    })
-                },
-                include: {
-                    owner: { select: { handle: true, image: true, id: true } },
-                    _count: { select: { items: true } }
-                },
-                take: limit,
-                skip: offset,
-                orderBy: { createdAt: "desc" }
-            });
-            return NextResponse.json({ items: collections, type: "COLLECTION" });
+            const where = {
+                isPublic: true,
+                ...(category && { category }),
+                ...(subCategory && { subCategory }),
+                ...(search && {
+                    OR: [
+                        { title: { contains: search, mode: "insensitive" } },
+                        { description: { contains: search, mode: "insensitive" } }
+                    ]
+                })
+            };
+
+            const [collections, total] = await Promise.all([
+                prisma.collection.findMany({
+                    where: where as any,
+                    include: {
+                        owner: { select: { handle: true, image: true, id: true } },
+                        _count: { select: { items: true } }
+                    },
+                    take: limit,
+                    skip: offset,
+                    orderBy: { createdAt: "desc" }
+                }),
+                prisma.collection.count({ where: where as any })
+            ]);
+
+            return NextResponse.json({ items: collections, total, type: "COLLECTION" });
         } else {
             // MODULES
-            const modules = await prisma.module.findMany({
-                where: {
-                    isForkable: true,
-                    status: "ACTIVE",
-                    ...(moduleType && { type: moduleType as any }),
-                    ...(category && { category }),
-                    ...(subCategory && { subCategory }),
-                    ...(search && {
-                        OR: [
-                            { title: { contains: search, mode: "insensitive" } },
-                            { description: { contains: search, mode: "insensitive" } }
-                        ]
-                    })
-                },
-                include: {
-                    owner: { select: { handle: true, image: true, id: true } },
-                    _count: { select: { items: true } }
-                },
-                take: limit,
-                skip: offset,
-                orderBy: { createdAt: "desc" }
-            });
-            return NextResponse.json({ items: modules, type: "MODULE" });
+            const where = {
+                isForkable: true,
+                status: "ACTIVE",
+                ...(moduleType && { type: moduleType as any }),
+                ...(category && { category }),
+                ...(subCategory && { subCategory }),
+                ...(search && {
+                    OR: [
+                        { title: { contains: search, mode: "insensitive" } },
+                        { description: { contains: search, mode: "insensitive" } }
+                    ]
+                })
+            };
+
+            const [modules, total] = await Promise.all([
+                prisma.module.findMany({
+                    where: where as any,
+                    include: {
+                        owner: { select: { handle: true, image: true, id: true } },
+                        _count: { select: { items: true } }
+                    },
+                    take: limit,
+                    skip: offset,
+                    orderBy: { createdAt: "desc" }
+                }),
+                prisma.module.count({ where: where as any })
+            ]);
+
+            return NextResponse.json({ items: modules, total, type: "MODULE" });
         }
 
     } catch (error) {
