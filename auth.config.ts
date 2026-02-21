@@ -30,5 +30,8 @@ export const authConfig = {
             return true;
         },
     },
+    // Production environment stability
+    trustHost: true,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
     providers: [], // Required by type
 } satisfies NextAuthConfig;

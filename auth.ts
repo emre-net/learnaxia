@@ -8,12 +8,10 @@ import { z } from "zod"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
-    secret: process.env.AUTH_SECRET,
-    trustHost: true,
     debug: true,
-    pages: authConfig.pages,
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -75,17 +73,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
-    cookies: {
-        sessionToken: {
-            name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}authjs.session-token`,
-            options: {
-                httpOnly: true,
-                sameSite: "lax",
-                path: "/",
-                secure: process.env.NODE_ENV === "production",
-            },
-        },
-    },
     events: {
         async createUser({ user }) {
             try {
