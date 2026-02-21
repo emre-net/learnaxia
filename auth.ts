@@ -8,16 +8,14 @@ import { z } from "zod"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
-    debug: true, // Hata ayıklama için geçici olarak true
-    ...authConfig,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    trustHost: true,
+    debug: true,
     providers: [
-        Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
-        }),
+        ...authConfig.providers,
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
@@ -57,10 +55,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }),
     ],
     events: {
-        async signIn({ user }) {
+        async createUser({ user }) {
             try {
-                // Only generate handle if it doesn't exist (e.g. first time Google login)
-                if (user.id && !(user as any).handle && user.email) {
+                // Generate handle ONLY for new users (Oauth/Adapter created)
+                if (user.id && user.email) {
                     const emailPrefix = user.email.split('@')[0];
                     const baseHandle = emailPrefix.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
                     let handle = baseHandle || `user${Math.floor(Math.random() * 10000)}`;
@@ -86,9 +84,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     });
                 }
             } catch (error) {
-                console.error("[Auth Event] Error in signIn event:", error);
-                // Don't throw to avoid blocking login even if handle generation fails
+                console.error("[Auth Event] Error in createUser event:", error);
             }
+        },
+        async linkAccount({ user }) {
+            // Optional: Handle if an existing user links Google for the first time
+            console.log("[Auth Event] Account linked for user:", user.email);
         }
     }
 })
