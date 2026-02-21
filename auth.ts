@@ -15,7 +15,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     trustHost: true,
     debug: true,
     providers: [
-        ...authConfig.providers,
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+        }),
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
@@ -54,6 +58,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
+    cookies: {
+        sessionToken: {
+            name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}authjs.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+            },
+        },
+    },
     events: {
         async createUser({ user }) {
             try {
@@ -88,7 +103,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
         },
         async linkAccount({ user }) {
-            // Optional: Handle if an existing user links Google for the first time
             console.log("[Auth Event] Account linked for user:", user.email);
         }
     }

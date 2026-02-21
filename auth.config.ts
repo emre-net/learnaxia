@@ -4,9 +4,10 @@ export const authConfig = {
     pages: {
         signIn: '/login',
     },
+    // Production'da session doğrulama sorunlarını çözmek için kritik
     trustHost: true,
     secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    providers: [],
+    providers: [], // Providers auth.ts içinde tanımlanacak
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -33,12 +34,12 @@ export const authConfig = {
                     if (userRole === "ADMIN") return true;
                     return Response.redirect(new URL('/dashboard', nextUrl));
                 }
-                return false; // Redirect to login
+                return false;
             }
 
             if (isOnDashboard) {
                 if (isLoggedIn) return true;
-                return false; // Redirect to login
+                return false;
             } else if (isLoggedIn) {
                 if (nextUrl.pathname === '/login') {
                     return Response.redirect(new URL('/dashboard', nextUrl));
