@@ -243,10 +243,10 @@ export function LibraryClient() {
                                 </TabsContent>
                                 <TabsContent value="created" className="mt-0">
                                     <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                                        {filteredModules.filter(m => !m.module.sourceModule).map((item) => (
+                                        {filteredModules.filter(m => m.role === 'OWNER').map((item) => (
                                             <ModuleCard key={item.moduleId} module={item.module} solvedCount={item.solvedCount} viewMode={viewMode} />
                                         ))}
-                                        {filteredModules.filter(m => !m.module.sourceModule).length === 0 && (
+                                        {filteredModules.filter(m => m.role === 'OWNER').length === 0 && (
                                             <div className="col-span-full text-center py-12 text-muted-foreground">
                                                 Henüz orijinal bir modül oluşturmadınız.
                                             </div>
@@ -255,10 +255,10 @@ export function LibraryClient() {
                                 </TabsContent>
                                 <TabsContent value="forked" className="mt-0">
                                     <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                                        {filteredModules.filter(m => m.module.sourceModule).map((item) => (
+                                        {filteredModules.filter(m => m.role === 'SAVED').map((item) => (
                                             <ModuleCard key={item.moduleId} module={item.module} solvedCount={item.solvedCount} viewMode={viewMode} />
                                         ))}
-                                        {filteredModules.filter(m => m.module.sourceModule).length === 0 && (
+                                        {filteredModules.filter(m => m.role === 'SAVED').length === 0 && (
                                             <div className="col-span-full text-center py-12 text-muted-foreground">
                                                 Henüz kitaplığınıza eklediğiniz bir modül yok.
                                             </div>

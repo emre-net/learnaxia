@@ -42,6 +42,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
+    const [isSaved, setIsSaved] = useState(module._count?.userLibrary ? module._count.userLibrary > 0 : false);
 
     const VerifiedBadge = () => (
         <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1 px-1.5 h-5 font-bold">
@@ -63,12 +64,22 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const handleSave = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isSaving) return;
+
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/modules/${module.id}/save`, { method: 'POST' });
+            const method = isSaved ? 'DELETE' : 'POST';
+            const res = await fetch(`/api/modules/${module.id}/save`, { method });
+
             if (res.ok) {
-                setSaveCount(prev => prev + 1);
-                toast({ title: "Başarılı", description: "Modül kitaplığına kaydedildi." });
+                const newSavedState = !isSaved;
+                setIsSaved(newSavedState);
+                setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
+
+                toast({
+                    title: "Başarılı",
+                    description: newSavedState ? "Modül kitaplığına kaydedildi." : "Modül kitaplığından kaldırıldı."
+                });
             }
         } catch (error) {
             toast({ title: "Hata", description: "İşlem gerçekleştirilemedi.", variant: "destructive" });
@@ -122,8 +133,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-primary">
-                        <Bookmark className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className={`transition-all ${isSaved ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}>
+                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
                     </Button>
                     <Button variant="default" onClick={() => setIsOptionsOpen(true)}>Çalış</Button>
                 </div>
@@ -179,8 +190,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
             <div className="p-5 pt-0 mt-auto flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-primary/5 hover:text-primary transition-all border-muted/50" onClick={handleSave} disabled={isSaving}>
-                        <Bookmark className="h-4 w-4" />
+                    <Button variant="outline" size="icon" className={`h-10 w-10 rounded-xl transition-all border-muted/50 ${isSaved ? 'bg-primary/10 text-primary border-primary/20' : 'hover:bg-primary/5 hover:text-primary'}`} onClick={handleSave} disabled={isSaving}>
+                        <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-primary' : ''}`} />
                     </Button>
                     {!module.sourceModule && (
                         <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50" title="Kendi kitaplığına ekle ve düzenle" onClick={handleFork}>
