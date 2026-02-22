@@ -430,18 +430,88 @@ export class ModuleService {
     }
 
     /**
-     * Updates a single item.
+     * Adds a module to the user's library WITHOUT forking.
+     * Uses 'SAVED' role to distinguish from owned modules.
+     */
+    static async addToLibrary(userId: string, moduleId: string) {
+        // Check if already in library
+        const existing = await prisma.userModuleLibrary.findUnique({
+            where: { userId_moduleId: { userId, moduleId } }
+        });
+
+        if (existing) return existing;
+
+        return await prisma.userModuleLibrary.create({
+            data: {
+                userId,
+                moduleId,
+                role: 'SAVED',
+                lastInteractionAt: new Date()
+            }
+        });
+    }
+
+    /**
+     * Fork-on-Edit helper: Forks the module and returns the new item ID that corresponds to the source item.
+     */
+    static async forkAndApplyUpdate(userId: string, moduleId: string, itemId: string, itemData: any) {
+        return await prisma.$transaction(async (tx) => {
+            // 1. Fork the module
+            const newModule = await this.fork(userId, moduleId);
+
+            // 2. Find the corresponding item in the new module
+            const newItem = await tx.item.findFirst({
+                where: { moduleId: newModule.id, sourceItemId: itemId }
+            });
+
+            if (!newItem) throw new Error("Mapped item not found in fork");
+
+            // 3. Update the new item
+            const updatedItem = await tx.item.update({
+                where: { id: newItem.id },
+                data: {
+                    content: itemData.content as Prisma.InputJsonValue,
+                    contentHash: computeContentHash(itemData.content),
+                    type: itemData.type,
+                }
+            });
+
+            return { module: newModule, item: updatedItem };
+        });
+    }
+
+    /**
+     * Updates a single item. Handles automatic forking if user is not the owner.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static async updateItem(userId: string, moduleId: string, itemId: string, itemData: any) {
+        // 1. Check current access
         const access = await prisma.userContentAccess.findUnique({
             where: { userId_resourceId: { userId, resourceId: moduleId } }
         });
 
+        // 2. If NOT owner, trigger Fork-on-Edit
         if (!access || access.accessLevel !== 'OWNER') {
-            throw new Error("Unauthorized Update Item Access");
+            // Check if forkable
+            const module = await prisma.module.findUnique({ where: { id: moduleId } });
+            if (!module || !module.isForkable) throw new Error("Unauthorized or not forkable");
+
+            // Check if content Hash actually changed
+            const originalItem = await prisma.item.findUnique({ where: { id: itemId } });
+            const newHash = computeContentHash(itemData.content);
+
+            if (originalItem && originalItem.contentHash === newHash) {
+                // No change, no fork needed
+                console.log("[ModuleService] Update attempted on non-owned item but no content change. Skipping fork.");
+                return originalItem;
+            }
+
+            console.log(`[ModuleService] Non-owner editing item ${itemId}. Triggering Fork-on-Edit.`);
+            const result = await this.forkAndApplyUpdate(userId, moduleId, itemId, itemData);
+            return { ...result.item, _meta: { forkedModuleId: result.module.id } };
         }
 
+        // 3. Standard owner update
         // Verify item belongs to module
         const existingItem = await prisma.item.findUnique({
             where: { id: itemId }
@@ -457,7 +527,6 @@ export class ModuleService {
                 content: itemData.content as Prisma.InputJsonValue,
                 contentHash: computeContentHash(itemData.content),
                 type: itemData.type,
-                // Order is typically strictly managed via reorder endpoint, not here, but can be allowed.
             }
         });
     }
@@ -472,7 +541,21 @@ export class ModuleService {
         });
 
         if (!access || access.accessLevel !== 'OWNER') {
-            throw new Error("Unauthorized Delete Item Access");
+            // Deleting an item is definitely an edit.
+            const module = await prisma.module.findUnique({ where: { id: moduleId } });
+            if (!module || !module.isForkable) throw new Error("Unauthorized or not forkable");
+
+            console.log(`[ModuleService] Non-owner deleting item ${itemId}. Triggering Fork-on-Edit (Delete).`);
+            const newModule = await this.fork(userId, moduleId);
+            const newItem = await prisma.item.findFirst({
+                where: { moduleId: newModule.id, sourceItemId: itemId }
+            });
+
+            if (newItem) {
+                await prisma.item.delete({ where: { id: newItem.id } });
+            }
+
+            return { success: true, forkedModuleId: newModule.id };
         }
 
         // Verify item belongs to module

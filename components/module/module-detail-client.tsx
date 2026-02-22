@@ -67,23 +67,23 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
         if (!session) return;
         setIsForking(true);
         try {
-            const res = await fetch(`/api/modules/${moduleId}/fork`, {
+            // Updated to use 'save' endpoint which doesn't fork immediately anymore
+            const res = await fetch(`/api/modules/${moduleId}/save`, {
                 method: 'POST',
             });
 
-            if (!res.ok) throw new Error("Kopyalama başarısız");
+            if (!res.ok) throw new Error("Kütüphaneye ekleme başarısız");
 
-            const newModule = await res.json();
             toast({
                 title: "Başarılı",
-                description: "Modül kopyalandı! Kütüphanenize eklendi.",
+                description: "Modül kütüphanenize eklendi! Düzenleme yaparak kendi kopyanızı oluşturabilirsiniz.",
             });
-            router.push(`/dashboard/modules/${newModule.id}`);
+            await refetch(); // Refresh to update button state/visibility if needed
         } catch (error) {
             console.error(error);
             toast({
                 title: "Hata",
-                description: "Modül kopyalanırken bir hata oluştu.",
+                description: "Modül kütüphaneye eklenirken bir hata oluştu.",
                 variant: "destructive",
             });
         } finally {
@@ -93,20 +93,6 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
 
     const handleSaveItem = async (item: any) => {
         try {
-            const url = item.id && !item.id.includes('-') // Check if real ID (assuming UUID without dashes is not possible, but UUID has dashes. UUID v4 has dashes.)
-            // Actually, item.id is set to uuidv4() in ItemEditorSheet for NEW items too.
-            // But ItemEditorSheet's generatedId is passed to onSave.
-            // We need to distinguish between "New Item (client-side ID)" and "Existing Item (database ID)".
-            // BUT, `setEditingItem(item)` passes an existing DB item.
-            // `ItemEditorSheet` uses that ID.
-            // If it's a NEW item, ItemEditorSheet generates a UUID.
-            // So BOTH have IDs.
-            // We need to know if we are in "Edit Mode".
-            // `editingItem` state tells us if we started from an existing item!
-            // BUT `handleSaveItem` receives `item`, it doesn't know about `editingItem` state directly inside the closure if we assume it might lack context?
-            // Actually it can access `editingItem`.
-            // If `editingItem` is set, we are updating.
-
             let method = 'POST';
             let endpoint = `/api/modules/${moduleId}/items`;
 
@@ -123,10 +109,19 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
 
             if (!res.ok) throw new Error("Failed to save item");
 
+            const savedItem = await res.json();
+
+            // Handle automatic fork redirection
+            if (savedItem._meta?.forkedModuleId) {
+                toast({ title: "Başarılı", description: "Modül fork edildi ve değişiklik uygulandı!" });
+                router.push(`/dashboard/modules/${savedItem._meta.forkedModuleId}`);
+                return;
+            }
+
             await refetch();
             setIsSheetOpen(false);
             setEditingItem(null);
-            toast({ title: "Başarılı", description: "Öğe eklendi" });
+            toast({ title: "Başarılı", description: "Öğe güncellendi" });
         } catch (err) {
             console.error(err);
             toast({ title: "Hata", description: "Öğe eklenemedi", variant: "destructive" });
@@ -142,6 +137,15 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
             });
 
             if (!res.ok) throw new Error("Failed to delete item");
+
+            const result = await res.json();
+
+            // Handle automatic fork redirection
+            if (result.forkedModuleId) {
+                toast({ title: "Başarılı", description: "Modül fork edildi ve öğe silindi!" });
+                router.push(`/dashboard/modules/${result.forkedModuleId}`);
+                return;
+            }
 
             await refetch();
             toast({ title: "Başarılı", description: "Öğe silindi" });
@@ -200,8 +204,12 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                             </Button>
                         )}
 
-                        {isOwner && (
-                            <Button variant="outline" onClick={() => setIsSheetOpen(true)}>
+                        {/* Updated: Show "Add Item" if owner OR if module is forkable */}
+                        {(isOwner || module.isForkable) && (
+                            <Button variant="outline" onClick={() => {
+                                setEditingItem(null);
+                                setIsSheetOpen(true);
+                            }}>
                                 <Plus className="mr-2 h-4 w-4" /> Öğe Ekle
                             </Button>
                         )}
@@ -228,7 +236,12 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                         </div>
                         <h3 className="text-lg font-medium mb-1">This module is empty</h3>
                         <p className="text-muted-foreground mb-4">Add your first item to start learning.</p>
-                        <Button onClick={() => setIsSheetOpen(true)}>Add Item</Button>
+                        {(isOwner || module.isForkable) && (
+                            <Button onClick={() => {
+                                setEditingItem(null);
+                                setIsSheetOpen(true);
+                            }}>Add Item</Button>
+                        )}
                     </Card>
                 ) : (
                     <div className="grid gap-4">
@@ -239,7 +252,7 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-lg mb-1">
-                                        {item.content?.question || item.content?.front || item.content?.statement || getStudyDictionary(useSettingsStore.getState().language).untitledItem}
+                                        {item.content?.question || item.content?.front || item.content?.statement || "Untitled Item"}
                                     </p>
                                     <div className="text-muted-foreground flex items-center gap-2">
                                         <ArrowRight className="h-4 w-4" />
@@ -248,16 +261,21 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                         </span>
                                     </div>
                                 </div>
+                                {/* Updated: Show actions if owner OR if module is forkable */}
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                                        setEditingItem(item);
-                                        setIsSheetOpen(true);
-                                    }}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteItem(item.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    {(isOwner || module.isForkable) && (
+                                        <>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                                                setEditingItem(item);
+                                                setIsSheetOpen(true);
+                                            }}>
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteItem(item.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </Card>
                         ))}
@@ -270,6 +288,7 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                 onOpenChange={setIsSheetOpen}
                 onSave={handleSaveItem}
                 type={module.type}
+                initialData={editingItem}
             />
         </div>
     );
@@ -289,5 +308,5 @@ function ModuleDetailSkeleton() {
                 <Skeleton className="h-24 w-full" />
             </div>
         </div>
-    )
+    );
 }
