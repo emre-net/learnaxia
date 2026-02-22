@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, BookOpen, Clock, Coins, Target } from "lucide-react";
+import { Activity, BookOpen, Clock, Coins, Target, Terminal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface DashboardStats {
     totalStudyMinutes: number;
@@ -12,6 +16,9 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.role === "ADMIN";
+
     const [stats, setStats] = useState<DashboardStats>({
         totalStudyMinutes: 0,
         modulesStarted: 0,
@@ -50,6 +57,14 @@ export default function DashboardPage() {
         <div className="flex-1 space-y-4 p-8 pt-6">
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">Genel Bakış</h2>
+                {isAdmin && (
+                    <Link href="/dashboard/admin/logs">
+                        <Button variant="outline" className="rounded-2xl border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold gap-2">
+                            <Terminal className="w-4 h-4" />
+                            Admin Panel <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] ml-1">LOGS</Badge>
+                        </Button>
+                    </Link>
+                )}
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>

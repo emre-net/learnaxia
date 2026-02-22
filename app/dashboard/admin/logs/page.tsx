@@ -1,6 +1,6 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,10 @@ import {
 } from "lucide-react";
 
 export default function LogsPage() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const isAdmin = (session?.user as any)?.role === "ADMIN";
+
     const [logs, setLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -63,6 +67,25 @@ export default function LogsPage() {
             default: return <Badge variant="secondary" className="font-medium text-zinc-500">INFO</Badge>;
         }
     };
+
+    if (status === "loading") {
+        return <div className="p-8 flex items-center justify-center min-h-[60vh]"><RefreshCw className="animate-spin text-zinc-400" /></div>;
+    }
+
+    if (!isAdmin) {
+        return (
+            <div className="p-8 space-y-8 max-w-lg mx-auto text-center pt-20">
+                <div className="h-24 w-24 rounded-full bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto mb-6">
+                    <ShieldAlert className="h-12 w-12 text-rose-600 dark:text-rose-400" />
+                </div>
+                <h1 className="text-3xl font-black text-zinc-900 dark:text-white">Yetkisiz Erişim</h1>
+                <p className="text-zinc-500 font-medium italic">Bu sayfayı görüntülemek için yeterli yetkiniz bulunmuyor. Sadece yöneticiler bu alana erişebilir.</p>
+                <Button onClick={() => router.push("/dashboard")} className="rounded-2xl h-12 px-8 font-black bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 mt-4 transition-all active:scale-95">
+                    Dashboard'a Dön
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <div className="p-8 space-y-8 max-w-7xl mx-auto">
