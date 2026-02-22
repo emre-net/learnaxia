@@ -172,7 +172,6 @@ model Module {
   description     String?
   type            String
   status          String              @default("DRAFT")
-  visibility      Visibility          @default(PRIVATE)
   isForkable      Boolean             @default(true)
   ownerId         String
   creatorId       String
@@ -183,6 +182,7 @@ model Module {
   subCategory     String?
   archivedAt      DateTime?
   isVerified      Boolean             @default(false)
+  visibility      Visibility          @default(PRIVATE)
   collectionItems CollectionItem[]
   items           Item[]
   sessions        LearningSession[]
@@ -264,13 +264,13 @@ model Collection {
   id          String                  @id @default(uuid())
   title       String
   description String?
-  visibility  Visibility @default(PRIVATE)
   category    String?
   subCategory String?
   isVerified  Boolean                 @default(false)
   ownerId     String
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
+  visibility  Visibility              @default(PRIVATE)
   owner       User                    @relation("OwnedCollections", fields: [ownerId], references: [id])
   items       CollectionItem[]
   userLibrary UserCollectionLibrary[]

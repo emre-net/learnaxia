@@ -58,10 +58,8 @@ export async function GET(req: Request) {
 
 
         // 3. Module Performance — single grouped query (Fix #9: N+1)
-        const activeModules = await prisma.userModuleLibrary.findMany({
+        const allLibraryEntries = await prisma.userModuleLibrary.findMany({
             where: { userId },
-            orderBy: { lastInteractionAt: 'desc' },
-            take: 5,
             include: {
                 module: {
                     select: { id: true, title: true }
@@ -69,10 +67,15 @@ export async function GET(req: Request) {
             }
         });
 
-        const moduleIds = activeModules.map(m => m.moduleId);
+        const activeModulesCount = allLibraryEntries.length;
+        const recentModules = allLibraryEntries
+            .sort((a, b) => new Date(b.lastInteractionAt).getTime() - new Date(a.lastInteractionAt).getTime())
+            .slice(0, 5);
 
-        // Single query instead of N+1 loop
-        const allProgress = moduleIds.length > 0
+        const moduleIds = recentModules.map(m => m.moduleId);
+
+        // Single query instead of N+1 loop for recent module performance
+        const recentProgress = moduleIds.length > 0
             ? await prisma.itemProgress.findMany({
                 where: {
                     userId,
@@ -86,9 +89,9 @@ export async function GET(req: Request) {
             })
             : [];
 
-        // Group by moduleId in JS
+        // Group by moduleId in JS for recent modules
         const moduleStatsMap = new Map<string, { correct: number; wrong: number }>();
-        allProgress.forEach(p => {
+        recentProgress.forEach(p => {
             const mid = p.item.moduleId;
             const existing = moduleStatsMap.get(mid) || { correct: 0, wrong: 0 };
             existing.correct += p.correctCount;
@@ -96,7 +99,7 @@ export async function GET(req: Request) {
             moduleStatsMap.set(mid, existing);
         });
 
-        const moduleStats = activeModules.map(entry => {
+        const moduleStats = recentModules.map(entry => {
             const stats = moduleStatsMap.get(entry.moduleId) || { correct: 0, wrong: 0 };
             const total = stats.correct + stats.wrong;
             const accuracy = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
@@ -111,7 +114,7 @@ export async function GET(req: Request) {
         return NextResponse.json({
             stats: {
                 totalStudyMinutes: Math.round((totalDuration._sum.durationMs || 0) / 60000),
-                modulesStarted: activeModules.length,
+                modulesStarted: activeModulesCount,
                 totalSolved,
                 globalAccuracy,
             },

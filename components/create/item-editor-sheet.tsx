@@ -123,31 +123,32 @@ export function ItemEditorSheet({
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="sm:max-w-xl overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>{getTitle()}</SheetTitle>
+            <SheetContent className="sm:max-w-xl overflow-y-auto bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-l border-white/20 dark:border-white/10">
+                <SheetHeader className="mb-8">
+                    <SheetTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                        {getTitle()}
+                    </SheetTitle>
                     <SheetDescription>
                         {initialData ? t('creation.itemEditor.editDescription') : t('creation.itemEditor.newDescription')}
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="grid gap-6 py-6">
-                    {/* Question / Front - Hide for GAP (handled separately) */}
+                <div className="grid gap-8 py-2">
+                    {/* Question / Front */}
                     {type !== 'GAP' && (
-                        <div className="grid gap-2">
+                        <div className="grid gap-3">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="question">
+                                <Label htmlFor="question" className="text-sm font-bold text-foreground/70 uppercase tracking-tight">
                                     {type === 'FLASHCARD' ? t('creation.itemEditor.frontSide') : t('creation.itemEditor.questionLabel')}
                                 </Label>
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 text-xs text-muted-foreground hover:text-primary"
+                                    className="h-7 text-[10px] text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full px-3"
                                     onClick={() => toast({
                                         title: t('creation.itemEditor.comingSoon'),
                                         description: t('creation.itemEditor.imageFeatureHint'),
-                                        variant: "default"
                                     })}
                                 >
                                     📷 {t('creation.itemEditor.uploadImage')}
@@ -155,8 +156,8 @@ export function ItemEditorSheet({
                             </div>
                             <Textarea
                                 id="question"
-                                placeholder={t('creation.itemEditor.gapPlaceholder')}
-                                className="resize-none min-h-[100px]"
+                                placeholder={t('creation.itemEditor.questionPlaceholder')}
+                                className="resize-none min-h-[120px] bg-muted/30 border-muted-foreground/10 focus:border-primary/50 transition-all rounded-2xl p-4 text-lg font-medium"
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
                             />
@@ -165,18 +166,19 @@ export function ItemEditorSheet({
 
                     {/* Answer / Back (Flashcard) */}
                     {type === 'FLASHCARD' && (
-                        <div className="grid gap-2">
+                        <div className="grid gap-3">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="answer">{t('creation.itemEditor.backSide')}</Label>
+                                <Label htmlFor="answer" className="text-sm font-bold text-foreground/70 uppercase tracking-tight">
+                                    {t('creation.itemEditor.backSide')}
+                                </Label>
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 text-xs text-muted-foreground hover:text-primary"
+                                    className="h-7 text-[10px] text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full px-3"
                                     onClick={() => toast({
                                         title: t('creation.itemEditor.comingSoon'),
                                         description: t('creation.itemEditor.imageFeatureHint'),
-                                        variant: "default"
                                     })}
                                 >
                                     📷 {t('creation.itemEditor.uploadImage')}
@@ -184,8 +186,8 @@ export function ItemEditorSheet({
                             </div>
                             <Textarea
                                 id="answer"
-                                placeholder={t('creation.itemEditor.backSide')}
-                                className="resize-none min-h-[100px]"
+                                placeholder={t('creation.itemEditor.answerPlaceholder')}
+                                className="resize-none min-h-[120px] bg-muted/30 border-muted-foreground/10 focus:border-primary/50 transition-all rounded-2xl p-4 text-lg font-medium"
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
                             />
@@ -195,23 +197,31 @@ export function ItemEditorSheet({
                     {/* True / False */}
                     {type === 'TRUE_FALSE' && (
                         <div className="grid gap-4">
-                            <Label>{t('creation.itemEditor.correctAnswerLabel')}</Label>
+                            <Label className="text-sm font-bold text-foreground/70 uppercase tracking-tight">
+                                {t('creation.itemEditor.correctAnswerLabel')}
+                            </Label>
                             <div className="flex gap-4">
                                 <Button
                                     type="button"
                                     variant={answer === "True" ? "default" : "outline"}
-                                    className={`flex-1 ${answer === "True" ? "bg-green-600 hover:bg-green-700" : ""}`}
+                                    className={`flex-1 h-14 rounded-2xl text-lg font-bold transition-all ${answer === "True"
+                                            ? "bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/20"
+                                            : "border-muted-foreground/10 hover:border-green-500/30 hover:bg-green-500/5"
+                                        }`}
                                     onClick={() => setAnswer("True")}
                                 >
-                                    <Check className="mr-2 h-4 w-4" /> {t('creation.itemEditor.trueLabel')}
+                                    <Check className={`mr-2 h-5 w-5 ${answer === "True" ? "animate-in zoom-in" : ""}`} /> {t('creation.itemEditor.trueLabel')}
                                 </Button>
                                 <Button
                                     type="button"
                                     variant={answer === "False" ? "default" : "outline"}
-                                    className={`flex-1 ${answer === "False" ? "bg-red-600 hover:bg-red-700" : ""}`}
+                                    className={`flex-1 h-14 rounded-2xl text-lg font-bold transition-all ${answer === "False"
+                                            ? "bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20"
+                                            : "border-muted-foreground/10 hover:border-red-500/30 hover:bg-red-500/5"
+                                        }`}
                                     onClick={() => setAnswer("False")}
                                 >
-                                    <X className="mr-2 h-4 w-4" /> {t('creation.itemEditor.falseLabel')}
+                                    <X className={`mr-2 h-5 w-5 ${answer === "False" ? "animate-in zoom-in" : ""}`} /> {t('creation.itemEditor.falseLabel')}
                                 </Button>
                             </div>
                         </div>
@@ -219,45 +229,73 @@ export function ItemEditorSheet({
 
                     {/* Multiple Choice Options */}
                     {type === 'MC' && (
-                        <div className="grid gap-4">
-                            <Label>{t('creation.itemEditor.optionsLabel')}</Label>
-                            <p className="text-xs text-muted-foreground mb-2">{t('creation.itemEditor.optionsHint')}</p>
-                            {options.map((opt, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                    <Input
-                                        value={opt}
-                                        onChange={(e) => {
-                                            const newOpts = [...options];
-                                            const oldValue = newOpts[idx];
-                                            newOpts[idx] = e.target.value;
-                                            setOptions(newOpts);
-
-                                            if (answer === oldValue) {
-                                                setAnswer(e.target.value);
-                                            }
-                                        }}
-                                        placeholder={t('creation.itemEditor.optionPlaceholder', { index: idx + 1 })}
-                                    />
-                                    <div
-                                        className={`h-9 w-9 rounded-md border cursor-pointer flex items-center justify-center transition-all ${answer === opt && opt !== "" ? "bg-green-500 border-green-500 text-white shadow-md" : "border-muted hover:bg-muted"}`}
-                                        onClick={() => setAnswer(opt)}
-                                        title={t('creation.itemEditor.markAsCorrect')}
-                                    >
-                                        {answer === opt && opt !== "" && <Check className="h-5 w-5" />}
+                        <div className="grid gap-6">
+                            <div>
+                                <Label className="text-sm font-bold text-foreground/70 uppercase tracking-tight">{t('creation.itemEditor.optionsLabel')}</Label>
+                                <p className="text-[10px] text-muted-foreground mt-1">{t('creation.itemEditor.optionsHint')}</p>
+                            </div>
+                            <div className="space-y-4">
+                                {options.map((opt, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 group/opt">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                value={opt}
+                                                onChange={(e) => {
+                                                    const newOpts = [...options];
+                                                    const oldValue = newOpts[idx];
+                                                    newOpts[idx] = e.target.value;
+                                                    setOptions(newOpts);
+                                                    if (answer === oldValue) setAnswer(e.target.value);
+                                                }}
+                                                placeholder={t('creation.itemEditor.optionPlaceholder', { index: idx + 1 })}
+                                                className={`h-12 rounded-xl pr-12 transition-all ${answer === opt && opt !== ""
+                                                        ? "border-green-500/50 bg-green-500/5 focus:border-green-500"
+                                                        : "bg-muted/30 border-muted-foreground/10 focus:border-primary/50"
+                                                    }`}
+                                            />
+                                            {answer === opt && opt !== "" && (
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
+                                                    <Check className="h-5 w-5" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-1 shrink-0">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className={`h-10 w-10 rounded-xl transition-all ${answer === opt && opt !== ""
+                                                        ? "text-green-600 bg-green-500/10"
+                                                        : "text-muted-foreground hover:text-green-600 hover:bg-green-500/5"
+                                                    }`}
+                                                onClick={() => setAnswer(opt)}
+                                                title={t('creation.itemEditor.markAsCorrect')}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
+                                                onClick={() => {
+                                                    const newOpts = options.filter((_, i) => i !== idx);
+                                                    setOptions(newOpts);
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <Button
-                                        type="button"
-                                        variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive"
-                                        onClick={() => {
-                                            const newOpts = options.filter((_, i) => i !== idx);
-                                            setOptions(newOpts);
-                                        }}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                            <Button type="button" variant="outline" size="sm" onClick={() => setOptions([...options, ""])} className="w-fit">
+                                ))}
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setOptions([...options, ""])}
+                                className="w-full h-11 border-dashed border-2 hover:bg-primary/5 hover:border-primary/50 hover:text-primary transition-all rounded-xl border-muted-foreground/20"
+                            >
                                 <Plus className="mr-2 h-4 w-4" /> {t('creation.itemEditor.addOption')}
                             </Button>
                         </div>
@@ -265,88 +303,90 @@ export function ItemEditorSheet({
 
                     {/* GAP Fill */}
                     {type === 'GAP' && (
-                        <div className="grid gap-2">
+                        <div className="grid gap-4">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="question">{t('creation.itemEditor.gapInstruction')}</Label>
+                                <Label htmlFor="question" className="text-sm font-bold text-foreground/70 uppercase tracking-tight">
+                                    {t('creation.itemEditor.gapInstruction')}
+                                </Label>
                                 <Button
                                     type="button"
                                     variant="secondary"
                                     size="sm"
-                                    className="h-7 text-xs"
+                                    className="h-8 text-[10px] bg-primary/10 text-primary hover:bg-primary transition-all rounded-full px-4 hover:text-white"
                                     onClick={() => {
                                         const textarea = document.getElementById('question') as HTMLTextAreaElement;
                                         if (!textarea) return;
-
                                         const start = textarea.selectionStart;
                                         const end = textarea.selectionEnd;
                                         const text = question;
-
                                         if (start === end) {
                                             toast({
-                                                title: t('creation.itemEditor.comingSoon'),
-                                                description: t('creation.itemEditor.errorNoGaps'),
+                                                title: t('common.error'),
+                                                description: t('creation.itemEditor.errorNoSelection'),
                                                 variant: "destructive"
                                             });
                                             return;
                                         }
-
                                         const selected = text.substring(start, end);
                                         const before = text.substring(0, start);
                                         const after = text.substring(end);
-
-                                        const newText = `${before}{{${selected}}}${after}`;
-                                        setQuestion(newText);
+                                        setQuestion(`${before}{{${selected}}}${after}`);
                                     }}
                                 >
-                                    {t('creation.itemEditor.hideSelected')}
+                                    ✨ {t('creation.itemEditor.hideSelected')}
                                 </Button>
                             </div>
                             <Textarea
                                 id="question"
                                 placeholder={t('creation.itemEditor.gapPlaceholder')}
-                                className="resize-none min-h-[100px] font-mono text-sm"
+                                className="resize-none min-h-[140px] font-mono text-sm bg-muted/30 border-muted-foreground/10 focus:border-primary/50 transition-all rounded-2xl p-4"
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
                             />
 
-                            {/* Live Preview of Blanks */}
-                            <div className="p-3 bg-muted/50 rounded-md text-sm">
-                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">{t('creation.itemEditor.livePreview')}</span>
-                                {question.split(/(\{\{.*?\}\})/).map((part, i) => {
-                                    if (part.startsWith('{{') && part.endsWith('}}')) {
-                                        return (
-                                            <span key={i} className="bg-primary/20 text-primary px-1.5 py-0.5 rounded mx-0.5 font-medium border border-primary/30">
-                                                {part.slice(2, -2)}
-                                            </span>
-                                        );
-                                    }
-                                    return <span key={i}>{part}</span>;
-                                })}
-                                {question && !question.includes('{{') && (
-                                    <span className="text-muted-foreground italic opacity-70">{t('creation.itemEditor.noGapsYet')}</span>
-                                )}
+                            <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl">
+                                <span className="font-bold text-[10px] uppercase text-primary/70 block mb-2 tracking-widest">{t('creation.itemEditor.livePreview')}</span>
+                                <div className="text-sm leading-relaxed">
+                                    {question ? question.split(/(\{\{.*?\}\})/).map((part, i) => {
+                                        if (part.startsWith('{{') && part.endsWith('}}')) {
+                                            return (
+                                                <span key={i} className="bg-primary text-white px-2 py-0.5 rounded-lg mx-0.5 font-bold shadow-sm inline-block my-0.5">
+                                                    {part.slice(2, -2)}
+                                                </span>
+                                            );
+                                        }
+                                        return <span key={i} className="text-foreground/80">{part}</span>;
+                                    }) : <span className="text-muted-foreground italic opacity-70">{t('creation.itemEditor.noGapsYet')}</span>}
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* Solution / Explanation */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="solution">{t('creation.itemEditor.solutionLabel')}</Label>
+                    <div className="grid gap-3 pt-4 border-t border-border/50">
+                        <Label htmlFor="solution" className="text-sm font-bold text-foreground/70 uppercase tracking-tight">
+                            {t('creation.itemEditor.solutionLabel')}
+                        </Label>
                         <Textarea
                             id="solution"
                             placeholder={t('creation.itemEditor.solutionPlaceholder')}
-                            className="resize-none"
+                            className="resize-none min-h-[100px] bg-muted/30 border-muted-foreground/10 focus:border-primary/50 transition-all rounded-2xl p-4"
                             value={solution}
                             onChange={(e) => setSolution(e.target.value)}
                         />
                     </div>
                 </div>
 
-                <SheetFooter>
+                <SheetFooter className="mt-8 pt-6 border-t border-border/50">
                     <SheetClose asChild>
-                        <Button type="button" variant="outline">{t('common.cancel')}</Button>
+                        <Button type="button" variant="ghost" className="rounded-xl hover:bg-accent/50">{t('common.cancel')}</Button>
                     </SheetClose>
-                    <Button type="button" onClick={handleSave} disabled={!question || (type !== 'GAP' && !answer)}>
+                    <Button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={!question || (type !== 'GAP' && !answer)}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 px-8 rounded-xl transition-all hover:scale-105 active:scale-95"
+                    >
                         <Save className="mr-2 h-4 w-4" /> {initialData ? t('common.save') : t('common.add')}
                     </Button>
                 </SheetFooter>

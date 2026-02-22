@@ -31,20 +31,11 @@ export default function DashboardPage() {
                 const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
                 const wallet = walletRes.ok ? await walletRes.json() : null;
 
-                // Calculate accuracy from moduleStats
-                let totalCorrect = 0, totalInteractions = 0;
-                if (analytics?.moduleStats) {
-                    analytics.moduleStats.forEach((m: { accuracy: number; totalInteractions: number }) => {
-                        totalCorrect += (m.accuracy / 100) * m.totalInteractions;
-                        totalInteractions += m.totalInteractions;
-                    });
-                }
-
                 setStats({
                     totalStudyMinutes: analytics?.stats?.totalStudyMinutes || 0,
                     modulesStarted: analytics?.stats?.modulesStarted || 0,
                     tokenBalance: wallet?.balance || 0,
-                    accuracy: totalInteractions > 0 ? Math.round((totalCorrect / totalInteractions) * 100) : 0,
+                    accuracy: analytics?.stats?.globalAccuracy || 0,
                 });
             } catch (error) {
                 console.error("Dashboard stats fetch error:", error);
