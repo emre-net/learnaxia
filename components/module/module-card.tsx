@@ -29,6 +29,7 @@ export type ModuleCardProps = {
         } | null;
         owner?: { handle: string | null; image?: string | null };
         _count: { items: number; userLibrary?: number; forks?: number; sessions?: number };
+        isInLibrary?: boolean;
     };
     solvedCount?: number;
     viewMode?: 'grid' | 'list';
@@ -42,7 +43,11 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
-    const [isSaved, setIsSaved] = useState(module._count?.userLibrary ? module._count.userLibrary > 0 : false);
+    const [isSaved, setIsSaved] = useState(
+        typeof module.isInLibrary !== 'undefined'
+            ? module.isInLibrary
+            : (module._count?.userLibrary ? module._count.userLibrary > 0 : false)
+    );
 
     const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
         <div

@@ -26,8 +26,8 @@ interface LocalCollection {
     _count?: {
         items?: number;
         userLibrary?: number;
-        sessions?: number;
-    }
+    };
+    isInLibrary?: boolean;
 }
 
 interface CollectionCardProps {
@@ -44,18 +44,31 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
     const [saveCount, setSaveCount] = useState(collection._count?.userLibrary || 0);
+    const [isSaved, setIsSaved] = useState(
+        typeof collection.isInLibrary !== 'undefined'
+            ? collection.isInLibrary
+            : (collection._count?.userLibrary ? collection._count.userLibrary > 0 : false)
+    );
 
     const moduleCount = collection._count?.items ?? collection.moduleIds?.length ?? 0;
 
     const handleSave = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isSaving) return;
+
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/collections/${collection.id}/save`, { method: 'POST' });
+            const method = isSaved ? 'DELETE' : 'POST';
+            const res = await fetch(`/api/collections/${collection.id}/save`, { method });
             if (res.ok) {
-                setSaveCount(prev => prev + 1);
-                toast({ title: "Başarılı", description: "Koleksiyon kitaplığına kaydedildi." });
+                const newSavedState = !isSaved;
+                setIsSaved(newSavedState);
+                setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
+                toast({
+                    title: "Başarılı",
+                    description: newSavedState ? "Koleksiyon kitaplığına kaydedildi." : "Koleksiyon kitaplığından kaldırıldı."
+                });
             }
         } catch (error) {
             toast({ title: "Hata", description: "İşlem başarısız.", variant: "destructive" });
@@ -79,12 +92,18 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{collection.description || "Açıklama yok"}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={handleSave} disabled={isSaving} className="text-muted-foreground hover:text-primary">
-                        <Bookmark className="h-5 w-5" />
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className={`transition-all ${isSaved ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                    >
+                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
                     </Button>
                     <Link href={`/dashboard/collections/${collection.id}`}>
-                        <Button variant="outline" size="sm" className="rounded-lg px-4 h-9">Görüntüle</Button>
+                        <Button variant="default">Aç</Button>
                     </Link>
                 </div>
             </Card>
@@ -92,64 +111,75 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     }
 
     return (
-        <Card className="flex flex-col hover:shadow-2xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-[2rem] cursor-pointer">
-            <Link href={`/dashboard/collections/${collection.id}`} className="flex flex-col h-full">
-                <CardHeader className="p-5 pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                        <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+        <Card
+            className="flex flex-col hover:shadow-2xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-[2rem] cursor-pointer"
+        >
+            <div className="p-5 flex-grow space-y-4">
+                <div className="flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 border border-transparent group-hover:border-primary/20">
                             <Layers className="h-6 w-6 text-primary" />
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                            <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary bg-primary/5 uppercase">KOLEKSİYON</Badge>
-                            {role === 'OWNER' && <Badge variant="secondary" className="text-[10px] h-5">Sahibi</Badge>}
-                        </div>
+                        <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary bg-primary/5 uppercase">KOLEKSİYON</Badge>
                     </div>
-                    <CardTitle className="mt-3 leading-tight text-xl font-extrabold group-hover:text-primary transition-colors line-clamp-2">
-                        {collection.title}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="px-5 pt-0 flex-grow">
-                    <p className="text-sm text-muted-foreground line-clamp-3 min-h-[60px]">
-                        {collection.description || "Bu koleksiyon için henüz bir açıklama girilmemiş."}
-                    </p>
-                </CardContent>
-                <div className="px-5 py-4 border-y border-muted/20 flex items-center gap-6">
-                    <div className="flex items-center gap-2 text-sm font-bold text-foreground" title="Modül Sayısı">
-                        <Layers className="h-4 w-4 text-primary" />
-                        <span>{moduleCount}</span>
-                        <span className="text-xs font-medium text-muted-foreground ml-0.5">Modül</span>
-                    </div>
-                    <div className="w-px h-10 bg-muted/20" />
-                    <div className="flex items-center gap-2 text-sm font-bold text-foreground" title="Kaydedilme Sayısı">
-                        <Bookmark className="h-4 w-4 text-primary" />
-                        <span>{saveCount}</span>
-                        <span className="text-xs font-medium text-muted-foreground ml-0.5">Kaydet</span>
-                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-11 w-11 rounded-2xl transition-all ${isSaved ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary'}`}
+                        onClick={handleSave}
+                        disabled={isSaving}
+                    >
+                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
+                    </Button>
                 </div>
 
-                <div className="px-5 py-2">
-                    <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/80">
-                        <Play className="h-3 w-3 text-blue-500 fill-blue-500/20" />
-                        <span>Bu koleksiyonu <span className="text-foreground">{collection._count?.sessions || 0}</span> kişi çalışıyor</span>
+                <div className="space-y-2">
+                    <CardTitle className="leading-tight text-xl font-extrabold group-hover:text-primary transition-colors">
+                        {collection.title}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+                        {collection.description || "Bu koleksiyon için henüz bir açıklama girilmemiş."}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-6 py-4 border-y border-muted/20">
+                    <div className="flex flex-col gap-1" title="Modül Sayısı">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                            <Layers className="h-4 w-4 text-primary" />
+                            <span>{moduleCount}</span>
+                            <span className="text-xs font-medium text-muted-foreground ml-0.5">Modül</span>
+                        </div>
+                    </div>
+
+                    <div className="w-px h-10 bg-muted/20" />
+
+                    <div className="flex flex-col gap-1" title="Kaydedilme Sayısı">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                            <Bookmark className={`h-4 w-4 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <span>{saveCount}</span>
+                            <span className="text-xs font-medium text-muted-foreground ml-0.5">Kaydet</span>
+                        </div>
                     </div>
                 </div>
-                <CardFooter className="p-5 flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6 border-2 border-background shadow-sm">
-                            <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">{collection.owner.handle?.[0]?.toUpperCase() || "U"}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-semibold text-muted-foreground">@{collection.owner.handle || "user"}</span>
-                    </div>
-                    <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl transition-all hover:bg-primary/5 hover:text-primary" onClick={handleSave} disabled={isSaving}>
-                            <Bookmark className="h-4 w-4" />
+            </div>
+
+            <div className="p-5 pt-3 mt-auto flex items-center justify-between gap-3 border-t border-muted/20">
+                <div className="flex items-center gap-2.5">
+                    <Avatar className="h-8 w-8 rounded-lg border border-muted-foreground/10 shadow-inner grayscale-[0.5] group-hover:grayscale-0 transition-all">
+                        <AvatarImage src={""} />
+                        <AvatarFallback className="text-xs uppercase font-bold text-muted-foreground bg-muted">{collection.owner.handle?.[0] || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-[13px] font-bold text-muted-foreground transition-colors group-hover:text-foreground">@{collection.owner.handle || 'user'}</span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <Link href={`/dashboard/collections/${collection.id}`} className="contents">
+                        <Button className="h-11 rounded-2xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all group/btn">
+                            Aç <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:scale-110 transition-transform" />
                         </Button>
-                        <Button variant="default" className="h-9 rounded-xl px-4 font-bold active:scale-95 transition-transform">
-                            Aç <Play className="ml-1.5 h-3.5 w-3.5 fill-current" />
-                        </Button>
-                    </div>
-                </CardFooter>
-            </Link>
+                    </Link>
+                </div>
+            </div>
         </Card>
     );
 }

@@ -38,7 +38,11 @@ export async function GET(req: Request) {
                     where: where as any,
                     include: {
                         owner: { select: { handle: true, image: true, id: true } },
-                        _count: { select: { items: true } }
+                        _count: { select: { items: true, userLibrary: true } },
+                        userLibrary: {
+                            where: { userId: session.user.id },
+                            select: { userId: true }
+                        }
                     },
                     take: limit,
                     skip: offset,
@@ -47,7 +51,13 @@ export async function GET(req: Request) {
                 prisma.collection.count({ where: where as any })
             ]);
 
-            return NextResponse.json({ items: collections, total, type: "COLLECTION" });
+            const normalizedCollections = collections.map(c => ({
+                ...c,
+                isInLibrary: c.userLibrary.length > 0,
+                userLibrary: undefined // Clean up
+            }));
+
+            return NextResponse.json({ items: normalizedCollections, total, type: "COLLECTION" });
         } else {
             // MODULES
             const where = {
@@ -69,7 +79,11 @@ export async function GET(req: Request) {
                     where: where as any,
                     include: {
                         owner: { select: { handle: true, image: true, id: true } },
-                        _count: { select: { items: true } }
+                        _count: { select: { items: true, userLibrary: true, forks: true, sessions: true } },
+                        userLibrary: {
+                            where: { userId: session.user.id },
+                            select: { userId: true }
+                        }
                     },
                     take: limit,
                     skip: offset,
@@ -78,7 +92,13 @@ export async function GET(req: Request) {
                 prisma.module.count({ where: where as any })
             ]);
 
-            return NextResponse.json({ items: modules, total, type: "MODULE" });
+            const normalizedModules = modules.map(m => ({
+                ...m,
+                isInLibrary: m.userLibrary.length > 0,
+                userLibrary: undefined
+            }));
+
+            return NextResponse.json({ items: normalizedModules, total, type: "MODULE" });
         }
 
     } catch (error) {
