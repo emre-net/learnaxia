@@ -51,14 +51,10 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
     const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
         <div
-            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${isTeam
-                ? "bg-blue-600/10 text-blue-600 border-blue-200"
-                : "bg-green-600/10 text-green-600 border-green-200"
-                }`}
             title={isTeam ? "Bu modül Learnaxia ekibi tarafından doğrulanmıştır" : "Doğrulanmış İçerik"}
+            className="flex items-center"
         >
-            <CheckCircle2 className={`h-3 w-3 ${isTeam ? "fill-blue-600 text-white" : "fill-green-600 text-white"}`} />
-            <span>{isTeam ? "LEARNAXIA ONAYLI" : "DOĞRULANMIŞ"}</span>
+            <CheckCircle2 className={`h-3.5 w-3.5 ${isTeam ? "text-blue-600 fill-blue-500/10" : "text-green-600 fill-green-500/10"}`} />
         </div>
     );
 
@@ -138,8 +134,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <Link href={`/dashboard/modules/${module.id}`} className="font-bold text-lg hover:underline truncate">
                             {module.title}
                         </Link>
-                        {module.isVerified && <VerifiedBadge />}
                         {module.category && <Badge variant="secondary" className="text-[10px] h-5">{module.category}</Badge>}
+                        {module.isVerified && <VerifiedBadge isTeam={module.owner?.handle === 'learnaxia'} />}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
                 </div>
@@ -173,17 +169,29 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 border border-transparent group-hover:border-primary/20">
                             {getTypeIcon(module.type)}
                         </div>
-                        {module.isVerified && <VerifiedBadge isTeam={module.owner?.handle === 'learnaxia'} />}
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-11 w-11 rounded-2xl transition-all ${isSaved ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary'}`}
-                        onClick={handleSave}
-                        disabled={isSaving}
-                    >
-                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                        {!module.sourceModule && module.isForkable && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-11 w-11 rounded-2xl bg-muted/30 text-muted-foreground hover:bg-blue-50 hover:text-blue-500 transition-all"
+                                title="Kendi kütüphanene kopyalayarak özelleştir"
+                                onClick={handleFork}
+                            >
+                                <Pencil className="h-4.5 w-4.5" />
+                            </Button>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-11 w-11 rounded-2xl transition-all ${isSaved ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary'}`}
+                            onClick={handleSave}
+                            disabled={isSaving}
+                        >
+                            <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="space-y-2">
@@ -233,17 +241,6 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
             <div className="p-5 pt-3 mt-auto flex items-center justify-between gap-3 border-t border-muted/20">
                 <div className="flex items-center gap-2">
-                    {!module.sourceModule && (
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-11 w-11 rounded-2xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50 shadow-sm"
-                            title="Kendi kütüphanene kopyalayarak özelleştir"
-                            onClick={handleFork}
-                        >
-                            <Pencil className="h-4.5 w-4.5" />
-                        </Button>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-4 pr-1">
@@ -253,9 +250,10 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                                 <Layers className="h-4 w-4 text-primary" />
                             </div>
                             <span className="text-[13px] font-bold text-primary tracking-tight">Learnaxia Ekibi</span>
+                            {module.isVerified && <VerifiedBadge isTeam={true} />}
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-1.5 focus-within:z-10">
                             <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-muted-foreground/10 shadow-inner grayscale-[0.5] group-hover:grayscale-0 transition-all">
                                 {module.owner?.image ? (
                                     <img src={module.owner.image} alt="" className="h-full w-full object-cover" />
@@ -264,6 +262,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                                 )}
                             </div>
                             <span className="text-[13px] font-bold text-muted-foreground transition-colors group-hover:text-foreground">@{module.owner?.handle || 'user'}</span>
+                            {module.isVerified && <VerifiedBadge isTeam={false} />}
                         </div>
                     )}
                     <Button className="h-11 rounded-2xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all group/btn">

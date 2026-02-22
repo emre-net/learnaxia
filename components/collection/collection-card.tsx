@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Layers, BookCopy, Bookmark, Play } from "lucide-react";
+import { Layers, BookCopy, Bookmark, Play, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,6 +18,7 @@ interface LocalCollection {
     moduleIds: string[];
     category: string | null;
     subCategory: string | null;
+    isVerified?: boolean;
     createdAt: string;
     updatedAt: string;
     owner: {
@@ -48,6 +49,15 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
         typeof collection.isInLibrary !== 'undefined'
             ? collection.isInLibrary
             : (collection._count?.userLibrary ? collection._count.userLibrary > 0 : false)
+    );
+
+    const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
+        <div
+            title={isTeam ? "Bu koleksiyon Learnaxia ekibi tarafından doğrulanmıştır" : "Doğrulanmış İçerik"}
+            className="flex items-center"
+        >
+            <CheckCircle2 className={`h-3.5 w-3.5 ${isTeam ? "text-blue-600 fill-blue-500/10" : "text-green-600 fill-green-500/10"}`} />
+        </div>
     );
 
     const moduleCount = collection._count?.items ?? collection.moduleIds?.length ?? 0;
@@ -89,6 +99,7 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                             {collection.title}
                         </Link>
                         {collection.category && <Badge variant="secondary" className="text-[10px] h-5">{collection.category}</Badge>}
+                        {collection.isVerified && <VerifiedBadge isTeam={collection.owner?.handle === 'learnaxia'} />}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{collection.description || "Açıklama yok"}</p>
                 </div>
@@ -169,7 +180,12 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                         <AvatarImage src={""} />
                         <AvatarFallback className="text-xs uppercase font-bold text-muted-foreground bg-muted">{collection.owner.handle?.[0] || 'U'}</AvatarFallback>
                     </Avatar>
-                    <span className="text-[13px] font-bold text-muted-foreground transition-colors group-hover:text-foreground">@{collection.owner.handle || 'user'}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[13px] font-bold text-muted-foreground transition-colors group-hover:text-foreground">
+                            {collection.owner.handle === 'learnaxia' ? 'Learnaxia Ekibi' : `@${collection.owner.handle || 'user'}`}
+                        </span>
+                        {collection.isVerified && <VerifiedBadge isTeam={collection.owner.handle === 'learnaxia'} />}
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">
