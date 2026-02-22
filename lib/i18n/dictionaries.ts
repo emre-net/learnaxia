@@ -129,9 +129,10 @@ const en = {
         firstSelectCategory: "Select Category First",
         visibilityLabel: "Visibility",
         public: "Public",
-        publicDescription: "Other users can see and fork your module.",
+        publicDescription: "Other users can see and customize your module.",
         private: "Private",
-        privateDescription: "Only you can see this module.",
+        privateDescription: "Only you and people you share the link with can see the module.",
+        save: "Save Module",
         contentTypeLabel: "Content Type",
         flashcardsLabel: "Flashcards",
         flashcardsDescription: "Front/Back cards. Ideal for memorization.",
@@ -179,7 +180,15 @@ const en = {
             uploadImage: "Add Image",
             comingSoon: "Coming Soon",
             imageFeatureHint: "Image upload feature will be added very soon.",
-            errorNoGaps: "Please add at least one gap (select text and hide it)."
+            errorNoGaps: "Please add at least one gap (select text and hide it).",
+            errorNoSelection: "Please select some text to hide."
+        },
+        incompleteContent: "Incomplete Content",
+        collection: {
+            newTitle: "Create New Collection",
+            description: "Group your modules into a sequential learning path.",
+            publicDescription: "Other users can see and customize your collection.",
+            privateDescription: "Only you and people you share the link with can see the collection."
         }
     },
     common: {
@@ -197,7 +206,8 @@ const en = {
         preview: "Preview",
         noDescription: "No description provided.",
         itemsCount: "{count} Items",
-        byAuthor: "by @{author}"
+        byAuthor: "by @{author}",
+        optional: "optional"
     },
     admin: {
         dashboard: {
@@ -278,7 +288,9 @@ const en = {
         failedToLoad: "Module could not be loaded",
         failedToSave: "Transaction failed",
         moduleUpdated: "Module updated.",
-        moduleCreated: "Module successfully created."
+        moduleCreated: "Module successfully created.",
+        categoryRequired: "Please select a category (Required for Public modules)",
+        subCategoryRequired: "Please select a sub-category"
     }
 };
 
@@ -412,9 +424,10 @@ const tr = {
         firstSelectCategory: "Önce Kategori Seçin",
         visibilityLabel: "Görünürlük",
         public: "Herkese Açık (Public)",
-        publicDescription: "Diğer kullanıcılar modülünüzü görebilir ve kopyalayabilir.",
+        publicDescription: "Diğer kullanıcılar modülünüzü görebilir ve özelleştirebilir.",
         private: "Gizli (Private)",
-        privateDescription: "Modülü sadece siz görebilirsiniz.",
+        privateDescription: "Modülü sadece siz ve linki paylaştığınız kişiler görebilir.",
+        save: "Modülü Kaydet",
         contentTypeLabel: "İçerik Tipi",
         flashcardsLabel: "Kartlar",
         flashcardsDescription: "Ön/Arka kartlar. Ezber için ideal.",
@@ -462,7 +475,15 @@ const tr = {
             uploadImage: "Görsel Ekle",
             comingSoon: "Yakında",
             imageFeatureHint: "Görsel yükleme özelliği çok yakında eklenecek.",
-            errorNoGaps: "Lütfen en az bir boşluk ekleyin (metni seçip gizleyin)."
+            errorNoGaps: "Lütfen en az bir boşluk ekleyin (metni seçip gizleyin).",
+            errorNoSelection: "Lütfen gizlemek için bir metin seçin."
+        },
+        incompleteContent: "Eksik İçerik",
+        collection: {
+            newTitle: "Yeni Koleksiyon Oluştur",
+            description: "Modüllerinizi sıralı bir öğrenme yolunda gruplayın.",
+            publicDescription: "Diğer kullanıcılar koleksiyonunuzu görebilir ve özelleştirebilir.",
+            privateDescription: "Koleksiyonu sadece siz ve linki paylaştığınız kişiler görebilir."
         }
     },
     common: {
@@ -480,7 +501,8 @@ const tr = {
         preview: "Önizleme",
         noDescription: "Açıklama girilmemiş.",
         itemsCount: "{count} Öğe",
-        byAuthor: "yazar: @{author}"
+        byAuthor: "yazar: @{author}",
+        optional: "opsiyonel"
     },
     admin: {
         dashboard: {
@@ -561,7 +583,9 @@ const tr = {
         failedToLoad: "Modül yüklenemedi",
         failedToSave: "İşlem başarısız",
         moduleUpdated: "Modül güncellendi.",
-        moduleCreated: "Modül başarıyla oluşturuldu."
+        moduleCreated: "Modül başarıyla oluşturuldu.",
+        categoryRequired: "Lütfen bir kategori seçin (Public modüller için zorunlu)",
+        subCategoryRequired: "Lütfen bir alt kategori seçin"
     }
 };
 

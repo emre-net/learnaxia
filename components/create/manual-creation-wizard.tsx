@@ -23,6 +23,23 @@ const getModuleSchema = (t: any) => z.object({
     subCategory: z.string().optional(),
     isForkable: z.boolean().default(true),
     items: z.array(z.any()).default([])
+}).superRefine((data, ctx) => {
+    if (data.isForkable) {
+        if (!data.category || data.category === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t('validation.categoryRequired'),
+                path: ["category"]
+            });
+        }
+        if (!data.subCategory || data.subCategory === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t('validation.subCategoryRequired'),
+                path: ["subCategory"]
+            });
+        }
+    }
 });
 
 export type ModuleFormData = z.input<ReturnType<typeof getModuleSchema>>;
@@ -89,7 +106,7 @@ export function ManualCreationWizard() {
     }, [editId, isEditMode, reset, toast, t]);
 
     const nextStep = async () => {
-        const isStepValid = await trigger(["title", "type", "isForkable"]); // Only trigger required fields for step 1
+        const isStepValid = await trigger(["title", "type", "isForkable", "category", "subCategory"]); // Only trigger required fields for step 1
 
         if (isStepValid) {
             setIsTransitioning(true); // Lock submission

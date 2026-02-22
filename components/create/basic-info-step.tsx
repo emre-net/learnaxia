@@ -20,6 +20,7 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
     const { control, watch, setValue } = useFormContext<ModuleFormData>();
     const selectedCategory = watch("category");
     const selectedType = watch("type");
+    const isPublic = watch("isForkable");
 
     const contentTypes = [
         { id: "FLASHCARD", icon: GalleryVerticalEnd, label: t('creation.flashcardsLabel'), desc: t('creation.flashcardsDescription'), color: "blue" },
@@ -36,7 +37,9 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="title"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-semibold text-foreground/70">{t('creation.moduleTitleLabel')}</FormLabel>
+                            <FormLabel className="text-sm font-bold text-foreground/70 uppercase tracking-wider flex items-center gap-1">
+                                {t('creation.moduleTitleLabel')} <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
                                 <Input
                                     placeholder={t('creation.moduleTitlePlaceholder')}
@@ -57,7 +60,9 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-semibold text-foreground/70">{t('creation.descriptionLabelOptional')}</FormLabel>
+                            <FormLabel className="text-sm font-bold text-foreground/70 uppercase tracking-wider">
+                                {t('creation.descriptionLabelOptional')}
+                            </FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder={t('creation.descriptionPlaceholder')}
@@ -77,13 +82,15 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="category"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-semibold text-foreground/70">{t('creation.categoryLabel')}</FormLabel>
+                            <FormLabel className="text-sm font-bold text-foreground/70 uppercase tracking-wider flex items-center gap-1">
+                                {t('creation.categoryLabel')} {isPublic ? <span className="text-destructive">*</span> : <span className="text-[10px] lowercase font-normal opacity-50">({t('common.optional') || 'optional'})</span>}
+                            </FormLabel>
                             <Select onValueChange={(val) => {
                                 field.onChange(val);
                                 setValue("subCategory", "");
                             }} value={field.value}>
                                 <FormControl>
-                                    <SelectTrigger className="h-11 bg-muted/30 border-muted-foreground/20">
+                                    <SelectTrigger className="h-11 bg-muted/30 border-muted-foreground/20 ring-offset-background focus:ring-2 focus:ring-primary/20 transition-all">
                                         <SelectValue placeholder={t('creation.categoryPlaceholder')} />
                                     </SelectTrigger>
                                 </FormControl>
@@ -103,10 +110,12 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="subCategory"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-sm font-semibold text-foreground/70">{t('creation.subCategoryLabel')}</FormLabel>
+                            <FormLabel className="text-sm font-bold text-foreground/70 uppercase tracking-wider flex items-center gap-1">
+                                {t('creation.subCategoryLabel')} {isPublic ? <span className="text-destructive">*</span> : <span className="text-[10px] lowercase font-normal opacity-50">({t('common.optional') || 'optional'})</span>}
+                            </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategory}>
                                 <FormControl>
-                                    <SelectTrigger className="h-11 bg-muted/30 border-muted-foreground/20">
+                                    <SelectTrigger className="h-11 bg-muted/30 border-muted-foreground/20 ring-offset-background focus:ring-2 focus:ring-primary/20 transition-all">
                                         <SelectValue placeholder={selectedCategory ? t('creation.subCategoryPlaceholder') : t('creation.firstSelectCategory')} />
                                     </SelectTrigger>
                                 </FormControl>
