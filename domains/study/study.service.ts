@@ -49,6 +49,13 @@ export class StudyService {
 
             if (type === 'MULTIPLE_CHOICE') type = 'MC';
             if (type === 'GAP_FILL') type = 'GAP';
+            if (type === 'MC' || type === 'FLASHCARD' || type === 'TRUE_FALSE') {
+                if (!content.question && content.front) content.question = content.front;
+                if (!content.front && content.question) content.front = content.question;
+                if (!content.answer && content.back) content.answer = content.back;
+                if (!content.back && content.answer) content.back = content.answer;
+            }
+
             if (type === 'TRUE_FALSE') {
                 type = 'MC'; // Render TF as Multiple Choice (Quiz)
                 if (!content.question && content.statement) {
@@ -58,14 +65,6 @@ export class StudyService {
                 if (!content.options || content.options.length === 0) {
                     content.options = ["True", "False"];
                 }
-            }
-
-            // Ensure Flashcard has front/back
-            if (type === 'FLASHCARD' && !content.front && content.question) {
-                content.front = content.question;
-            }
-            if (type === 'FLASHCARD' && !content.back && content.answer) {
-                content.back = content.answer;
             }
 
             return {

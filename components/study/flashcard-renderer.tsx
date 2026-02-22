@@ -46,7 +46,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     <div className="flex flex-col gap-4 select-none">
                         <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{t('study.questionLabel')}</span>
                         <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
-                            <ReactMarkdown>{item.content.question || item.content.front}</ReactMarkdown>
+                            <ReactMarkdown>{item.content.question || item.content.front || item.content.text || ""}</ReactMarkdown>
                         </div>
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>

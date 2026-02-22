@@ -44,8 +44,8 @@ export function QuizRenderer({ item }: { item: any }) {
     return (
         <div className="w-full max-w-2xl flex flex-col gap-8">
             <Card className="p-8 text-center border-2 shadow-sm prose dark:prose-invert max-w-none">
-                <div className="text-2xl font-semibold">
-                    <ReactMarkdown>{item.content.question}</ReactMarkdown>
+                <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
+                    <ReactMarkdown>{item.content.question || item.content.front || item.content.text || ""}</ReactMarkdown>
                 </div>
             </Card>
 
