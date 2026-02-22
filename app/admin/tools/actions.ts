@@ -202,7 +202,7 @@ export async function seedLearnaxiaContentAction() {
             data: {
                 title: "Learnaxia Akademi: Başlangıç Paketi",
                 description: "Uygulamamızı tanımanız için hazırladığımız özel içerikler.",
-                isPublic: true,
+                visibility: 'PUBLIC',
                 isVerified: true,
                 ownerId: userId,
                 items: {

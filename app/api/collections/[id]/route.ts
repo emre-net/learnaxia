@@ -7,7 +7,7 @@ import { z } from "zod";
 const UpdateCollectionSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
-    isPublic: z.boolean().optional(),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
     moduleIds: z.array(z.string()).optional()
 });
 

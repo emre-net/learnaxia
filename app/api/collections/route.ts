@@ -7,7 +7,7 @@ import { z } from "zod";
 const CreateCollectionSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
-    isPublic: z.boolean().optional().default(false),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional().default("PRIVATE"),
     category: z.string().optional(),
     subCategory: z.string().optional(),
 });

@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
         if (type === "COLLECTION") {
             const where = {
-                isPublic: true,
+                visibility: 'PUBLIC',
                 ...(category && { category }),
                 ...(subCategory && { subCategory }),
                 ...(search && {
@@ -38,7 +38,7 @@ export async function GET(req: Request) {
                     where: where as any,
                     include: {
                         owner: { select: { handle: true, image: true, id: true } },
-                        _count: { select: { items: true, userLibrary: true } },
+                        _count: { select: { items: true, userLibrary: { where: { role: 'SAVED' } } } },
                         userLibrary: {
                             where: { userId: session.user.id },
                             select: { userId: true }
@@ -79,7 +79,7 @@ export async function GET(req: Request) {
                     where: where as any,
                     include: {
                         owner: { select: { handle: true, image: true, id: true } },
-                        _count: { select: { items: true, userLibrary: true, forks: true, sessions: true } },
+                        _count: { select: { items: true, userLibrary: { where: { role: 'SAVED' } }, forks: true, sessions: true } },
                         userLibrary: {
                             where: { userId: session.user.id },
                             select: { userId: true }

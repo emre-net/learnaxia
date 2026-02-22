@@ -172,6 +172,7 @@ model Module {
   description     String?
   type            String
   status          String              @default("DRAFT")
+  visibility      Visibility          @default(PRIVATE)
   isForkable      Boolean             @default(true)
   ownerId         String
   creatorId       String
@@ -263,7 +264,7 @@ model Collection {
   id          String                  @id @default(uuid())
   title       String
   description String?
-  isPublic    Boolean                 @default(false)
+  visibility  Visibility @default(PRIVATE)
   category    String?
   subCategory String?
   isVerified  Boolean                 @default(false)
@@ -431,4 +432,9 @@ model SolvedQuestion {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
 }

@@ -8,12 +8,13 @@ import { Layers, BookCopy, Bookmark, Play, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LocalCollection {
     id: string;
     title: string;
     description: string | null;
-    isPublic: boolean;
+    visibility: 'PUBLIC' | 'PRIVATE';
     ownerId: string;
     moduleIds: string[];
     category: string | null;
@@ -43,6 +44,7 @@ interface CollectionCardProps {
 export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     const { collection, role } = item;
     const { toast } = useToast();
+    const queryClient = useQueryClient();
     const [isSaving, setIsSaving] = useState(false);
     const [saveCount, setSaveCount] = useState(collection._count?.userLibrary || 0);
     const [isSaved, setIsSaved] = useState(
@@ -75,6 +77,10 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                 const newSavedState = !isSaved;
                 setIsSaved(newSavedState);
                 setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
+
+                // Invalidate library queries
+                queryClient.invalidateQueries({ queryKey: ['library-collections'] });
+
                 toast({
                     title: "Başarılı",
                     description: newSavedState ? "Koleksiyon kitaplığına kaydedildi." : "Koleksiyon kitaplığından kaldırıldı."
@@ -131,7 +137,9 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                         <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 border border-transparent group-hover:border-primary/20">
                             <Layers className="h-6 w-6 text-primary" />
                         </div>
-                        <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary bg-primary/5 uppercase">KOLEKSİYON</Badge>
+                        <Badge variant="outline" className={`text-[10px] font-bold border-primary/20 bg-primary/5 uppercase ${collection.visibility === 'PRIVATE' ? 'text-orange-500 border-orange-500/20 bg-orange-50' : 'text-primary'}`}>
+                            {collection.visibility === 'PRIVATE' ? 'GİZLİ KOLEKSİYON' : 'KAMU KOLEKSİYONU'}
+                        </Badge>
                     </div>
                     <Button
                         variant="ghost"

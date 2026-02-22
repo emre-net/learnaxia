@@ -16,19 +16,13 @@ export class StudyService {
         if (!module) throw new Error("Module not found");
 
         // 2. Permissive Access Check
-        // Rule: Access allowed if Public OR Owner OR in Library OR explicit Access record exists
-        const isPublic = module.status === 'ACTIVE' && module.isForkable;
+        // Rule: Access allowed if Public OR Owner OR Linked Access (Private but has valid ID)
+        // Since we are fetching by unique ID here, having the ID is proof of linked access.
+        const isPublic = (module as any).visibility === 'PUBLIC';
         const isOwner = module.ownerId === userId;
+        const isPrivateLinked = (module as any).visibility === 'PRIVATE';
 
-        let hasAccess = isPublic || isOwner;
-
-        if (!hasAccess) {
-            const [libraryEntry, explicitAccess] = await Promise.all([
-                prisma.userModuleLibrary.findUnique({ where: { userId_moduleId: { userId, moduleId } } }),
-                prisma.userContentAccess.findUnique({ where: { userId_resourceId: { userId, resourceId: moduleId } } })
-            ]);
-            hasAccess = !!libraryEntry || !!explicitAccess;
-        }
+        let hasAccess = isPublic || isOwner || isPrivateLinked;
 
         if (!hasAccess) {
             throw new Error("Unauthorized Study Access");

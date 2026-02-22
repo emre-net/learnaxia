@@ -6,11 +6,12 @@ export class CollectionService {
 
     static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean; category?: string; subCategory?: string }) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const collection = await (tx as any).collection.create({
                 data: {
                     title: data.title,
                     description: data.description ?? null,
-                    isPublic: data.isPublic ?? false,
+                    visibility: data.isPublic ? 'PUBLIC' : 'PRIVATE',
                     ownerId: userId,
                     category: data.category ?? null,
                     subCategory: data.subCategory ?? null
@@ -51,7 +52,7 @@ export class CollectionService {
                             select: { handle: true }
                         },
                         items: { select: { moduleId: true } }, // Fetch item count
-                        _count: { select: { userLibrary: true } }
+                        _count: { select: { userLibrary: { where: { role: 'SAVED' } } } }
                     }
                 }
             },
@@ -59,35 +60,34 @@ export class CollectionService {
         });
         return userLibrary;
     }
-
     static async getById(userId: string, collectionId: string) {
-        // Check access
-        const access = await prisma.userContentAccess.findUnique({
-            where: { userId_resourceId: { userId, resourceId: collectionId } }
-        });
-
-        if (!access) throw new Error("Unauthorized");
-
         const collection = await prisma.collection.findUnique({
             where: { id: collectionId },
             include: {
-                owner: { select: { handle: true } },
+                owner: { select: { handle: true, id: true } },
                 items: {
                     include: {
                         module: {
-                            select: { id: true, title: true, type: true, status: true, items: { select: { id: true } } }
-                        }
+                            select: { id: true, title: true, type: true, status: true, visibility: true, items: { select: { id: true } } }
+                        } as any
                     },
                     orderBy: { order: 'asc' }
                 },
-                _count: { select: { items: true, userLibrary: true } }
+                _count: { select: { items: true, userLibrary: { where: { role: 'SAVED' } } } }
             }
         });
 
         if (!collection) throw new Error("Collection not found");
 
+        // Access Rule: PUBLIC or OWNER or linked access (PRIVATE but has ID)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((collection as any).visibility === 'PRIVATE' && collection.ownerId !== userId) {
+            // Implicit access via Link is allowed for PRIVATE collections
+        }
+
         // Extract modules from items
-        const modules = collection.items.map((item: any) => item.module);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const modules = (collection as any).items.map((item: any) => item.module);
 
         return {
             ...collection,
@@ -108,12 +108,13 @@ export class CollectionService {
         // Transaction to update details and items
         return await prisma.$transaction(async (tx) => {
             // Update basic details
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (tx as any).collection.update({
                 where: { id: collectionId },
                 data: {
                     title: data.title,
                     description: data.description || null,
-                    isPublic: data.isPublic || false,
+                    visibility: data.isPublic ? 'PUBLIC' : 'PRIVATE',
                     category: data.category || null,
                     subCategory: data.subCategory || null,
                     ownerId: userId

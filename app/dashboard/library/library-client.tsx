@@ -39,6 +39,7 @@ type LibraryModule = {
         description: string | null;
         type: string;
         status: string;
+        visibility: 'PUBLIC' | 'PRIVATE';
         isForkable: boolean;
         createdAt: string;
         category: string | null;
@@ -62,7 +63,7 @@ interface LibraryCollection {
         id: string;
         title: string;
         description: string | null;
-        isPublic: boolean;
+        visibility: 'PUBLIC' | 'PRIVATE';
         ownerId: string;
         moduleIds: string[];
         category: string | null;

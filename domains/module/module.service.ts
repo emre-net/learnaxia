@@ -106,7 +106,7 @@ export class ModuleService {
                                 owner: { select: { handle: true, image: true } }
                             }
                         },
-                        _count: { select: { items: true, userLibrary: true, forks: true, sessions: true } }
+                        _count: { select: { items: true, userLibrary: { where: { role: 'SAVED' } }, forks: true, sessions: true } }
                     }
                 }
             },
@@ -220,7 +220,8 @@ export class ModuleService {
         return await prisma.module.findMany({
             where: {
                 status: 'ACTIVE',
-                isForkable: true,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                visibility: 'PUBLIC' as any,
                 NOT: { ownerId: userId },
                 ...(search && {
                     OR: [
@@ -234,7 +235,7 @@ export class ModuleService {
                     select: { handle: true, image: true }
                 },
                 _count: {
-                    select: { items: true, userLibrary: true, forks: true, sessions: true }
+                    select: { items: true, userLibrary: { where: { role: 'SAVED' } }, forks: true, sessions: true }
                 }
             },
             take: 20,
@@ -264,9 +265,10 @@ export class ModuleService {
 
         if (!module) throw new Error("Module not found");
 
-        // 2. PREMISSIVE ACCESS RULES:
-        // Rule A: Public Content (ACTIVE & Forkable) is viewable by anyone
-        if (module.status === 'ACTIVE' && module.isForkable) {
+        // 2. PERMISSIVE ACCESS RULES:
+        // Rule A: Public Content is viewable by anyone
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((module as any).visibility === 'PUBLIC') {
             return module;
         }
 
@@ -275,21 +277,11 @@ export class ModuleService {
             return module;
         }
 
-        // Rule C: Check explicit library access (Saved/Forked)
-        const libraryEntry = await prisma.userModuleLibrary.findUnique({
-            where: { userId_moduleId: { userId, moduleId } }
-        });
-
-        if (libraryEntry) {
-            return module;
-        }
-
-        // Rule D: Fallback to explicit access table (Legacy/Manual permissions)
-        const access = await prisma.userContentAccess.findUnique({
-            where: { userId_resourceId: { userId, resourceId: moduleId } }
-        });
-
-        if (access) {
+        // Rule C: Private but user has the Link (UUID security)
+        // Since we are fetching by unique ID, having the ID is proof of sharing for PRIVATE modules.
+        // We allow viewing/studying but NOT editing.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((module as any).visibility === 'PRIVATE') {
             return module;
         }
 
@@ -315,6 +307,8 @@ export class ModuleService {
                 description: dto.description,
                 type: dto.type,
                 isForkable: dto.isForkable,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                visibility: (dto as any).visibility as any, // Accept visibility update
                 status: dto.status,
                 category: dto.category,
                 subCategory: dto.subCategory,
@@ -408,6 +402,7 @@ export class ModuleService {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static async addItem(userId: string, moduleId: string, itemData: any) {
         const access = await prisma.userContentAccess.findUnique({
             where: { userId_resourceId: { userId, resourceId: moduleId } }
@@ -437,6 +432,7 @@ export class ModuleService {
     /**
      * Updates a single item.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static async updateItem(userId: string, moduleId: string, itemId: string, itemData: any) {
         const access = await prisma.userContentAccess.findUnique({
             where: { userId_resourceId: { userId, resourceId: moduleId } }
@@ -469,6 +465,7 @@ export class ModuleService {
     /**
      * Deletes a single item.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static async deleteItem(userId: string, moduleId: string, itemId: string) {
         const access = await prisma.userContentAccess.findUnique({
             where: { userId_resourceId: { userId, resourceId: moduleId } }
@@ -555,7 +552,9 @@ export class ModuleService {
                 const progressMap = new Map(existingProgress.map(p => [p.itemId, p]));
                 const sm2Map = new Map(existingSM2.map(p => [p.itemId, p]));
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const progressToCreate: any[] = [];
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const sm2ToCreate: any[] = [];
 
                 // Map old item progress to new item IDs

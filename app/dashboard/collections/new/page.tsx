@@ -32,7 +32,7 @@ export default function NewCollectionPage() {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
     const [subCategory, setSubCategory] = useState("");
-    const [isPublic, setIsPublic] = useState(false);
+    const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PRIVATE');
 
     // Step 2: Module Selection State
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
@@ -92,7 +92,7 @@ export default function NewCollectionPage() {
                 });
                 return;
             }
-            if (isPublic && (!category || !subCategory)) {
+            if (visibility === 'PUBLIC' && (!category || !subCategory)) {
                 toast({
                     title: "Eksik Bilgi",
                     description: "Herkese açık koleksiyonlar için kategori ve alt kategori seçimi zorunludur.",
@@ -134,7 +134,7 @@ export default function NewCollectionPage() {
                     description,
                     category,
                     subCategory,
-                    isPublic
+                    visibility
                 })
             });
 
@@ -265,23 +265,25 @@ export default function NewCollectionPage() {
                             <div className="pt-4 border-t flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <div className="flex items-center gap-2">
-                                        <label className="text-base font-bold">Herkese Açık</label>
-                                        <Badge variant="outline" className="text-[10px] uppercase">Önerilen</Badge>
+                                        <label className="text-base font-bold">Görünürlük</label>
+                                        <Badge variant="outline" className="text-[10px] uppercase">{visibility === 'PUBLIC' ? 'KEŞFEDİLEBİLİR' : 'GİZLİ'}</Badge>
                                     </div>
                                     <p className="text-sm text-muted-foreground">
-                                        Bu koleksiyon keşfet sayfasında görünebilir hale gelir.
+                                        {visibility === 'PUBLIC'
+                                            ? 'Bu koleksiyon keşfet sayfasında görünebilir hale gelir.'
+                                            : 'Sadece siz ve linke sahip olanlar erişebilir.'}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3 bg-muted/30 p-2 rounded-lg px-4 border border-border">
-                                    {isPublic ? <Globe className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
+                                    {visibility === 'PUBLIC' ? <Globe className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
                                     <Switch
-                                        checked={isPublic}
-                                        onCheckedChange={setIsPublic}
+                                        checked={visibility === 'PUBLIC'}
+                                        onCheckedChange={(checked) => setVisibility(checked ? 'PUBLIC' : 'PRIVATE')}
                                     />
                                 </div>
                             </div>
 
-                            {isPublic && (!category || !subCategory) && (
+                            {visibility === 'PUBLIC' && (!category || !subCategory) && (
                                 <div className="flex items-center gap-2 text-xs text-amber-500 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20 animate-in fade-in slide-in-from-top-2">
                                     <AlertCircle className="h-4 w-4 shrink-0" />
                                     <span>Herkese açık koleksiyonlar için kategori seçimi zorunludur.</span>

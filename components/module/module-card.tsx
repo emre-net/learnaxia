@@ -3,13 +3,14 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, CheckCircle2, FileText, CheckSquare, Pencil, MoreVertical, Layers, Clock, Copy, Play, Bookmark } from "lucide-react";
+import { BookOpen, CheckCircle2, FileText, CheckSquare, Pencil, MoreVertical, Layers, Clock, Copy, Play, Bookmark, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useTranslation } from "@/lib/i18n/i18n";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type ModuleCardProps = {
     module: {
@@ -19,6 +20,7 @@ export type ModuleCardProps = {
         category: string | null;
         type: string;
         status: string;
+        visibility: 'PUBLIC' | 'PRIVATE';
         isForkable: boolean;
         createdAt: string | Date;
         isVerified?: boolean;
@@ -40,6 +42,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const router = useRouter();
     const { t } = useTranslation();
     const { toast } = useToast();
+    const queryClient = useQueryClient();
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
@@ -83,6 +86,10 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 setIsSaved(newSavedState);
                 setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
 
+                // Invalidate library queries to refresh the library page
+                queryClient.invalidateQueries({ queryKey: ['library-modules'] });
+                queryClient.invalidateQueries({ queryKey: ['library-collections'] });
+
                 toast({
                     title: "Başarılı",
                     description: newSavedState ? "Modül kitaplığına kaydedildi." : "Modül kitaplığından kaldırıldı."
@@ -102,11 +109,14 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
             const res = await fetch(`/api/modules/${module.id}/fork`, { method: 'POST' });
             const data = await res.json();
             if (res.ok) {
-                toast({ title: "Modül Kopyalandı", description: "İlerlemenle birlikte kendi kütüphanene eklendi. Artık istediğin gibi düzenleyebilirsin!" });
+                // Invalidate queries so the library shows the new module
+                queryClient.invalidateQueries({ queryKey: ['library-modules'] });
+
+                toast({ title: "Modül Özelleştirildi", description: "Modülün bir kopyası kütüphanene eklendi. Artık istediğin gibi düzenleyebilirsin!" });
                 router.push(`/dashboard/modules/${data.id}`);
             }
         } catch (error) {
-            toast({ title: "Hata", description: "Kopyalama işlemi başarısız.", variant: "destructive" });
+            toast({ title: "Hata", description: "İşlem başarısız.", variant: "destructive" });
         }
     };
 
@@ -171,15 +181,20 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">
+                        {module.visibility === 'PRIVATE' && (
+                            <div title="Gizli (Sadece linkle erişilebilir)" className="bg-orange-500/10 p-2 rounded-xl border border-orange-500/20 text-orange-600">
+                                <Layers className="h-4 w-4" />
+                            </div>
+                        )}
                         {!module.sourceModule && module.isForkable && (
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-11 w-11 rounded-2xl bg-muted/30 text-muted-foreground hover:bg-blue-50 hover:text-blue-500 transition-all"
-                                title="Kendi kütüphanene kopyalayarak özelleştir"
+                                title="Kendin için özelleştir ve düzenle"
                                 onClick={handleFork}
                             >
-                                <Pencil className="h-4.5 w-4.5" />
+                                <Sparkles className="h-4.5 w-4.5" />
                             </Button>
                         )}
                         <Button
@@ -232,8 +247,8 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     </div>
                     {(module._count?.forks || 0) > 0 && (
                         <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/80">
-                            <Copy className="h-3 w-3 text-orange-500" />
-                            <span><span className="text-foreground">{module._count?.forks}</span> kişi kütüphanesine ekleyerek özelleştirdi</span>
+                            <Sparkles className="h-3 w-3 text-orange-500" />
+                            <span><span className="text-foreground">{module._count?.forks}</span> kişi kendisi için özelleştirdi</span>
                         </div>
                     )}
                 </div>
