@@ -299,26 +299,62 @@ export function LibraryClient() {
                 </TabsContent>
 
                 <TabsContent value="collections" className="space-y-4">
-                    {isLoading ? (
-                        <LibrarySkeleton viewMode={viewMode} />
-                    ) : !filteredCollections || filteredCollections.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
-                            <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-semibold">Koleksiyon bulunamadı</h3>
-                            <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                Modüllerini koleksiyonlar halinde grupla.
-                            </p>
-                            <Button asChild>
-                                <Link href="/dashboard/collections/new">Koleksiyon Oluştur</Link>
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                            {filteredCollections.map((item) => (
-                                <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
-                            ))}
-                        </div>
-                    )}
+                    <Tabs defaultValue="all" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
+                            <TabsTrigger value="all">Tümü</TabsTrigger>
+                            <TabsTrigger value="created">Oluşturduklarım</TabsTrigger>
+                            <TabsTrigger value="forked">Kaydedilenler</TabsTrigger>
+                        </TabsList>
+
+                        {isLoading ? (
+                            <LibrarySkeleton viewMode={viewMode} />
+                        ) : !filteredCollections || filteredCollections.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
+                                <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
+                                <h3 className="text-lg font-semibold">Koleksiyon bulunamadı</h3>
+                                <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
+                                    Modüllerini koleksiyonlar halinde grupla.
+                                </p>
+                                <Button asChild>
+                                    <Link href="/dashboard/collections/new">Koleksiyon Oluştur</Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <TabsContent value="all" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredCollections.map((item) => (
+                                            <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
+                                        ))}
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="created" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredCollections.filter(c => c.role === 'OWNER').map((item) => (
+                                            <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
+                                        ))}
+                                        {filteredCollections.filter(c => c.role === 'OWNER').length === 0 && (
+                                            <div className="col-span-full text-center py-12 text-muted-foreground">
+                                                Henüz bir koleksiyon oluşturmadınız.
+                                            </div>
+                                        )}
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="forked" className="mt-0">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                        {filteredCollections.filter(c => c.role === 'SAVED').map((item) => (
+                                            <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
+                                        ))}
+                                        {filteredCollections.filter(c => c.role === 'SAVED').length === 0 && (
+                                            <div className="col-span-full text-center py-12 text-muted-foreground">
+                                                Henüz kaydettiğiniz bir koleksiyon yok.
+                                            </div>
+                                        )}
+                                    </div>
+                                </TabsContent>
+                            </>
+                        )}
+                    </Tabs>
                 </TabsContent>
 
                 <TabsContent value="ai-solutions" className="space-y-4">
