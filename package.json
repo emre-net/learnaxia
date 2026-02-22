@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "prisma generate && next build",
     "db:push": "prisma db push",
-    "start": "next start",
+    "start": "prisma db push --accept-data-loss && next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "test:e2e": "npx playwright test",
