@@ -16,7 +16,11 @@ export const authConfig = {
             if (isOnAdmin) {
                 if (isLoggedIn) {
                     const userRole = (auth.user as any)?.role;
-                    if (userRole === "ADMIN") return true;
+                    const userEmail = auth.user?.email;
+
+                    // Priority: ADMIN role or matching the configured ADMIN_EMAIL
+                    if (userRole === "ADMIN" || userEmail === process.env.ADMIN_EMAIL) return true;
+
                     return Response.redirect(new URL('/dashboard', nextUrl));
                 }
                 return false;
