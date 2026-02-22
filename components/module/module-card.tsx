@@ -28,7 +28,7 @@ export type ModuleCardProps = {
             owner: { handle: string | null; name?: string | null; image?: string | null };
         } | null;
         owner?: { handle: string | null; image?: string | null };
-        _count: { items: number; userLibrary?: number };
+        _count: { items: number; userLibrary?: number; forks?: number; sessions?: number };
     };
     solvedCount?: number;
     viewMode?: 'grid' | 'list';
@@ -176,14 +176,43 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 py-2 border-y border-muted/30">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold">
-                        <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{module._count?.items || 0} İçerik</span>
+                <div className="flex items-center gap-4 py-3 border-y border-muted/30">
+                    <div className="flex flex-col gap-0.5" title="İçerik Sayısı">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                            <Layers className="h-3.5 w-3.5" />
+                            <span>{module._count?.items || 0}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">İçerik</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold">
-                        <Bookmark className="h-3.5 w-3.5 text-primary" />
-                        <span>{saveCount} Kaydedilme</span>
+
+                    <div className="w-px h-8 bg-muted/30" />
+
+                    <div className="flex flex-col gap-0.5" title="Çalışılma Sayısı">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                            <Play className="h-3.5 w-3.5 text-blue-500" />
+                            <span>{module._count?.sessions || 0}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Çalışma</span>
+                    </div>
+
+                    <div className="w-px h-8 bg-muted/30" />
+
+                    <div className="flex flex-col gap-0.5" title="Kaydedilme Sayısı">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                            <Bookmark className={`h-3.5 w-3.5 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <span>{saveCount}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Kaydet</span>
+                    </div>
+
+                    <div className="w-px h-8 bg-muted/30" />
+
+                    <div className="flex flex-col gap-0.5" title="Kopyalanma Sayısı">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                            <Copy className="h-3.5 w-3.5 text-orange-500" />
+                            <span>{module._count?.forks || 0}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Kopya</span>
                     </div>
                 </div>
             </div>
@@ -194,7 +223,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-primary' : ''}`} />
                     </Button>
                     {!module.sourceModule && (
-                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50" title="Kendi kitaplığına ekle ve düzenle" onClick={handleFork}>
+                        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl hover:bg-blue-50 hover:text-blue-500 transition-all border-muted/50" title="Kendi kütüphanene kopyalayarak özelleştir" onClick={handleFork}>
                             <Copy className="h-4 w-4" />
                         </Button>
                     )}

@@ -41,7 +41,7 @@ type LibraryModule = {
             title: string;
             owner: { handle: string | null; name: string | null; image: string | null };
         } | null;
-        _count: { items: number };
+        _count: { items: number; userLibrary?: number; forks?: number; sessions?: number };
     };
 };
 

@@ -106,7 +106,7 @@ export class ModuleService {
                                 owner: { select: { handle: true, image: true } }
                             }
                         },
-                        _count: { select: { items: true, userLibrary: true } }
+                        _count: { select: { items: true, userLibrary: true, forks: true, sessions: true } }
                     }
                 }
             },
@@ -214,7 +214,7 @@ export class ModuleService {
                     select: { handle: true, image: true }
                 },
                 _count: {
-                    select: { items: true, userLibrary: true }
+                    select: { items: true, userLibrary: true, forks: true, sessions: true }
                 }
             },
             take: 20,
