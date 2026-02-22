@@ -44,11 +44,17 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
     const [isSaved, setIsSaved] = useState(module._count?.userLibrary ? module._count.userLibrary > 0 : false);
 
-    const VerifiedBadge = () => (
-        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200 gap-1 px-1.5 h-5 font-bold">
-            <CheckCircle2 className="h-3 w-3 fill-blue-600 text-white" />
-            V
-        </Badge>
+    const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
+        <div
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${isTeam
+                    ? "bg-blue-600/10 text-blue-600 border-blue-200"
+                    : "bg-green-600/10 text-green-600 border-green-200"
+                }`}
+            title={isTeam ? "Bu modül Learnaxia ekibi tarafından doğrulanmıştır" : "Doğrulanmış İçerik"}
+        >
+            <CheckCircle2 className={`h-3 w-3 ${isTeam ? "fill-blue-600 text-white" : "fill-green-600 text-white"}`} />
+            <span>{isTeam ? "LEARNAXIA ONAYLI" : "DOĞRULANMIŞ"}</span>
+        </div>
     );
 
     const getTypeIcon = (type: string) => {
@@ -158,12 +164,11 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         >
             <div className="p-5 flex-grow space-y-4">
                 <div className="flex justify-between items-start gap-3">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                        {getTypeIcon(module.type)}
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                        <Badge variant="outline" className="text-[10px] font-bold border-primary/20 text-primary bg-primary/5 uppercase">{module.type}</Badge>
-                        {module.isVerified && <VerifiedBadge />}
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                            {getTypeIcon(module.type)}
+                        </div>
+                        {module.isVerified && <VerifiedBadge isTeam={module.owner?.handle === 'learnaxia'} />}
                     </div>
                 </div>
 
@@ -212,7 +217,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 </div>
             </div>
 
-            <div className="p-5 pt-0 mt-auto flex items-center justify-between gap-3">
+            <div className="p-5 pt-2 mt-auto flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className={`h-10 w-10 rounded-xl transition-all border-muted/50 ${isSaved ? 'bg-primary/10 text-primary border-primary/20' : 'hover:bg-primary/5 hover:text-primary'}`} onClick={handleSave} disabled={isSaving}>
                         <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-primary' : ''}`} />
@@ -224,9 +229,30 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     )}
                 </div>
 
-                <Button className="h-10 rounded-xl px-5 font-bold shadow-sm hover:shadow-primary/20 transition-all">
-                    Çalış <Play className="ml-2 h-4 w-4 fill-current" />
-                </Button>
+                <div className="flex items-center gap-3">
+                    {module.owner?.handle === 'learnaxia' ? (
+                        <div className="flex items-center gap-2 pr-2">
+                            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                                <Layers className="h-4 w-4 text-primary" />
+                            </div>
+                            <span className="text-xs font-bold text-primary">Learnaxia Ekibi</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 pr-2">
+                            <div className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-muted-foreground/10">
+                                {module.owner?.image ? (
+                                    <img src={module.owner.image} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">{(module.owner?.handle?.[0] || 'U')}</span>
+                                )}
+                            </div>
+                            <span className="text-xs font-semibold text-muted-foreground">@{module.owner?.handle || 'user'}</span>
+                        </div>
+                    )}
+                    <Button className="h-10 rounded-xl px-5 font-bold shadow-sm hover:shadow-primary/20 transition-all">
+                        Çalış <Play className="ml-2 h-4 w-4 fill-current" />
+                    </Button>
+                </div>
             </div>
 
             <Dialog open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>

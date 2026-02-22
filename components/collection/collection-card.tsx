@@ -26,6 +26,7 @@ interface LocalCollection {
     _count?: {
         items?: number;
         userLibrary?: number;
+        sessions?: number;
     }
 }
 
@@ -91,7 +92,7 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     }
 
     return (
-        <Card className="flex flex-col hover:shadow-xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-2xl cursor-pointer">
+        <Card className="flex flex-col hover:shadow-2xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-[2rem] cursor-pointer">
             <Link href={`/dashboard/collections/${collection.id}`} className="flex flex-col h-full">
                 <CardHeader className="p-5 pb-3">
                     <div className="flex justify-between items-start gap-2">
@@ -112,14 +113,24 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                         {collection.description || "Bu koleksiyon için henüz bir açıklama girilmemiş."}
                     </p>
                 </CardContent>
-                <div className="px-5 py-3 border-y border-muted/30 flex items-center justify-between text-[11px] font-bold text-muted-foreground">
-                    <div className="flex items-center gap-1.5 uppercase tracking-wider">
-                        <BookCopy className="h-3.5 w-3.5" />
-                        <span>{moduleCount} MODÜL</span>
+                <div className="px-5 py-4 border-y border-muted/20 flex items-center gap-6">
+                    <div className="flex items-center gap-2 text-sm font-bold text-foreground" title="Modül Sayısı">
+                        <Layers className="h-4 w-4 text-primary" />
+                        <span>{moduleCount}</span>
+                        <span className="text-xs font-medium text-muted-foreground ml-0.5">Modül</span>
                     </div>
-                    <div className="flex items-center gap-1.5 uppercase tracking-wider">
-                        <Bookmark className="h-3.5 w-3.5 text-primary" />
-                        <span>{saveCount} KAYDEDİLME</span>
+                    <div className="w-px h-10 bg-muted/20" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-foreground" title="Kaydedilme Sayısı">
+                        <Bookmark className="h-4 w-4 text-primary" />
+                        <span>{saveCount}</span>
+                        <span className="text-xs font-medium text-muted-foreground ml-0.5">Kaydet</span>
+                    </div>
+                </div>
+
+                <div className="px-5 py-2">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/80">
+                        <Play className="h-3 w-3 text-blue-500 fill-blue-500/20" />
+                        <span>Bu koleksiyonu <span className="text-foreground">{collection._count?.sessions || 0}</span> kişi çalışıyor</span>
                     </div>
                 </div>
                 <CardFooter className="p-5 flex items-center justify-between mt-auto">
