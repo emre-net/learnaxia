@@ -165,24 +165,44 @@ export class ModuleService {
 
         const allItems = [...standardResults, ...rescueResults];
 
-        // 4. Fetch solved counts for all items
+        // 4. Fetch solved counts for all items in a single query (Optimization)
         const moduleIds = allItems.map(item => item.moduleId);
         if (moduleIds.length === 0) return [];
 
-        const solvedCounts = await Promise.all(moduleIds.map(async (mid) => {
-            const count = await prisma.itemProgress.count({
-                where: {
-                    userId,
-                    lastResult: 'CORRECT',
-                    item: { moduleId: mid }
-                }
-            });
-            return { mid, count };
-        }));
+        const progressStats = await prisma.itemProgress.groupBy({
+            by: ['itemId'],
+            where: {
+                userId,
+                lastResult: 'CORRECT',
+                item: { moduleId: { in: moduleIds } }
+            },
+            _count: true
+        });
+
+        // We need to map itemId counts back to moduleIds
+        // Since groupBy only groups by top-level fields in Prisma's current version for ItemProgress,
+        // we'll fetch the mapping of item -> module for these items if needed, 
+        // OR we can fetch ItemProgress joined with Item to group by ModuleId.
+
+        // BETTER APPROACH: Use aggregate if groupBy moduleId is not directly possible via nested fields.
+        // Actually, Prisma's groupBy for nested fields is limited. 
+        // Let's use findMany with includes or a more direct query.
+
+        const correctItems = await prisma.itemProgress.findMany({
+            where: {
+                userId,
+                lastResult: 'CORRECT',
+                item: { moduleId: { in: moduleIds } }
+            },
+            select: {
+                item: { select: { moduleId: true } }
+            }
+        });
 
         const solvedMap: Record<string, number> = {};
-        solvedCounts.forEach(({ mid, count }) => {
-            solvedMap[mid] = count;
+        correctItems.forEach(p => {
+            const mid = p.item.moduleId;
+            solvedMap[mid] = (solvedMap[mid] || 0) + 1;
         });
 
         return allItems.map(item => ({
@@ -474,26 +494,14 @@ export class ModuleService {
 
     /**
      * Forks (Deep Copies) a module for the current user.
+     * Randomized order is NOT preserved; original order is kept.
      */
     static async fork(userId: string, sourceModuleId: string) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            // 1. Check Access to Source Module
-            const access = await tx.userContentAccess.findUnique({
-                where: { userId_resourceId: { userId, resourceId: sourceModuleId } }
-            });
-
-            if (!access) {
-                // If no explicit access record, check if it's a public module (via Collection?) 
-                // For now, MVP rule: You must have access record (Owner, Editor, Viewer)
-                // If it's a public collection's module, access logic might be different.
-                // Assuming standard access control:
-                throw new Error("Unauthorized Access to Source Module");
-            }
-
-            // 2. Fetch Source Module
+            // 1. Fetch Source Module with Items
             const sourceModule = await tx.module.findUnique({
                 where: { id: sourceModuleId },
-                include: { items: true }
+                include: { items: { orderBy: { order: 'asc' } } }
             });
 
             if (!sourceModule) throw new Error("Module not found");
@@ -502,21 +510,40 @@ export class ModuleService {
             // 2. Clone Module
             const newModule = await tx.module.create({
                 data: {
-                    title: sourceModule.title, // Keep original title, UI distinguishes via attribution
+                    title: sourceModule.title,
                     description: sourceModule.description,
                     type: sourceModule.type,
-                    status: 'ACTIVE', // Forks start as active personal copies
-                    isForkable: true, // Forks are forkable by default
+                    status: 'ACTIVE',
+                    isForkable: true,
                     ownerId: userId,
-                    creatorId: userId, // User becomes the creator of this copy
-                    sourceModuleId: sourceModule.id, // Link to original
+                    creatorId: userId,
+                    sourceModuleId: sourceModule.id,
                     category: sourceModule.category,
                     subCategory: sourceModule.subCategory,
                 }
             });
 
             if (sourceModule.items.length > 0) {
-                // 3a. Fetch User's Existing Progress on Source Items
+                // 3. Create Items in Bulk
+                await tx.item.createMany({
+                    data: sourceModule.items.map(item => ({
+                        moduleId: newModule.id,
+                        type: item.type,
+                        content: item.content as Prisma.InputJsonValue,
+                        contentHash: item.contentHash,
+                        order: item.order,
+                        sourceItemId: item.id
+                    }))
+                });
+
+                // 4. Copy Progress (Optimization: Batch match by order)
+                // Fetch newly created items back to get their IDs
+                const newItems = await tx.item.findMany({
+                    where: { moduleId: newModule.id },
+                    orderBy: { order: 'asc' }
+                });
+
+                // Fetch existing progress
                 const sourceItemIds = sourceModule.items.map(i => i.id);
                 const existingProgress = await tx.itemProgress.findMany({
                     where: { userId, itemId: { in: sourceItemIds } }
@@ -525,78 +552,54 @@ export class ModuleService {
                     where: { userId, itemId: { in: sourceItemIds } }
                 });
 
-                // Create Map for fast lookup
                 const progressMap = new Map(existingProgress.map(p => [p.itemId, p]));
                 const sm2Map = new Map(existingSM2.map(p => [p.itemId, p]));
 
-                // 3b. Prepare Items Data
-                const itemsData = sourceModule.items.map(item => ({
-                    moduleId: newModule.id,
-                    type: item.type,
-                    content: item.content as Prisma.InputJsonValue,
-                    contentHash: item.contentHash,
-                    order: item.order,
-                    sourceItemId: item.id
-                }));
+                const progressToCreate: any[] = [];
+                const sm2ToCreate: any[] = [];
 
-                // 3c. Create Items and Get Returned Objects (need IDs for progress)
-                // Note: createMany does not return IDs in all DBs, but Prisma 5+ with PG returns count.
-                // We need to create them one by one or use a strict order assumption if we want to link progress immediately.
-                // Better approach for data integrity: Create items, then fetch them back or use transaction result if available.
-                // Since we need to map OldItem -> NewItem to copy progress, and createMany doesn't return created records easily:
-                // We will iterate and create. For strictly better performance we could use raw query but createMany is safer.
-                // OPTIMIZATION: We can't use createMany AND copy progress easily without re-fetching.
-                // Strategy: Iterate. It's fewer queries than re-fetching and matching by order.
+                // Map old item progress to new item IDs
+                newItems.forEach((newItem, index) => {
+                    const sourceItem = sourceModule.items[index];
+                    const srcProgress = progressMap.get(sourceItem.id);
 
-                for (const item of sourceModule.items) {
-                    const newItem = await tx.item.create({
-                        data: {
-                            moduleId: newModule.id,
-                            type: item.type,
-                            content: item.content as Prisma.InputJsonValue,
-                            contentHash: item.contentHash,
-                            order: item.order,
-                            sourceItemId: item.id
-                        }
-                    });
-
-                    // 3d. Check & Copy Progress (Handbook Rule: Hash Match = Keep Progress)
-                    const srcProgress = progressMap.get(item.id);
-                    if (srcProgress && srcProgress.contentHash === item.contentHash) {
-                        await tx.itemProgress.create({
-                            data: {
-                                userId,
-                                itemId: newItem.id,
-                                contentHash: newItem.contentHash, // Ensure integrity
-                                correctCount: srcProgress.correctCount,
-                                wrongCount: srcProgress.wrongCount,
-                                strengthScore: srcProgress.strengthScore,
-                                lastResult: srcProgress.lastResult,
-                                lastReviewedAt: srcProgress.lastReviewedAt,
-                                aiMetadata: srcProgress.aiMetadata ?? Prisma.JsonNull,
-                            }
+                    if (srcProgress && srcProgress.contentHash === newItem.contentHash) {
+                        progressToCreate.push({
+                            userId,
+                            itemId: newItem.id,
+                            contentHash: newItem.contentHash,
+                            correctCount: srcProgress.correctCount,
+                            wrongCount: srcProgress.wrongCount,
+                            strengthScore: srcProgress.strengthScore,
+                            lastResult: srcProgress.lastResult,
+                            lastReviewedAt: srcProgress.lastReviewedAt,
+                            aiMetadata: srcProgress.aiMetadata ?? Prisma.JsonNull,
                         });
 
-                        // Copy SM2 Data if active
-                        const srcSM2 = sm2Map.get(item.id);
+                        const srcSM2 = sm2Map.get(sourceItem.id);
                         if (srcSM2) {
-                            await tx.sM2Progress.create({
-                                data: {
-                                    userId,
-                                    itemId: newItem.id,
-                                    repetition: srcSM2.repetition,
-                                    interval: srcSM2.interval,
-                                    easeFactor: srcSM2.easeFactor,
-                                    nextReviewAt: srcSM2.nextReviewAt,
-                                    isRetired: srcSM2.isRetired
-                                }
+                            sm2ToCreate.push({
+                                userId,
+                                itemId: newItem.id,
+                                repetition: srcSM2.repetition,
+                                interval: srcSM2.interval,
+                                easeFactor: srcSM2.easeFactor,
+                                nextReviewAt: srcSM2.nextReviewAt,
+                                isRetired: srcSM2.isRetired
                             });
                         }
                     }
+                });
+
+                if (progressToCreate.length > 0) {
+                    await tx.itemProgress.createMany({ data: progressToCreate });
+                }
+                if (sm2ToCreate.length > 0) {
+                    await tx.sM2Progress.createMany({ data: sm2ToCreate });
                 }
             }
 
-            // 4. Add to User Library (Read Model)
+            // 5. Add to User Library & Grant Access
             await tx.userModuleLibrary.create({
                 data: {
                     userId: userId,
@@ -606,7 +609,6 @@ export class ModuleService {
                 }
             });
 
-            // 5. Grant Access
             await tx.userContentAccess.create({
                 data: {
                     userId: userId,

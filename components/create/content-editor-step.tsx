@@ -8,7 +8,10 @@ import { ItemEditorSheet } from "./item-editor-sheet";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { useTranslation } from "@/lib/i18n/i18n";
+
 export function ContentEditorStep() {
+    const { t } = useTranslation();
     const { control, watch, getValues } = useFormContext<ModuleFormData>();
     const { fields, append, remove, update } = useFieldArray({
         control,
@@ -49,30 +52,30 @@ export function ContentEditorStep() {
 
     const getAnswerDisplay = (field: any) => {
         const answer = field.content?.answer;
-        if (!answer) return "Cevap yok";
+        if (!answer) return t('creation.noAnswer');
 
-        if (field.type === 'MC') return `Cevap: ${answer}`;
-        if (field.type === 'TRUE_FALSE') return `Cevap: ${answer === "True" ? "Doğru" : "Yanlış"}`;
+        if (field.type === 'MC') return `${t('creation.itemEditor.answerLabel')}: ${answer}`;
+        if (field.type === 'TRUE_FALSE') return `${t('creation.itemEditor.answerLabel')}: ${answer === "True" ? t('creation.itemEditor.trueLabel') : t('creation.itemEditor.falseLabel')}`;
         if (field.type === 'FLASHCARD') return answer;
         return answer;
     };
 
-    const getTypeLabel = (t: string) => {
-        switch (t) {
-            case 'FLASHCARD': return 'kart';
-            case 'MC': return 'soru';
-            case 'GAP': return 'boşluk doldurma';
-            case 'TRUE_FALSE': return 'D/Y sorusu';
-            default: return 'içerik';
+    const getTypeLabel = (t_key: string) => {
+        switch (t_key) {
+            case 'FLASHCARD': return t('creation.itemFlashcard');
+            case 'MC': return t('creation.itemMC');
+            case 'GAP': return t('creation.itemGap');
+            case 'TRUE_FALSE': return t('creation.itemTF');
+            default: return t('creation.itemGeneric');
         }
     };
 
     return (
         <div className="h-full flex flex-col gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Modül İçeriği</h3>
+                <h3 className="text-lg font-medium">{t('creation.moduleContentTitle')}</h3>
                 <Button type="button" onClick={handleAddNewClick}>
-                    <Plus className="mr-2 h-4 w-4" /> İçerik Ekle
+                    <Plus className="mr-2 h-4 w-4" /> {t('creation.addItem')}
                 </Button>
             </div>
 
@@ -80,9 +83,9 @@ export function ContentEditorStep() {
                 {fields.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
                         <Layers className="h-10 w-10 opacity-20" />
-                        <p>Henüz içerik eklenmedi.</p>
+                        <p>{t('creation.noItemsYet')}</p>
                         <Button type="button" variant="link" onClick={handleAddNewClick}>
-                            İlk {getTypeLabel(type)} içeriğini ekle
+                            {t('creation.addFirstItem', { type: getTypeLabel(type) })}
                         </Button>
                     </div>
                 ) : (
@@ -137,7 +140,7 @@ export function ContentEditorStep() {
             </ScrollArea>
 
             <div className="text-sm text-muted-foreground text-right">
-                Toplam İçerik: {fields.length}
+                {t('creation.totalItems', { count: fields.length })}
             </div>
 
             <ItemEditorSheet

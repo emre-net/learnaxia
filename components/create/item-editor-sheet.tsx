@@ -14,6 +14,8 @@ const generateId = () => uuidv4();
 
 type ItemType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
 
+import { useTranslation } from "@/lib/i18n/i18n";
+
 export function ItemEditorSheet({
     open,
     onOpenChange,
@@ -27,6 +29,7 @@ export function ItemEditorSheet({
     type: ItemType;
     initialData?: any;
 }) {
+    const { t } = useTranslation();
     const { toast } = useToast();
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState(""); // Back of card or correct answer
@@ -60,7 +63,11 @@ export function ItemEditorSheet({
         if (!question) return;
         if (type !== 'GAP' && !answer) return; // Flashcard/MC/TF needs explict answer field
         if (type === 'GAP' && !question.includes('{{')) {
-            toast({ title: "Hata", description: "Lütfen en az bir boşluk ekleyin (metni seçip gizleyin).", variant: "destructive" });
+            toast({
+                title: t('common.error'),
+                description: t('creation.itemEditor.errorNoGaps'),
+                variant: "destructive"
+            });
             return;
         }
 
@@ -71,23 +78,11 @@ export function ItemEditorSheet({
         let finalQuestion = question;
 
         if (type === 'GAP') {
-            // Extract content between {{ }}
             const matches = question.match(/\{\{(.*?)\}\}/g);
             if (matches) {
                 const answers = matches.map(m => m.slice(2, -2));
-                // For GAP, we store the full text with braces in 'text' (mapped to question/front for now)
-                // And answers array.
-                // But our schema uses 'question' in general. 
-                // Let's store: content: { text: question, answers: [...] }
-                // The main handler expects 'question', 'answer'.
-
-                // Let's map it to match existing GapRenderer expectations
-                // Renderer uses: item.content.text and item.content.answers
-
-                // We'll return a structure that the parent (ContentEditorStep) and Service can handle.
-                // Ideally we normalize here.
-                finalQuestion = question; // The text with {{words}}
-                finalAnswer = answers[0]; // Primary answer (legacy support)
+                finalQuestion = question;
+                finalAnswer = answers[0];
             }
         }
 
@@ -95,12 +90,10 @@ export function ItemEditorSheet({
             id: id || generateId(),
             type: type,
             content: {
-                question: finalQuestion, // Used for generic view
+                question: finalQuestion,
                 answer: finalAnswer,
                 solution: finalSolution,
                 options: finalOptions,
-
-                // Specific fields for GAP
                 text: type === 'GAP' ? finalQuestion : undefined,
                 answers: type === 'GAP' ? (question.match(/\{\{(.*?)\}\}/g) || []).map(m => m.slice(2, -2)) : undefined
             },
@@ -111,15 +104,21 @@ export function ItemEditorSheet({
         onOpenChange(false);
     };
 
-    const getTitle = () => {
-        const action = initialData ? "Düzenle" : "Ekle";
-        switch (type) {
-            case 'FLASHCARD': return `Kart ${action}`;
-            case 'MC': return `Çoktan Seçmeli Soru ${action}`;
-            case 'GAP': return `Boşluk Doldurma ${action}`;
-            case 'TRUE_FALSE': return `Doğru / Yanlış Sorusu ${action}`;
-            default: return `Soru ${action}`;
+    const getTypeLabel = (t_key: string) => {
+        switch (t_key) {
+            case 'FLASHCARD': return t('creation.itemFlashcard');
+            case 'MC': return t('creation.itemMC');
+            case 'GAP': return t('creation.itemGap');
+            case 'TRUE_FALSE': return t('creation.itemTF');
+            default: return t('creation.itemGeneric');
         }
+    };
+
+    const getTitle = () => {
+        const typeLabel = getTypeLabel(type);
+        return initialData
+            ? t('creation.itemEditor.edit', { type: typeLabel })
+            : t('creation.itemEditor.add', { type: typeLabel });
     };
 
     return (
@@ -128,7 +127,7 @@ export function ItemEditorSheet({
                 <SheetHeader>
                     <SheetTitle>{getTitle()}</SheetTitle>
                     <SheetDescription>
-                        {initialData ? "İçeriği güncelleyin." : "Yeni içerik oluşturun."}
+                        {initialData ? t('creation.itemEditor.editDescription') : t('creation.itemEditor.newDescription')}
                     </SheetDescription>
                 </SheetHeader>
 
@@ -138,21 +137,25 @@ export function ItemEditorSheet({
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="question">
-                                    {type === 'FLASHCARD' ? 'Ön Yüz (Soru)' : 'Soru Metni'}
+                                    {type === 'FLASHCARD' ? t('creation.itemEditor.frontSide') : t('creation.itemEditor.questionLabel')}
                                 </Label>
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 text-xs text-muted-foreground hover:text-primary"
-                                    onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
+                                    onClick={() => toast({
+                                        title: t('creation.itemEditor.comingSoon'),
+                                        description: t('creation.itemEditor.imageFeatureHint'),
+                                        variant: "default"
+                                    })}
                                 >
-                                    📷 Görsel Ekle
+                                    📷 {t('creation.itemEditor.uploadImage')}
                                 </Button>
                             </div>
                             <Textarea
                                 id="question"
-                                placeholder="Sorunuzu buraya yazın..."
+                                placeholder={t('creation.itemEditor.gapPlaceholder')}
                                 className="resize-none min-h-[100px]"
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
@@ -164,20 +167,24 @@ export function ItemEditorSheet({
                     {type === 'FLASHCARD' && (
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="answer">Arka Yüz (Cevap)</Label>
+                                <Label htmlFor="answer">{t('creation.itemEditor.backSide')}</Label>
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 text-xs text-muted-foreground hover:text-primary"
-                                    onClick={() => toast({ title: "Yakında", description: "Görsel yükleme özelliği çok yakında eklenecek.", variant: "default" })}
+                                    onClick={() => toast({
+                                        title: t('creation.itemEditor.comingSoon'),
+                                        description: t('creation.itemEditor.imageFeatureHint'),
+                                        variant: "default"
+                                    })}
                                 >
-                                    📷 Görsel Ekle
+                                    📷 {t('creation.itemEditor.uploadImage')}
                                 </Button>
                             </div>
                             <Textarea
                                 id="answer"
-                                placeholder="Cevabı buraya yazın..."
+                                placeholder={t('creation.itemEditor.backSide')}
                                 className="resize-none min-h-[100px]"
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
@@ -188,7 +195,7 @@ export function ItemEditorSheet({
                     {/* True / False */}
                     {type === 'TRUE_FALSE' && (
                         <div className="grid gap-4">
-                            <Label>Doğru Cevap</Label>
+                            <Label>{t('creation.itemEditor.correctAnswerLabel')}</Label>
                             <div className="flex gap-4">
                                 <Button
                                     type="button"
@@ -196,7 +203,7 @@ export function ItemEditorSheet({
                                     className={`flex-1 ${answer === "True" ? "bg-green-600 hover:bg-green-700" : ""}`}
                                     onClick={() => setAnswer("True")}
                                 >
-                                    <Check className="mr-2 h-4 w-4" /> Doğru
+                                    <Check className="mr-2 h-4 w-4" /> {t('creation.itemEditor.trueLabel')}
                                 </Button>
                                 <Button
                                     type="button"
@@ -204,7 +211,7 @@ export function ItemEditorSheet({
                                     className={`flex-1 ${answer === "False" ? "bg-red-600 hover:bg-red-700" : ""}`}
                                     onClick={() => setAnswer("False")}
                                 >
-                                    <X className="mr-2 h-4 w-4" /> Yanlış
+                                    <X className="mr-2 h-4 w-4" /> {t('creation.itemEditor.falseLabel')}
                                 </Button>
                             </div>
                         </div>
@@ -213,8 +220,8 @@ export function ItemEditorSheet({
                     {/* Multiple Choice Options */}
                     {type === 'MC' && (
                         <div className="grid gap-4">
-                            <Label>Seçenekler</Label>
-                            <p className="text-xs text-muted-foreground mb-2">Doğru cevabı işaretlemeyi unutmayın.</p>
+                            <Label>{t('creation.itemEditor.optionsLabel')}</Label>
+                            <p className="text-xs text-muted-foreground mb-2">{t('creation.itemEditor.optionsHint')}</p>
                             {options.map((opt, idx) => (
                                 <div key={idx} className="flex items-center gap-2">
                                     <Input
@@ -225,17 +232,16 @@ export function ItemEditorSheet({
                                             newOpts[idx] = e.target.value;
                                             setOptions(newOpts);
 
-                                            // If this option was selected as answer, update answer too
                                             if (answer === oldValue) {
                                                 setAnswer(e.target.value);
                                             }
                                         }}
-                                        placeholder={`Seçenek ${idx + 1}`}
+                                        placeholder={t('creation.itemEditor.optionPlaceholder', { index: idx + 1 })}
                                     />
                                     <div
                                         className={`h-9 w-9 rounded-md border cursor-pointer flex items-center justify-center transition-all ${answer === opt && opt !== "" ? "bg-green-500 border-green-500 text-white shadow-md" : "border-muted hover:bg-muted"}`}
                                         onClick={() => setAnswer(opt)}
-                                        title="Doğru cevap olarak işaretle"
+                                        title={t('creation.itemEditor.markAsCorrect')}
                                     >
                                         {answer === opt && opt !== "" && <Check className="h-5 w-5" />}
                                     </div>
@@ -252,7 +258,7 @@ export function ItemEditorSheet({
                                 </div>
                             ))}
                             <Button type="button" variant="outline" size="sm" onClick={() => setOptions([...options, ""])} className="w-fit">
-                                <Plus className="mr-2 h-4 w-4" /> Seçenek Ekle
+                                <Plus className="mr-2 h-4 w-4" /> {t('creation.itemEditor.addOption')}
                             </Button>
                         </div>
                     )}
@@ -261,7 +267,7 @@ export function ItemEditorSheet({
                     {type === 'GAP' && (
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="question">Boşluk Doldurma Cümlesi</Label>
+                                <Label htmlFor="question">{t('creation.itemEditor.gapInstruction')}</Label>
                                 <Button
                                     type="button"
                                     variant="secondary"
@@ -276,7 +282,11 @@ export function ItemEditorSheet({
                                         const text = question;
 
                                         if (start === end) {
-                                            toast({ title: "Metin Seçilmedi", description: "Lütfen gizlemek istediğiniz kelimeyi seçin.", variant: "destructive" });
+                                            toast({
+                                                title: t('creation.itemEditor.comingSoon'),
+                                                description: t('creation.itemEditor.errorNoGaps'),
+                                                variant: "destructive"
+                                            });
                                             return;
                                         }
 
@@ -284,20 +294,16 @@ export function ItemEditorSheet({
                                         const before = text.substring(0, start);
                                         const after = text.substring(end);
 
-                                        // Wrap in double curly braces
                                         const newText = `${before}{{${selected}}}${after}`;
                                         setQuestion(newText);
-
-                                        // Auto-extract answers for preview/validation
-                                        // Note: Logic handles extraction on Save/Render
                                     }}
                                 >
-                                    Seçili Alanı Gizle (Boşluk Yap)
+                                    {t('creation.itemEditor.hideSelected')}
                                 </Button>
                             </div>
                             <Textarea
                                 id="question"
-                                placeholder="Cümleyi yazın, gizlemek istediğiniz kelimeyi seçip butona basın."
+                                placeholder={t('creation.itemEditor.gapPlaceholder')}
                                 className="resize-none min-h-[100px] font-mono text-sm"
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
@@ -305,7 +311,7 @@ export function ItemEditorSheet({
 
                             {/* Live Preview of Blanks */}
                             <div className="p-3 bg-muted/50 rounded-md text-sm">
-                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">Canlı Görünüm:</span>
+                                <span className="font-semibold text-xs uppercase text-muted-foreground block mb-2">{t('creation.itemEditor.livePreview')}</span>
                                 {question.split(/(\{\{.*?\}\})/).map((part, i) => {
                                     if (part.startsWith('{{') && part.endsWith('}}')) {
                                         return (
@@ -317,18 +323,18 @@ export function ItemEditorSheet({
                                     return <span key={i}>{part}</span>;
                                 })}
                                 {question && !question.includes('{{') && (
-                                    <span className="text-muted-foreground italic opacity-70">Henüz hiç boşluk eklenmedi.</span>
+                                    <span className="text-muted-foreground italic opacity-70">{t('creation.itemEditor.noGapsYet')}</span>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* Solution / Explanation - Simplified and Renamed */}
+                    {/* Solution / Explanation */}
                     <div className="grid gap-2">
-                        <Label htmlFor="solution">Çözüm / Detaylı Açıklama (Opsiyonel)</Label>
+                        <Label htmlFor="solution">{t('creation.itemEditor.solutionLabel')}</Label>
                         <Textarea
                             id="solution"
-                            placeholder="Cevabın mantığını veya detayını buraya ekleyebilirsiniz."
+                            placeholder={t('creation.itemEditor.solutionPlaceholder')}
                             className="resize-none"
                             value={solution}
                             onChange={(e) => setSolution(e.target.value)}
@@ -338,10 +344,10 @@ export function ItemEditorSheet({
 
                 <SheetFooter>
                     <SheetClose asChild>
-                        <Button type="button" variant="outline">İptal</Button>
+                        <Button type="button" variant="outline">{t('common.cancel')}</Button>
                     </SheetClose>
-                    <Button type="button" onClick={handleSave} disabled={!question || !answer}>
-                        <Save className="mr-2 h-4 w-4" /> {initialData ? "Güncelle" : "Ekle"}
+                    <Button type="button" onClick={handleSave} disabled={!question || (type !== 'GAP' && !answer)}>
+                        <Save className="mr-2 h-4 w-4" /> {initialData ? t('common.save') : t('common.add')}
                     </Button>
                 </SheetFooter>
             </SheetContent>

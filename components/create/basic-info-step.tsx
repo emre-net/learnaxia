@@ -11,7 +11,10 @@ import { GalleryVerticalEnd, ListTodo, Braces, Split } from "lucide-react";
 
 import { CATEGORIES } from "@/lib/constants/categories";
 
+import { useTranslation } from "@/lib/i18n/i18n";
+
 export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
+    const { t } = useTranslation();
     const { control, watch, setValue } = useFormContext<ModuleFormData>();
     const selectedCategory = watch("category");
 
@@ -30,12 +33,12 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                 name="title"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Modül Başlığı</FormLabel>
+                        <FormLabel>{t('creation.moduleTitleLabel')}</FormLabel>
                         <FormControl>
-                            <Input placeholder="Örn: İspanyolca Kelimeler A1" {...field} />
+                            <Input placeholder={t('creation.moduleTitlePlaceholder')} {...field} />
                         </FormControl>
                         <FormDescription>
-                            Modülünüz için açıklayıcı bir isim girin.
+                            {t('creation.titleDescription')}
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
@@ -48,10 +51,10 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Açıklama <span className="text-muted-foreground text-xs font-normal">(Opsiyonel)</span></FormLabel>
+                        <FormLabel>{t('creation.descriptionLabelOptional')}</FormLabel>
                         <FormControl>
                             <Textarea
-                                placeholder="Bu modülde ne öğreneceksiniz?"
+                                placeholder={t('creation.descriptionPlaceholder')}
                                 className="resize-none h-24"
                                 {...field}
                             />
@@ -68,14 +71,14 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="category"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Kategori <span className="text-muted-foreground text-xs font-normal">(Opsiyonel)</span></FormLabel>
+                            <FormLabel>{t('creation.categoryLabel')}</FormLabel>
                             <Select onValueChange={(val) => {
                                 field.onChange(val);
                                 setValue("subCategory", ""); // Reset sub on change
                             }} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Kategori Seçin" />
+                                        <SelectValue placeholder={t('creation.categoryPlaceholder')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -94,11 +97,11 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                     name="subCategory"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Alt Kategori</FormLabel>
+                            <FormLabel>{t('creation.subCategoryLabel')}</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategory}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={selectedCategory ? "Alt Kategori Seçin" : "Önce Kategori Seçin"} />
+                                        <SelectValue placeholder={selectedCategory ? t('creation.subCategoryPlaceholder') : t('creation.firstSelectCategory')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -119,7 +122,7 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                 name="isForkable"
                 render={({ field }) => (
                     <FormItem className="space-y-3">
-                        <FormLabel>Görünürlük</FormLabel>
+                        <FormLabel>{t('creation.visibilityLabel')}</FormLabel>
                         <FormControl>
                             <RadioGroup
                                 onValueChange={(val) => field.onChange(val === "true")}
@@ -131,8 +134,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                         <RadioGroupItem value="true" />
                                     </FormControl>
                                     <FormLabel className="font-normal cursor-pointer">
-                                        <span className="font-semibold block">Herkese Açık (Public)</span>
-                                        <span className="text-muted-foreground text-xs">Diğer kullanıcılar modülünüzü görebilir ve kopyalayabilir.</span>
+                                        <span className="font-semibold block">{t('creation.public')}</span>
+                                        <span className="text-muted-foreground text-xs">{t('creation.publicDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0">
@@ -140,8 +143,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                         <RadioGroupItem value="false" />
                                     </FormControl>
                                     <FormLabel className="font-normal cursor-pointer">
-                                        <span className="font-semibold block">Gizli (Private)</span>
-                                        <span className="text-muted-foreground text-xs">Modülü sadece siz görebilirsiniz.</span>
+                                        <span className="font-semibold block">{t('creation.private')}</span>
+                                        <span className="text-muted-foreground text-xs">{t('creation.privateDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
                             </RadioGroup>
@@ -157,7 +160,7 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                 name="type"
                 render={({ field }) => (
                     <FormItem className="space-y-3">
-                        <FormLabel>İçerik Tipi</FormLabel>
+                        <FormLabel>{t('creation.contentTypeLabel')}</FormLabel>
                         <FormControl>
                             <RadioGroup
                                 onValueChange={field.onChange}
@@ -171,8 +174,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                     </FormControl>
                                     <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <GalleryVerticalEnd className="mb-2 h-6 w-6" />
-                                        <span className="font-semibold">Kartlar</span>
-                                        <span className="text-xs text-muted-foreground text-center mt-1">Ön/Arka kartlar. Ezber için ideal.</span>
+                                        <span className="font-semibold">{t('creation.flashcardsLabel')}</span>
+                                        <span className="text-xs text-muted-foreground text-center mt-1">{t('creation.flashcardsDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
 
@@ -182,8 +185,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                     </FormControl>
                                     <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <ListTodo className="mb-2 h-6 w-6" />
-                                        <span className="font-semibold">Çoktan Seçmeli</span>
-                                        <span className="text-xs text-muted-foreground text-center mt-1">Test usulü sorular.</span>
+                                        <span className="font-semibold">{t('creation.mcLabel')}</span>
+                                        <span className="text-xs text-muted-foreground text-center mt-1">{t('creation.mcDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
 
@@ -193,8 +196,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                     </FormControl>
                                     <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <Braces className="mb-2 h-6 w-6" />
-                                        <span className="font-semibold">Boşluk Doldurma</span>
-                                        <span className="text-xs text-muted-foreground text-center mt-1">Dil bilgisi için ideal.</span>
+                                        <span className="font-semibold">{t('creation.gapLabel')}</span>
+                                        <span className="text-xs text-muted-foreground text-center mt-1">{t('creation.gapDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
 
@@ -204,8 +207,8 @@ export function BasicInfoStep({ isEditMode }: { isEditMode?: boolean }) {
                                     </FormControl>
                                     <FormLabel className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer h-full ${isEditMode ? "opacity-50 cursor-not-allowed" : ""}`}>
                                         <Split className="mb-2 h-6 w-6" />
-                                        <span className="font-semibold">Doğru / Yanlış</span>
-                                        <span className="text-xs text-muted-foreground text-center mt-1">Hızlı tekrar soruları.</span>
+                                        <span className="font-semibold">{t('creation.tfLabel')}</span>
+                                        <span className="text-xs text-muted-foreground text-center mt-1">{t('creation.tfDescription')}</span>
                                     </FormLabel>
                                 </FormItem>
                             </RadioGroup>
