@@ -33,10 +33,12 @@ model User {
   learningSessions  LearningSession[]
   createdModules    Module[]                @relation("CreatedModules")
   modules           Module[]                @relation("OwnedModules")
+  notes             Note[]
   pdfAssets         PDFAsset[]
   paymentMethods    PaymentMethod[]
   sm2Progress       SM2Progress[]
   sessions          Session[]
+  solvedQuestions   SolvedQuestion[]
   subscription      Subscription?
   tokenTransactions TokenTransaction[]
   wallet            TokenWallet?
@@ -46,8 +48,6 @@ model User {
   questionOverrides UserQuestionOverride[]
   userRetention     UserRetention[]
   weaknessReports   WeaknessReport[]
-  notes             Note[]
-  solvedQuestions   SolvedQuestion[]
 
   @@index([email])
   @@index([handle])
@@ -189,8 +189,8 @@ model Module {
   owner           User                @relation("OwnedModules", fields: [ownerId], references: [id])
   sourceModule    Module?             @relation("ModuleForks", fields: [sourceModuleId], references: [id])
   forks           Module[]            @relation("ModuleForks")
-  userLibrary     UserModuleLibrary[]
   notes           Note[]
+  userLibrary     UserModuleLibrary[]
 }
 
 model Item {
@@ -204,9 +204,9 @@ model Item {
   module            Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   itemProgress      ItemProgress[]
   itemSessions      ItemSession[]
+  notes             Note[]
   sm2Progress       SM2Progress[]
   questionOverrides UserQuestionOverride[]
-  notes             Note[]
 }
 
 model PDFAsset {
@@ -399,20 +399,19 @@ model UserRetention {
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  userId    String
-  moduleId  String?
-  itemId    String?
+  id               String          @id @default(uuid())
+  userId           String
+  moduleId         String?
+  itemId           String?
   solvedQuestionId String?
-  title     String?
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  module Module? @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  item   Item?   @relation(fields: [itemId], references: [id], onDelete: SetNull)
-  solvedQuestion SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id], onDelete: SetNull)
+  title            String?
+  content          String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  item             Item?           @relation(fields: [itemId], references: [id])
+  module           Module?         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  solvedQuestion   SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id])
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([moduleId])
@@ -424,13 +423,12 @@ model SolvedQuestion {
   id           String   @id @default(uuid())
   userId       String
   imageUrl     String
-  questionText String   @db.Text
-  solution     String   @db.Text
+  questionText String
+  solution     String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes Note[]
+  notes        Note[]
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
