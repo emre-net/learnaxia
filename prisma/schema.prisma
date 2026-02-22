@@ -47,6 +47,7 @@ model User {
   userRetention     UserRetention[]
   weaknessReports   WeaknessReport[]
   notes             Note[]
+  solvedQuestions   SolvedQuestion[]
 
   @@index([email])
   @@index([handle])
@@ -402,6 +403,7 @@ model Note {
   userId    String
   moduleId  String?
   itemId    String?
+  solvedQuestionId String?
   title     String?
   content   String
   createdAt DateTime @default(now())
@@ -410,8 +412,25 @@ model Note {
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   module Module? @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   item   Item?   @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  solvedQuestion SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([moduleId])
   @@index([itemId])
+  @@index([solvedQuestionId])
+}
+
+model SolvedQuestion {
+  id           String   @id @default(uuid())
+  userId       String
+  imageUrl     String
+  questionText String   @db.Text
+  solution     String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes Note[]
+
+  @@index([userId])
 }

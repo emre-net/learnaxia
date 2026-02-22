@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 export type CreateNoteDto = {
     moduleId?: string;
     itemId?: string;
+    solvedQuestionId?: string;
     title?: string;
     content: string;
 };
@@ -20,10 +21,6 @@ export class NoteService {
     static async create(userId: string, dto: CreateNoteDto) {
         // If linked to a module, verify access
         if (dto.moduleId) {
-            // Check if user has access (Owner, Editor, Viewer) to the module
-            // Or if it's a public module.
-            // For now, let's assume if they can view it, they can take notes on it.
-            // We check UserContentAccess to be strict about library usage.
             const access = await prisma.userContentAccess.findFirst({
                 where: {
                     userId: userId,
@@ -31,20 +28,14 @@ export class NoteService {
                 }
             });
 
-            // If no access record found, check if it's a public module or handle accordingly.
-            // For MVP, if they are studying it, they likely have access.
-            // If strict check fails, we might still allow notes if it's just a personal note linked to an ID?
-            // But let's enforce access to ensure data integrity.
             if (!access) {
-                // Determine if module is public?
                 const module = await prisma.module.findUnique({
                     where: { id: dto.moduleId },
-                    select: { isForkable: true, ownerId: true } // isForkable implies visibility usually
+                    select: { isForkable: true, ownerId: true }
                 });
 
                 if (!module) throw new Error("Module not found");
 
-                // SECURITY FIX: If module is not forkable (public) and user is not owner, deny access.
                 if (!module.isForkable && module.ownerId !== userId) {
                     throw new Error("Access Denied: Cannot take notes on a private module you do not own.");
                 }
@@ -56,6 +47,7 @@ export class NoteService {
                 userId,
                 moduleId: dto.moduleId,
                 itemId: dto.itemId,
+                solvedQuestionId: dto.solvedQuestionId,
                 title: dto.title,
                 content: dto.content,
             }
@@ -65,12 +57,13 @@ export class NoteService {
     /**
      * Get all notes for a user, optionally filtered by module or item.
      */
-    static async findAll(userId: string, filter?: { moduleId?: string; itemId?: string }) {
+    static async findAll(userId: string, filter?: { moduleId?: string; itemId?: string; solvedQuestionId?: string }) {
         return await prisma.note.findMany({
             where: {
                 userId,
                 ...(filter?.moduleId && { moduleId: filter.moduleId }),
                 ...(filter?.itemId && { itemId: filter.itemId }),
+                ...(filter?.solvedQuestionId && { solvedQuestionId: filter.solvedQuestionId }),
             },
             orderBy: { updatedAt: 'desc' },
             include: {
@@ -78,7 +71,10 @@ export class NoteService {
                     select: { title: true }
                 },
                 item: {
-                    select: { id: true, type: true } // Minimal info
+                    select: { id: true, type: true }
+                },
+                solvedQuestion: {
+                    select: { questionText: true }
                 }
             }
         });
@@ -90,11 +86,14 @@ export class NoteService {
     static async findOne(userId: string, noteId: string) {
         const note = await prisma.note.findUnique({
             where: { id: noteId },
-            include: { module: { select: { title: true } } }
+            include: {
+                module: { select: { title: true } },
+                solvedQuestion: { select: { questionText: true } }
+            }
         });
 
         if (!note || note.userId !== userId) {
-            return null; // Or throw NotFound
+            return null;
         }
 
         return note;

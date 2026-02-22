@@ -60,6 +60,39 @@ const en = {
             gap: "Gap Fill"
         }
     },
+    solvePhoto: {
+        title: "Solve from Photo",
+        description: "Solve any educational question by taking a photo.",
+        uploadPhoto: "Upload or Take Photo",
+        solving: "Solving with AI...",
+        solution: "Solution",
+        takeNote: "Take a Note",
+        saveToLibrary: "Save to Library",
+        history: "Solution History",
+        noHistory: "No solutions solved yet.",
+        scanAgain: "Scan Again",
+        errors: {
+            blurry: "Image is too blurry or unreadable. Please take a clearer photo.",
+            noQuestion: "No question detected in the image. Please upload a question photo.",
+            multipleQuestions: "Multiple questions detected. Please focus on a single question.",
+            generic: "An error occurred while solving the question. Please try again."
+        }
+    },
+    library: {
+        tabs: {
+            modules: "Modules",
+            collections: "Collections",
+            aiSolutions: "AI Solutions",
+            notes: "Notes"
+        },
+        notes: {
+            title: "All Notes",
+            noNotes: "No notes taken yet.",
+            source: "Source",
+            aiSolution: "AI Solution",
+            moduleNote: "Module Note"
+        }
+    },
     creation: {
         title: "Create Interactive Lesson",
         description: "Turn any topic or document into an interactive lesson.",
@@ -309,6 +342,39 @@ const tr = {
             gap: "Boşluk Doldurma"
         }
     },
+    solvePhoto: {
+        title: "Fotoğraftan Soru Çöz",
+        description: "Fotoğrafını çekerek herhangi bir soruyu AI ile anında çözün.",
+        uploadPhoto: "Fotoğraf Çek veya Yükle",
+        solving: "AI ile Çözülüyor...",
+        solution: "Çözüm",
+        takeNote: "Not Al",
+        saveToLibrary: "Kitaplığa Kaydet",
+        history: "Çözüm Geçmişi",
+        noHistory: "Henüz hiç soru çözülmedi.",
+        scanAgain: "Yeni Taram",
+        errors: {
+            blurry: "Görüntü çok bulanık veya okunamaz durumda. Lütfen daha net bir fotoğraf çekin.",
+            noQuestion: "Görüntüde bir soru tespit edilemedi. Lütfen bir soru fotoğrafı yükleyin.",
+            multipleQuestions: "Birden fazla soru tespit edildi. Lütfen tek bir soruya odaklanın.",
+            generic: "Soru çözülürken bir hata oluştu. Lütfen tekrar deneyin."
+        }
+    },
+    library: {
+        tabs: {
+            modules: "Modüller",
+            collections: "Koleksiyonlar",
+            aiSolutions: "AI Çözümleri",
+            notes: "Notlar"
+        },
+        notes: {
+            title: "Tüm Notlar",
+            noNotes: "Henüz not alınmamış.",
+            source: "Kaynak",
+            aiSolution: "AI Çözümü",
+            moduleNote: "Modül Notu"
+        }
+    },
     creation: {
         title: "İnteraktif Ders Oluştur",
         description: "Herhangi bir konuyu veya belgeyi etkileşimli bir derse dönüştür.",
@@ -471,7 +537,7 @@ const tr = {
             },
             cleanup: {
                 title: "Tehlikeli Alan (Cleanup)",
-                description: "Tüm modülleri, öğeleri ve çalışma oturumlarını kalıcı olarak siler. Geri dönüşü yoktur.",
+                description: "Tüm modülleri, öğeleri ve çalışma oturumlarını kalıcı olarak siler. Geri dönüşı yoktur.",
                 button: "Veritabanını Sıfırla (DİKKAT!)"
             },
             cache: {

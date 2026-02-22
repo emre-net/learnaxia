@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil, Copy, Filter } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Search, Plus, BookOpen, Clock, MoreVertical, Layers, CheckSquare, FileText, CheckCircle2, Pencil, Copy, Filter, Brain } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import { useSettingsStore } from "@/stores/settings-store";
 import { CreateCollectionDialog } from "@/components/collection/create-collection-dialog";
 import { CollectionCard } from "@/components/collection/collection-card";
@@ -18,6 +19,12 @@ import { ModuleCard } from "@/components/module/module-card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { CATEGORIES } from "@/lib/constants/categories";
+import { SolvedQuestion, Note as PrismaNote } from "@prisma/client";
+
+type NoteWithSource = PrismaNote & {
+    module?: { title: string } | null;
+    solvedQuestion?: { questionText: string } | null;
+};
 
 // Types (Mirroring API response)
 type LibraryModule = {
@@ -98,6 +105,25 @@ export function LibraryClient() {
         }
     });
 
+    const { data: aiSolutions, isLoading: isLoadingSolutions } = useQuery<SolvedQuestion[]>({
+        queryKey: ['ai-solutions'],
+        queryFn: async () => {
+            const res = await fetch('/api/solved-questions');
+            if (!res.ok) throw new Error('Failed to fetch solutions');
+            return res.json();
+        }
+    });
+
+    const { data: allNotes, isLoading: isLoadingNotes } = useQuery<NoteWithSource[]>({
+        queryKey: ['all-notes'],
+        queryFn: async () => {
+            // New endpoint or updated existing one
+            const res = await fetch('/api/notes');
+            if (!res.ok) throw new Error('Failed to fetch notes');
+            return res.json();
+        }
+    });
+
     const filteredModules = modules?.filter(item => {
         const matchesSearch = item.module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (item.module.description && item.module.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -130,8 +156,10 @@ export function LibraryClient() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <TabsList>
-                        <TabsTrigger value="modules">Modüller</TabsTrigger>
-                        <TabsTrigger value="collections">Koleksiyonlar</TabsTrigger>
+                        <TabsTrigger value="modules">{dictionary.library.tabs.modules}</TabsTrigger>
+                        <TabsTrigger value="collections">{dictionary.library.tabs.collections}</TabsTrigger>
+                        <TabsTrigger value="ai-solutions">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
+                        <TabsTrigger value="notes">{dictionary.library.tabs.notes}</TabsTrigger>
                     </TabsList>
 
                     <div className="flex items-center gap-2">
@@ -288,6 +316,84 @@ export function LibraryClient() {
                         <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
                             {filteredCollections.map((item) => (
                                 <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="ai-solutions" className="space-y-4">
+                    {isLoadingSolutions ? (
+                        <LibrarySkeleton viewMode={viewMode} />
+                    ) : !aiSolutions || aiSolutions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center">
+                            <Brain className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
+                            <h3 className="text-lg font-semibold">{dictionary.solvePhoto.noHistory}</h3>
+                            <Button asChild className="mt-4">
+                                <Link href="/dashboard/create/solve-photo">Soru Çözmeye Başla</Link>
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {aiSolutions.map((solution) => (
+                                <Card key={solution.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                                    <div className="aspect-video relative bg-muted">
+                                        {solution.imageUrl ? (
+                                            <Image src={solution.imageUrl} alt="Soru" fill className="object-cover" />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full">
+                                                <FileText className="h-8 w-8 text-muted-foreground" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <CardHeader className="p-4">
+                                        <CardTitle className="text-sm line-clamp-2 leading-snug">{solution.questionText}</CardTitle>
+                                        <CardDescription className="text-[10px] mt-1 flex items-center gap-1">
+                                            <Clock className="h-3 w-3" />
+                                            {new Date(solution.createdAt).toLocaleDateString()}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardFooter className="p-4 pt-0">
+                                        <Button variant="outline" size="sm" className="w-full text-xs" asChild>
+                                            <Link href={`/dashboard/create/solve-photo?id=${solution.id}`}>Çözümü Gör</Link>
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="notes" className="space-y-4">
+                    {isLoadingNotes ? (
+                        <LibrarySkeleton viewMode={viewMode} />
+                    ) : !allNotes || allNotes.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center">
+                            <FileText className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
+                            <h3 className="text-lg font-semibold">{dictionary.library.notes.noNotes}</h3>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {allNotes.map((note) => (
+                                <Card key={note.id} className="hover:border-primary/50 transition-colors">
+                                    <CardHeader className="p-4 pb-2">
+                                        <div className="flex items-center justify-between">
+                                            <Badge variant="secondary" className="text-[10px]">
+                                                {note.moduleId ? dictionary.library.notes.moduleNote : dictionary.library.notes.aiSolution}
+                                            </Badge>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {new Date(note.updatedAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <CardTitle className="text-sm mt-2">{note.title || "Adsız Not"}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-0">
+                                        <p className="text-sm text-muted-foreground line-clamp-3">{note.content}</p>
+                                        <div className="mt-3 text-[10px] font-medium text-primary flex items-center gap-1">
+                                            <BookOpen className="h-3 w-3" />
+                                            {note.module?.title || note.solvedQuestion?.questionText.substring(0, 30) + "..."}
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             ))}
                         </div>
                     )}

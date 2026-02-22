@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Sparkles, BookOpen, FolderPlus, BrainCircuit } from "lucide-react";
+import { PenTool, Sparkles, BookOpen, FolderPlus, BrainCircuit, Camera } from "lucide-react";
 import Link from "next/link";
 
 export default function CreatePage() {
@@ -78,6 +78,40 @@ export default function CreatePage() {
                             </CardContent>
                             <CardFooter>
                                 <Button variant="secondary" className="w-full bg-purple-500/10 text-purple-600 hover:bg-purple-500 hover:text-white border-purple-200">Yapay Zeka ile Başla</Button>
+                            </CardFooter>
+                        </Card>
+                    </Link>
+
+                    {/* Solve Photo Card */}
+                    <Link href="/dashboard/create/solve-photo" className="group">
+                        <Card className="h-full border-emerald-500/20 hover:border-emerald-500 transition-all hover:shadow-lg hover:shadow-emerald-500/10 cursor-pointer flex flex-col relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Camera className="h-32 w-32 text-emerald-500 -rotate-12" />
+                            </div>
+                            <CardHeader>
+                                <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                    <Camera className="h-6 w-6" />
+                                </div>
+                                <CardTitle className="text-xl">Fotoğraftan Soru Çöz</CardTitle>
+                                <CardDescription>
+                                    Fotoğrafını çekerek herhangi bir soruyu AI ile anında çözün.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1 relative z-10">
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                    <li className="flex items-center">
+                                        <Sparkles className="h-4 w-4 mr-2 text-emerald-500" /> Görselden Metne Çözüm
+                                    </li>
+                                    <li className="flex items-center">
+                                        <Sparkles className="h-4 w-4 mr-2 text-emerald-500" /> Adım Adım Açıklama
+                                    </li>
+                                    <li className="flex items-center">
+                                        <Sparkles className="h-4 w-4 mr-2 text-emerald-500" /> Çözüm Üzerine Not Al
+                                    </li>
+                                </ul>
+                            </CardContent>
+                            <CardFooter>
+                                <Button variant="secondary" className="w-full bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white border-emerald-200">Fotoğraf ile Başla</Button>
                             </CardFooter>
                         </Card>
                     </Link>

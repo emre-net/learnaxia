@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/auth";
 import { NoteService } from "@/domains/note/note.service";
 import { NextRequest, NextResponse } from "next/server";
@@ -6,6 +7,7 @@ import { z } from "zod";
 const createNoteSchema = z.object({
     moduleId: z.string().optional(),
     itemId: z.string().optional(),
+    solvedQuestionId: z.string().optional(),
     title: z.string().optional(),
     content: z.string().min(1, "Note content cannot be empty"),
 });
@@ -19,9 +21,10 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const moduleId = searchParams.get("moduleId") || undefined;
     const itemId = searchParams.get("itemId") || undefined;
+    const solvedQuestionId = searchParams.get("solvedQuestionId") || undefined;
 
     try {
-        const notes = await NoteService.findAll(session.user.id, { moduleId, itemId });
+        const notes = await NoteService.findAll(session.user.id, { moduleId, itemId, solvedQuestionId });
         return NextResponse.json(notes);
     } catch (error) {
         console.error("Failed to fetch notes:", error);
