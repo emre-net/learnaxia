@@ -7,6 +7,8 @@ import { auth } from "@/auth"
 import { ReactQueryProvider } from "@/components/providers/query-provider"
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
+import { GlobalErrorListener } from "@/components/providers/error-listener";
 
 // import { Inter as FontSans } from "next/font/google";
 // const fontSans = FontSans({
@@ -83,7 +85,10 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <GlobalErrorListener />
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
               <Toaster />
             </ThemeProvider>
           </ReactQueryProvider>

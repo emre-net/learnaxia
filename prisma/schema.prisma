@@ -438,3 +438,32 @@ enum Visibility {
   PUBLIC
   PRIVATE
 }
+
+model SystemLog {
+  id          String   @id @default(uuid())
+  requestId   String?  // Correlation ID
+  level       LogLevel @default(INFO)
+  environment String   // "development" | "production"
+  service     String?  // "api", "ai", "auth", "client"
+  message     String   @db.Text
+  stack       String?  @db.Text
+  source      String   // "CLIENT" | "SERVER"
+  url         String?  // Hata anındaki URL
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?    // Ekstra veri (Sanitized)
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  @@index([level])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([requestId])
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+}
