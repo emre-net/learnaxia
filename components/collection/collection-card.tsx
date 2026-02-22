@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSave } from "@/hooks/use-save";
 
 interface LocalCollection {
     id: string;
@@ -45,13 +46,16 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     const { collection, role } = item;
     const { toast } = useToast();
     const queryClient = useQueryClient();
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveCount, setSaveCount] = useState(collection._count?.userLibrary || 0);
-    const [isSaved, setIsSaved] = useState(
-        typeof collection.isInLibrary !== 'undefined'
+
+    // Centralized Save Logic
+    const { isSaved, saveCount, isSaving, handleSave } = useSave({
+        id: collection.id,
+        type: 'collection',
+        initialSaved: typeof collection.isInLibrary !== 'undefined'
             ? collection.isInLibrary
-            : (collection._count?.userLibrary ? collection._count.userLibrary > 0 : false)
-    );
+            : (collection._count?.userLibrary ? collection._count.userLibrary > 0 : false),
+        initialSaveCount: collection._count?.userLibrary || 0
+    });
 
     const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
         <div
@@ -64,34 +68,6 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
 
     const moduleCount = collection._count?.items ?? collection.moduleIds?.length ?? 0;
 
-    const handleSave = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isSaving) return;
-
-        setIsSaving(true);
-        try {
-            const method = isSaved ? 'DELETE' : 'POST';
-            const res = await fetch(`/api/collections/${collection.id}/save`, { method });
-            if (res.ok) {
-                const newSavedState = !isSaved;
-                setIsSaved(newSavedState);
-                setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
-
-                // Invalidate library queries
-                queryClient.invalidateQueries({ queryKey: ['library-collections'] });
-
-                toast({
-                    title: "Başarılı",
-                    description: newSavedState ? "Koleksiyon kitaplığına kaydedildi." : "Koleksiyon kitaplığından kaldırıldı."
-                });
-            }
-        } catch (error) {
-            toast({ title: "Hata", description: "İşlem başarısız.", variant: "destructive" });
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     if (viewMode === 'list') {
         return (

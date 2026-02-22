@@ -61,6 +61,7 @@ export async function GET(req: Request) {
         } else {
             // MODULES
             const where = {
+                visibility: 'PUBLIC',
                 isForkable: true,
                 status: "ACTIVE",
                 ...(moduleType && { type: moduleType as any }),

@@ -11,6 +11,7 @@ import { useTranslation } from "@/lib/i18n/i18n";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSave } from "@/hooks/use-save";
 
 export type ModuleCardProps = {
     module: {
@@ -44,13 +45,16 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveCount, setSaveCount] = useState(module._count?.userLibrary || 0);
-    const [isSaved, setIsSaved] = useState(
-        typeof module.isInLibrary !== 'undefined'
+
+    // Centralized Save Logic
+    const { isSaved, saveCount, isSaving, handleSave } = useSave({
+        id: module.id,
+        type: 'module',
+        initialSaved: typeof module.isInLibrary !== 'undefined'
             ? module.isInLibrary
-            : (module._count?.userLibrary ? module._count.userLibrary > 0 : false)
-    );
+            : (module._count?.userLibrary ? module._count.userLibrary > 0 : false),
+        initialSaveCount: module._count?.userLibrary || 0
+    });
 
     const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
         <div
@@ -71,36 +75,6 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         }
     };
 
-    const handleSave = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isSaving) return;
-
-        setIsSaving(true);
-        try {
-            const method = isSaved ? 'DELETE' : 'POST';
-            const res = await fetch(`/api/modules/${module.id}/save`, { method });
-
-            if (res.ok) {
-                const newSavedState = !isSaved;
-                setIsSaved(newSavedState);
-                setSaveCount(prev => newSavedState ? prev + 1 : Math.max(0, prev - 1));
-
-                // Invalidate library queries to refresh the library page
-                queryClient.invalidateQueries({ queryKey: ['library-modules'] });
-                queryClient.invalidateQueries({ queryKey: ['library-collections'] });
-
-                toast({
-                    title: "Başarılı",
-                    description: newSavedState ? "Modül kitaplığına kaydedildi." : "Modül kitaplığından kaldırıldı."
-                });
-            }
-        } catch (error) {
-            toast({ title: "Hata", description: "İşlem gerçekleştirilemedi.", variant: "destructive" });
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     const handleFork = async (e: React.MouseEvent) => {
         e.preventDefault();
