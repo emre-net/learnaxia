@@ -226,34 +226,54 @@ export class ModuleService {
      * Gets a single module detail.
      */
     static async getById(userId: string, moduleId: string) {
-        const access = await prisma.userContentAccess.findUnique({
-            where: { userId_resourceId: { userId, resourceId: moduleId } }
-        });
-
-        if (!access) {
-            throw new Error("Unauthorized Access");
-        }
-
-        return await prisma.module.findUnique({
+        // 1. Fetch Module basic info to check visibility
+        const module = await prisma.module.findUnique({
             where: { id: moduleId },
             include: {
-                items: {
-                    orderBy: { order: 'asc' }
-                },
-                owner: {
-                    select: { handle: true, image: true }
-                },
+                items: { orderBy: { order: 'asc' } },
+                owner: { select: { handle: true, image: true, id: true } },
                 sourceModule: {
                     select: {
                         id: true,
                         title: true,
-                        owner: {
-                            select: { handle: true }
-                        }
+                        owner: { select: { handle: true } }
                     }
                 }
             }
         });
+
+        if (!module) throw new Error("Module not found");
+
+        // 2. PREMISSIVE ACCESS RULES:
+        // Rule A: Public Content (ACTIVE & Forkable) is viewable by anyone
+        if (module.status === 'ACTIVE' && module.isForkable) {
+            return module;
+        }
+
+        // Rule B: Owner has full access
+        if (module.ownerId === userId) {
+            return module;
+        }
+
+        // Rule C: Check explicit library access (Saved/Forked)
+        const libraryEntry = await prisma.userModuleLibrary.findUnique({
+            where: { userId_moduleId: { userId, moduleId } }
+        });
+
+        if (libraryEntry) {
+            return module;
+        }
+
+        // Rule D: Fallback to explicit access table (Legacy/Manual permissions)
+        const access = await prisma.userContentAccess.findUnique({
+            where: { userId_resourceId: { userId, resourceId: moduleId } }
+        });
+
+        if (access) {
+            return module;
+        }
+
+        throw new Error("Unauthorized Access");
     }
 
     /**
