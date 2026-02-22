@@ -3,16 +3,7 @@ import { ItemType, StudyMode } from "@/lib/types";
 
 export class StudyService {
     static async startSession(userId: string, moduleId: string, mode: StudyMode) {
-        // 1. Check Access
-        const access = await prisma.userContentAccess.findUnique({
-            where: { userId_resourceId: { userId, resourceId: moduleId } }
-        });
-
-        if (!access) {
-            throw new Error("Unauthorized Study Access");
-        }
-
-        // 2. Fetch Module & Items
+        // 1. Fetch Module & Items First
         const module = await prisma.module.findUnique({
             where: { id: moduleId },
             include: {
@@ -23,6 +14,25 @@ export class StudyService {
         });
 
         if (!module) throw new Error("Module not found");
+
+        // 2. Permissive Access Check
+        // Rule: Access allowed if Public OR Owner OR in Library OR explicit Access record exists
+        const isPublic = module.status === 'ACTIVE' && module.isForkable;
+        const isOwner = module.ownerId === userId;
+
+        let hasAccess = isPublic || isOwner;
+
+        if (!hasAccess) {
+            const [libraryEntry, explicitAccess] = await Promise.all([
+                prisma.userModuleLibrary.findUnique({ where: { userId_moduleId: { userId, moduleId } } }),
+                prisma.userContentAccess.findUnique({ where: { userId_resourceId: { userId, resourceId: moduleId } } })
+            ]);
+            hasAccess = !!libraryEntry || !!explicitAccess;
+        }
+
+        if (!hasAccess) {
+            throw new Error("Unauthorized Study Access");
+        }
 
         // 3. Fetch User Progress (Parallel)
         const [itemProgresses, sm2Progresses] = await Promise.all([
