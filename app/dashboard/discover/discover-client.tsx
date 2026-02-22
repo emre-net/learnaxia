@@ -48,23 +48,20 @@ export function DiscoverClient() {
     const [activeTab, setActiveTab] = useState("modules"); // 'modules' | 'collections'
 
     const [limit] = useState(12);
-    const [items, setItems] = useState<any[]>([]);
-    const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
 
     const { language } = useSettingsStore();
     const dictionary = getDictionary(language);
     const studyDict = dictionary.study;
 
-    const debouncedSearch = useDebounceValue(searchQuery, 500);
+    const debouncedSearch = useDebounceValue(searchQuery, 300);
 
-    // Reset items and page on filter change
+    // Reset page on filter change
     useEffect(() => {
-        setItems([]);
         setPage(0);
     }, [activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch]);
 
-    const { isLoading, isFetching } = useQuery({
+    const { data, isLoading, isFetching } = useQuery({
         queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch, page],
         queryFn: async () => {
             const params = new URLSearchParams();
@@ -80,16 +77,14 @@ export function DiscoverClient() {
 
             const res = await fetch(`/api/discover?${params.toString()}`);
             if (!res.ok) throw new Error("Failed to fetch");
-            const data = await res.json();
-
-            setItems(prev => page === 0 ? data.items : [...prev, ...data.items]);
-            setTotal(data.total || 0);
-            return data;
+            return res.json();
         },
-        staleTime: 60000
+        staleTime: 30000
     });
 
-    const hasMore = items.length < total;
+    const items = data?.items || [];
+    const total = data?.total || 0;
+    const hasMore = items.length < total && total > limit;
 
     // Clear subcategory when category changes
     const handleCategorySelect = (cat: string) => {
