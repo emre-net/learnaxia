@@ -12,6 +12,9 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSave } from "@/hooks/use-save";
+import { TypeIcon, getModuleTypeLabel } from "@/components/shared/type-icon";
+import { VerifiedBadge } from "@/components/shared/verified-badge";
+import { CardOwner } from "@/components/shared/card-owner";
 
 export type ModuleCardProps = {
     module: {
@@ -56,24 +59,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         initialSaveCount: module._count?.userLibrary || 0
     });
 
-    const VerifiedBadge = ({ isTeam = false }: { isTeam?: boolean }) => (
-        <div
-            title={isTeam ? "Bu modül Learnaxia ekibi tarafından doğrulanmıştır" : "Doğrulanmış İçerik"}
-            className="flex items-center"
-        >
-            <CheckCircle2 className={`h-3.5 w-3.5 ${isTeam ? "text-blue-600 fill-blue-500/10" : "text-green-600 fill-green-500/10"}`} />
-        </div>
-    );
 
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'FLASHCARD': return <BookOpen className="h-5 w-5 text-blue-500" />;
-            case 'MC': return <CheckSquare className="h-5 w-5 text-green-500" />;
-            case 'GAP': return <FileText className="h-5 w-5 text-orange-500" />;
-            case 'TRUE_FALSE': return <CheckCircle2 className="h-5 w-5 text-purple-500" />;
-            default: return <BookOpen className="h-5 w-5 text-gray-500" />;
-        }
-    };
 
 
     const handleFork = async (e: React.MouseEvent) => {
@@ -111,14 +97,14 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         return (
             <Card className="flex flex-row items-center gap-4 p-4 hover:shadow-md transition-all group border-muted/50">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    {getTypeIcon(module.type)}
+                    <TypeIcon type={module.type as any} className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         <Link href={`/dashboard/modules/${module.id}`} className="font-bold text-lg hover:underline truncate">
                             {module.title}
                         </Link>
-                        {module.category && <Badge variant="secondary" className="text-[10px] h-5">{module.category}</Badge>}
+                        <Badge variant="secondary" className="text-[10px] h-5">{getModuleTypeLabel(module.type)}</Badge>
                         {module.isVerified && <VerifiedBadge isTeam={module.owner?.handle === 'learnaxia'} />}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{module.description || "Açıklama yok"}</p>
@@ -151,7 +137,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex items-center gap-3">
                         <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 border border-transparent group-hover:border-primary/20">
-                            {getTypeIcon(module.type)}
+                            <TypeIcon type={module.type as any} className="h-6 w-6 text-primary" />
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -229,39 +215,22 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
             </div>
 
             <div className="p-5 pt-3 mt-auto flex items-center justify-between gap-3 border-t border-muted/20">
-                <div className="flex items-center gap-2">
-                </div>
+                <CardOwner
+                    handle={module.owner?.handle || null}
+                    image={module.owner?.image}
+                    isVerified={module.isVerified}
+                    isTeam={module.owner?.handle === 'learnaxia'}
+                />
 
                 <div className="flex items-center gap-4 pr-1">
-                    {module.owner?.handle === 'learnaxia' ? (
-                        <div className="flex items-center gap-2.5">
-                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20 shadow-inner">
-                                <Layers className="h-4 w-4 text-primary" />
-                            </div>
-                            <span className="text-[13px] font-bold text-primary tracking-tight">Learnaxia Ekibi</span>
-                            {module.isVerified && <VerifiedBadge isTeam={true} />}
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1.5 focus-within:z-10">
-                            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-muted-foreground/10 shadow-inner grayscale-[0.5] group-hover:grayscale-0 transition-all">
-                                {module.owner?.image ? (
-                                    <img src={module.owner.image} alt="" className="h-full w-full object-cover" />
-                                ) : (
-                                    <span className="text-xs uppercase font-bold text-muted-foreground">{(module.owner?.handle?.[0] || 'U')}</span>
-                                )}
-                            </div>
-                            <span className="text-[13px] font-bold text-muted-foreground transition-colors group-hover:text-foreground">@{module.owner?.handle || 'user'}</span>
-                            {module.isVerified && <VerifiedBadge isTeam={false} />}
-                        </div>
-                    )}
-                    <Button className="h-11 rounded-2xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all group/btn">
+                    <Button className="h-11 rounded-2xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all group/btn" onClick={(e) => { e.stopPropagation(); setIsOptionsOpen(true); }}>
                         Çalış <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:scale-110 transition-transform" />
                     </Button>
                 </div>
             </div>
 
             <Dialog open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-md" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
                         <DialogTitle>{module.title}</DialogTitle>
                         <DialogDescription>{t('study.moduleActions.optionsTitle')}</DialogDescription>
