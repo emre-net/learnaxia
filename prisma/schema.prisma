@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id                String                  @id @default(uuid())
+  name              String?
   email             String?                 @unique
   handle            String?                 @unique
   timezone          String                  @default("UTC")
