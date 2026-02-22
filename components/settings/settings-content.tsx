@@ -144,7 +144,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
     }, [activeTab, walletData, toast]);
 
     const tabs: { id: Tab; label: string; icon: typeof User }[] = [
-        { id: "account", label: "Hesap", icon: User },
+        { id: "account", label: "Profil", icon: User },
         { id: "settings", label: "Ayarlar", icon: Pencil },
         { id: "analytics", label: "İstatistikler", icon: BarChart2 },
         { id: "wallet", label: "Cüzdan", icon: Coins },
@@ -225,7 +225,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         <div className="flex flex-col">
                                             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Başarı</span>
                                             <span className="text-2xl font-black text-foreground tabular-nums">
-                                                %{analyticsData.stats.globalAccuracy}
+                                                %{analyticsData.stats?.globalAccuracy ?? 0}
                                             </span>
                                         </div>
                                     </motion.div>
@@ -243,7 +243,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         <div className="flex flex-col">
                                             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Soru</span>
                                             <span className="text-2xl font-black text-foreground tabular-nums">
-                                                {analyticsData.stats.totalSolved}
+                                                {analyticsData.stats?.totalSolved ?? 0}
                                             </span>
                                         </div>
                                     </motion.div>
@@ -261,9 +261,9 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                         <div className="flex flex-col">
                                             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Süre</span>
                                             <span className="text-2xl font-black text-foreground tabular-nums">
-                                                {analyticsData.stats.totalStudyMinutes > 60
-                                                    ? `${Math.floor(analyticsData.stats.totalStudyMinutes / 60)}s`
-                                                    : `${analyticsData.stats.totalStudyMinutes}dk`}
+                                                {(analyticsData.stats?.totalStudyMinutes ?? 0) > 60
+                                                    ? `${Math.floor((analyticsData.stats?.totalStudyMinutes ?? 0) / 60)}s`
+                                                    : `${analyticsData.stats?.totalStudyMinutes ?? 0}dk`}
                                             </span>
                                         </div>
                                     </motion.div>
@@ -294,10 +294,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
                 <div className="flex flex-col items-center">
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Süre</span>
                     <span className="text-xl font-black text-emerald-500">
-                        {analyticsData ? (
-                            analyticsData.stats.totalStudyMinutes > 60
-                                ? `${Math.floor(analyticsData.stats.totalStudyMinutes / 60)}s`
-                                : `${analyticsData.stats.totalStudyMinutes}dk`
+                        {analyticsData?.stats ? (
+                            (analyticsData.stats.totalStudyMinutes ?? 0) > 60
+                                ? `${Math.floor((analyticsData.stats.totalStudyMinutes ?? 0) / 60)}s`
+                                : `${analyticsData.stats.totalStudyMinutes ?? 0}dk`
                         ) : "--"}
                     </span>
                 </div>
@@ -518,7 +518,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                                 <Clock className="h-4 w-4 text-muted-foreground" />
                                             </CardHeader>
                                             <CardContent>
-                                                <div className="text-2xl font-bold">{analyticsData.stats.totalStudyMinutes}dk</div>
+                                                <div className="text-2xl font-bold">{analyticsData.stats?.totalStudyMinutes ?? 0}dk</div>
                                                 <p className="text-xs text-muted-foreground">Toplam öğrenme süresi.</p>
                                             </CardContent>
                                         </Card>
@@ -528,7 +528,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                                                 <BookOpen className="h-4 w-4 text-muted-foreground" />
                                             </CardHeader>
                                             <CardContent>
-                                                <div className="text-2xl font-bold">{analyticsData.stats.modulesStarted}</div>
+                                                <div className="text-2xl font-bold">{analyticsData.stats?.modulesStarted ?? 0}</div>
                                                 <p className="text-xs text-muted-foreground">Kütüphanenizdeki aktif modüller.</p>
                                             </CardContent>
                                         </Card>

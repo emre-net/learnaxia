@@ -7,7 +7,7 @@ async function mockApiCall(type: string) {
     const offset = 0;
 
     if (type === "COLLECTION") {
-        const where = { isPublic: true };
+        const where = { visibility: 'PUBLIC' } as any;
         const [collections, total] = await Promise.all([
             prisma.collection.findMany({ where, take: limit, skip: offset }),
             prisma.collection.count({ where })

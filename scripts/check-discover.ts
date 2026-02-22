@@ -9,7 +9,7 @@ async function main() {
     });
 
     const allCollections = await prisma.collection.findMany({
-        where: { isPublic: true },
+        where: { visibility: 'PUBLIC' } as any,
         select: { title: true }
     });
 
