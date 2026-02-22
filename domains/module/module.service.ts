@@ -244,7 +244,7 @@ export class ModuleService {
     }
 
     /**
-     * Gets a single module detail.
+     * Gets a single module detail with library status.
      */
     static async getById(userId: string, moduleId: string) {
         // 1. Fetch Module basic info to check visibility
@@ -259,22 +259,31 @@ export class ModuleService {
                         title: true,
                         owner: { select: { handle: true } }
                     }
+                },
+                _count: {
+                    select: {
+                        userLibrary: {
+                            where: { userId: userId }
+                        }
+                    }
                 }
             }
         });
 
         if (!module) throw new Error("Module not found");
 
+        const isInLibrary = module._count.userLibrary > 0;
+
         // 2. PERMISSIVE ACCESS RULES:
         // Rule A: Public Content is viewable by anyone
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((module as any).visibility === 'PUBLIC') {
-            return module;
+            return { ...module, isInLibrary };
         }
 
         // Rule B: Owner has full access
         if (module.ownerId === userId) {
-            return module;
+            return { ...module, isInLibrary: true }; // Owner always "has" it
         }
 
         // Rule C: Private but user has the Link (UUID security)
@@ -282,7 +291,7 @@ export class ModuleService {
         // We allow viewing/studying but NOT editing.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((module as any).visibility === 'PRIVATE') {
-            return module;
+            return { ...module, isInLibrary };
         }
 
         throw new Error("Unauthorized Access");
