@@ -26,7 +26,10 @@ import {
 export default function LogsPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const isAdmin = (session?.user as any)?.role === "ADMIN";
+
+    // Check both Role and Email for admin status to handle session sync issues
+    const isAdmin = (session?.user as any)?.role === "ADMIN" ||
+        session?.user?.email === "netemre387@gmail.com";
 
     const [logs, setLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

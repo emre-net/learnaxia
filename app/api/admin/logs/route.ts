@@ -5,9 +5,15 @@ import prisma from "@/lib/prisma";
 export async function GET(req: NextRequest) {
     try {
         const session = await auth();
+        const userEmail = session?.user?.email;
+        const userRole = (session?.user as any)?.role;
 
-        // Yetki Kontrolü
-        if (!session?.user || (session.user as any).role !== 'ADMIN') {
+        // Yetki Kontrolü: Rol ADMIN olmalı veya e-posta admin e-postasıyla eşleşmeli
+        const isAdmin = userRole === 'ADMIN' ||
+            userEmail === 'netemre387@gmail.com' ||
+            userEmail === process.env.ADMIN_EMAIL;
+
+        if (!session?.user || !isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
