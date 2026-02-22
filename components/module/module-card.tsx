@@ -153,7 +153,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
 
     return (
         <Card
-            className="flex flex-col hover:shadow-xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-2xl cursor-pointer"
+            className="flex flex-col hover:shadow-2xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-[2rem] cursor-pointer"
             onClick={() => setIsOptionsOpen(true)}
         >
             <div className="p-5 flex-grow space-y-4">
@@ -176,44 +176,39 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 py-3 border-y border-muted/30">
-                    <div className="flex flex-col gap-0.5" title="İçerik Sayısı">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                            <Layers className="h-3.5 w-3.5" />
+                <div className="flex items-center gap-6 py-4 border-y border-muted/20">
+                    <div className="flex flex-col gap-1" title="İçerik Sayısı">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                            <Layers className="h-4 w-4 text-primary" />
                             <span>{module._count?.items || 0}</span>
+                            <span className="text-xs font-medium text-muted-foreground ml-0.5">
+                                {module.type === 'FLASHCARD' ? 'Kart' : 'Soru'}
+                            </span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">İçerik</span>
                     </div>
 
-                    <div className="w-px h-8 bg-muted/30" />
+                    <div className="w-px h-10 bg-muted/20" />
 
-                    <div className="flex flex-col gap-0.5" title="Çalışılma Sayısı">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                            <Play className="h-3.5 w-3.5 text-blue-500" />
-                            <span>{module._count?.sessions || 0}</span>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Çalışma</span>
-                    </div>
-
-                    <div className="w-px h-8 bg-muted/30" />
-
-                    <div className="flex flex-col gap-0.5" title="Kaydedilme Sayısı">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                            <Bookmark className={`h-3.5 w-3.5 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div className="flex flex-col gap-1" title="Kaydedilme Sayısı">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                            <Bookmark className={`h-4 w-4 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`} />
                             <span>{saveCount}</span>
+                            <span className="text-xs font-medium text-muted-foreground ml-0.5">Kaydet</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Kaydet</span>
                     </div>
+                </div>
 
-                    <div className="w-px h-8 bg-muted/30" />
-
-                    <div className="flex flex-col gap-0.5" title="Kopyalanma Sayısı">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                            <Copy className="h-3.5 w-3.5 text-orange-500" />
-                            <span>{module._count?.forks || 0}</span>
+                <div className="flex flex-col gap-1.5 pt-1">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/80">
+                        <Play className="h-3 w-3 text-blue-500 fill-blue-500/20" />
+                        <span>Bu modülü <span className="text-foreground">{module._count?.sessions || 0}</span> kişi çalışıyor</span>
+                    </div>
+                    {(module._count?.forks || 0) > 0 && (
+                        <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/80">
+                            <Copy className="h-3 w-3 text-orange-500" />
+                            <span><span className="text-foreground">{module._count?.forks}</span> kişi kütüphanesine ekleyerek özelleştirdi</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">Kopya</span>
-                    </div>
+                    )}
                 </div>
             </div>
 
