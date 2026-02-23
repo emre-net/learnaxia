@@ -10,7 +10,8 @@ import {
     LogOut,
     ShieldCheck,
     Database,
-    Activity
+    Activity,
+    Terminal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -19,6 +20,7 @@ const menuItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Modules", href: "/admin/modules", icon: Layers },
+    { name: "System Logs", href: "/admin/system/logs", icon: Terminal },
     { name: "System Health", href: "/admin/system", icon: Activity },
     { name: "DB Tools", href: "/admin/tools", icon: Database },
 ];

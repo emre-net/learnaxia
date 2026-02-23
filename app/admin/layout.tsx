@@ -8,9 +8,15 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
+    const userRole = (session?.user as any)?.role;
+    const userEmail = session?.user?.email;
 
-    // Safety check again in layout
-    if ((session?.user as any)?.role !== "ADMIN") {
+    // Robust check matching auth.config.ts
+    const isAdmin = userRole === "ADMIN" ||
+        userEmail === "netemre387@gmail.com" ||
+        userEmail === process.env.ADMIN_EMAIL;
+
+    if (!isAdmin) {
         redirect("/dashboard");
     }
 
