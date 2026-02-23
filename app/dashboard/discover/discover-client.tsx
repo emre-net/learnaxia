@@ -223,7 +223,7 @@ export function DiscoverClient() {
                                 <p className="text-muted-foreground mt-1 text-lg">
                                     {selectedCategory
                                         ? `${selectedCategory} ${selectedSubCategory ? `> ${selectedSubCategory}` : ''}`
-                                        : "Topluluk tarafından oluşturulan en yeni içerikler"}
+                                        : "Topluluk Atölyesi'nden en yeni üretimler"}
                                 </p>
                             </div>
 

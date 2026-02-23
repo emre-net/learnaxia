@@ -248,7 +248,7 @@ export function LibraryClient() {
                     <Tabs defaultValue="all" className="w-full">
                         <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
                             <TabsTrigger value="all">Tümü</TabsTrigger>
-                            <TabsTrigger value="created">Oluşturduklarım</TabsTrigger>
+                            <TabsTrigger value="created">Üretimlerim</TabsTrigger>
                             <TabsTrigger value="forked">Kaydedilenler</TabsTrigger>
                         </TabsList>
 
@@ -259,10 +259,10 @@ export function LibraryClient() {
                                 <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
                                 <h3 className="text-lg font-semibold">Modül bulunamadı</h3>
                                 <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                                    Henüz hiç modül oluşturmadın veya kaydetmedin.
+                                    Henüz Atölye'de bir üretim yapmadın veya kütüphanene kayıt eklemedin.
                                 </p>
                                 <Button asChild>
-                                    <Link href="/dashboard/create">Modül Oluştur</Link>
+                                    <Link href="/dashboard/create">Atölye'ye Git</Link>
                                 </Button>
                             </div>
                         ) : (
@@ -307,7 +307,7 @@ export function LibraryClient() {
                     <Tabs defaultValue="all" className="w-full">
                         <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
                             <TabsTrigger value="all">Tümü</TabsTrigger>
-                            <TabsTrigger value="created">Oluşturduklarım</TabsTrigger>
+                            <TabsTrigger value="created">Üretimlerim</TabsTrigger>
                             <TabsTrigger value="forked">Kaydedilenler</TabsTrigger>
                         </TabsList>
 
@@ -321,7 +321,7 @@ export function LibraryClient() {
                                     Modüllerini koleksiyonlar halinde grupla.
                                 </p>
                                 <Button asChild>
-                                    <Link href="/dashboard/collections/new">Koleksiyon Oluştur</Link>
+                                    <Link href="/dashboard/create">Atölye'ye Git</Link>
                                 </Button>
                             </div>
                         ) : (
@@ -395,7 +395,7 @@ export function LibraryClient() {
                                     </CardHeader>
                                     <CardFooter className="p-4 pt-0">
                                         <Button variant="outline" size="sm" className="w-full text-xs" asChild>
-                                            <Link href={`/dashboard/create/solve-photo?id=${solution.id}`}>Çözümü Gör</Link>
+                                            <Link href={`/dashboard/create/solve-photo?id=${solution.id}`}>İncele</Link>
                                         </Button>
                                     </CardFooter>
                                 </Card>

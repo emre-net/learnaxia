@@ -104,7 +104,7 @@ export function ProfileClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Oluşturulan Modüller</CardTitle>
+                        <CardTitle className="text-sm font-medium">Atölye Üretimleri</CardTitle>
                         <BookOpen className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -136,7 +136,7 @@ export function ProfileClient() {
             {/* Content Tabs */}
             <Tabs defaultValue="modules" className="w-full">
                 <TabsList className="mb-4">
-                    <TabsTrigger value="modules">Modüllerim</TabsTrigger>
+                    <TabsTrigger value="modules">Üretimlerim</TabsTrigger>
                     <TabsTrigger value="collections">Koleksiyonlarım</TabsTrigger>
                 </TabsList>
 
@@ -150,7 +150,7 @@ export function ProfileClient() {
                             Henüz modül oluşturmadınız.
                             <br />
                             <Button variant="link" asChild className="mt-2">
-                                <Link href="/dashboard/create">Hemen Oluştur</Link>
+                                <Link href="/dashboard/create">Atölye'ye Git</Link>
                             </Button>
                         </div>
                     ) : (

@@ -94,8 +94,8 @@ const en = {
         }
     },
     creation: {
-        title: "Create Interactive Lesson",
-        description: "Turn any topic or document into an interactive lesson.",
+        title: "Atölye: İnteraktif Üretim",
+        description: "Her konuyu veya belgeyi etkileşimli bir derse dönüştürün.",
         wizardTitle: "Curriculum Wizard",
         wizardDescription: "Enter the topic, AI will generate the best learning path for you.",
         topicLabel: "Topic or Title",
@@ -391,8 +391,8 @@ const tr = {
         }
     },
     creation: {
-        title: "İnteraktif Ders Oluştur",
-        description: "Herhangi bir konuyu veya belgeyi etkileşimli bir derse dönüştür.",
+        title: "Atölye: İnteraktif Üretim",
+        description: "Herhangi bir konuyu veya belgeyi etkileşimli bir derse dönüştürün.",
         wizardTitle: "Müfredat Sihirbazı",
         wizardDescription: "Konuyu gir, AI senin için en iyi öğrenme yolunu çıkarsın.",
         topicLabel: "Konu veya Başlık",
@@ -408,9 +408,9 @@ const tr = {
         sectionCost: "Onaylanan her bölüm: {count} Token.",
         generating: "Müfredat Hazırlanıyor...",
         createPlan: "Planı Oluştur ({count} Token)",
-        manualTitle: "Manuel Modül Oluşturma",
+        manualTitle: "Atölye: Manuel Modül",
         editTitle: "Modülü Düzenle",
-        newTitle: "Yeni Modül Oluştur",
+        newTitle: "Yeni Modül Üret",
         next: "İleri",
         step1Label: "Temel Bilgiler",
         step2Label: "İçerik",
@@ -484,7 +484,7 @@ const tr = {
         },
         incompleteContent: "Eksik İçerik",
         collection: {
-            newTitle: "Yeni Koleksiyon Oluştur",
+            newTitle: "Koleksiyon Atölyesi",
             description: "Modüllerinizi sıralı bir öğrenme yolunda gruplayın.",
             publicDescription: "Diğer kullanıcılar koleksiyonunuzu görebilir ve özelleştirebilir.",
             privateDescription: "Koleksiyonu sadece siz ve linki paylaştığınız kişiler görebilir."
@@ -574,7 +574,7 @@ const tr = {
                 button: "Global Cache Purge"
             },
             confirm: "Bu işlemi gerçekleştirmek istediğinize emin misiniz?",
-            successRepair: "{count} kütüphane kaydı başarıyla onarıldı.",
+            successRepair: "{count} kütühane kaydı başarıyla onarıldı.",
             successReset: "Sistem içerikleri başarıyla sıfırlandı.",
             error: "Bir hata oluştu."
         }

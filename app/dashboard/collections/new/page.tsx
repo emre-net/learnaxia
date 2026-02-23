@@ -381,7 +381,7 @@ export default function NewCollectionPage() {
                                     </p>
                                     <div className="flex gap-3">
                                         <Button asChild variant="default">
-                                            <Link href="/dashboard/create">Modül Oluştur</Link>
+                                            <Link href="/dashboard/create">Atölye'de Üret</Link>
                                         </Button>
                                         <Button asChild variant="outline">
                                             <Link href="/dashboard/discover">Keşfet'i Gez</Link>
