@@ -18,9 +18,13 @@ export const logger = {
         }
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 sec timeout
+
             await fetch('/api/logs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({
                     level,
                     message,
@@ -28,12 +32,14 @@ export const logger = {
                     metadata: {
                         ...options?.metadata,
                         context: options?.context,
+                        timestamp: new Date().toISOString(),
                         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
                     }
                 }),
             });
+            clearTimeout(timeoutId);
         } catch (err) {
-            // Sessizce geç; sonsuz döngüye girmemek için burada console.error kullanmıyoruz
+            // Sessizce geç; ağ hataları veya zaman aşımı durumunda uygulama akışını bozma
         }
     },
 

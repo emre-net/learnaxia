@@ -1,7 +1,7 @@
-import { PrismaClient, LogLevel } from "@prisma/client";
+import { LogLevel } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { AsyncLocalStorage } from "async_hooks";
 
-const prisma = new PrismaClient();
 export const logContext = new AsyncLocalStorage<{ requestId: string; userId?: string }>();
 
 export type LogContext = {

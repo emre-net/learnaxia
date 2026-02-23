@@ -58,12 +58,12 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">Genel Bakış</h2>
                 {isAdmin && (
-                    <Link href="/admin">
-                        <Button variant="outline" className="rounded-2xl border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold gap-2">
+                    <Button asChild variant="outline" className="rounded-2xl border-blue-500/30 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold gap-2">
+                        <Link href="/admin">
                             <ShieldCheck className="w-4 h-4" />
                             Admin Panel <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] ml-1">NEW</Badge>
-                        </Button>
-                    </Link>
+                        </Link>
+                    </Button>
                 )}
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
