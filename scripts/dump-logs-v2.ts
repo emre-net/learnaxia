@@ -1,15 +1,15 @@
 import prisma from "../lib/prisma.js";
+import fs from "fs";
 
 async function main() {
     try {
         const lastLogs = await prisma.systemLog.findMany({
-            where: { level: 'CRITICAL' },
-            take: 3,
+            take: 10,
             orderBy: { createdAt: 'desc' },
         });
 
-        console.log("CRITICAL LOG DETAILS:");
-        console.log(JSON.stringify(lastLogs, null, 2));
+        fs.writeFileSync('scripts/error_dump_v2.json', JSON.stringify(lastLogs, null, 2));
+        console.log("Successfully wrote logs to scripts/error_dump_v2.json");
     } catch (error) {
         console.error("Error fetching logs:", error);
     } finally {

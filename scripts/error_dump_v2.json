@@ -1,5 +1,51 @@
 [
   {
+    "id": "17b94934-22e7-45ab-b7d4-a1935a7c5c3e",
+    "requestId": null,
+    "level": "CRITICAL",
+    "environment": "production",
+    "service": "client",
+    "message": "UI Crash - React Error Boundary caught an error",
+    "stack": null,
+    "source": "CLIENT",
+    "url": "https://learnaxia.com/dashboard",
+    "ipAddress": "95.2.9.136, 162.159.113.75, 157.52.109.21",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "metadata": {
+      "error": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "context": "ErrorBoundary",
+      "requestId": "ab3540a9-1929-4bbe-9615-00f34bfa5b5a",
+      "timestamp": "2026-02-23T10:27:43.118Z",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "componentStack": "\n    at div (<anonymous>)\n    at div (<anonymous>)\n    at div (<anonymous>)\n    at main (<anonymous>)\n    at div (<anonymous>)\n    at E (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:5226)\n    at f (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4364)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4848)\n    at u (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:913)\n    at l (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:1873)\n    at j (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:6018)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at O (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:3895)\n    at R (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:4906)\n    at s (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:8366)\n    at w (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:6321)\n    at o (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:34470)\n    at c (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:8414)\n    at u (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:8295)\n    at m (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:10877)\n    at n (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:1:334)\n    at g (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:33528)\n    at C (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:1300)\n    at body (<anonymous>)\n    at html (<anonymous>)\n    at __next_root_layout_boundary__ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:6089)\n    at f (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4364)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4848)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:2668)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at s (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:213531)\n    at L (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:215290)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:2668)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at s (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:213531)\n    at R (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:218828)\n    at M (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:222559)\n    at D (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:223033)"
+    },
+    "userId": "virtual-admin",
+    "createdAt": "2026-02-23T10:27:44.069Z"
+  },
+  {
+    "id": "dfc3b697-c464-43fa-a453-eb69bce51dd8",
+    "requestId": null,
+    "level": "CRITICAL",
+    "environment": "production",
+    "service": "client",
+    "message": "UI Crash - React Error Boundary caught an error",
+    "stack": null,
+    "source": "CLIENT",
+    "url": "https://learnaxia.com/dashboard",
+    "ipAddress": "95.2.9.136, 172.71.183.204, 157.52.109.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "metadata": {
+      "error": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "context": "ErrorBoundary",
+      "requestId": "ece3e0ce-c36a-48fd-84aa-4573f3c6a1f8",
+      "timestamp": "2026-02-23T10:25:42.030Z",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "componentStack": "\n    at div (<anonymous>)\n    at div (<anonymous>)\n    at div (<anonymous>)\n    at main (<anonymous>)\n    at div (<anonymous>)\n    at E (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:5226)\n    at f (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4364)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4848)\n    at u (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:913)\n    at l (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:1873)\n    at j (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:6018)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at O (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:3895)\n    at R (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:4906)\n    at s (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:8366)\n    at w (https://learnaxia.com/_next/static/chunks/73e3194f06db260e.js:1:6321)\n    at o (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:34470)\n    at c (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:8414)\n    at u (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:8295)\n    at m (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:10877)\n    at n (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:1:334)\n    at g (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:33528)\n    at C (https://learnaxia.com/_next/static/chunks/808df0bc0491b250.js:2:1300)\n    at body (<anonymous>)\n    at html (<anonymous>)\n    at __next_root_layout_boundary__ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:6089)\n    at f (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4364)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:4848)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:2668)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at s (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:213531)\n    at L (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:215290)\n    at p (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:2668)\n    at _ (https://learnaxia.com/_next/static/chunks/7a3281f1ab67fcef.js:1:3357)\n    at s (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:213531)\n    at R (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:218828)\n    at M (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:222559)\n    at D (https://learnaxia.com/_next/static/chunks/4af27f77bd5de33b.js:1:223033)"
+    },
+    "userId": "virtual-admin",
+    "createdAt": "2026-02-23T10:25:43.173Z"
+  },
+  {
     "id": "1cb614d6-27fc-47ab-82ec-0800a36bc757",
     "requestId": null,
     "level": "CRITICAL",

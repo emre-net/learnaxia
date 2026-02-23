@@ -7,6 +7,18 @@ export class WalletService {
      * Get or create wallet for user.
      */
     static async getBalance(userId: string) {
+        // Virtual Admin handling
+        if (userId === "virtual-admin") {
+            return {
+                id: "virtual-admin-wallet",
+                userId: "virtual-admin",
+                balance: 999999,
+                currency: "LEARN",
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+        }
+
         let wallet = await prisma.tokenWallet.findUnique({
             where: { userId }
         });
