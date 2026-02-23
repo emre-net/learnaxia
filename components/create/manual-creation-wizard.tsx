@@ -193,7 +193,7 @@ export function ManualCreationWizard() {
                 transition={{ duration: 0.5 }}
                 className="text-center mb-12"
             >
-                <h1 className="text-4xl font-extrabold mb-3 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
                     {isEditMode ? t('creation.editTitle') : t('creation.newTitle')}
                 </h1>
                 <p className="text-muted-foreground text-lg">
@@ -202,7 +202,7 @@ export function ManualCreationWizard() {
             </motion.div>
 
             {/* Premium Step Indicator */}
-            <div className="relative mb-12 px-8">
+            <div className="relative mb-12 px-4 sm:px-8">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded-full overflow-hidden">
                     <motion.div
                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
@@ -234,7 +234,7 @@ export function ManualCreationWizard() {
 
             <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Card className="p-8 min-h-[550px] shadow-2xl border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl relative overflow-hidden group">
+                    <Card className="p-4 sm:p-6 md:p-8 min-h-[500px] md:min-h-[550px] shadow-2xl border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl relative overflow-hidden group">
                         {/* Decorative background element */}
                         <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors duration-700" />
                         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors duration-700" />

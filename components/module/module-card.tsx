@@ -134,7 +134,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
             className="flex flex-col hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 group h-full border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 overflow-hidden rounded-[2.5rem] cursor-pointer"
             onClick={() => setIsOptionsOpen(true)}
         >
-            <div className="p-7 flex-grow space-y-5">
+            <div className="p-5 md:p-7 flex-grow space-y-5">
                 <div className="flex justify-between items-start gap-4">
                     <TypeIcon type={module.type} size="md" className="group-hover:scale-110 transition-transform duration-500" />
                     <div className="flex items-center gap-2 pt-1">
@@ -197,7 +197,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 </div>
             </div>
 
-            <div className="p-6 pt-2 mt-auto flex items-center justify-between gap-4 border-t border-zinc-50 dark:border-zinc-800/30 bg-zinc-50/30 dark:bg-zinc-900/20">
+            <div className="p-5 md:p-6 pt-2 mt-auto flex flex-col xs:flex-row items-center justify-between gap-4 border-t border-zinc-50 dark:border-zinc-800/30 bg-zinc-50/30 dark:bg-zinc-900/20">
                 <CardOwner
                     handle={module.owner?.handle || null}
                     image={module.owner?.image}
@@ -205,7 +205,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                     isTeam={module.owner?.handle === 'learnaxia'}
                 />
 
-                <Button className="h-12 rounded-[1.25rem] px-8 font-black text-base shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 group/btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0" onClick={(e) => { e.stopPropagation(); setIsOptionsOpen(true); }}>
+                <Button className="h-10 md:h-12 w-full xs:w-auto rounded-[1.25rem] px-6 md:px-8 font-black text-sm md:text-base shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 group/btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0" onClick={(e) => { e.stopPropagation(); setIsOptionsOpen(true); }}>
                     Çalış <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:scale-110 transition-transform" />
                 </Button>
             </div>

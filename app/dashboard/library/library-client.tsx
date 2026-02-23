@@ -155,92 +155,96 @@ export function LibraryClient() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <TabsList>
-                        <TabsTrigger value="modules">{dictionary.library.tabs.modules}</TabsTrigger>
-                        <TabsTrigger value="collections">{dictionary.library.tabs.collections}</TabsTrigger>
-                        <TabsTrigger value="ai-solutions">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
-                        <TabsTrigger value="notes">{dictionary.library.tabs.notes}</TabsTrigger>
+                <div className="flex flex-col gap-4">
+                    <TabsList className="w-full flex-wrap h-auto p-1 justify-start sm:justify-center lg:justify-start">
+                        <TabsTrigger value="modules" className="flex-1 sm:flex-none">{dictionary.library.tabs.modules}</TabsTrigger>
+                        <TabsTrigger value="collections" className="flex-1 sm:flex-none">{dictionary.library.tabs.collections}</TabsTrigger>
+                        <TabsTrigger value="ai-solutions" className="flex-1 sm:flex-none">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
+                        <TabsTrigger value="notes" className="flex-1 sm:flex-none">{dictionary.library.tabs.notes}</TabsTrigger>
                     </TabsList>
-
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
+                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto mt-2 lg:mt-0">
+                        <div className="relative flex-1 min-w-[200px] sm:flex-none sm:w-[260px]">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Ara..."
-                                className="w-full sm:w-[260px] pl-9"
+                                className="w-full pl-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
 
-                        {activeTab === "modules" && (
-                            <Select value={selectedType} onValueChange={setSelectedType}>
-                                <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
-                                    <Filter className="mr-2 h-4 w-4 opacity-70" />
-                                    <SelectValue placeholder={studyDict.moduleTypes?.title || "Tip"} />
+                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                            {activeTab === "modules" && (
+                                <Select value={selectedType} onValueChange={setSelectedType}>
+                                    <SelectTrigger className="flex-1 sm:w-[130px] h-9">
+                                        <Filter className="mr-2 h-4 w-4 opacity-70" />
+                                        <SelectValue placeholder={studyDict.moduleTypes?.title || "Tip"} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ALL">{studyDict.moduleTypes?.all || "Tümü"}</SelectItem>
+                                        <SelectItem value="FLASHCARD">{studyDict.moduleTypes?.flashcard || "Kartlar"}</SelectItem>
+                                        <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
+                                        <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
+                                        <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
+
+                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                <SelectTrigger className="flex-1 sm:w-[130px] h-9">
+                                    <SelectValue placeholder="Kategori" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="ALL">{studyDict.moduleTypes?.all || "Tümü"}</SelectItem>
-                                    <SelectItem value="FLASHCARD">{studyDict.moduleTypes?.flashcard || "Kartlar"}</SelectItem>
-                                    <SelectItem value="MC">{studyDict.moduleTypes?.mc || "Quiz"}</SelectItem>
-                                    <SelectItem value="TRUE_FALSE">{studyDict.moduleTypes?.true_false || "D/Y"}</SelectItem>
-                                    <SelectItem value="GAP">{studyDict.moduleTypes?.gap || "Boşluk"}</SelectItem>
+                                    <SelectItem value="ALL">Tüm Kategoriler</SelectItem>
+                                    {Object.keys(CATEGORIES).map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
-                        )}
 
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                            <SelectTrigger className="w-[110px] sm:w-[150px] h-9">
-                                <SelectValue placeholder="Kategori" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Tüm Kategoriler</SelectItem>
-                                {Object.keys(CATEGORIES).map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                            <div className="flex items-center border rounded-md shrink-0">
+                                <Button
+                                    variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                                    size="icon"
+                                    onClick={() => setViewMode('grid')}
+                                    className="rounded-none rounded-l-md h-9 w-9"
+                                >
+                                    <LayoutGrid className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                                    size="icon"
+                                    onClick={() => setViewMode('list')}
+                                    className="rounded-none rounded-r-md h-9 w-9"
+                                >
+                                    <ListIcon className="h-4 w-4" />
+                                </Button>
+                            </div>
 
-                        <div className="flex items-center border rounded-md">
-                            <Button
-                                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                onClick={() => setViewMode('grid')}
-                                className="rounded-none rounded-l-md h-9 w-9"
-                            >
-                                <LayoutGrid className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                onClick={() => setViewMode('list')}
-                                className="rounded-none rounded-r-md h-9 w-9"
-                            >
-                                <ListIcon className="h-4 w-4" />
-                            </Button>
+                            <div className="w-full sm:w-auto">
+                                <TabsContent value="modules" className="m-0 border-0 p-0">
+                                    <Button asChild className="w-full sm:w-auto">
+                                        <Link href="/dashboard/create">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Yeni Modül
+                                        </Link>
+                                    </Button>
+                                </TabsContent>
+                                <TabsContent value="collections" className="m-0 border-0 p-0">
+                                    <Button asChild className="w-full sm:w-auto">
+                                        <Link href="/dashboard/collections/new">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Yeni Koleksiyon
+                                        </Link>
+                                    </Button>
+                                </TabsContent>
+                            </div>
                         </div>
-                        <TabsContent value="modules" className="m-0 border-0 p-0">
-                            <Button asChild>
-                                <Link href="/dashboard/create">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Yeni Modül
-                                </Link>
-                            </Button>
-                        </TabsContent>
-                        <TabsContent value="collections" className="m-0 border-0 p-0">
-                            <Button asChild>
-                                <Link href="/dashboard/collections/new">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Yeni Koleksiyon
-                                </Link>
-                            </Button>
-                        </TabsContent>
                     </div>
                 </div>
 
-                <TabsContent value="modules" className="space-y-4">
+                <TabsContent value="modules" className="space-y-4 !mt-8">
                     <Tabs defaultValue="all" className="w-full">
                         <TabsList className="grid w-full grid-cols-3 max-w-[400px] mb-4">
                             <TabsTrigger value="all">Tümü</TabsTrigger>

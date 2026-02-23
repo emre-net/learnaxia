@@ -180,7 +180,7 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                     </Badge>
                                 )}
                             </div>
-                            <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
+                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
                                 {module.title}
                             </h1>
                             <p className="text-zinc-600 dark:text-zinc-400 text-lg max-w-2xl leading-relaxed">
@@ -216,11 +216,11 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-6 lg:pt-0">
+                    <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 pt-6 lg:pt-0">
                         {canSave && module.isForkable && (
-                            <Button variant="secondary" onClick={handleFork} disabled={isForking} className="h-12 px-6 rounded-2xl font-bold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all active:scale-95 shadow-sm">
+                            <Button variant="secondary" onClick={handleFork} disabled={isForking} className="h-11 md:h-12 px-5 md:px-6 rounded-2xl font-bold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all active:scale-95 shadow-sm">
                                 {isForking ? <RotateCw className="mr-2 h-4 w-4 animate-spin" /> : <Bookmark className="mr-2 h-4 w-4" />}
-                                Kitaplığına Ekle
+                                Kitaplığa Ekle
                             </Button>
                         )}
 
@@ -228,12 +228,12 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                             <Button variant="outline" onClick={() => {
                                 setEditingItem(null);
                                 setIsSheetOpen(true);
-                            }} className="h-12 px-6 rounded-2xl font-bold border-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all shadow-sm">
+                            }} className="h-11 md:h-12 px-5 md:px-6 rounded-2xl font-bold border-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all shadow-sm">
                                 <Plus className="mr-2 h-4 w-4" /> Öğe Ekle
                             </Button>
                         )}
 
-                        <Button size="lg" className="h-12 px-8 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/20 transition-all active:scale-95" asChild>
+                        <Button size="lg" className="h-11 md:h-12 px-7 md:px-8 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex-1 sm:flex-none justify-center" asChild>
                             <Link href={`/study/${module.id}`}>
                                 <Play className="mr-2 h-5 w-5 fill-current" /> Çalışmaya Başla
                             </Link>
@@ -290,16 +290,16 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 pl-4">
+                                <div className="opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 pl-4">
                                     {(isOwner || module.isForkable) && (
                                         <>
-                                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20" onClick={() => {
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20 text-zinc-400" onClick={() => {
                                                 setEditingItem(item);
                                                 setIsSheetOpen(true);
                                             }}>
                                                 <Edit className="h-5 w-5" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20" onClick={() => handleDeleteItem(item.id)}>
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 text-zinc-400" onClick={() => handleDeleteItem(item.id)}>
                                                 <Trash2 className="h-5 w-5" />
                                             </Button>
                                         </>
