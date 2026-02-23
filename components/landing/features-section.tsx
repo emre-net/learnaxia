@@ -37,11 +37,12 @@ const features = [
 export function FeaturesSection() {
     return (
         <section id="features" className="py-20 bg-muted/30">
-            <div className="container px-4 md:px-6">
+            <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold tracking-tight md:text-5xl mb-4">Öğrenmenin En Akıllı Yolu</h2>
-                    <p className="text-muted-foreground md:text-lg max-w-[800px] mx-auto">
-                        Learnaxia, geleneksel öğrenme yöntemlerini modern teknoloji ile birleştirir.
+                    <h2 className="text-3xl font-black tracking-tighter md:text-6xl mb-4">Öğrenmenin En Verimli Hali</h2>
+                    <p className="text-muted-foreground md:text-xl max-w-[900px] mx-auto leading-relaxed">
+                        Learnaxia, karmaşık konuları parçalara böler, yapay zeka ile analiz eder ve
+                        bilimsel yöntemlerle kalıcı hafızanıza aktarmanıza yardımcı olur.
                     </p>
                 </div>
 
