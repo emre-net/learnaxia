@@ -65,21 +65,24 @@ export function Sidebar({ className }: SidebarProps) {
                         </h2>
                     </div>
 
-                    {/* Oluştur — Featured CTA */}
+                    {/* Atölye — Featured CTA */}
                     <div className="mb-6">
                         <Link href="/dashboard/create">
                             <div className={cn(
-                                "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300",
+                                "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300 overflow-hidden",
                                 isCreateActive
                                     ? "bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/30"
                                     : "bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/25"
                             )}>
-                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm">
+                                {/* Shimmer Effect */}
+                                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
+
+                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm z-10 transition-transform group-hover:scale-110">
                                     <PlusCircle className="h-5 w-5 text-white" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-semibold text-white">Oluştur</span>
-                                    <span className="text-[10px] text-white/60">Yeni modül veya koleksiyon</span>
+                                <div className="flex flex-col z-10">
+                                    <span className="text-sm font-semibold text-white tracking-wide">Atölye</span>
+                                    <span className="text-[10px] text-white/70 font-medium">Üret, Çöz ve Not Al</span>
                                 </div>
                             </div>
                         </Link>

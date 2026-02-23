@@ -13,24 +13,15 @@ export default async function SettingsPage() {
         redirect("/login");
     }
 
-    // Fetch fresh user data including handle
-    // For virtual-admin, we return mock data since it's not in DB
-    const user = session.user.id === "virtual-admin"
-        ? {
-            email: session.user.email,
-            image: session.user.image,
-            handle: "Admin",
-            language: "tr"
-        }
-        : await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: {
-                email: true,
-                image: true,
-                handle: true,
-                language: true,
-            },
-        });
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+            email: true,
+            image: true,
+            handle: true,
+            language: true,
+        },
+    });
 
     if (!user) return null;
 

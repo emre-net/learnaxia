@@ -40,12 +40,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { email, password } = parsedCredentials.data;
 
                     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+                        // Ensure the admin user exists in the database to allow FK relations
+                        let adminUser = await prisma.user.findUnique({ where: { email } });
+
+                        if (!adminUser) {
+                            adminUser = await prisma.user.create({
+                                data: {
+                                    email,
+                                    name: "Admin",
+                                    role: "ADMIN",
+                                    handle: "admin",
+                                    emailVerified: new Date(),
+                                }
+                            });
+                        } else if (adminUser.role !== 'ADMIN') {
+                            // Ensure the existing user with this email has ADMIN role
+                            adminUser = await prisma.user.update({
+                                where: { id: adminUser.id },
+                                data: { role: 'ADMIN' }
+                            });
+                        }
+
                         return {
-                            id: "virtual-admin",
-                            email: email,
-                            name: "Virtual Admin",
+                            id: adminUser.id,
+                            email: adminUser.email,
+                            name: adminUser.name,
                             role: "ADMIN"
-                        } as any;
+                        };
                     }
 
                     const user = await prisma.user.findUnique({ where: { email } });
