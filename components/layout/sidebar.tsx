@@ -13,15 +13,23 @@ import {
     BrainCircuit,
     Compass,
     User,
-    LayoutDashboard
+    LayoutDashboard,
+    Sparkles,
+    PenTool,
+    FileText,
+    Camera,
+    FolderPlus,
+    Zap
 } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
+    const [isHoveringAtölye, setIsHoveringAtölye] = useState(false)
 
     const routes = [
         {
@@ -52,6 +60,15 @@ export function Sidebar({ className }: SidebarProps) {
 
     const isCreateActive = pathname.startsWith("/dashboard/create")
 
+    const atölyeShortcuts = [
+        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: "Manuel", href: "/dashboard/create/manual" },
+        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: "AI Üret", href: "/dashboard/create/ai" },
+        { icon: FileText, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: "Notlar", href: "/dashboard/create/ai-notes" },
+        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: "Soru Çöz", href: "/dashboard/create/solve-photo" },
+        { icon: FolderPlus, color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/50", label: "Koleksiyon", href: "/dashboard/collections/new" },
+        { icon: Zap, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: "Rota", href: "/dashboard/learning/create" },
+    ]
+
     return (
         <div className={cn("pb-12 h-full bg-gradient-to-b from-slate-900 to-black text-white border-r border-slate-800", className)}>
             <div className="space-y-4 py-4 flex flex-col h-full">
@@ -65,11 +82,15 @@ export function Sidebar({ className }: SidebarProps) {
                         </h2>
                     </div>
 
-                    {/* Atölye — Featured CTA */}
-                    <div className="mb-6">
+                    {/* Atölye — Featured CTA with Branching Shortcuts */}
+                    <div
+                        className="mb-6 relative"
+                        onMouseEnter={() => setIsHoveringAtölye(true)}
+                        onMouseLeave={() => setIsHoveringAtölye(false)}
+                    >
                         <Link href="/dashboard/create">
                             <div className={cn(
-                                "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300 overflow-hidden",
+                                "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300 overflow-hidden z-20",
                                 isCreateActive
                                     ? "bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/30"
                                     : "bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/25"
@@ -86,6 +107,49 @@ export function Sidebar({ className }: SidebarProps) {
                                 </div>
                             </div>
                         </Link>
+
+                        {/* Branching Shortcuts — Opening to the right */}
+                        <AnimatePresence>
+                            {isHoveringAtölye && (
+                                <motion.div
+                                    className="absolute top-0 left-full ml-2 flex items-center gap-2 z-50 pointer-events-auto"
+                                    initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                >
+                                    {/* Data Path Line */}
+                                    <div className="w-4 h-[2px] bg-gradient-to-r from-purple-500/50 to-transparent" />
+
+                                    <div className="flex items-center gap-2 p-2 bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-black/50">
+                                        {atölyeShortcuts.map((shortcut, idx) => (
+                                            <motion.div
+                                                key={shortcut.label}
+                                                initial={{ opacity: 0, scale: 0.5, x: -10 }}
+                                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                                transition={{ delay: idx * 0.05 }}
+                                            >
+                                                <Link href={shortcut.href}>
+                                                    <div className={cn(
+                                                        "group/shortcut relative p-2 rounded-xl border transition-all duration-300 cursor-pointer",
+                                                        shortcut.bg,
+                                                        shortcut.border,
+                                                        "hover:scale-110 hover:-translate-y-1 active:scale-95"
+                                                    )}>
+                                                        <shortcut.icon className={cn("h-5 w-5", shortcut.color)} />
+
+                                                        {/* Hover Label */}
+                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                            {shortcut.label}
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     <div className="space-y-1">
