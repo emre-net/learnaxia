@@ -1,202 +1,213 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Sparkles, BookOpen, FolderPlus, BrainCircuit, Camera, FileText, Zap, Layout, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+    Plus,
+    Sparkles,
+    ArrowRight,
+    BrainCircuit,
+    FileText,
+    FolderPlus,
+    Camera,
+    PenTool,
+    Cpu,
+    Zap
+} from "lucide-react"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 export default function AtölyePage() {
+    const pillars = [
+        {
+            id: "modules",
+            title: "Modüller",
+            description: "Öğrenme kartları ve testler oluşturun.",
+            icon: BrainCircuit,
+            color: "blue",
+            actions: [
+                {
+                    label: "Manuel Oluştur",
+                    description: "Kendi içeriğinizi elle girin.",
+                    icon: PenTool,
+                    href: "/dashboard/create/manual",
+                    type: "manual"
+                },
+                {
+                    label: "Zeka ile Üret",
+                    description: "Metin veya dosyadan AI ile üretin.",
+                    icon: Sparkles,
+                    href: "/dashboard/create/ai",
+                    type: "ai"
+                }
+            ]
+        },
+        {
+            id: "collections",
+            title: "Koleksiyonlar",
+            description: "Modülleri tematik setlerde birleştirin.",
+            icon: FolderPlus,
+            color: "indigo",
+            actions: [
+                {
+                    label: "Yeni Koleksiyon",
+                    description: "Modüllerinizi gruplandırın.",
+                    icon: Plus,
+                    href: "/dashboard/collections/new",
+                    type: "manual"
+                }
+            ]
+        },
+        {
+            id: "notes",
+            title: "Notlar",
+            description: "Ders notları ve çalışma dokümanları.",
+            icon: FileText,
+            color: "amber",
+            actions: [
+                {
+                    label: "Not Yaz",
+                    description: "Zengin metin editörü ile not alın.",
+                    icon: PenTool,
+                    href: "/dashboard/create/manual-note",
+                    type: "manual"
+                },
+                {
+                    label: "PDF'den Not Çıkar",
+                    description: "AI PDF içeriğini notlara dönüştürsün.",
+                    icon: Cpu,
+                    href: "/dashboard/create/ai-notes",
+                    type: "ai"
+                }
+            ]
+        }
+    ]
+
     return (
-        <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-16 animate-in fade-in duration-700 pb-20">
-            {/* Header Area */}
-            <div className="text-center space-y-4">
-                <Badge variant="outline" className="px-4 py-1 text-xs font-black uppercase tracking-[0.2em] border-primary/20 bg-primary/5 text-primary mb-2">
-                    Yaratıcılık Merkezi
-                </Badge>
-                <h1 className="text-5xl md:text-6xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 dark:from-white dark:via-zinc-300 dark:to-white">
-                    Atölye
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
-                    Bilgiyi modüllere dönüştür, zekayla çöz ve akıllı notlar al. Öğrenme yolculuğunu burada inşa et.
-                </p>
+        <div className="flex-1 space-y-8 p-1 sm:p-4 md:p-8 pt-6 min-h-screen bg-transparent">
+            {/* Header Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full -mr-20 -mt-20" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full -ml-20 -mb-20" />
+
+                <div className="relative z-10 flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 shadow-lg shadow-blue-500/20">
+                            <Zap className="h-6 w-6 text-white" />
+                        </div>
+                        <h1 className="text-4xl font-extrabold tracking-tight text-white mb-1">
+                            Atölye
+                        </h1>
+                    </div>
+                    <p className="text-slate-400 text-lg max-w-2xl font-medium ml-12">
+                        Öğrenme sistemini inşa et. Modüller üret, koleksiyonlar kur ve AI destekli notlar al.
+                    </p>
+                </div>
             </div>
 
-            {/* === ÜRETİM KATMANI === */}
-            <section className="space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-1 px-0 bg-blue-600 rounded-full" />
-                    <div>
-                        <h2 className="text-3xl font-black tracking-tight flex items-center gap-3">
-                            <Layout className="h-7 w-7 text-blue-600" /> Üretim
-                        </h2>
-                        <p className="text-muted-foreground font-medium">Sıfırdan veya koleksiyon halinde içerikler tasarla.</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                    {/* Manual Creation Card */}
-                    <Link href="/dashboard/create/manual" className="group">
-                        <Card className="h-full border-2 border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/5 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8">
-                                <div className="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <PenTool className="h-7 w-7" />
-                                </div>
-                                <CardTitle className="text-2xl font-black mb-2">Manuel Modül</CardTitle>
-                                <CardDescription className="text-base">
-                                    Flashcard veya testleri tek tek, tam kontrolle oluştur.
+            {/* Pillars Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {pillars.map((pillar) => (
+                    <div key={pillar.id} className="flex flex-col gap-4">
+                        <div className="flex items-center gap-3 px-2">
+                            <pillar.icon className={cn(
+                                "h-5 w-5",
+                                pillar.color === "blue" && "text-blue-400",
+                                pillar.color === "indigo" && "text-indigo-400",
+                                pillar.color === "amber" && "text-amber-400"
+                            )} />
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
+                                {pillar.title}
+                            </h2>
+                        </div>
+
+                        <Card className="h-full bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-slate-700/50 transition-colors shadow-xl">
+                            <CardHeader>
+                                <CardTitle className="text-xl text-white">{pillar.title} Atölyesi</CardTitle>
+                                <CardDescription className="text-slate-400">
+                                    {pillar.description}
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="px-8 pb-8 flex-1">
-                                <ul className="space-y-3 text-sm font-medium text-muted-foreground">
-                                    <li className="flex items-center gap-3">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" /> Her öğe üzerinde tam hakimiyet
-                                    </li>
-                                    <li className="flex items-center gap-3">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" /> Çoklu tür (Flashcard, Test, Boşluk Doldurma)
-                                    </li>
-                                </ul>
+                            <CardContent className="space-y-4">
+                                {pillar.actions.map((action) => (
+                                    <Link key={action.label} href={action.href}>
+                                        <div className={cn(
+                                            "group relative flex items-center gap-4 p-4 rounded-xl border border-transparent transition-all duration-300 cursor-pointer overflow-hidden mb-3",
+                                            action.type === "ai"
+                                                ? "bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500/30"
+                                                : "bg-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700/50"
+                                        )}>
+                                            <div className={cn(
+                                                "p-2.5 rounded-lg shrink-0 transition-transform group-hover:scale-110",
+                                                action.type === "ai" ? "bg-purple-500/20 text-purple-400" : "bg-slate-700/50 text-slate-300"
+                                            )}>
+                                                <action.icon className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
+                                                        {action.label}
+                                                    </h3>
+                                                    <ArrowRight className="h-4 w-4 text-slate-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                                </div>
+                                                <p className="text-[11px] text-slate-500 group-hover:text-slate-400 transition-colors">
+                                                    {action.description}
+                                                </p>
+                                            </div>
+
+                                            {action.type === "ai" && (
+                                                <div className="absolute top-0 right-0 py-1 px-2 bg-purple-500/20 rounded-bl-lg border-l border-b border-purple-500/30 flex items-center gap-1">
+                                                    <Sparkles className="h-2.5 w-2.5 text-purple-400" />
+                                                    <span className="text-[8px] font-bold text-purple-400 uppercase tracking-tighter">AI</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Link>
+                                ))}
                             </CardContent>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button className="w-full h-12 rounded-xl font-bold bg-slate-900 hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200">
-                                    Hemen Başla <ArrowRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </CardFooter>
                         </Card>
-                    </Link>
-
-                    {/* Collection Creation Card */}
-                    <Link href="/dashboard/collections/new" className="group">
-                        <Card className="h-full border-2 border-slate-100 dark:border-zinc-800/50 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/5 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8">
-                                <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <FolderPlus className="h-7 w-7" />
-                                </div>
-                                <CardTitle className="text-2xl font-black mb-2">Kitap Koleksiyonu</CardTitle>
-                                <CardDescription className="text-base">
-                                    Modülleri birleştirerek sıralı bir öğrenme yolu kur.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="px-8 pb-8 flex-1">
-                                <ul className="space-y-3 text-sm font-medium text-muted-foreground">
-                                    <li className="flex items-center gap-3">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" /> Modülleri klasörle ve grupla
-                                    </li>
-                                    <li className="flex items-center gap-3">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" /> Sıralı öğrenme müfredatı
-                                    </li>
-                                </ul>
-                            </CardContent>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button variant="outline" className="w-full h-12 rounded-xl font-bold border-2">
-                                    Koleksiyon İnşa Et <FolderPlus className="ml-2 h-4 w-4" />
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </Link>
-                </div>
-            </section>
-
-            {/* === ZEKA KATMANI === */}
-            <section className="space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-1 px-0 bg-purple-600 rounded-full" />
-                    <div>
-                        <h2 className="text-3xl font-black tracking-tight flex items-center gap-3">
-                            <Sparkles className="h-7 w-7 text-purple-600" /> Zeka
-                        </h2>
-                        <p className="text-muted-foreground font-medium">AI teknolojisiyle içerik üret ve sorunlarını çöz.</p>
                     </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* AI Generation Card */}
-                    <Link href="/dashboard/create/ai" className="group">
-                        <Card className="h-full border-2 border-purple-100 dark:border-purple-900/20 hover:border-purple-500 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8">
-                                <div className="h-14 w-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <Sparkles className="h-7 w-7" />
-                                </div>
-                                <CardTitle className="text-2xl font-black mb-2">AI Üretimi</CardTitle>
-                                <CardDescription>Metin veya PDF'den anında modül oluştur.</CardDescription>
-                            </CardHeader>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button className="w-full h-12 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 text-white">
-                                    Üretmeye Başla <Zap className="ml-2 h-4 w-4 fill-white" />
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </Link>
+                ))}
+            </div>
 
-                    {/* Solve Photo Card */}
-                    <Link href="/dashboard/create/solve-photo" className="group">
-                        <Card className="h-full border-2 border-emerald-100 dark:border-emerald-900/20 hover:border-emerald-500 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8">
-                                <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <Camera className="h-7 w-7" />
-                                </div>
-                                <CardTitle className="text-2xl font-black mb-2">Soru Çözücü</CardTitle>
-                                <CardDescription>Fotoğrafını çek, AI adım adım açıklasın.</CardDescription>
-                            </CardHeader>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
-                                    Fotoğraf Yükle <Camera className="ml-2 h-4 w-4" />
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </Link>
-
-                    {/* AI Note Extraction Card (NEW) */}
-                    <Link href="/dashboard/create/ai-notes" className="group">
-                        <Card className="h-full border-2 border-amber-100 dark:border-amber-900/20 hover:border-amber-500 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8">
-                                <div className="h-14 w-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <FileText className="h-7 w-7" />
-                                </div>
-                                <CardTitle className="text-2xl font-black mb-2">Not Atölyesi</CardTitle>
-                                <CardDescription>PDF'den akıllı notlar çıkar ve özetle.</CardDescription>
-                            </CardHeader>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button className="w-full h-12 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-white">
-                                    Not Çıkar <FileText className="ml-2 h-4 w-4" />
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </Link>
+            {/* Extra Tools Section */}
+            <div className="mt-8 border-t border-slate-800 pt-8">
+                <div className="flex items-center gap-3 mb-6">
+                    <Camera className="h-5 w-5 text-emerald-400" />
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
+                        Hızlı Araçlar
+                    </h2>
                 </div>
-            </section>
-
-            {/* === PLANLAMA KATMANI === */}
-            <section className="space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-1 px-0 bg-zinc-600 rounded-full" />
-                    <div>
-                        <h2 className="text-3xl font-black tracking-tight flex items-center gap-3">
-                            <BrainCircuit className="h-7 w-7 text-zinc-600" /> Planlama
-                        </h2>
-                        <p className="text-muted-foreground font-medium">Kişisel öğrenme stratejini belirle.</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Learning Mode Card */}
-                    <Link href="/dashboard/learning/create" className="group">
-                        <Card className="h-full border-2 border-slate-100 dark:border-zinc-800/50 hover:border-zinc-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-zinc-500/5 cursor-pointer flex flex-col rounded-[2rem] overflow-hidden bg-white dark:bg-zinc-900/50">
-                            <CardHeader className="p-8 flex flex-row items-center gap-6">
-                                <div className="h-16 w-16 rounded-2xl bg-zinc-500/10 flex items-center justify-center text-zinc-600 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                                    <BrainCircuit className="h-8 w-8" />
-                                </div>
-                                <div className="space-y-1">
-                                    <CardTitle className="text-2xl font-black">Öğrenme Modu</CardTitle>
-                                    <CardDescription className="text-base font-medium">
-                                        Kişiselleştirilmiş rota ve zayıf yön analizi.
-                                    </CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardFooter className="p-8 pt-0 mt-auto">
-                                <Button variant="secondary" className="w-full h-12 rounded-xl font-bold border-0">
-                                    Rota Oluştur
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
+                    <Link href="/dashboard/create/solve-photo">
+                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all cursor-pointer">
+                            <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
+                                <Camera className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-bold">Fotoğraftan Soru Çöz</h3>
+                                <p className="text-xs text-slate-400">Kitaplardan soru çekin, AI anında çözsün.</p>
+                            </div>
+                            <div className="ml-auto p-2 rounded-full bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight className="h-4 w-4 text-emerald-400" />
+                            </div>
+                        </div>
+                    </Link>
+                    <Link href="/dashboard/learning/create">
+                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-zinc-500/5 border border-zinc-500/10 hover:bg-zinc-500/10 hover:border-zinc-500/30 transition-all cursor-pointer">
+                            <div className="p-3 bg-zinc-500/20 rounded-xl text-zinc-400 group-hover:scale-110 transition-transform">
+                                <Zap className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-bold">Öğrenme Rotası</h3>
+                                <p className="text-xs text-slate-400">Kişiselleştirilmiş çalışma planı oluşturun.</p>
+                            </div>
+                            <div className="ml-auto p-2 rounded-full bg-zinc-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight className="h-4 w-4 text-zinc-400" />
+                            </div>
+                        </div>
                     </Link>
                 </div>
-            </section>
+            </div>
         </div>
-    );
+    )
 }

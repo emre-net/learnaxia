@@ -19,7 +19,8 @@ import {
     FileText,
     Camera,
     FolderPlus,
-    Zap
+    Zap,
+    Cpu
 } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -60,13 +61,16 @@ export function Sidebar({ className }: SidebarProps) {
 
     const isCreateActive = pathname.startsWith("/dashboard/create")
 
-    const atölyeShortcuts = [
-        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: "Manuel", href: "/dashboard/create/manual" },
-        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: "AI Üret", href: "/dashboard/create/ai" },
-        { icon: FileText, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: "Notlar", href: "/dashboard/create/ai-notes" },
-        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: "Soru Çöz", href: "/dashboard/create/solve-photo" },
+    const manualShortcuts = [
+        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: "Modül Üret", href: "/dashboard/create/manual" },
         { icon: FolderPlus, color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/50", label: "Koleksiyon", href: "/dashboard/collections/new" },
-        { icon: Zap, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: "Rota", href: "/dashboard/learning/create" },
+        { icon: FileText, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: "Not Yaz", href: "/dashboard/create/manual-note" },
+    ]
+
+    const aiShortcuts = [
+        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: "AI Modül", href: "/dashboard/create/ai" },
+        { icon: Cpu, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: "AI Not", href: "/dashboard/create/ai-notes" },
+        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: "Soru Çöz", href: "/dashboard/create/solve-photo" },
     ]
 
     return (
@@ -103,43 +107,67 @@ export function Sidebar({ className }: SidebarProps) {
                                 </div>
                                 <div className="flex flex-col z-10">
                                     <span className="text-sm font-semibold text-white tracking-wide">Atölye</span>
-                                    <span className="text-[10px] text-white/70 font-medium">Üret, Çöz ve Not Al</span>
+                                    <span className="text-[10px] text-white/70 font-medium">Sistemi İnşa Et</span>
                                 </div>
                             </div>
                         </Link>
 
-                        {/* Branching Shortcuts — Opening to the right */}
+                        {/* Branching Shortcuts — Opening to the right like a data grid */}
                         <AnimatePresence>
                             {isHoveringAtölye && (
                                 <motion.div
-                                    className="absolute top-0 left-full ml-2 flex items-center gap-2 z-50 pointer-events-auto"
-                                    initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                                    exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                                    className="absolute top-0 left-full ml-4 flex flex-col gap-3 z-50 pointer-events-auto"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
                                     transition={{ duration: 0.3, ease: "easeOut" }}
                                 >
-                                    {/* Data Path Line */}
-                                    <div className="w-4 h-[2px] bg-gradient-to-r from-purple-500/50 to-transparent" />
-
-                                    <div className="flex items-center gap-2 p-2 bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl shadow-black/50">
-                                        {atölyeShortcuts.map((shortcut, idx) => (
+                                    {/* Manual Section Branch */}
+                                    <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-blue-500/20 rounded-xl shadow-2xl shadow-blue-500/10">
+                                        <div className="text-[9px] font-bold text-blue-500/70 border-r border-blue-500/20 pr-2 mr-1 uppercase tracking-tighter">Üret</div>
+                                        {manualShortcuts.map((shortcut, idx) => (
                                             <motion.div
                                                 key={shortcut.label}
-                                                initial={{ opacity: 0, scale: 0.5, x: -10 }}
+                                                initial={{ opacity: 0, scale: 0.8, x: -5 }}
                                                 animate={{ opacity: 1, scale: 1, x: 0 }}
-                                                transition={{ delay: idx * 0.05 }}
+                                                transition={{ delay: idx * 0.04 }}
                                             >
                                                 <Link href={shortcut.href}>
                                                     <div className={cn(
-                                                        "group/shortcut relative p-2 rounded-xl border transition-all duration-300 cursor-pointer",
+                                                        "group/shortcut relative p-1.5 rounded-lg border transition-all duration-300 cursor-pointer hover:bg-white/5",
                                                         shortcut.bg,
                                                         shortcut.border,
-                                                        "hover:scale-110 hover:-translate-y-1 active:scale-95"
+                                                        "hover:scale-110 active:scale-95"
                                                     )}>
-                                                        <shortcut.icon className={cn("h-5 w-5", shortcut.color)} />
+                                                        <shortcut.icon className={cn("h-4 w-4", shortcut.color)} />
+                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap z-50">
+                                                            {shortcut.label}
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            </motion.div>
+                                        ))}
+                                    </div>
 
-                                                        {/* Hover Label */}
-                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] font-bold px-2 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    {/* AI Section Branch */}
+                                    <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-purple-500/20 rounded-xl shadow-2xl shadow-purple-500/10">
+                                        <div className="text-[9px] font-bold text-purple-500/70 border-r border-purple-500/20 pr-2 mr-1 uppercase tracking-tighter">Zeka</div>
+                                        {aiShortcuts.map((shortcut, idx) => (
+                                            <motion.div
+                                                key={shortcut.label}
+                                                initial={{ opacity: 0, scale: 0.8, x: -5 }}
+                                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                                transition={{ delay: 0.1 + idx * 0.04 }}
+                                            >
+                                                <Link href={shortcut.href}>
+                                                    <div className={cn(
+                                                        "group/shortcut relative p-1.5 rounded-lg border transition-all duration-300 cursor-pointer hover:bg-white/5",
+                                                        shortcut.bg,
+                                                        shortcut.border,
+                                                        "hover:scale-110 active:scale-95"
+                                                    )}>
+                                                        <shortcut.icon className={cn("h-4 w-4", shortcut.color)} />
+                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap z-50">
                                                             {shortcut.label}
                                                         </div>
                                                     </div>
