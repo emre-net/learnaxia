@@ -1,7 +1,9 @@
+
 export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
-import { aiVisionService, VisionError } from "@/lib/ai/ai-service";
+import { AIService } from "@/domains/ai/ai.service";
+import { AIError } from "@/domains/ai/ai.interface";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -25,14 +27,14 @@ export async function POST(req: Request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const result = await aiVisionService.analyzeQuestionImage(buffer, file.type);
+        const result = await AIService.solvePhoto(buffer, file.type);
 
         return NextResponse.json(result);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Solve Photo API Error:", error);
 
-        if (error instanceof VisionError) {
+        if (error instanceof AIError) {
             return NextResponse.json({
                 error: error.message,
                 code: error.code
