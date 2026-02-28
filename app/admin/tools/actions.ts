@@ -57,176 +57,6 @@ export async function repairLibrariesAction() {
     }
 }
 
-/**
- * Seed Learnaxia Corporate Content
- */
-export async function seedLearnaxiaContentAction() {
-    await ensureAdmin();
-
-    try {
-        // 1. Create/Find Learnaxia User
-        const learnaxiaUser = await prisma.user.upsert({
-            where: { email: "foundation@learnaxia.com" },
-            update: { handle: "learnaxia", role: "ADMIN", status: "ACTIVE" },
-            create: {
-                email: "foundation@learnaxia.com",
-                handle: "learnaxia",
-                role: "ADMIN",
-                status: "ACTIVE",
-                language: "tr"
-            }
-        });
-
-        const userId = learnaxiaUser.id;
-
-        // 2. Define 8 Modules
-        const modules = [
-            {
-                title: "İngilizce: Günlük Konuşma Kalıpları",
-                description: "En çok kullanılan 20 temel İngilizce kalıp.",
-                type: "FLASHCARD",
-                category: "Languge",
-                items: [
-                    { content: { front: "Nice to meet you", back: "Tanıştığımıza memnun oldum" } },
-                    { content: { front: "How is it going?", back: "Nasıl gidiyor?" } },
-                    { content: { front: "Could you help me?", back: "Bana yardım edebilir misiniz?" } }
-                ]
-            },
-            {
-                title: "JavaScript Temelleri: Değişkenler",
-                description: "JS'de let, const ve var kullanımı üzerine test.",
-                type: "MC",
-                category: "Technology",
-                items: [
-                    { content: { question: "Hangi anahtar kelime sonradan değiştirilemeyen bir değişken tanımlar?", options: ["let", "var", "const", "def"], answer: "const" } },
-                    { content: { question: "Modern JavaScript'te hangisinin kullanımı önerilmez?", options: ["let", "const", "var", "class"], answer: "var" } }
-                ]
-            },
-            {
-                title: "Dünya Coğrafyası: Başkentler",
-                description: "Zorlayıcı bir başkent testi.",
-                type: "GAP",
-                category: "General Culture",
-                items: [
-                    { content: { text: "Fransa'nın başkenti ____'dir.", answer: "Paris" } },
-                    { content: { text: "Japonya'nın başkenti ____'dur.", answer: "Tokyo" } }
-                ]
-            },
-            {
-                title: "Biyoloji: Hücre Organelleri",
-                description: "Hücre organelleri ve görevleri hakkında doğru/yanlış testi.",
-                type: "TRUE_FALSE",
-                category: "Science",
-                items: [
-                    { content: { statement: "Mitokondri hücrenin enerji merkezidir.", answer: true } },
-                    { content: { statement: "Ribozomlar sadece bitki hücrelerinde bulunur.", answer: false } }
-                ]
-            },
-            {
-                title: "Girişimcilik 101: Temel Kavramlar",
-                description: "Girişimcilik dünyasına adım atın.",
-                type: "FLASHCARD",
-                category: "Business",
-                items: [
-                    { content: { front: "MVP nedir?", back: "Minimum Viable Product (Minimum Uygulanabilir Ürün)" } },
-                    { content: { front: "Unicorn Girişim", back: "Değeri 1 milyar doları aşan girişim" } }
-                ]
-            },
-            {
-                title: "Yedinci Sanat: Film Kültürü",
-                description: "Sinema tarihi hakkında çoktan seçmeli sorular.",
-                type: "MC",
-                category: "Arts",
-                items: [
-                    { content: { question: "Tarihteki ilk sesli film hangisidir?", options: ["The Jazz Singer", "Citizen Kane", "Metropolis", "Psycho"], answer: "The Jazz Singer" } }
-                ]
-            },
-            {
-                title: "Osmanlı Tarihi: Yükselme Dönemi",
-                description: "Yükselme dönemi padişahları ve olayları.",
-                type: "GAP",
-                category: "History",
-                items: [
-                    { content: { text: "İstanbul'u ____ yılında Fatih Sultan Mehmet fethetmiştir.", answer: "1453" } }
-                ]
-            },
-            {
-                title: "Kişisel Gelişim: Zaman Yönetimi",
-                description: "Daha verimli çalışmak için temel stratejiler.",
-                type: "TRUE_FALSE",
-                category: "Personal Development",
-                items: [
-                    { content: { statement: "Pomodoro tekniği 25 dakika çalışma ve 5 dakika mola esasına dayanır.", answer: true } }
-                ]
-            }
-        ];
-
-        // 3. Create Modules & Collection
-        const createdModuleIds: string[] = [];
-
-        for (const m of modules) {
-            const module = await prisma.module.create({
-                data: {
-                    title: m.title,
-                    description: m.description,
-                    type: m.type,
-                    status: 'ACTIVE',
-                    isVerified: true,
-                    ownerId: userId,
-                    creatorId: userId,
-                    category: m.category,
-                    items: {
-                        create: m.items.map((item, index) => ({
-                            type: m.type,
-                            content: item.content as any,
-                            contentHash: Math.random().toString(36).substring(7), // Quick hash for seed
-                            order: index
-                        }))
-                    }
-                }
-            });
-
-            // Add to library for clarity
-            await prisma.userModuleLibrary.create({
-                data: { userId, moduleId: module.id, role: 'OWNER' }
-            });
-            await prisma.userContentAccess.create({
-                data: { userId, resourceId: module.id, resourceType: 'MODULE', accessLevel: 'OWNER' }
-            });
-
-            createdModuleIds.push(module.id);
-        }
-
-        // 4. Create Collection
-        const collection = await prisma.collection.create({
-            data: {
-                title: "Learnaxia Akademi: Başlangıç Paketi",
-                description: "Uygulamamızı tanımanız için hazırladığımız özel içerikler.",
-                visibility: 'PUBLIC',
-                isVerified: true,
-                ownerId: userId,
-                items: {
-                    create: createdModuleIds.map((mid, idx) => ({
-                        moduleId: mid,
-                        order: idx
-                    }))
-                }
-            }
-        });
-
-        // Add collection to library
-        await prisma.userCollectionLibrary.create({
-            data: { userId, collectionId: collection.id, role: 'OWNER' }
-        });
-
-        revalidatePath("/admin");
-        return { success: true, message: "Learnaxia kurumsal içerikleri başarıyla oluşturuldu." };
-
-    } catch (error) {
-        console.error("Seed error:", error);
-        return { success: false, message: "Seed işlemi başarısız." };
-    }
-}
 
 /**
  * Dangerous: Resets only modules and study-related data, keeping users.
@@ -319,63 +149,89 @@ export async function seedTestDataAction() {
             }
         }
 
-        const testModule = await prisma.module.create({
-            data: {
-                title: 'İleri Seviye React Test Modülü',
-                description: 'Bu modül UI testleri için Learnaxia tarafından otomatik oluşturulmuştur. Harika tasarım değişikliklerini test etmek için harika bir fırsat.',
-                type: 'FLASHCARD',
-                status: 'PUBLISHED',
-                visibility: 'PUBLIC',
-                isVerified: true,
-                ownerId: owner.id,
-                creatorId: owner.id,
-                category: 'Yazılım',
-                subCategory: 'React'
-            }
-        });
+        const modulesData = [
+            { title: 'Modern React Mimarileri', desc: 'React 19, Server Components, ve daha fazlası.', cat: 'Yazılım', subcat: 'React' },
+            { title: 'Gelişmiş TypeScript', desc: 'Jenerikler, Tipe Güvenli Tasarımlar ve İleri Seviye Konseptler', cat: 'Yazılım', subcat: 'TypeScript' },
+            { title: 'UI/UX Temel İlkeleri', desc: 'Etkili ve kullanıcı dostu arayüzler tasarlamak.', cat: 'Tasarım', subcat: 'UI/UX' },
+            { title: 'PostgreSQL Optimizasyonu', desc: 'Büyük verilerle çalışırken veritabanı performansı.', cat: 'Yazılım', subcat: 'Veritabanı' },
+            { title: 'Next.js App Router', desc: 'Layoutlar, loading state\'leri ve veri çekme yöntemleri', cat: 'Yazılım', subcat: 'Next.js' },
+            { title: 'Figma ile Prototipleme', desc: 'Tasarımı canlandırma ve etkileşim ekleme süreçleri.', cat: 'Tasarım', subcat: 'Figma' }
+        ];
 
-        await prisma.item.createMany({
+        const createdModules = [];
+        for (const data of modulesData) {
+            const m = await prisma.module.create({
+                data: {
+                    title: data.title,
+                    description: data.desc,
+                    type: 'FLASHCARD',
+                    status: 'PUBLISHED',
+                    visibility: 'PUBLIC',
+                    isVerified: true,
+                    ownerId: owner.id,
+                    creatorId: owner.id,
+                    category: data.cat,
+                    subCategory: data.subcat,
+                    items: {
+                        create: [
+                            { type: 'FLASHCARD', order: 1, contentHash: `hash-${data.title}-1`, content: { front: 'Soru 1', back: 'Cevap 1' } },
+                            { type: 'FLASHCARD', order: 2, contentHash: `hash-${data.title}-2`, content: { front: 'Soru 2', back: 'Cevap 2' } },
+                        ]
+                    }
+                }
+            });
+            createdModules.push(m);
+
+            await prisma.userModuleLibrary.upsert({
+                where: { userId_moduleId: { userId: owner.id, moduleId: m.id } },
+                update: {},
+                create: { userId: owner.id, moduleId: m.id, role: 'OWNER' }
+            });
+        }
+
+        const collectionsData = [
+            { title: 'Frontend Mastery 2026', desc: 'Mükemmel arayüzler tasarlamak ve geliştirmek için ihtiyacınız olan her şey.', cat: 'Yazılım', subcat: 'Frontend' },
+            { title: 'Backend Geliştirme Paketi', desc: 'Sunucu tarafı teknolojiler ve veritabanı yönetimi.', cat: 'Yazılım', subcat: 'Backend' },
+            { title: 'Fullstack Yol Haritası', desc: 'Uçtan uca web uygulamaları geliştirme rehberi.', cat: 'Yazılım', subcat: 'Fullstack' },
+            { title: 'Tasarımcılar Kod Yazıyor', desc: 'Tasarımcılar için kodlama temelleri.', cat: 'Tasarım', subcat: 'UI/UX' },
+            { title: 'Gelişmiş Web Performansı', desc: 'Web sitelerini saniyenin altında yükleme hedefleri.', cat: 'Yazılım', subcat: 'Performans' },
+        ];
+
+        for (const [idx, data] of collectionsData.entries()) {
+            const moduleX = createdModules[idx % createdModules.length];
+            const moduleY = createdModules[(idx + 1) % createdModules.length];
+
+            const c = await prisma.collection.create({
+                data: {
+                    title: data.title,
+                    description: data.desc,
+                    visibility: 'PUBLIC',
+                    isVerified: true,
+                    ownerId: owner.id,
+                    category: data.cat,
+                    subCategory: data.subcat,
+                    items: {
+                        create: [
+                            { moduleId: moduleX.id, order: 1 },
+                            { moduleId: moduleY.id, order: 2 }
+                        ]
+                    }
+                }
+            });
+
+            await prisma.userCollectionLibrary.upsert({
+                where: { userId_collectionId: { userId: owner.id, collectionId: c.id } },
+                update: {},
+                create: { userId: owner.id, collectionId: c.id, role: 'OWNER' }
+            });
+        }
+
+        await prisma.note.createMany({
             data: [
-                { moduleId: testModule.id, type: 'FLASHCARD', order: 1, contentHash: 'hash1', content: { front: 'A', back: 'B' } },
-                { moduleId: testModule.id, type: 'FLASHCARD', order: 2, contentHash: 'hash2', content: { front: 'C', back: 'D' } },
-                { moduleId: testModule.id, type: 'FLASHCARD', order: 3, contentHash: 'hash3', content: { front: 'E', back: 'F' } },
+                { userId: owner.id, title: 'LibraryCard Refactoring Notları', content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz' },
+                { userId: owner.id, title: 'Veritabanı Optimizasyonları', content: 'PostgreSQL indexing kullanarak query sürelerini 2ms seviyesine indirdik. Ayrıca Prisma sorgularını birleştirerek 15 farklı network requesti tek transaction içinde hallettik.' },
+                { userId: owner.id, title: 'Sonraki Versiyon V2.0 Hedefleri', content: 'Önümüzdeki aylarda yapay zeka entegreli akıllı tekrarlama algoritmamızı test gruplarına açacağız.' }
             ]
-        });
-
-        await prisma.userModuleLibrary.upsert({
-            where: { userId_moduleId: { userId: owner.id, moduleId: testModule.id } },
-            update: {},
-            create: { userId: owner.id, moduleId: testModule.id, role: 'OWNER' }
-        });
-
-        const testCollection = await prisma.collection.create({
-            data: {
-                title: 'Frontend Mastery 2026',
-                description: 'Mükemmel arayüzler tasarlamak ve geliştirmek için ihtiyacınız olan her şey. UI/UX prensiplerinden modern frameworklere kadar...',
-                visibility: 'PUBLIC',
-                isVerified: true,
-                ownerId: owner.id,
-                category: 'Tasarım ve Yazılım',
-                subCategory: 'Frontend'
-            }
-        });
-
-        await prisma.collectionItem.create({
-            data: { collectionId: testCollection.id, moduleId: testModule.id, order: 1 }
-        });
-
-        await prisma.userCollectionLibrary.upsert({
-            where: { userId_collectionId: { userId: owner.id, collectionId: testCollection.id } },
-            update: {},
-            create: { userId: owner.id, collectionId: testCollection.id, role: 'OWNER' }
-        });
-
-        await prisma.note.create({
-            data: {
-                userId: owner.id,
-                title: 'LibraryCard Refactoring Notları',
-                content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz',
-            }
         });
 
         revalidatePath("/admin");
