@@ -42,23 +42,50 @@ export class CollectionService {
         });
     }
 
-    static async findAllUserCollections(userId: string) {
+    static async findAllUserCollections(userId: string, limit = 12, offset = 0, filters?: { search?: string, category?: string, role?: string }) {
+        const collectionWhere = {
+            ...(filters?.search && {
+                OR: [
+                    { title: { contains: filters.search, mode: 'insensitive' as any } },
+                    { description: { contains: filters.search, mode: 'insensitive' as any } }
+                ]
+            }),
+            ...(filters?.category && filters.category !== 'ALL' && { category: filters.category }),
+        };
+
+        const hasFilters = Object.keys(collectionWhere).length > 0;
+
+        const total = await prisma.userCollectionLibrary.count({
+            where: {
+                userId,
+                ...(filters?.role && filters.role !== 'all' && { role: filters.role === 'created' ? 'OWNER' : 'SAVED' }),
+                ...(hasFilters && { collection: collectionWhere })
+            }
+        });
+
         const userLibrary = await prisma.userCollectionLibrary.findMany({
-            where: { userId },
+            where: {
+                userId,
+                ...(filters?.role && filters.role !== 'all' && { role: filters.role === 'created' ? 'OWNER' : 'SAVED' }),
+                ...(hasFilters && { collection: collectionWhere })
+            },
             include: {
                 collection: {
                     include: {
                         owner: {
-                            select: { handle: true }
+                            select: { handle: true, image: true, isVerified: true }
                         },
                         items: { select: { moduleId: true } }, // Fetch item count
                         _count: { select: { userLibrary: { where: { role: 'SAVED' } } } }
                     }
                 }
             },
-            orderBy: { lastInteractionAt: 'desc' }
+            orderBy: { lastInteractionAt: 'desc' },
+            skip: offset,
+            take: limit
         });
-        return userLibrary;
+
+        return { items: userLibrary, total };
     }
     static async getById(userId: string, collectionId: string) {
         const collection = await prisma.collection.findUnique({

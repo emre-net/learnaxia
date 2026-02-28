@@ -22,10 +22,12 @@ export async function GET(req: NextRequest) {
     const moduleId = searchParams.get("moduleId") || undefined;
     const itemId = searchParams.get("itemId") || undefined;
     const solvedQuestionId = searchParams.get("solvedQuestionId") || undefined;
+    const limit = parseInt(searchParams.get("limit") || "12", 10);
+    const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     try {
-        const notes = await NoteService.findAll(session.user.id, { moduleId, itemId, solvedQuestionId });
-        return NextResponse.json(notes);
+        const notesPayload = await NoteService.findAll(session.user.id, { moduleId, itemId, solvedQuestionId }, limit, offset);
+        return NextResponse.json(notesPayload);
     } catch (error) {
         console.error("Failed to fetch notes:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -57,14 +57,18 @@ export class NoteService {
     /**
      * Get all notes for a user, optionally filtered by module or item.
      */
-    static async findAll(userId: string, filter?: { moduleId?: string; itemId?: string; solvedQuestionId?: string }) {
-        return await prisma.note.findMany({
-            where: {
-                userId,
-                ...(filter?.moduleId && { moduleId: filter.moduleId }),
-                ...(filter?.itemId && { itemId: filter.itemId }),
-                ...(filter?.solvedQuestionId && { solvedQuestionId: filter.solvedQuestionId }),
-            },
+    static async findAll(userId: string, filter?: { moduleId?: string; itemId?: string; solvedQuestionId?: string }, limit = 12, offset = 0) {
+        const whereClause = {
+            userId,
+            ...(filter?.moduleId && { moduleId: filter.moduleId }),
+            ...(filter?.itemId && { itemId: filter.itemId }),
+            ...(filter?.solvedQuestionId && { solvedQuestionId: filter.solvedQuestionId }),
+        };
+
+        const total = await prisma.note.count({ where: whereClause });
+
+        const notes = await prisma.note.findMany({
+            where: whereClause,
             orderBy: { updatedAt: 'desc' },
             include: {
                 module: {
@@ -76,8 +80,12 @@ export class NoteService {
                 solvedQuestion: {
                     select: { questionText: true }
                 }
-            }
+            },
+            skip: offset,
+            take: limit
         });
+
+        return { items: notes, total };
     }
 
     /**

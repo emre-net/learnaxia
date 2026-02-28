@@ -5,13 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Layers, BookCopy, Bookmark, Play, CheckCircle2 } from "lucide-react";
-import { VerifiedBadge } from "@/components/shared/verified-badge";
-import { CardOwner } from "@/components/shared/card-owner";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSave } from "@/hooks/use-save";
+import { LibraryCard, LibraryCardMetric } from "@/components/shared/library-card";
+import { TypeIcon } from "@/components/shared/type-icon";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 interface LocalCollection {
     id: string;
@@ -46,8 +46,11 @@ interface CollectionCardProps {
 
 export function CollectionCard({ item, viewMode }: CollectionCardProps) {
     const { collection, role } = item;
-    const { toast } = useToast();
     const queryClient = useQueryClient();
+    const router = useRouter();
+    const { data: session } = useSession();
+
+    const isOwner = session?.user?.id === collection.ownerId;
 
     // Centralized Save Logic
     const { isSaved, saveCount, isSaving, handleSave } = useSave({
@@ -62,112 +65,77 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
 
     const moduleCount = collection._count?.items ?? collection.moduleIds?.length ?? 0;
 
+    const metrics: LibraryCardMetric[] = [
+        {
+            icon: <Layers className="h-4.5 w-4.5" />,
+            count: moduleCount,
+            label: 'Modül',
+            isActive: true
+        },
+        {
+            icon: <Bookmark className="h-4.5 w-4.5" />,
+            count: saveCount,
+            label: 'Kaydet',
+            isActive: isSaved
+        }
+    ];
 
-    if (viewMode === 'list') {
-        return (
-            <Card className="flex flex-row items-center gap-4 p-4 hover:shadow-md transition-all group border-muted/50 rounded-xl">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Layers className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Link href={`/dashboard/collections/${collection.id}`} className="font-bold text-lg hover:underline truncate">
-                            {collection.title}
-                        </Link>
-                        {collection.category && <Badge variant="secondary" className="text-[10px] h-5">{collection.category}</Badge>}
-                        {collection.isVerified && <VerifiedBadge isTeam={collection.owner?.handle === 'learnaxia'} />}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1">{collection.description || "Açıklama yok"}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className={`transition-all ${isSaved ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
-                    >
-                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
-                    </Button>
-                    <Link href={`/dashboard/collections/${collection.id}`}>
-                        <Button variant="default">Aç</Button>
-                    </Link>
-                </div>
-            </Card>
+    const metadataItems: React.ReactNode[] = [];
+    if (collection.category) {
+        metadataItems.push(
+            <Badge key="category" variant="secondary" className="bg-primary/5 text-primary border-primary/20 text-[10px] h-5 px-2">
+                {collection.category}
+            </Badge>
         );
     }
 
-    return (
-        <Card
-            className="flex flex-col hover:shadow-2xl transition-all duration-300 group h-full border-muted/50 hover:border-primary/20 bg-card overflow-hidden rounded-[2rem] cursor-pointer"
+    const saveButton = (
+        <Button
+            variant="ghost"
+            size="icon"
+            className={`h-11 w-11 rounded-2xl transition-all shadow-sm ${isOwner ? 'opacity-40 cursor-not-allowed bg-muted/20 text-muted-foreground' :
+                    isSaved ? 'bg-primary/5 text-primary border border-primary/10' :
+                        'bg-muted/40 text-muted-foreground hover:bg-primary/5 hover:text-primary border border-transparent'
+                }`}
+            onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isOwner) handleSave();
+            }}
+            disabled={isSaving || isOwner}
+            title={isOwner ? "Kendi içeriğinizi kaydedemezsiniz" : "Koleksiyonu Kaydet"}
         >
-            <div className="p-5 flex-grow space-y-4">
-                <div className="flex justify-between items-center gap-3">
-                    <div className="flex items-center gap-3">
-                        <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 border border-transparent group-hover:border-primary/20">
-                            <Layers className="h-6 w-6 text-primary" />
-                        </div>
-                        <Badge variant="outline" className={`text-[10px] font-bold border-primary/20 bg-primary/5 uppercase ${collection.visibility === 'PRIVATE' ? 'text-orange-500 border-orange-500/20 bg-orange-50' : 'text-primary'}`}>
-                            {collection.visibility === 'PRIVATE' ? 'GİZLİ KOLEKSİYON' : 'KAMU KOLEKSİYONU'}
-                        </Badge>
-                    </div>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-11 w-11 rounded-2xl transition-all ${isSaved ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-muted/30 text-muted-foreground hover:bg-primary/10 hover:text-primary'}`}
-                        onClick={handleSave}
-                        disabled={isSaving}
-                    >
-                        <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-primary' : ''}`} />
-                    </Button>
-                </div>
+            <Bookmark className={`h-5.5 w-5.5 ${isSaved && !isOwner ? 'fill-primary' : ''}`} />
+        </Button>
+    );
 
-                <div className="space-y-2">
-                    <CardTitle className="leading-tight text-xl font-extrabold group-hover:text-primary transition-colors">
-                        {collection.title}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
-                        {collection.description || "Bu koleksiyon için henüz bir açıklama girilmemiş."}
-                    </p>
-                </div>
+    const actionButton = (
+        <Button
+            className="h-10 md:h-12 w-full xs:w-auto rounded-[1.25rem] px-6 md:px-8 font-black text-sm md:text-base shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 group/btn bg-primary text-white"
+            onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); router.push(`/dashboard/collections/${collection.id}`); }}
+        >
+            Aç <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:scale-110 transition-transform" />
+        </Button>
+    );
 
-                <div className="flex items-center gap-6 py-4 border-y border-muted/20">
-                    <div className="flex flex-col gap-1" title="Modül Sayısı">
-                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                            <Layers className="h-4 w-4 text-primary" />
-                            <span>{moduleCount}</span>
-                            <span className="text-xs font-medium text-muted-foreground ml-0.5">Modül</span>
-                        </div>
-                    </div>
-
-                    <div className="w-px h-10 bg-muted/20" />
-
-                    <div className="flex flex-col gap-1" title="Kaydedilme Sayısı">
-                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                            <Bookmark className={`h-4 w-4 ${isSaved ? 'text-primary' : 'text-muted-foreground'}`} />
-                            <span>{saveCount}</span>
-                            <span className="text-xs font-medium text-muted-foreground ml-0.5">Kaydet</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="p-5 pt-3 mt-auto flex items-center justify-between gap-3 border-t border-muted/20">
-                <CardOwner
-                    handle={collection.owner.handle}
-                    image={null}
-                    isVerified={collection.isVerified}
-                    isTeam={collection.owner.handle === 'learnaxia'}
-                />
-
-                <div className="flex items-center gap-4">
-                    <Link href={`/dashboard/collections/${collection.id}`} className="contents">
-                        <Button className="h-11 rounded-2xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all group/btn">
-                            Aç <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:scale-110 transition-transform" />
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-        </Card>
+    return (
+        <LibraryCard
+            viewMode={viewMode}
+            typeIcon={<TypeIcon type="COLLECTION" size={viewMode === 'list' ? 'sm' : 'md'} />}
+            visibility={collection.visibility}
+            title={collection.title}
+            description={collection.description || ""}
+            metrics={metrics}
+            metadata={metadataItems}
+            owner={{
+                handle: collection.owner.handle,
+                image: null,
+                isVerified: collection.isVerified,
+                isTeam: collection.owner.handle === 'learnaxia'
+            }}
+            saveButton={saveButton}
+            actionButton={viewMode === 'list' ? <Button variant="default" className="h-11 rounded-xl px-6 font-bold" onClick={(e: React.MouseEvent) => { e.stopPropagation(); router.push(`/dashboard/collections/${collection.id}`); }}>Aç</Button> : actionButton}
+            onClick={() => router.push(`/dashboard/collections/${collection.id}`)}
+        />
     );
 }

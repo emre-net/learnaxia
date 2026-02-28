@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
+import { logger } from "@/lib/logger";
 type Note = {
     id: string;
     moduleId?: string;
@@ -75,6 +75,12 @@ export function useNotes(filters?: { moduleId?: string; itemId?: string }) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
         },
+        onError: (err) => {
+            logger.error("Failed to create note", {
+                context: "useNotes",
+                metadata: { error: err.message, filters }
+            });
+        }
     });
 
     const updateMutation = useMutation({
@@ -82,6 +88,12 @@ export function useNotes(filters?: { moduleId?: string; itemId?: string }) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
         },
+        onError: (err) => {
+            logger.error("Failed to update note", {
+                context: "useNotes",
+                metadata: { error: err.message }
+            });
+        }
     });
 
     const deleteMutation = useMutation({
@@ -89,6 +101,12 @@ export function useNotes(filters?: { moduleId?: string; itemId?: string }) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
         },
+        onError: (err) => {
+            logger.error("Failed to delete note", {
+                context: "useNotes",
+                metadata: { error: err.message }
+            });
+        }
     });
 
     return {

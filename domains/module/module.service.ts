@@ -81,8 +81,8 @@ export class ModuleService {
     /**
      * Delegates to LibraryService.
      */
-    static async getUserLibrary(userId: string) {
-        return LibraryService.getUserLibrary(userId);
+    static async getUserLibrary(userId: string, limit = 12, offset = 0, filters?: { search?: string, type?: string, category?: string, role?: string }) {
+        return LibraryService.getUserLibrary(userId, limit, offset, filters);
     }
 
     /**

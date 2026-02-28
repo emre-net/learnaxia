@@ -12,7 +12,7 @@ import {
     Loader2,
     CheckCircle2
 } from "lucide-react";
-import { repairLibrariesAction, resetContentAction } from "./actions";
+import { repairLibrariesAction, resetContentAction, seedTestDataAction, seedLearnaxiaContentAction } from "./actions";
 
 export default function AdminToolsClient() {
     const [loading, setLoading] = useState<string | null>(null);
@@ -93,18 +93,39 @@ export default function AdminToolsClient() {
                     </button>
                 </div>
 
-                {/* Integration Section */}
-                <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 border-l-4 border-l-indigo-500 shadow-xl">
+                <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 border-l-4 border-l-green-500 shadow-xl">
                     <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-                        <Server className="w-5 h-5 text-indigo-500" />
-                        Cache & Session
+                        <Database className="w-5 h-5 text-green-500" />
+                        Test Verisi (Seeder)
                     </h2>
                     <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                        Uygulama genelindeki önbelleği (API Cache) temizler.
+                        Sisteme sahte veriler ekler (1 public modül, 1 koleksiyon, 1 not). Bu işlem, arayüz geliştirmelerini test etmek için faydalıdır.
                     </p>
-                    <button className="w-full py-4 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 border border-indigo-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2">
-                        <Zap className="w-5 h-5" />
-                        Global Cache Purge
+                    <button
+                        disabled={!!loading}
+                        onClick={() => handleAction('seed-test', seedTestDataAction)}
+                        className="w-full py-4 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 text-green-500 border border-green-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                        {loading === 'seed-test' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Database className="w-5 h-5" />}
+                        Otomatik Test Verisi Üret
+                    </button>
+                </div>
+
+                <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 border-l-4 border-l-blue-500 shadow-xl">
+                    <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                        <Database className="w-5 h-5 text-blue-500" />
+                        Kurumsal İçerik (Seeder)
+                    </h2>
+                    <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                        Learnaxia resmi hesabından 8 adet çeşitli formatta kurumsal eğitim modülü ve bunları barındıran 1 örnek koleksiyon üretir.
+                    </p>
+                    <button
+                        disabled={!!loading}
+                        onClick={() => handleAction('seed-learnaxia', seedLearnaxiaContentAction)}
+                        className="w-full py-4 bg-blue-500/10 hover:bg-blue-500/20 disabled:opacity-50 text-blue-500 border border-blue-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                        {loading === 'seed-learnaxia' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Database className="w-5 h-5" />}
+                        Learnaxia Üretimlerini Yükle
                     </button>
                 </div>
             </div>

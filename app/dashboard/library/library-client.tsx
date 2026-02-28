@@ -33,38 +33,11 @@ export function LibraryClient() {
     const { language } = useSettingsStore();
     const dictionary = getDictionary(language);
 
-    const { data: modules, isLoading: isLoadingModules } = useQuery<any[]>({
-        queryKey: ['library-modules'],
-        queryFn: async () => {
-            const res = await fetch('/api/modules');
-            if (!res.ok) throw new Error('Failed to fetch modules');
-            return res.json();
-        }
-    });
-
-    const { data: collections, isLoading: isLoadingCollections } = useQuery<any[]>({
-        queryKey: ['library-collections'],
-        queryFn: async () => {
-            const res = await fetch('/api/collections');
-            if (!res.ok) throw new Error('Failed to fetch collections');
-            return res.json();
-        }
-    });
-
     const { data: aiSolutions, isLoading: isLoadingSolutions } = useQuery<SolvedQuestion[]>({
         queryKey: ['ai-solutions'],
         queryFn: async () => {
             const res = await fetch('/api/solved-questions');
             if (!res.ok) throw new Error('Failed to fetch solutions');
-            return res.json();
-        }
-    });
-
-    const { data: allNotes, isLoading: isLoadingNotes } = useQuery<NoteWithSource[]>({
-        queryKey: ['all-notes'],
-        queryFn: async () => {
-            const res = await fetch('/api/notes');
-            if (!res.ok) throw new Error('Failed to fetch notes');
             return res.json();
         }
     });
@@ -101,8 +74,6 @@ export function LibraryClient() {
 
                 <TabsContent value="modules" className="space-y-4 !mt-8">
                     <ModulesTab
-                        modules={modules}
-                        isLoading={isLoadingModules}
                         viewMode={viewMode}
                         searchQuery={searchQuery}
                         selectedType={selectedType}
@@ -112,8 +83,6 @@ export function LibraryClient() {
 
                 <TabsContent value="collections" className="space-y-4">
                     <CollectionsTab
-                        collections={collections}
-                        isLoading={isLoadingCollections}
                         viewMode={viewMode}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
@@ -131,8 +100,6 @@ export function LibraryClient() {
 
                 <TabsContent value="notes" className="space-y-4">
                     <NotesTab
-                        notes={allNotes}
-                        isLoading={isLoadingNotes}
                         viewMode={viewMode}
                         dictionary={dictionary}
                     />

@@ -1,8 +1,8 @@
 "use client";
 
-import { CreditCard, Brain, Layers, ListChecks, HelpCircle, LucideIcon } from "lucide-react";
+import { CreditCard, Brain, Layers, ListChecks, HelpCircle, LucideIcon, BookCopy, FileText } from "lucide-react";
 
-export type ModuleType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
+export type ModuleType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE' | 'COLLECTION' | 'NOTE';
 
 interface TypeIconProps {
     type: ModuleType | string;
@@ -35,6 +35,18 @@ export function TypeIcon({ type, className = "", size = 'md' }: TypeIconProps) {
             color: "text-orange-600 dark:text-orange-400",
             bg: "bg-orange-50 dark:bg-orange-900/20",
             label: "Doğru/Yanlış"
+        },
+        "COLLECTION": {
+            icon: BookCopy,
+            color: "text-indigo-600 dark:text-indigo-400",
+            bg: "bg-indigo-50 dark:bg-indigo-900/20",
+            label: "Koleksiyon"
+        },
+        "NOTE": {
+            icon: FileText,
+            color: "text-rose-600 dark:text-rose-400",
+            bg: "bg-rose-50 dark:bg-rose-900/20",
+            label: "Not Defteri"
         }
     };
 
@@ -59,7 +71,9 @@ export function getModuleTypeLabel(type: string) {
         "FLASHCARD": "Flashcard",
         "MC": "Çoktan Seçmeli",
         "GAP": "Boşluk Doldurma",
-        "TRUE_FALSE": "Doğru/Yanlış"
+        "TRUE_FALSE": "Doğru/Yanlış",
+        "COLLECTION": "Koleksiyon",
+        "NOTE": "Not Defteri"
     };
     return labels[type] || "Modül";
 }

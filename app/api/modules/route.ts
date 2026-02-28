@@ -55,15 +55,21 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const scope = searchParams.get("scope") || "library";
         const search = searchParams.get("search") || "";
+        const limit = parseInt(searchParams.get("limit") || "12", 10);
+        const offset = parseInt(searchParams.get("offset") || "0", 10);
+
+        const type = searchParams.get("type") || undefined;
+        const category = searchParams.get("category") || undefined;
+        const role = searchParams.get("role") || "all";
 
         if (scope === "discover") {
             const modules = await ModuleService.getDiscoverModules(session.user.id, search);
             return NextResponse.json(modules);
         }
 
-        const library = await ModuleService.getUserLibrary(session.user.id);
-        console.log(`[API/MODULES] Fetched library for user ${session.user.id}. Count: ${library.length}`);
-        return NextResponse.json(library);
+        const libraryPayload = await ModuleService.getUserLibrary(session.user.id, limit, offset, { search, type, category, role });
+        console.log(`[API/MODULES] Fetched library for user ${session.user.id}. Total: ${libraryPayload.total}`);
+        return NextResponse.json(libraryPayload);
     } catch (error) {
         console.error("Get Modules Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -1,24 +1,50 @@
 
 "use client";
 
-import { FileText, BookOpen } from "lucide-react";
+import { FileText, BookOpen, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 interface NotesTabProps {
-    notes: any[] | undefined;
-    isLoading: boolean;
     viewMode: 'grid' | 'list';
     dictionary: any;
 }
 
 export function NotesTab({
-    notes,
-    isLoading,
     viewMode,
     dictionary
 }: NotesTabProps) {
+    const { ref, inView } = useInView();
+
+    const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['library-notes'],
+        queryFn: async ({ pageParam = 0 }) => {
+            const params = new URLSearchParams({
+                limit: '12',
+                offset: pageParam.toString(),
+            });
+            const res = await fetch(`/api/notes?${params}`);
+            if (!res.ok) throw new Error('Failed to fetch notes');
+            return res.json();
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotalItems = allPages.reduce((acc, page) => acc + page.items.length, 0);
+            return currentTotalItems < lastPage.total ? currentTotalItems : undefined;
+        }
+    });
+
+    useEffect(() => {
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const items = data ? data.pages.flatMap(page => page.items) : [];
     if (isLoading) {
         return (
             <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
@@ -29,7 +55,7 @@ export function NotesTab({
         );
     }
 
-    if (!notes || notes.length === 0) {
+    if (!isLoading && items.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center">
                 <FileText className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
@@ -40,7 +66,7 @@ export function NotesTab({
 
     return (
         <div className="space-y-4">
-            {notes.map((note) => (
+            {items.map((note) => (
                 <Card key={note.id} className="hover:border-primary/50 transition-colors">
                     <CardHeader className="p-4 pb-2">
                         <div className="flex items-center justify-between">
@@ -62,6 +88,19 @@ export function NotesTab({
                     </CardContent>
                 </Card>
             ))}
+
+            {hasNextPage && (
+                <div ref={ref} className="flex justify-center py-8">
+                    {isFetchingNextPage ? (
+                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Daha fazla yükleniyor...
+                        </div>
+                    ) : (
+                        <div className="h-8"></div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

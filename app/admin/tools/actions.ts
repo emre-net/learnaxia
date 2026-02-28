@@ -236,18 +236,136 @@ export async function resetContentAction() {
 
     try {
         await prisma.$transaction([
+            // 1. Delete Interactions and Progress
             prisma.itemSession.deleteMany({}),
             prisma.learningSession.deleteMany({}),
+            prisma.sM2Progress.deleteMany({}),
+            prisma.itemProgress.deleteMany({}),
+            prisma.userQuestionOverride.deleteMany({}),
+
+            // 2. Delete Libraries & Access
             prisma.userModuleLibrary.deleteMany({}),
+            prisma.userCollectionLibrary.deleteMany({}),
             prisma.userContentAccess.deleteMany({}),
+
+            // 3. Delete Notes & Solved Questions
+            prisma.note.deleteMany({}),
+            prisma.solvedQuestion.deleteMany({}),
+
+            // 4. Delete Exams & Attempts
+            prisma.examAttempt.deleteMany({}),
+            prisma.exam.deleteMany({}),
+
+            // 5. Delete Core Structure (Items, Modules, Collections)
+            prisma.collectionItem.deleteMany({}),
             prisma.item.deleteMany({}),
+            prisma.collection.deleteMany({}),
             prisma.module.deleteMany({}),
+
+            // 6. Miscellanous
+            prisma.pDFAsset.deleteMany({}),
+            prisma.weaknessReport.deleteMany({}),
+            prisma.systemLog.deleteMany({}),
         ]);
 
         revalidatePath("/admin");
-        return { success: true, message: "Sistem içerikleri (modüller, oturumlar) başarıyla sıfırlandı." };
+        return { success: true, message: "Kullanıcılar hariç tüm içerik veritabanları (Modül, Not, Koleksiyon) başarıyla sıfırlandı." };
     } catch (error) {
         console.error("Reset error:", error);
         return { success: false, message: "Sıfırlarken hata oluştu." };
+    }
+}
+
+export async function seedTestDataAction() {
+    await ensureAdmin();
+
+    try {
+        let owner = await prisma.user.findUnique({ where: { handle: 'learnaxia' } });
+
+        if (!owner) {
+            const existingEmail = await prisma.user.findUnique({ where: { email: 'learnaxia@test.com' } });
+            if (existingEmail) {
+                owner = await prisma.user.update({
+                    where: { email: 'learnaxia@test.com' },
+                    data: { handle: 'learnaxia' }
+                });
+            } else {
+                owner = await prisma.user.create({
+                    data: {
+                        name: 'Learnaxia Official',
+                        email: 'learnaxia@test.com',
+                        handle: 'learnaxia',
+                        role: 'ADMIN',
+                        status: 'ACTIVE'
+                    }
+                });
+            }
+        }
+
+        const testModule = await prisma.module.create({
+            data: {
+                title: 'İleri Seviye React Test Modülü',
+                description: 'Bu modül UI testleri için Learnaxia tarafından otomatik oluşturulmuştur. Harika tasarım değişikliklerini test etmek için harika bir fırsat.',
+                type: 'FLASHCARD',
+                status: 'PUBLISHED',
+                visibility: 'PUBLIC',
+                isVerified: true,
+                ownerId: owner.id,
+                creatorId: owner.id,
+                category: 'Yazılım',
+                subCategory: 'React'
+            }
+        });
+
+        await prisma.item.createMany({
+            data: [
+                { moduleId: testModule.id, type: 'FLASHCARD', order: 1, contentHash: 'hash1', content: { front: 'A', back: 'B' } },
+                { moduleId: testModule.id, type: 'FLASHCARD', order: 2, contentHash: 'hash2', content: { front: 'C', back: 'D' } },
+                { moduleId: testModule.id, type: 'FLASHCARD', order: 3, contentHash: 'hash3', content: { front: 'E', back: 'F' } },
+            ]
+        });
+
+        await prisma.userModuleLibrary.upsert({
+            where: { userId_moduleId: { userId: owner.id, moduleId: testModule.id } },
+            update: {},
+            create: { userId: owner.id, moduleId: testModule.id, role: 'OWNER' }
+        });
+
+        const testCollection = await prisma.collection.create({
+            data: {
+                title: 'Frontend Mastery 2026',
+                description: 'Mükemmel arayüzler tasarlamak ve geliştirmek için ihtiyacınız olan her şey. UI/UX prensiplerinden modern frameworklere kadar...',
+                visibility: 'PUBLIC',
+                isVerified: true,
+                ownerId: owner.id,
+                category: 'Tasarım ve Yazılım',
+                subCategory: 'Frontend'
+            }
+        });
+
+        await prisma.collectionItem.create({
+            data: { collectionId: testCollection.id, moduleId: testModule.id, order: 1 }
+        });
+
+        await prisma.userCollectionLibrary.upsert({
+            where: { userId_collectionId: { userId: owner.id, collectionId: testCollection.id } },
+            update: {},
+            create: { userId: owner.id, collectionId: testCollection.id, role: 'OWNER' }
+        });
+
+        await prisma.note.create({
+            data: {
+                userId: owner.id,
+                title: 'LibraryCard Refactoring Notları',
+                content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz',
+            }
+        });
+
+        revalidatePath("/admin");
+        return { success: true, message: "Test verileri (Modül, Koleksiyon, Not) başarıyla oluşturuldu." };
+
+    } catch (error) {
+        console.error("Seed test data error:", error);
+        return { success: false, message: "Test verisi üretirken bir hata oluştu." };
     }
 }

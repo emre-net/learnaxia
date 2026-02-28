@@ -1,16 +1,17 @@
 
 "use client";
 
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCard } from "@/components/module/module-card";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import { useEffect, useState } from "react";
 
 interface ModulesTabProps {
-    modules: any[] | undefined;
-    isLoading: boolean;
     viewMode: 'grid' | 'list';
     searchQuery: string;
     selectedType: string;
@@ -18,20 +19,43 @@ interface ModulesTabProps {
 }
 
 export function ModulesTab({
-    modules,
-    isLoading,
     viewMode,
     searchQuery,
     selectedType,
     selectedCategory
 }: ModulesTabProps) {
-    const filteredModules = modules?.filter(item => {
-        const matchesSearch = item.module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.module.description && item.module.description.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesType = selectedType === "ALL" || item.module.type === selectedType;
-        const matchesCategory = selectedCategory === "ALL" || item.module.category === selectedCategory;
-        return matchesSearch && matchesType && matchesCategory;
+    const [activeSubTab, setActiveSubTab] = useState("all");
+    const { ref, inView } = useInView();
+
+    const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['library-modules', searchQuery, selectedType, selectedCategory, activeSubTab],
+        queryFn: async ({ pageParam = 0 }) => {
+            const params = new URLSearchParams({
+                limit: '12',
+                offset: pageParam.toString(),
+                search: searchQuery,
+                type: selectedType,
+                category: selectedCategory,
+                role: activeSubTab
+            });
+            const res = await fetch(`/api/modules?${params}`);
+            if (!res.ok) throw new Error('Failed to fetch modules');
+            return res.json();
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotalItems = allPages.reduce((acc, page) => acc + page.items.length, 0);
+            return currentTotalItems < lastPage.total ? currentTotalItems : undefined;
+        }
     });
+
+    useEffect(() => {
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const items = data ? data.pages.flatMap(page => page.items) : [];
 
     if (isLoading) {
         return (
@@ -43,7 +67,7 @@ export function ModulesTab({
         );
     }
 
-    if (!filteredModules || filteredModules.length === 0) {
+    if (!isLoading && items.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
                 <BookOpen className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
@@ -59,7 +83,7 @@ export function ModulesTab({
     }
 
     return (
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
             <div className="flex items-center justify-between mb-4">
                 <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
                     <TabsTrigger value="all">Tümü</TabsTrigger>
@@ -73,39 +97,26 @@ export function ModulesTab({
                 </Button>
             </div>
 
-            <TabsContent value="all" className="mt-0">
+            <TabsContent value={activeSubTab} className="mt-0">
                 <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredModules.map((item) => (
+                    {items.map((item) => (
                         <ModuleCard key={item.moduleId} module={item.module} solvedCount={item.solvedCount} viewMode={viewMode} />
                     ))}
                 </div>
             </TabsContent>
 
-            <TabsContent value="created" className="mt-0">
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredModules.filter(m => m.role === 'OWNER').map((item) => (
-                        <ModuleCard key={item.moduleId} module={item.module} solvedCount={item.solvedCount} viewMode={viewMode} />
-                    ))}
-                    {filteredModules.filter(m => m.role === 'OWNER').length === 0 && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                            Henüz orijinal bir modül oluşturmadınız.
+            {hasNextPage && (
+                <div ref={ref} className="flex justify-center py-8">
+                    {isFetchingNextPage ? (
+                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Daha fazla yükleniyor...
                         </div>
+                    ) : (
+                        <div className="h-8"></div>
                     )}
                 </div>
-            </TabsContent>
-
-            <TabsContent value="forked" className="mt-0">
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredModules.filter(m => m.role === 'SAVED').map((item) => (
-                        <ModuleCard key={item.moduleId} module={item.module} solvedCount={item.solvedCount} viewMode={viewMode} />
-                    ))}
-                    {filteredModules.filter(m => m.role === 'SAVED').length === 0 && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                            Henüz kitaplığınıza eklediğiniz bir modül yok.
-                        </div>
-                    )}
-                </div>
-            </TabsContent>
+            )}
         </Tabs>
     );
 }

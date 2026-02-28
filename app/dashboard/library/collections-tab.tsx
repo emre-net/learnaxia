@@ -1,34 +1,58 @@
 
 "use client";
 
-import { Layers, Plus } from "lucide-react";
+import { Layers, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CollectionCard } from "@/components/collection/collection-card";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import { useEffect, useState } from "react";
 
 interface CollectionsTabProps {
-    collections: any[] | undefined;
-    isLoading: boolean;
     viewMode: 'grid' | 'list';
     searchQuery: string;
     selectedCategory: string;
 }
 
 export function CollectionsTab({
-    collections,
-    isLoading,
     viewMode,
     searchQuery,
     selectedCategory
 }: CollectionsTabProps) {
-    const filteredCollections = collections?.filter(item => {
-        const matchesSearch = item.collection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.collection.description && item.collection.description.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesCategory = selectedCategory === "ALL" || item.collection.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+    const [activeSubTab, setActiveSubTab] = useState("all");
+    const { ref, inView } = useInView();
+
+    const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['library-collections', searchQuery, selectedCategory, activeSubTab],
+        queryFn: async ({ pageParam = 0 }) => {
+            const params = new URLSearchParams({
+                limit: '12',
+                offset: pageParam.toString(),
+                search: searchQuery,
+                category: selectedCategory,
+                role: activeSubTab
+            });
+            const res = await fetch(`/api/collections?${params}`);
+            if (!res.ok) throw new Error('Failed to fetch collections');
+            return res.json();
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotalItems = allPages.reduce((acc, page) => acc + page.items.length, 0);
+            return currentTotalItems < lastPage.total ? currentTotalItems : undefined;
+        }
     });
+
+    useEffect(() => {
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const items = data ? data.pages.flatMap(page => page.items) : [];
 
     if (isLoading) {
         return (
@@ -40,7 +64,7 @@ export function CollectionsTab({
         );
     }
 
-    if (!filteredCollections || filteredCollections.length === 0) {
+    if (!isLoading && items.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
                 <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
@@ -56,7 +80,7 @@ export function CollectionsTab({
     }
 
     return (
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
             <div className="flex items-center justify-between mb-4">
                 <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
                     <TabsTrigger value="all">Tümü</TabsTrigger>
@@ -70,39 +94,26 @@ export function CollectionsTab({
                 </Button>
             </div>
 
-            <TabsContent value="all" className="mt-0">
+            <TabsContent value={activeSubTab} className="mt-0">
                 <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredCollections.map((item) => (
+                    {items.map((item) => (
                         <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
                     ))}
                 </div>
             </TabsContent>
 
-            <TabsContent value="created" className="mt-0">
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredCollections.filter(c => c.role === 'OWNER').map((item) => (
-                        <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
-                    ))}
-                    {filteredCollections.filter(c => c.role === 'OWNER').length === 0 && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                            Henüz bir koleksiyon oluşturmadınız.
+            {hasNextPage && (
+                <div ref={ref} className="flex justify-center py-8">
+                    {isFetchingNextPage ? (
+                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Daha fazla yükleniyor...
                         </div>
+                    ) : (
+                        <div className="h-8"></div>
                     )}
                 </div>
-            </TabsContent>
-
-            <TabsContent value="forked" className="mt-0">
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {filteredCollections.filter(c => c.role === 'SAVED').map((item) => (
-                        <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
-                    ))}
-                    {filteredCollections.filter(c => c.role === 'SAVED').length === 0 && (
-                        <div className="col-span-full text-center py-12 text-muted-foreground">
-                            Henüz kaydettiğiniz bir koleksiyon yok.
-                        </div>
-                    )}
-                </div>
-            </TabsContent>
+            )}
         </Tabs>
     );
 }

@@ -41,8 +41,15 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const library = await CollectionService.findAllUserCollections(session.user.id);
-        return NextResponse.json(library);
+        const { searchParams } = new URL(req.url);
+        const limit = parseInt(searchParams.get("limit") || "12", 10);
+        const offset = parseInt(searchParams.get("offset") || "0", 10);
+        const search = searchParams.get("search") || undefined;
+        const category = searchParams.get("category") || undefined;
+        const role = searchParams.get("role") || "all";
+
+        const libraryPayload = await CollectionService.findAllUserCollections(session.user.id, limit, offset, { search, category, role });
+        return NextResponse.json(libraryPayload);
     } catch (error) {
         console.error("Get Collections Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

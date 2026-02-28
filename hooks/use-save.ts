@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { logger } from "@/lib/logger";
 
 interface UseSaveOptions {
     id: string;
@@ -60,6 +61,10 @@ export function useSave({ id, type, initialSaved = false, initialSaveCount = 0, 
                 throw new Error("API hatası");
             }
         } catch (error) {
+            logger.error(`Save operation failed for ${type} ${id}`, {
+                context: "useSave",
+                metadata: { id, type, isSaved, error: error instanceof Error ? error.message : String(error) }
+            });
             toast({
                 title: "Hata",
                 description: "İşlem gerçekleştirilemedi.",

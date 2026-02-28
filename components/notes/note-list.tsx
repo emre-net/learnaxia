@@ -5,7 +5,7 @@ import { NoteEditor } from "./note-editor";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, FileText } from "lucide-react";
 import { useState } from "react";
 import {
     AlertDialog,
@@ -18,14 +18,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardFooter
-} from "@/components/ui/card";
+import { LibraryCard } from "@/components/shared/library-card";
+import { TypeIcon } from "@/components/shared/type-icon";
 
 interface NoteListProps {
     moduleId?: string;
@@ -56,61 +50,64 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                 onClose={() => setEditingNoteId(null)}
                             />
                         ) : (
-                            <Card>
-                                <CardHeader className="p-4 pb-2">
-                                    <div className="flex justify-between items-start">
-                                        <div className="space-y-1">
-                                            <CardTitle className="text-base font-semibold leading-none">
-                                                {note.title || "Untitled Note"}
-                                            </CardTitle>
-                                            <CardDescription className="text-xs">
-                                                {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
-                                            </CardDescription>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() => setEditingNoteId(note.id)}
-                                            >
-                                                <Edit2 className="h-3 w-3" />
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive">
-                                                        <Trash2 className="h-3 w-3" />
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Delete Note?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => deleteNote(note.id)}>
-                                                            Delete
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-2 text-sm whitespace-pre-wrap text-foreground/90">
-                                    {note.content}
-                                </CardContent>
-                                {note.module && !moduleId && (
-                                    <CardFooter className="p-4 pt-0">
-                                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                            Module: {note.module.title}
+                            <LibraryCard
+                                viewMode="grid"
+                                typeIcon={<TypeIcon type="NOTE" size="md" />}
+                                title={note.title || "İsimsiz Not"}
+                                description={note.content}
+                                metadata={[
+                                    <span key="date" className="text-xs text-muted-foreground whitespace-nowrap">
+                                        {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })} güncellendi
+                                    </span>,
+                                    note.module && !moduleId ? (
+                                        <span key="module" className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-2 truncate">
+                                            Modül: {note.module.title}
                                         </span>
-                                    </CardFooter>
-                                )}
-                            </Card>
+                                    ) : null
+                                ]}
+                                metrics={[
+                                    {
+                                        icon: <FileText className="h-4.5 w-4.5" />,
+                                        count: note.content.length,
+                                        label: "Karakter"
+                                    }
+                                ]}
+                                actionButton={
+                                    <div className="flex gap-2 w-full justify-end">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-10 rounded-xl px-4 flex-1 xs:flex-none border-primary/20 text-primary hover:bg-primary/5"
+                                            onClick={() => setEditingNoteId(note.id)}
+                                        >
+                                            <Edit2 className="h-4 w-4 mr-2" />
+                                            Düzenle
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 flex-1 xs:flex-none border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Sil
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="rounded-[2rem]">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Notu Sil?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Bu işlem geri alınamaz. Notunuz tamamen silinecektir.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="rounded-xl">İptal</AlertDialogCancel>
+                                                    <AlertDialogAction className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteNote(note.id)}>
+                                                        Sil
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                }
+                            />
                         )}
                     </div>
                 ))}

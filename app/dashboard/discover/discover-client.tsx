@@ -2,7 +2,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,14 +57,12 @@ export function DiscoverClient() {
 
     const debouncedSearch = useDebounceValue(searchQuery, 300);
 
-    // Reset page on filter change
-    useEffect(() => {
-        setPage(0);
-    }, [activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch]);
+    const { ref, inView } = useInView();
 
-    const { data, isLoading, isFetching } = useQuery({
-        queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch, page],
-        queryFn: async () => {
+    // Reset page logic handled by useInfiniteQuery's key
+    const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch],
+        queryFn: async ({ pageParam = 0 }) => {
             const params = new URLSearchParams();
             if (activeTab === "modules") params.set("type", "MODULE");
             else params.set("type", "COLLECTION");
@@ -73,18 +72,28 @@ export function DiscoverClient() {
             if (selectedModuleType) params.set("moduleType", selectedModuleType);
             if (debouncedSearch) params.set("search", debouncedSearch);
             params.set("limit", limit.toString());
-            params.set("offset", (page * limit).toString());
+            params.set("offset", (pageParam * limit).toString());
 
             const res = await fetch(`/api/discover?${params.toString()}`);
             if (!res.ok) throw new Error("Failed to fetch");
             return res.json();
         },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotalItems = allPages.reduce((acc, page) => acc + page.items.length, 0);
+            return currentTotalItems < lastPage.total ? allPages.length : undefined;
+        },
         staleTime: 30000
     });
 
-    const items = data?.items || [];
-    const total = data?.total || 0;
-    const hasMore = items.length < total && total > limit;
+    useEffect(() => {
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const items = data?.pages.flatMap((page) => page.items) || [];
+    const total = data?.pages[0]?.total || 0;
 
     // Clear subcategory when category changes
     const handleCategorySelect = (cat: string) => {
@@ -272,8 +281,8 @@ export function DiscoverClient() {
                             </div>
                         </div>
 
-                        <div className="space-y-8">
-                            {isLoading && page === 0 ? (
+                        <div className="space-y-8 pb-10">
+                            {isLoading ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                                     {[1, 2, 3, 4, 5, 6].map(i => (
                                         <div key={i} className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl border border-dashed" />
@@ -317,24 +326,16 @@ export function DiscoverClient() {
                                         )}
                                     </div>
 
-                                    {hasMore && (
-                                        <div className="flex justify-center pb-20">
-                                            <Button
-                                                variant="outline"
-                                                className="rounded-xl px-12 h-14 font-extrabold min-w-[240px] shadow-sm hover:shadow-md transition-all border-2"
-                                                onClick={() => setPage(p => p + 1)}
-                                                disabled={isFetching}
-                                            >
-                                                {isFetching ? (
-                                                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                                                ) : (
-                                                    <>
-                                                        Daha Fazla Gör
-                                                        <Separator orientation="vertical" className="mx-4 h-4 bg-foreground/20" />
-                                                        <span className="text-xs text-muted-foreground font-medium">Kalan {total - items.length}</span>
-                                                    </>
-                                                )}
-                                            </Button>
+                                    {hasNextPage && (
+                                        <div ref={ref} className="flex justify-center py-8">
+                                            {isFetchingNextPage ? (
+                                                <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                    Daha fazla yükleniyor...
+                                                </div>
+                                            ) : (
+                                                <div className="h-8"></div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
