@@ -165,7 +165,7 @@ export async function seedTestDataAction() {
                     title: data.title,
                     description: data.desc,
                     type: 'FLASHCARD',
-                    status: 'PUBLISHED',
+                    status: 'ACTIVE',
                     visibility: 'PUBLIC',
                     isVerified: true,
                     ownerId: owner.id,
@@ -228,9 +228,9 @@ export async function seedTestDataAction() {
 
         await prisma.note.createMany({
             data: [
-                { userId: owner.id, title: 'LibraryCard Refactoring Notları', content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz' },
-                { userId: owner.id, title: 'Veritabanı Optimizasyonları', content: 'PostgreSQL indexing kullanarak query sürelerini 2ms seviyesine indirdik. Ayrıca Prisma sorgularını birleştirerek 15 farklı network requesti tek transaction içinde hallettik.' },
-                { userId: owner.id, title: 'Sonraki Versiyon V2.0 Hedefleri', content: 'Önümüzdeki aylarda yapay zeka entegreli akıllı tekrarlama algoritmamızı test gruplarına açacağız.' }
+                { userId: owner.id, title: 'LibraryCard Refactoring Notları', content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz', visibility: 'PUBLIC' },
+                { userId: owner.id, title: 'Veritabanı Optimizasyonları', content: 'PostgreSQL indexing kullanarak query sürelerini 2ms seviyesine indirdik. Ayrıca Prisma sorgularını birleştirerek 15 farklı network requesti tek transaction içinde hallettik.', visibility: 'PUBLIC' },
+                { userId: owner.id, title: 'Sonraki Versiyon V2.0 Hedefleri', content: 'Önümüzdeki aylarda yapay zeka entegreli akıllı tekrarlama algoritmamızı test gruplarına açacağız.', visibility: 'PUBLIC' }
             ]
         });
 

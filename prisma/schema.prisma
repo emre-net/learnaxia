@@ -407,6 +407,7 @@ model Note {
   solvedQuestionId String?
   title            String?
   content          String
+  visibility       Visibility      @default(PRIVATE)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   item             Item?           @relation(fields: [itemId], references: [id])

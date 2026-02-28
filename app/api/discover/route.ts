@@ -20,7 +20,40 @@ export async function GET(req: Request) {
         const limit = parseInt(searchParams.get("limit") || "20");
         const offset = parseInt(searchParams.get("offset") || "0");
 
-        if (type === "COLLECTION") {
+        if (type === "NOTE") {
+            const where = {
+                visibility: 'PUBLIC',
+                ...(search && {
+                    OR: [
+                        { title: { contains: search, mode: "insensitive" } },
+                        { content: { contains: search, mode: "insensitive" } }
+                    ]
+                })
+            };
+
+            const [notes, total] = await Promise.all([
+                prisma.note.findMany({
+                    where: where as any,
+                    include: {
+                        user: { select: { handle: true, image: true, id: true, name: true } },
+                        module: { select: { title: true, id: true } }
+                    },
+                    take: limit,
+                    skip: offset,
+                    orderBy: { createdAt: "desc" }
+                }),
+                prisma.note.count({ where: where as any })
+            ]);
+
+            const normalizedNotes = notes.map((n: any) => ({
+                ...n,
+                owner: n.user, // Normalize it so the frontend can read `item.owner.handle` like modules
+                user: undefined
+            }));
+
+            return NextResponse.json({ items: normalizedNotes, total, type: "NOTE" });
+
+        } else if (type === "COLLECTION") {
             const where = {
                 visibility: 'PUBLIC',
                 ...(category && { category }),

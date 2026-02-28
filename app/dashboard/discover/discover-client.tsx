@@ -65,7 +65,8 @@ export function DiscoverClient() {
         queryFn: async ({ pageParam = 0 }) => {
             const params = new URLSearchParams();
             if (activeTab === "modules") params.set("type", "MODULE");
-            else params.set("type", "COLLECTION");
+            else if (activeTab === "collections") params.set("type", "COLLECTION");
+            else params.set("type", "NOTE");
 
             if (selectedCategory) params.set("category", selectedCategory);
             if (selectedSubCategory) params.set("subCategory", selectedSubCategory);
@@ -274,6 +275,7 @@ export function DiscoverClient() {
                             <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground">
                                 <TabsTrigger value="modules" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Modüller</TabsTrigger>
                                 <TabsTrigger value="collections" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Koleksiyonlar</TabsTrigger>
+                                <TabsTrigger value="notes" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notlar</TabsTrigger>
                             </TabsList>
 
                             <div className="hidden sm:block text-sm text-muted-foreground font-medium">
@@ -311,7 +313,7 @@ export function DiscoverClient() {
                                             items.map((item: any) => (
                                                 <ModuleCard key={item.id} module={item} showOwner={true} />
                                             ))
-                                        ) : (
+                                        ) : activeTab === "collections" ? (
                                             items.map((item: any) => (
                                                 <CollectionCard
                                                     key={item.id}
@@ -322,6 +324,56 @@ export function DiscoverClient() {
                                                     }}
                                                     viewMode="grid"
                                                 />
+                                            ))
+                                        ) : (
+                                            items.map((item: any) => (
+                                                <div key={item.id} className="relative group">
+                                                    <div className="absolute -inset-0.5 bg-gradient-to-tr from-primary/10 to-indigo-500/10 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity blur-lg" />
+                                                    <div className="h-full bg-slate-900 border border-slate-800 rounded-[1.8rem] p-6 shadow-xl relative z-10 flex flex-col justify-between overflow-hidden">
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-10 w-10 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-2xl relative">
+                                                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50" />
+                                                                    <BookOpen className="h-5 w-5" />
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="font-bold text-slate-100 uppercase tracking-wider text-xs">Açık Not</h3>
+                                                                    {item.module && (
+                                                                        <div className="text-[10px] text-muted-foreground font-medium truncate max-w-[150px]">
+                                                                            Modül: {item.module.title}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h2 className="text-xl font-bold line-clamp-2 leading-tight">
+                                                                    {item.title || "İsimsiz Not"}
+                                                                </h2>
+                                                                <p className="mt-3 text-sm text-slate-400 line-clamp-3 leading-relaxed">
+                                                                    {item.content}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="pt-6 mt-6 border-t border-slate-800/60 flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                {item.owner?.image ? (
+                                                                    <img src={item.owner.image} alt={item.owner.handle || "user"} className="h-6 w-6 rounded-full border border-slate-700 object-cover" />
+                                                                ) : (
+                                                                    <div className="h-6 w-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                                                                        {(item.owner?.handle || item.owner?.name || "?").substring(0, 1).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                                <span className="text-xs font-bold text-slate-300">
+                                                                    @{item.owner?.handle || "anonim"}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground font-medium">
+                                                                {new Date(item.createdAt).toLocaleDateString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             ))
                                         )}
                                     </div>
