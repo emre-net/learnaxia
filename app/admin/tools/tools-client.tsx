@@ -99,7 +99,7 @@ export default function AdminToolsClient() {
                         Test Verisi (Seeder)
                     </h2>
                     <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                        Sisteme sahte veriler ekler (1 public modül, 1 koleksiyon, 1 not). Bu işlem, arayüz geliştirmelerini test etmek için faydalıdır.
+                        Sisteme 6 çeşitli Modül, 5 Koleksiyon ve 3 Not ekler. Tümü otomatik "learnaxia" hesabı adına yayınlanır.
                     </p>
                     <button
                         disabled={!!loading}
