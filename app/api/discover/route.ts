@@ -51,7 +51,7 @@ export async function GET(req: Request) {
                 prisma.collection.count({ where: where as any })
             ]);
 
-            const normalizedCollections = collections.map(c => ({
+            const normalizedCollections = collections.map((c: any) => ({
                 ...c,
                 isInLibrary: c.userLibrary.length > 0,
                 userLibrary: undefined // Clean up
@@ -93,7 +93,7 @@ export async function GET(req: Request) {
                 prisma.module.count({ where: where as any })
             ]);
 
-            const normalizedModules = modules.map(m => ({
+            const normalizedModules = modules.map((m: any) => ({
                 ...m,
                 isInLibrary: m.userLibrary.length > 0,
                 userLibrary: undefined

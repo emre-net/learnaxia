@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         const userId = session.user.id;
 
         // Fix #11: Wrap ALL merge operations in a single transaction
-        const results = await prisma.$transaction(async (tx) => {
+        const results = await prisma.$transaction(async (tx: any) => {
             const counts = { merged: 0, skipped: 0, sessions: 0, itemSessions: 0 };
 
             // --- 1. Merge Progress ---

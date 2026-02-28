@@ -52,7 +52,7 @@ export default async function AdminUsersPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                users.map((user) => (
+                                users.map((user: any) => (
                                     <tr key={user.id} className="hover:bg-slate-800/30 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -70,8 +70,8 @@ export default async function AdminUsersPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${user.role === 'ADMIN'
-                                                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                                                    : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                                : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
                                                 }`}>
                                                 {user.role}
                                             </span>

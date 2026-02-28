@@ -37,7 +37,7 @@ export async function POST() {
             prisma.module.deleteMany({}), // This will cascade delete forks since sourceModuleId is optional but relates to Module
 
             // 6. Miscellanous
-            prisma.pdfAsset.deleteMany({}),
+            prisma.pDFAsset.deleteMany({}),
             prisma.weaknessReport.deleteMany({}),
             prisma.systemLog.deleteMany({}),
         ]);

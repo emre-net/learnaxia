@@ -31,17 +31,17 @@ export class StudyService {
         // 3. Fetch User Progress (Parallel)
         const [itemProgresses, sm2Progresses] = await Promise.all([
             prisma.itemProgress.findMany({
-                where: { userId, itemId: { in: module.items.map(i => i.id) } }
+                where: { userId, itemId: { in: module.items.map((i: any) => i.id) } }
             }),
             prisma.sM2Progress.findMany({
-                where: { userId, itemId: { in: module.items.map(i => i.id) } }
+                where: { userId, itemId: { in: module.items.map((i: any) => i.id) } }
             })
         ]);
 
         // 4. Merge & Filter Logic
-        let items = module.items.map(item => {
-            const progress = itemProgresses.find(p => p.itemId === item.id);
-            const sm2 = sm2Progresses.find(p => p.itemId === item.id);
+        let items = module.items.map((item: any) => {
+            const progress = itemProgresses.find((p: any) => p.itemId === item.id);
+            const sm2 = sm2Progresses.find((p: any) => p.itemId === item.id);
 
             // Normalize Type & Content
             let type: any = item.type;
@@ -88,8 +88,8 @@ export class StudyService {
         if (mode === 'WRONG_ONLY') {
             // Handbook Rule: "Item changed -> no longer wrong".
             // Filter: lastResult == WRONG AND item.hash == progress.hash
-            items = items.filter(i => {
-                const progress = itemProgresses.find(p => p.itemId === i.id);
+            items = items.filter((i: any) => {
+                const progress = itemProgresses.find((p: any) => p.itemId === i.id);
                 return i.lastResult === 'WRONG' && progress?.contentHash === i.hash;
             });
         } else if (mode === 'SM2') {
@@ -102,7 +102,7 @@ export class StudyService {
             });
         } else if (mode === 'AI_SMART') {
             // Smart Order: Prioritize WRONG > New > Review
-            items = items.sort((a, b) => {
+            items = items.sort((a: any, b: any) => {
                 const scoreA = (a.lastResult === 'WRONG' ? 100 : 0) + (a.interval === 0 ? 50 : 0);
                 const scoreB = (b.lastResult === 'WRONG' ? 100 : 0) + (b.interval === 0 ? 50 : 0);
                 return scoreB - scoreA;
@@ -114,8 +114,8 @@ export class StudyService {
 
         // 6. Find Resumption Index (Improved)
         // Find the index of the first item that doesn't have a CORRECT progress
-        const firstUnsolvedIndex = module.items.findIndex(item => {
-            const progress = itemProgresses.find(p => p.itemId === item.id);
+        const firstUnsolvedIndex = module.items.findIndex((item: any) => {
+            const progress = itemProgresses.find((p: any) => p.itemId === item.id);
             return !progress || progress.lastResult !== 'CORRECT';
         });
 

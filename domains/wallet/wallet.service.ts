@@ -40,7 +40,7 @@ export class WalletService {
     static async credit(userId: string, amount: number, type: string, description?: string) {
         if (amount <= 0) throw new Error("Credit amount must be positive");
 
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const wallet = await tx.tokenWallet.upsert({
                 where: { userId },
                 create: { userId, balance: 50 + amount }, // Initial 50 + credit
@@ -68,11 +68,10 @@ export class WalletService {
     static async debit(userId: string, cost: number, type: string, description?: string) {
         if (cost <= 0) throw new Error("Debit cost must be positive");
 
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // Pessimistic lock: SELECT FOR UPDATE prevents concurrent reads
-            const [wallet] = await tx.$queryRaw<{ id: string; balance: number }[]>(
-                Prisma.sql`SELECT "id", "balance" FROM "TokenWallet" WHERE "userId" = ${userId} FOR UPDATE`
-            );
+            const wallets = await prisma.$queryRaw<{ id: string; balance: number }[]>`SELECT "id", "balance" FROM "TokenWallet" WHERE "userId" = ${userId} FOR UPDATE`;
+            const wallet = wallets[0];
 
             if (!wallet) throw new Error("Wallet not found");
             if (wallet.balance < cost) throw new Error("Insufficient funds");

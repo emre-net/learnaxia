@@ -139,7 +139,7 @@ export class ForkService {
      * Fork-on-Edit helper: Forks the module and returns the new item ID that corresponds to the source item.
      */
     static async forkAndApplyUpdate(userId: string, moduleId: string, itemId: string, itemData: any) {
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: any) => {
             // 1. Fork the module
             const newModule = await this.fork(userId, moduleId);
 

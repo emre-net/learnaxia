@@ -46,7 +46,7 @@ export async function GET(req: Request) {
         });
 
         const activityMap = new Map<string, number>();
-        lastMonthSessions.forEach(s => {
+        lastMonthSessions.forEach((s: any) => {
             const date = s.createdAt.toISOString().split('T')[0];
             activityMap.set(date, (activityMap.get(date) || 0) + (s.durationMs || 0));
         });
@@ -69,10 +69,10 @@ export async function GET(req: Request) {
 
         const activeModulesCount = allLibraryEntries.length;
         const recentModules = allLibraryEntries
-            .sort((a, b) => new Date(b.lastInteractionAt).getTime() - new Date(a.lastInteractionAt).getTime())
+            .sort((a: any, b: any) => new Date(b.lastInteractionAt).getTime() - new Date(a.lastInteractionAt).getTime())
             .slice(0, 5);
 
-        const moduleIds = recentModules.map(m => m.moduleId);
+        const moduleIds = recentModules.map((m: any) => m.moduleId);
 
         // Single query instead of N+1 loop for recent module performance
         const recentProgress = moduleIds.length > 0
@@ -91,7 +91,7 @@ export async function GET(req: Request) {
 
         // Group by moduleId in JS for recent modules
         const moduleStatsMap = new Map<string, { correct: number; wrong: number }>();
-        recentProgress.forEach(p => {
+        recentProgress.forEach((p: any) => {
             const mid = p.item.moduleId;
             const existing = moduleStatsMap.get(mid) || { correct: 0, wrong: 0 };
             existing.correct += p.correctCount;
@@ -99,7 +99,7 @@ export async function GET(req: Request) {
             moduleStatsMap.set(mid, existing);
         });
 
-        const moduleStats = recentModules.map(entry => {
+        const moduleStats = recentModules.map((entry: any) => {
             const stats = moduleStatsMap.get(entry.moduleId) || { correct: 0, wrong: 0 };
             const total = stats.correct + stats.wrong;
             const accuracy = total > 0 ? Math.round((stats.correct / total) * 100) : 0;

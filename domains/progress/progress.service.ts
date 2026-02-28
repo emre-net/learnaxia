@@ -20,7 +20,7 @@ export class ProgressService {
             durationMs: number;
         }
     ) {
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: any) => {
             // 1. Validate Session & Ownership
             const session = await tx.learningSession.findUnique({
                 where: { id: sessionId }

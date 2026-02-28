@@ -73,7 +73,7 @@ export class CollectionService {
                 collection: {
                     include: {
                         owner: {
-                            select: { handle: true, image: true, isVerified: true }
+                            select: { handle: true, image: true }
                         },
                         items: { select: { moduleId: true } }, // Fetch item count
                         _count: { select: { userLibrary: { where: { role: 'SAVED' } } } }
@@ -133,7 +133,7 @@ export class CollectionService {
         }
 
         // Transaction to update details and items
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: any) => {
             // Update basic details
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (tx as any).collection.update({

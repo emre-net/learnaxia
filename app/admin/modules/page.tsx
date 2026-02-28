@@ -55,7 +55,7 @@ export default async function AdminModulesPage() {
                         <p className="text-slate-500 italic">Henüz modül oluşturulmamış.</p>
                     </div>
                 ) : (
-                    modules.map((mod) => (
+                    modules.map((mod: any) => (
                         <div key={mod.id} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden group hover:border-indigo-500/30 transition-all duration-300">
                             <div className="p-6">
                                 <div className="flex items-start justify-between mb-4">

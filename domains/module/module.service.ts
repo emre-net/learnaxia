@@ -154,16 +154,16 @@ export class ModuleService {
 
         if (dto.items) {
             const items = dto.items;
-            await prisma.$transaction(async (tx) => {
+            await prisma.$transaction(async (tx: any) => {
                 const existingItems = await tx.item.findMany({
                     where: { moduleId },
                     select: { id: true }
                 });
-                const existingItemIds = new Set(existingItems.map(i => i.id));
-                const incomingItemIds = new Set(items.filter(i => i.id && existingItemIds.has(i.id)).map(i => i.id));
-                const itemsToCreate = items.filter(i => !i.id || !existingItemIds.has(i.id));
+                const existingItemIds = new Set(existingItems.map((i: any) => i.id));
+                const incomingItemIds = new Set(items.filter((i: any) => i.id && existingItemIds.has(i.id)).map((i: any) => i.id));
+                const itemsToCreate = items.filter((i: any) => !i.id || !existingItemIds.has(i.id));
 
-                const itemsToDelete = existingItems.filter(i => !incomingItemIds.has(i.id)).map(i => i.id);
+                const itemsToDelete = existingItems.filter((i: any) => !incomingItemIds.has(i.id)).map((i: any) => i.id);
                 if (itemsToDelete.length > 0) {
                     await tx.item.deleteMany({ where: { id: { in: itemsToDelete } } });
                 }
