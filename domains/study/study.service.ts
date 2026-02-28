@@ -96,7 +96,7 @@ export class StudyService {
             // SM-2 Filter: Due items only (or new)
             // Due: nextReviewAt <= NOW
             const now = new Date();
-            items = items.filter(i => {
+            items = items.filter((i: any) => {
                 if (!i.nextReviewAt) return true; // New items are due
                 return new Date(i.nextReviewAt) <= now;
             });

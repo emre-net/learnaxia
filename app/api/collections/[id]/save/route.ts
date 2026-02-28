@@ -11,7 +11,7 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const collectionId = params.id;
+        const { id: collectionId } = await props.params;
         const userId = session.user.id;
 
         await prisma.userCollectionLibrary.upsert({
@@ -35,7 +35,7 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const collectionId = params.id;
+        const { id: collectionId } = await props.params;
         const userId = session.user.id;
 
         const entry = await prisma.userCollectionLibrary.findUnique({

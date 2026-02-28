@@ -11,7 +11,7 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const moduleId = params.id;
+        const { id: moduleId } = await props.params;
         await ModuleService.addToLibrary(session.user.id, moduleId);
 
         return NextResponse.json({ success: true });

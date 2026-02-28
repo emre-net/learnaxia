@@ -11,7 +11,7 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const sourceModuleId = params.id;
+        const { id: sourceModuleId } = await props.params;
         const newModule = await ModuleService.fork(session.user.id, sourceModuleId);
 
         return NextResponse.json(newModule, { status: 201 });

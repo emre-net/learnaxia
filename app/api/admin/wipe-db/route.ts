@@ -34,6 +34,7 @@ export async function POST() {
             prisma.collectionItem.deleteMany({}),
             prisma.item.deleteMany({}),
             prisma.collection.deleteMany({}),
+            prisma.module.updateMany({ data: { sourceModuleId: null } }),
             prisma.module.deleteMany({}), // This will cascade delete forks since sourceModuleId is optional but relates to Module
 
             // 6. Miscellanous
@@ -45,8 +46,24 @@ export async function POST() {
         console.log("Database wipe completed successfully.");
         return NextResponse.json({ success: true, message: "Tüm içerik veritabanları (kullanıcılar hariç) başarıyla sıfırlandı." });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Database wipe failed:", error);
-        return NextResponse.json({ success: false, error: "Veritabanı sıfırlanırken bir hata oluştu.", details: String(error) }, { status: 500 });
+
+        try {
+            await prisma.systemLog.create({
+                data: {
+                    level: 'ERROR',
+                    environment: process.env.NODE_ENV || 'development',
+                    service: 'api/wipe-db',
+                    source: 'SERVER',
+                    message: `Veritabanı sıfırlama hatası (wipe-db API): ${error.message || String(error)}`,
+                    stack: error.stack
+                }
+            });
+        } catch (logError) {
+            console.error("Failed to write to systemLog:", logError);
+        }
+
+        return NextResponse.json({ success: false, error: "Veritabanı sıfırlanırken bir hata oluştu. Detaylar için Admin Log'a bakın.", details: String(error) }, { status: 500 });
     }
 }

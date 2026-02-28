@@ -12,7 +12,8 @@ export default async function CollectionDetailPage(props: { params: Promise<{ id
     }
 
     try {
-        const collection = await CollectionService.getById(session.user.id, params.id);
+        const { id } = await params;
+        const collection = await CollectionService.getById(session.user.id, id);
         if (!collection) return notFound();
 
         return <CollectionDetailClient collection={collection} />;

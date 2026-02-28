@@ -260,6 +260,7 @@ export async function resetContentAction() {
             prisma.collectionItem.deleteMany({}),
             prisma.item.deleteMany({}),
             prisma.collection.deleteMany({}),
+            prisma.module.updateMany({ data: { sourceModuleId: null } }),
             prisma.module.deleteMany({}),
 
             // 6. Miscellanous
@@ -270,9 +271,25 @@ export async function resetContentAction() {
 
         revalidatePath("/admin");
         return { success: true, message: "Kullanıcılar hariç tüm içerik veritabanları (Modül, Not, Koleksiyon) başarıyla sıfırlandı." };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Reset error:", error);
-        return { success: false, message: "Sıfırlarken hata oluştu." };
+
+        try {
+            await prisma.systemLog.create({
+                data: {
+                    level: 'ERROR',
+                    environment: process.env.NODE_ENV || 'development',
+                    service: 'admin/cleanup',
+                    source: 'SERVER',
+                    message: `Veritabanı sıfırlama hatası (resetContentAction): ${error.message || String(error)}`,
+                    stack: error.stack
+                }
+            });
+        } catch (logError) {
+            console.error("Failed to write to systemLog:", logError);
+        }
+
+        return { success: false, message: "Sıfırlarken hata oluştu. Lütfen detaylar için Admin Log sekmesini kontrol edin." };
     }
 }
 
