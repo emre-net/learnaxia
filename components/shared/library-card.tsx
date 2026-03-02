@@ -3,6 +3,7 @@
 import { Card, CardTitle } from "@/components/ui/card";
 import { VisibilityBadge } from "@/components/shared/visibility-badge";
 import { CardOwner } from "@/components/shared/card-owner";
+import { ShareButton } from "@/components/shared/share-button";
 
 export interface LibraryCardMetric {
     icon: React.ReactNode;
@@ -22,6 +23,9 @@ export interface LibraryCardProps {
     owner?: { handle: string | null; image?: string | null; isVerified?: boolean; isTeam?: boolean } | null;
     actionButton?: React.ReactNode;
     saveButton?: React.ReactNode;
+    shareType?: "module" | "collection" | "note";
+    shareId?: string;
+    shareTitle?: string;
     onClick?: () => void;
 }
 
@@ -36,6 +40,9 @@ export function LibraryCard({
     owner,
     actionButton,
     saveButton,
+    shareType,
+    shareId,
+    shareTitle,
     onClick
 }: LibraryCardProps) {
     if (viewMode === 'list') {
@@ -59,6 +66,9 @@ export function LibraryCard({
                     </div>
                 </div>
                 <div className="flex items-center gap-3 pl-2" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
+                    {shareType && shareId && shareTitle && (
+                        <ShareButton type={shareType} id={shareId} title={shareTitle} />
+                    )}
                     {saveButton}
                     {actionButton}
                 </div>
@@ -81,6 +91,9 @@ export function LibraryCard({
                     </div>
                     <div className="flex items-center gap-2 pt-1" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
                         {visibility && <VisibilityBadge visibility={visibility as any} className="h-7 text-xs px-3 shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-white/50 dark:border-zinc-800" />}
+                        {shareType && shareId && shareTitle && (
+                            <ShareButton type={shareType} id={shareId} title={shareTitle} />
+                        )}
                         {saveButton}
                     </div>
                 </div>

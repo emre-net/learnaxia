@@ -94,8 +94,8 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
             variant="ghost"
             size="icon"
             className={`h-11 w-11 rounded-2xl transition-all shadow-sm ${isOwner ? 'opacity-40 cursor-not-allowed bg-muted/20 text-muted-foreground' :
-                    isSaved ? 'bg-primary/5 text-primary border border-primary/10' :
-                        'bg-muted/40 text-muted-foreground hover:bg-primary/5 hover:text-primary border border-transparent'
+                isSaved ? 'bg-primary/5 text-primary border border-primary/10' :
+                    'bg-muted/40 text-muted-foreground hover:bg-primary/5 hover:text-primary border border-transparent'
                 }`}
             onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
@@ -133,6 +133,9 @@ export function CollectionCard({ item, viewMode }: CollectionCardProps) {
                 isVerified: collection.isVerified,
                 isTeam: collection.owner.handle === 'learnaxia'
             }}
+            shareType="collection"
+            shareId={collection.id}
+            shareTitle={collection.title}
             saveButton={saveButton}
             actionButton={viewMode === 'list' ? <Button variant="default" className="h-11 rounded-xl px-6 font-bold" onClick={(e: React.MouseEvent) => { e.stopPropagation(); router.push(`/dashboard/collections/${collection.id}`); }}>Aç</Button> : actionButton}
             onClick={() => router.push(`/dashboard/collections/${collection.id}`)}

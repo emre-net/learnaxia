@@ -168,6 +168,9 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                 metrics={metrics}
                 metadata={metadataItems}
                 owner={showOwner ? module.owner : undefined}
+                shareType="module"
+                shareId={module.id}
+                shareTitle={module.title}
                 saveButton={saveButton}
                 actionButton={viewMode === 'list' ? <Button variant="default" className="h-11 rounded-xl px-6 font-bold" onClick={(e) => { e.stopPropagation(); setIsOptionsOpen(true); }}>Çalış</Button> : actionButton}
                 onClick={() => setIsOptionsOpen(true)}

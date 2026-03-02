@@ -77,6 +77,9 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                         label: "Karakter"
                                     }
                                 ]}
+                                shareType="note"
+                                shareId={note.id}
+                                shareTitle={note.title || "İsimsiz Not"}
                                 actionButton={
                                     <div className="flex gap-2 w-full justify-end">
                                         <Button
