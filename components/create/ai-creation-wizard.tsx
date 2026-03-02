@@ -423,18 +423,18 @@ export function AICreationWizard() {
 
                                     {item.type === 'FLASHCARD' && (
                                         <div className="mt-2">
-                                            <p className="font-semibold text-lg">{item.front}</p>
+                                            <p className="font-semibold text-lg">{item.content?.front}</p>
                                             <div className="h-px bg-border my-2" />
-                                            <p className="text-muted-foreground">{item.back}</p>
+                                            <p className="text-muted-foreground">{item.content?.back}</p>
                                         </div>
                                     )}
 
                                     {item.type === 'MC' && (
                                         <div className="mt-2">
-                                            <p className="font-medium">{item.question}</p>
+                                            <p className="font-medium">{item.content?.question}</p>
                                             <ul className="grid grid-cols-2 gap-2 mt-2 text-sm">
-                                                {item.options.map((opt: string, i: number) => (
-                                                    <li key={i} className={`p-2 rounded border ${opt === item.answer ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400' : 'bg-muted/50'}`}>
+                                                {(item.content?.options || []).map((opt: string, i: number) => (
+                                                    <li key={i} className={`p-2 rounded border ${opt === (item.content?.answer || item.content?.correct) ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400' : 'bg-muted/50'}`}>
                                                         {opt}
                                                     </li>
                                                 ))}
@@ -444,15 +444,15 @@ export function AICreationWizard() {
 
                                     {item.type === 'GAP' && (
                                         <div className="mt-2">
-                                            <p className="font-medium bg-muted/30 p-3 rounded-md font-mono text-sm">{item.text}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">Answers: {item.answers.join(", ")}</p>
+                                            <p className="font-medium bg-muted/30 p-3 rounded-md font-mono text-sm">{item.content?.text}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Answers: {(item.content?.answers || []).join(", ")}</p>
                                         </div>
                                     )}
 
                                     {item.type === 'TF' && (
                                         <div className="mt-2">
-                                            <p className="font-medium">{item.statement}</p>
-                                            <p className={`mt-1 font-bold ${item.answer === 'True' ? 'text-green-500' : 'text-red-500'}`}>{item.answer}</p>
+                                            <p className="font-medium">{item.content?.statement || item.content?.question}</p>
+                                            <p className={`mt-1 font-bold ${(item.content?.answer || item.content?.correct)?.toString().toLowerCase() === 'true' ? 'text-green-500' : 'text-red-500'}`}>{String(item.content?.answer || item.content?.correct)}</p>
                                         </div>
                                     )}
 

@@ -93,8 +93,32 @@ export class OpenAIAIProvider implements AIProvider {
                     response_format: { type: "json_object" }
                 });
 
-                const content = JSON.parse(response.choices[0].message.content || "{}");
-                const parsed = GenerationSchema.parse(content);
+                const contentString = response.choices[0].message.content || "{}";
+                let content;
+                let parsed;
+
+                try {
+                    content = JSON.parse(contentString);
+                    parsed = GenerationSchema.parse(content);
+                } catch (parseError: any) {
+                    await prisma.systemLog.create({
+                        data: {
+                            requestId: generationId,
+                            level: "ERROR",
+                            environment: process.env.NODE_ENV || "development",
+                            service: "ai",
+                            message: `JSON Parsing veya Schema Doğrulama Hatası (Attempt ${attempt})`,
+                            source: "SERVER",
+                            metadata: {
+                                attempt,
+                                rawResponse: contentString,
+                                error: parseError.message
+                            }
+                        }
+                    }).catch(() => { });
+                    throw parseError; // Caught by outer catch block
+                }
+
                 currentItems = parsed.items as AIResponseItem[];
 
                 // If this is the last attempt, return the items immediately to avoid a redundant check
