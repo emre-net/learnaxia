@@ -6,8 +6,11 @@ import prisma from "@/lib/prisma"
 import { authConfig } from "./auth.config"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { headers } from "next/headers"
+import { extractBearerToken, verifyMobileAccessToken } from "@/lib/auth/mobile-jwt"
+import type { Session } from "next-auth"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const nextAuth = NextAuth({
     ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
@@ -116,3 +119,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
     }
 })
+
+export const { handlers, signIn, signOut } = nextAuth
+
+export async function auth(): Promise<Session | null> {
+    const session = await (nextAuth.auth as any)()
+    if (session?.user?.id) return session
+
+    // Fallback for mobile clients using Authorization: Bearer <accessToken>
+    // Works when route handlers call auth() without relying on NextAuth cookies.
+    let authorizationHeader: string | null = null
+    try {
+        authorizationHeader = (await headers()).get("authorization")
+    } catch {
+        // no-op: headers() not available in this runtime context
+    }
+
+    const bearer = extractBearerToken(authorizationHeader)
+    if (!bearer) return session
+
+    try {
+        const payload = await verifyMobileAccessToken(bearer)
+        const user = await prisma.user.findUnique({
+            where: { id: payload.userId },
+            select: { id: true, email: true, role: true, status: true, deletedAt: true, sessionVersion: true }
+        })
+
+        if (!user || user.deletedAt || user.status !== "ACTIVE") return null
+        if ((user.sessionVersion ?? 1) !== (payload.tokenVersion ?? 1)) return null
+
+        return {
+            user: {
+                id: user.id,
+                email: user.email ?? payload.email ?? undefined,
+                name: undefined,
+                role: user.role,
+            } as any,
+            expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        } as any
+    } catch {
+        return session
+    }
+}

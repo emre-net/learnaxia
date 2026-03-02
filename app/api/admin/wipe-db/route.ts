@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 
 export async function POST() {
-    // SECURITY WARNING: In a real app, ensure this is protected by Admin role checks.
-    // Given the context of a development/testing environment reset request:
     try {
+        const session = await auth();
+        const role = (session?.user as { role?: string } | undefined)?.role;
+        if (!session?.user?.id || role !== "ADMIN") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         console.log("Starting full database wipe (excluding users)...");
 
         // Use Prisma transactions to ensure atomicity and handle relations correctly.
@@ -46,7 +51,7 @@ export async function POST() {
         console.log("Database wipe completed successfully.");
         return NextResponse.json({ success: true, message: "Tüm içerik veritabanları (kullanıcılar hariç) başarıyla sıfırlandı." });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Database wipe failed:", error);
 
         try {
@@ -56,8 +61,8 @@ export async function POST() {
                     environment: process.env.NODE_ENV || 'development',
                     service: 'api/wipe-db',
                     source: 'SERVER',
-                    message: `Veritabanı sıfırlama hatası (wipe-db API): ${error.message || String(error)}`,
-                    stack: error.stack
+                    message: `Veritabanı sıfırlama hatası (wipe-db API): ${error instanceof Error ? error.message : String(error)}`,
+                    stack: error instanceof Error ? error.stack : undefined
                 }
             });
         } catch (logError) {

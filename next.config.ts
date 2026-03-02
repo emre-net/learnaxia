@@ -43,7 +43,8 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            // Allow camera on same-origin pages (needed for photo-upload/capture flows).
+            value: 'camera=(self), microphone=(), geolocation=()',
           },
         ],
       },

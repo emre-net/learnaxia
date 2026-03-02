@@ -19,10 +19,7 @@ export const authConfig = {
                     const userEmail = auth.user?.email;
 
                     // Priority: ADMIN role or matching the configured ADMIN_EMAIL
-                    // Hardcoded fallback included to handle session sync issues
-                    const isAdmin = userRole === "ADMIN" ||
-                        userEmail === "netemre387@gmail.com" ||
-                        userEmail === process.env.ADMIN_EMAIL;
+                    const isAdmin = userRole === "ADMIN" || userEmail === process.env.ADMIN_EMAIL;
 
                     if (isAdmin) return true;
 

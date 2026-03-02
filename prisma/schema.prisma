@@ -48,9 +48,34 @@ model User {
   questionOverrides UserQuestionOverride[]
   userRetention     UserRetention[]
   weaknessReports   WeaknessReport[]
+  mobileRefreshTokens MobileRefreshToken[]
 
   @@index([email])
   @@index([handle])
+}
+
+model MobileRefreshToken {
+  id               String            @id @default(uuid())
+  userId           String
+  tokenHash        String            @unique
+  expiresAt        DateTime
+  createdAt        DateTime          @default(now())
+  revokedAt        DateTime?
+  replacedByTokenId String?
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedByToken  MobileRefreshToken? @relation("MobileRefreshTokenRotation", fields: [replacedByTokenId], references: [id])
+  replacedTokens   MobileRefreshToken[] @relation("MobileRefreshTokenRotation")
+
+  @@index([userId, expiresAt])
+}
+
+model ApiRateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
