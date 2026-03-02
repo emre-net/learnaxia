@@ -2,10 +2,66 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 import { Cpu, ArrowLeft, Upload, FileUp, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function AiNotePage() {
+    const [isExtracting, setIsExtracting] = useState(false);
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsExtracting(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const res = await fetch("/api/file/extract", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Failed to extract document");
+            }
+
+            const data = await res.json();
+
+            // Redirect to AI Creation Wizard with the extracted text via session storage
+            // Because URL params have limits
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('magic_wand_text', data.text.substring(0, 19500));
+            }
+
+            toast({
+                title: "Belge Okundu",
+                description: "Veriler başarıyla analiz edildi, oluşturma atölyesine yönlendiriliyorsunuz.",
+            });
+
+            // Redirect to general AI creation where notes can be generated alongside modules
+            router.push('/dashboard/create/ai');
+
+        } catch (error: any) {
+            console.error("Extraction error:", error);
+            toast({
+                title: "Hata",
+                description: error.message || "Belge okunurken bir hata oluştu.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsExtracting(false);
+            e.target.value = '';
+        }
+    };
+
     return (
         <div className="flex-1 space-y-8 p-4 md:p-8 pt-6">
             <div className="flex items-center gap-4">
@@ -29,9 +85,21 @@ export default function AiNotePage() {
                     <CardDescription className="max-w-xs">
                         Ders notlarınızı, kitap bölümlerini veya makaleleri buraya sürükleyin.
                     </CardDescription>
-                    <Button className="mt-8 bg-purple-600 hover:bg-purple-700 font-bold px-8">
-                        <Upload className="mr-2 h-4 w-4" /> Dosya Seç
-                    </Button>
+                    <Label htmlFor="ai-note-doc-upload" className="mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors w-max">
+                        {isExtracting ? (
+                            <span className="flex items-center">Yükleniyor...</span>
+                        ) : (
+                            <span className="flex items-center"><Upload className="mr-2 h-4 w-4" /> Dosya Seç</span>
+                        )}
+                        <input
+                            id="ai-note-doc-upload"
+                            type="file"
+                            accept=".pdf,.txt,.pptx,.docx"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                            disabled={isExtracting}
+                        />
+                    </Label>
                 </Card>
 
                 <Card className="bg-slate-900/50 border-slate-800 p-8 flex flex-col">

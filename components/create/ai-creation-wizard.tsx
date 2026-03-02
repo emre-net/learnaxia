@@ -25,7 +25,7 @@ import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 const aiConfigSchema = z.object({
     topic: z.string().min(10, "Text must be at least 10 characters").max(20000), // Increased for large docs
     count: z.number().min(3).max(20),
-    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]), // Changed to single type
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TF"]), // Changed to single type
     focusMode: z.enum(["detailed", "summary", "key_concepts", "auto"])
 });
 
@@ -48,14 +48,45 @@ export function AICreationWizard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Setup for future implementation
-        // For now just set the topic to prompt to show it's selected
-        setValue("topic", `[Dosya Seçildi: ${file.name}] Lütfen bu dosyadan içerik oluştur.`);
+        setIsUploading(true);
 
-        toast({
-            title: t("common.success"),
-            description: `${file.name} analize hazır. (Demo Modu)`,
-        });
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const res = await fetch("/api/file/extract", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Failed to extract document");
+            }
+
+            const data = await res.json();
+
+            // Sınır koruması yapalım (örn: 20000)
+            const textToSave = data.text ? data.text.substring(0, 19500) : "";
+
+            setValue("topic", textToSave, { shouldValidate: true, shouldDirty: true });
+
+            toast({
+                title: t("common.success"),
+                description: `${file.name} belgesi okundu ve analize hazır.`,
+            });
+        } catch (error: any) {
+            console.error("Extraction error:", error);
+            setValue("topic", ""); // Temizle
+            toast({
+                title: t("common.error"),
+                description: error.message || "Belge okunurken bir hata oluştu.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsUploading(false);
+            e.target.value = ''; // Reset input
+        }
     };
 
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<AIConfig>({
@@ -246,7 +277,7 @@ export function AICreationWizard() {
                             <div className="space-y-3">
                                 <Label>Content Type</Label>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {["FLASHCARD", "MC", "GAP", "TRUE_FALSE"].map((type) => (
+                                    {["FLASHCARD", "MC", "GAP", "TF"].map((type) => (
                                         <div
                                             key={type}
                                             className={`flex items-center space-x-2 border p-3 rounded-lg cursor-pointer transition-all ${config.type === type ? 'border-purple-500 bg-purple-500/5 ring-1 ring-purple-500' : 'hover:bg-muted/50'}`}
@@ -256,7 +287,7 @@ export function AICreationWizard() {
                                                 {config.type === type && <div className="h-2 w-2 rounded-full bg-purple-500" />}
                                             </div>
                                             <label className="text-sm font-medium leading-none cursor-pointer w-full">
-                                                {type === 'MC' ? t("creation.mcLabel") : type === 'TRUE_FALSE' ? t("creation.tfLabel") : type === 'GAP' ? t("creation.gapLabel") : t("creation.flashcardsLabel")}
+                                                {type === 'MC' ? t("creation.mcLabel") : type === 'TF' ? t("creation.tfLabel") : type === 'GAP' ? t("creation.gapLabel") : t("creation.flashcardsLabel")}
                                             </label>
                                         </div>
                                     ))}
@@ -418,7 +449,7 @@ export function AICreationWizard() {
                                         </div>
                                     )}
 
-                                    {item.type === 'TRUE_FALSE' && (
+                                    {item.type === 'TF' && (
                                         <div className="mt-2">
                                             <p className="font-medium">{item.statement}</p>
                                             <p className={`mt-1 font-bold ${item.answer === 'True' ? 'text-green-500' : 'text-red-500'}`}>{item.answer}</p>
