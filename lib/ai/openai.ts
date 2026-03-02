@@ -4,7 +4,10 @@ import { z } from "zod";
 let _openai: OpenAI | null = null;
 function getOpenAI() {
     if (!_openai) {
-        _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        _openai = new OpenAI({
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: "https://api.groq.com/openai/v1",
+        });
     }
     return _openai;
 }
@@ -43,9 +46,9 @@ const GenerationSchema = z.object({
 
 export class OpenAIService {
     static async generateModuleContent(topic: string, types: ('FLASHCARD' | 'MC' | 'GAP' | 'TF')[] = ['FLASHCARD', 'MC', 'GAP', 'TF'], count: number = 5) {
-        if (!process.env.OPENAI_API_KEY) {
+        if (!process.env.GROQ_API_KEY) {
             // Mock fallback for development if key is missing
-            console.warn("OPENAI_API_KEY missing, returning mock data.");
+            console.warn("GROQ_API_KEY missing, returning mock data.");
             return OpenAIService.getMockData(topic);
         }
 

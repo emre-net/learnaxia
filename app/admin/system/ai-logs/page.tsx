@@ -31,6 +31,7 @@ interface AILog {
         generatorOutput: any[];
         checkerFeedback: string;
         errorMessage?: string;
+        error?: string;
     };
 }
 
@@ -137,7 +138,7 @@ export default function AILogsPage() {
                                     {log.message}
                                 </div>
                                 <div className="text-xs opacity-50 truncate mt-1">
-                                    Req: {log.requestId.split('-')[0]}...
+                                    Req: {log.requestId ? log.requestId.split('-')[0] : 'Unknown'}...
                                 </div>
                             </button>
                         ))}
@@ -184,6 +185,13 @@ export default function AILogsPage() {
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                {(selectedLog.metadata?.errorMessage || selectedLog.metadata?.error) && (
+                                    <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-400 mb-4 whitespace-pre-wrap font-mono text-sm max-h-[300px] overflow-y-auto">
+                                        <div className="font-bold flex items-center gap-2 mb-2"><XCircle className="w-4 h-4" /> CRASH REPORT:</div>
+                                        {selectedLog.metadata.errorMessage || selectedLog.metadata.error}
+                                    </div>
+                                )}
+
                                 {/* User Prompt */}
                                 <div className="flex gap-4">
                                     <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
@@ -192,7 +200,7 @@ export default function AILogsPage() {
                                     <div className="flex-1 space-y-2">
                                         <div className="font-medium text-sm text-slate-300">User / System</div>
                                         <div className="bg-slate-800/50 p-4 rounded-2xl rounded-tl-none border border-slate-700/50 text-slate-300 text-sm whitespace-pre-wrap font-mono">
-                                            {selectedLog.metadata?.generatorInput}
+                                            {selectedLog.metadata?.generatorInput || "N/A (Veritabanı dışı hata / Prompt öncesi çökme)"}
                                         </div>
                                     </div>
                                 </div>
@@ -206,7 +214,7 @@ export default function AILogsPage() {
                                         <div className="font-medium text-sm text-indigo-400 text-right">Generator AI (gpt-4o-mini)</div>
                                         <div className="bg-indigo-500/10 p-4 rounded-2xl rounded-tr-none border border-indigo-500/20 text-indigo-100/80 text-sm overflow-x-auto">
                                             <pre className="font-mono text-xs">
-                                                {JSON.stringify(selectedLog.metadata?.generatorOutput, null, 2)}
+                                                {selectedLog.metadata?.generatorOutput ? JSON.stringify(selectedLog.metadata.generatorOutput, null, 2) : "N/A (Yapay Zeka çıktı üretemedi)"}
                                             </pre>
                                         </div>
                                     </div>

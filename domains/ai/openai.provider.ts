@@ -222,8 +222,8 @@ export class OpenAIAIProvider implements AIProvider {
     }
 
     async analyzeImage(imageBuffer: Buffer, mimeType: string): Promise<VisionResult> {
-        if (!process.env.OPENAI_API_KEY) {
-            throw new AIError('AUTH_ERROR', 'OpenAI API key is missing');
+        if (!process.env.GROQ_API_KEY) {
+            throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
 
         const base64Image = imageBuffer.toString('base64');

@@ -37,12 +37,15 @@ export class OpenAIVisionService implements VisionService {
     private openai: OpenAI;
 
     constructor() {
-        this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        this.openai = new OpenAI({
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: "https://api.groq.com/openai/v1",
+        });
     }
 
     async analyzeQuestionImage(imageBuffer: Buffer, mimeType: string): Promise<VisionAnalysisResult> {
-        if (!process.env.OPENAI_API_KEY) {
-            console.warn("OPENAI_API_KEY missing, using mock vision analysis.");
+        if (!process.env.GROQ_API_KEY) {
+            console.warn("GROQ_API_KEY missing, using mock vision analysis.");
             return this.getMockAnalysis();
         }
 

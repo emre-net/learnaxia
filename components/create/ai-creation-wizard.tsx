@@ -187,7 +187,7 @@ export function AICreationWizard() {
                 title: "Success! 🎉",
                 description: "Module created successfully.",
             });
-            router.push(`/modules/${newModule.id}`);
+            router.push(`/dashboard/modules/${newModule.id}`);
 
         } catch (error) {
             console.error(error);
