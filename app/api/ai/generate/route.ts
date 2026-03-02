@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAiQueue } from "@/lib/queue/client";
 import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
+import prisma from "@/lib/prisma";
 
 const GenerateSchema = z.object({
     topic: z.string().min(3),
@@ -73,11 +74,27 @@ export async function POST(req: Request) {
                 items,
                 remainingTokens: (await WalletService.getBalance(userId)).balance
             });
-        } catch (aiError) {
+        } catch (aiError: any) {
             // 4. Refund on Failure
             console.error("AI Generation Failed, refunding user:", aiError);
             await WalletService.credit(userId, dynamicCost, 'REFUND', `Refund: Generation failed`);
-            return NextResponse.json({ error: "İçerik üretilemedi. Jetonlar iade edildi." }, { status: 500 });
+
+            await prisma.systemLog.create({
+                data: {
+                    level: "ERROR",
+                    environment: process.env.NODE_ENV || "development",
+                    service: "ai",
+                    message: "AI Generation Route Error",
+                    source: "SERVER",
+                    userId: userId,
+                    metadata: {
+                        error: aiError.message || String(aiError),
+                        type: "generation_failure"
+                    }
+                }
+            }).catch(() => { });
+
+            return NextResponse.json({ error: aiError.message || "İçerik üretilemedi. Jetonlar iade edildi." }, { status: 500 });
         }
 
     } catch (error) {
