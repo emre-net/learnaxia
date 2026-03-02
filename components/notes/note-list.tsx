@@ -54,7 +54,12 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                 viewMode="grid"
                                 typeIcon={<TypeIcon type="NOTE" size="md" />}
                                 title={note.title || "İsimsiz Not"}
-                                description={note.content}
+                                description={
+                                    <div
+                                        className="prose prose-sm dark:prose-invert max-w-none line-clamp-3 text-muted-foreground"
+                                        dangerouslySetInnerHTML={{ __html: note.content }}
+                                    />
+                                }
                                 metadata={[
                                     <span key="date" className="text-xs text-muted-foreground whitespace-nowrap">
                                         {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })} güncellendi

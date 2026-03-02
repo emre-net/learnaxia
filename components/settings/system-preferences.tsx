@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useSettingsStore } from "@/stores/settings-store";
 
 interface SystemPreferencesProps {
     language: string;
@@ -46,6 +47,19 @@ export function SystemPreferences({
                     </div>
                     <div className="flex items-center gap-2">
                         <Switch checked={soundEnabled} onCheckedChange={onSoundEnabledChange} />
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                    <div className="space-y-0.5">
+                        <Label className="text-base">Çalışma Süresi Göstergesi (Odaklanma)</Label>
+                        <p className="text-xs text-muted-foreground">Çalışma ekranında (Study) geçen süreyi gösterir. Kapatsanız bile süre arka planda ölçülür ve istatistiklere yansımaya devam eder.</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={useSettingsStore(s => s.showStudyTimer)}
+                            onCheckedChange={useSettingsStore(s => s.setShowStudyTimer)}
+                        />
                     </div>
                 </div>
 

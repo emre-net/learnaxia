@@ -3,7 +3,9 @@ export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
 import { AIService } from "@/domains/ai/ai.service";
+import { WalletService } from "@/domains/wallet/wallet.service";
 import { AIError } from "@/domains/ai/ai.interface";
+import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -27,7 +29,38 @@ export async function POST(req: Request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const result = await AIService.solvePhoto(buffer, file.type);
+        // 1. Dynamic Token Calculation & Rate Limit Guardian (Vision specific)
+        const tokenEstimate = calculateAITokensAndCost({
+            text: file.name, // We use the filename as baseline
+            targetCount: 1,  // Usually resolves one question
+            isVision: true
+        });
+
+        if (tokenEstimate.willHitRateLimit) {
+            return NextResponse.json({
+                error: "Yüklediğiniz fotoğraf analiz edilemeyecek kadar büyük. Lütfen kırparak tekrar deneyin."
+            }, { status: 413 });
+        }
+
+        const dynamicCost = tokenEstimate.recommendedCost;
+
+        // 2. Check Balance & Debit
+        try {
+            await WalletService.debit(session.user.id, dynamicCost, 'AI_SOLVE', `AI Photo Solve: ${file.name} | Cost: ${dynamicCost}`);
+        } catch (error) {
+            return NextResponse.json({ error: "Yetersiz jeton. Lütfen jeton yükleyin." }, { status: 402 });
+        }
+
+        // 3. Process Request
+        let result;
+        try {
+            result = await AIService.solvePhoto(buffer, file.type);
+        } catch (aiError) {
+            // 4. Refund on Failure
+            console.error("AI Photo Solve Failed, refunding user:", aiError);
+            await WalletService.credit(session.user.id, dynamicCost, 'REFUND', `Refund: Photo solve failed`);
+            throw aiError; // pass to the outer catch handler
+        }
 
         return NextResponse.json(result);
 

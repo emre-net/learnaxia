@@ -2,7 +2,7 @@
 
 import { useTranslation } from "@/lib/i18n/i18n";
 import { useStudyStore } from "@/stores/study-store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,23 +17,19 @@ export function GapRenderer({ item }: { item: any }) {
     const { t } = useTranslation();
 
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
-    const [parts, setParts] = useState<string[]>([]);
-    const [gapIndices, setGapIndices] = useState<number[]>([]);
 
-    // Initialize state when item changes
-    useEffect(() => {
-        // Parse text: "The {{capital}} of France." -> ["The ", "{{capital}}", " of France."]
+    const { parts, gapIndices } = useMemo(() => {
         const splitText = item.content.text.split(/(\{\{.*?\}\})/g);
-        setParts(splitText);
-
-        // Identify which parts are gaps
         const indices = splitText
             .map((part: string, index: number) => part.startsWith('{{') && part.endsWith('}}') ? index : -1)
             .filter((index: number) => index !== -1);
+        return { parts: splitText, gapIndices: indices };
+    }, [item.content.text]);
 
-        setGapIndices(indices);
-        setUserAnswers(new Array(indices.length).fill(""));
-    }, [item.id, item.content.text]);
+    // Initialize state when item changes
+    useEffect(() => {
+        setUserAnswers(new Array(gapIndices.length).fill(""));
+    }, [item.id, gapIndices.length]);
 
     const normalize = (s: string) => {
         return s
@@ -84,7 +80,7 @@ export function GapRenderer({ item }: { item: any }) {
         <div className="w-full max-w-3xl flex flex-col gap-8">
             <Card className="p-8 text-center border-2 shadow-sm min-h-[300px] flex flex-col items-center justify-center gap-8">
                 <div className="text-2xl font-semibold leading-loose max-w-full">
-                    {parts.map((part, i) => {
+                    {parts.map((part: string, i: number) => {
                         const isGap = part.startsWith('{{') && part.endsWith('}}');
 
                         if (isGap) {

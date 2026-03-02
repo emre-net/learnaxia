@@ -1,6 +1,9 @@
 "use client";
 
 import { CreditCard, Brain, Layers, ListChecks, HelpCircle, LucideIcon, BookCopy, FileText } from "lucide-react";
+import { Language } from "@/lib/i18n/dictionaries";
+import { t as translate } from "@/lib/i18n/i18n";
+import { useSettingsStore } from "@/stores/settings-store";
 
 export type ModuleType = 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE' | 'COLLECTION' | 'NOTE';
 
@@ -11,6 +14,8 @@ interface TypeIconProps {
 }
 
 export function TypeIcon({ type, className = "", size = 'md' }: TypeIconProps) {
+    const { language } = useSettingsStore();
+
     const config: Record<string, { icon: LucideIcon; color: string; bg: string; label: string }> = {
         "FLASHCARD": {
             icon: CreditCard,
@@ -46,34 +51,35 @@ export function TypeIcon({ type, className = "", size = 'md' }: TypeIconProps) {
             icon: FileText,
             color: "text-rose-600 dark:text-rose-400",
             bg: "bg-rose-50 dark:bg-rose-900/20",
-            label: "Not Defteri"
+            label: translate('creation.collection.note', language) || "Not Defteri"
         }
     };
 
-    const active = config[type] || { icon: Layers, color: "text-zinc-600", bg: "bg-zinc-50", label: "Modül" };
+    const active = config[type] || { icon: Layers, color: "text-zinc-600", bg: "bg-zinc-50", label: translate('library.tabs.modules', language) };
     const Icon = active.icon;
 
     const sizeClasses = {
-        sm: "h-8 w-8 rounded-lg p-1.5",
-        md: "h-11 w-11 rounded-xl p-2.5",
-        lg: "h-14 w-14 rounded-2xl p-3.5"
+        sm: "h-8 w-8 rounded-xl p-1.5",
+        md: "h-12 w-12 rounded-[1.25rem] p-2.5",
+        lg: "h-16 w-16 rounded-[1.5rem] p-3.5"
     };
 
     return (
-        <div className={`${sizeClasses[size]} ${active.bg} flex items-center justify-center border border-white/20 dark:border-white/5 shadow-sm ${className}`} title={active.label}>
-            <Icon className={`w-full h-full ${active.color}`} strokeWidth={2.5} />
+        <div className={`${sizeClasses[size]} ${active.bg} relative overflow-hidden flex items-center justify-center border border-white/60 dark:border-white/10 shadow-lg shadow-current/5 ${className}`} title={active.label}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent dark:from-white/20 dark:to-transparent pointer-events-none mix-blend-overlay" />
+            <Icon className={`w-full h-full relative z-10 ${active.color} drop-shadow-sm`} strokeWidth={2.5} />
         </div>
     );
 }
 
-export function getModuleTypeLabel(type: string) {
+export function getModuleTypeLabel(type: string, language: Language = 'tr') {
     const labels: Record<string, string> = {
-        "FLASHCARD": "Flashcard",
-        "MC": "Çoktan Seçmeli",
-        "GAP": "Boşluk Doldurma",
-        "TRUE_FALSE": "Doğru/Yanlış",
-        "COLLECTION": "Koleksiyon",
-        "NOTE": "Not Defteri"
+        "FLASHCARD": translate('creation.flashcardsLabel', language),
+        "MC": translate('creation.mcLabel', language),
+        "GAP": translate('creation.gapLabel', language),
+        "TRUE_FALSE": translate('creation.tfLabel', language),
+        "COLLECTION": translate('creation.collection.newTitle', language),
+        "NOTE": translate('library.tabs.notes', language)
     };
-    return labels[type] || "Modül";
+    return labels[type] || translate('library.tabs.modules', language);
 }

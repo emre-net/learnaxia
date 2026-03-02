@@ -191,6 +191,64 @@ const en = {
             description: "Group your modules into a sequential learning path.",
             publicDescription: "Other users can see and customize your collection.",
             privateDescription: "Only you and people you share the link with can see the collection."
+        },
+        aiConfig: "AI Configuration",
+        aiDescription: "Tell us what you want to learn, and we'll generate the content.",
+        textTab: "Text / Topic",
+        fileTab: "Upload Document",
+        topicContentLabel: "Topic or Text Content",
+        topicContentPlaceholder: "Paste your notes, article text, or just a topic...",
+        extractingText: "Extracting text from document...",
+        extractedContext: "Extracted Context",
+        itemCountLabel: "Item Count",
+        autoCount: "Auto (AI Decides)",
+        generateButton: "Generate Magic",
+        generatingContent: "Creating your content...",
+        analyzingContent: "Our AI is analyzing your {type} and creating questions.",
+        reviewContent: "Review Generated Content",
+        itemsReady: "{count} items ready to save."
+    },
+    sidebar: {
+        dashboard: "Dashboard",
+        discover: "Discover",
+        library: "Library",
+        profile: "Profile",
+        workshop: "Workshop",
+        buildSystem: "Build the System",
+        produce: "Produce",
+        manualModule: "Module Writer",
+        collection: "Collection",
+        writeNote: "Write Note",
+        intelligence: "Intelligence",
+        aiModule: "AI Module",
+        aiNote: "AI Note",
+        solvePhoto: "Solve Photo",
+        logout: "Log Out"
+    },
+    settings: {
+        profileTab: "Profile",
+        settingsTab: "Settings",
+        analyticsTab: "Analytics",
+        walletTab: "Wallet",
+        success: "Success",
+        successAccuracy: "Success",
+        questions: "Questions",
+        duration: "Duration"
+    },
+    dashboard: {
+        greeting: "Welcome, {name}!",
+        totalDue: "Total Due",
+        startSession: "Start Session",
+        mixAll: "Mix All",
+        modules: "Modules",
+        dailyReview: {
+            completedTitle: "Daily Reviews Completed! 🎉",
+            completedDesc: "Your memory is safe. There are no pending cards for today. You can write a new note or generate a new module instead.",
+            title: "Daily Review BootCamp",
+            duePrefix: "According to the spaced repetition algorithm, you have",
+            dueCards: "cards",
+            dueSuffix: "due today.",
+            studyJustThis: "Study Just This"
         }
     },
     common: {
@@ -382,6 +440,21 @@ const tr = {
             aiSolutions: "AI Çözümleri",
             notes: "Notlar"
         },
+        modulesTab: {
+            all: "Tümü",
+            created: "Benim Oluşturduklarım",
+            saved: "Kaydedilenler",
+            newModule: "Yeni Modül",
+            loadingMore: "Daha fazla yükleniyor...",
+            notFoundTitle: "Modül bulunamadı",
+            notFoundDesc: "Henüz Atölye'de bir şey üretmediniz veya kütüphanenize herhangi bir kayıt eklemediniz.",
+            goToWorkshop: "Atölyeye Git"
+        },
+        collectionsTab: {
+            newCollection: "Yeni Koleksiyon",
+            notFoundTitle: "Koleksiyon bulunamadı",
+            notFoundDesc: "Modüllerinizi koleksiyonlar halinde gruplandırın."
+        },
         notes: {
             title: "Tüm Notlar",
             noNotes: "Henüz not alınmamış.",
@@ -488,6 +561,64 @@ const tr = {
             description: "Modüllerinizi sıralı bir öğrenme yolunda gruplayın.",
             publicDescription: "Diğer kullanıcılar koleksiyonunuzu görebilir ve özelleştirebilir.",
             privateDescription: "Koleksiyonu sadece siz ve linki paylaştığınız kişiler görebilir."
+        },
+        aiConfig: "AI Yapılandırması",
+        aiDescription: "Ne öğrenmek istediğinizi söyleyin, içeriği biz oluşturalım.",
+        textTab: "Metin / Konu",
+        fileTab: "Dosya Yükle",
+        topicContentLabel: "Konu veya Metin İçeriği",
+        topicContentPlaceholder: "Notlarınızı, makale metnini veya sadece bir konuyu yapıştırın...",
+        extractingText: "Belgeden metin çıkarılıyor...",
+        extractedContext: "Çıkarılan Bağlam (Context)",
+        itemCountLabel: "Soru Sayısı",
+        autoCount: "Otomatik (AI Karar Versin)",
+        generateButton: "Sihri Başlat",
+        generatingContent: "İçeriğiniz oluşturuluyor...",
+        analyzingContent: "Yapay zeka analiz ediyor ve içeriği hazırlıyor.",
+        reviewContent: "Üretilen İçeriği İncele",
+        itemsReady: "{count} öğe kaydedilmeye hazır."
+    },
+    sidebar: {
+        dashboard: "Akış",
+        discover: "Keşfet",
+        library: "Kitaplık",
+        profile: "Profil",
+        workshop: "Atölye",
+        buildSystem: "Sistemi İnşa Et",
+        produce: "Üret",
+        manualModule: "Modül Yaz",
+        collection: "Koleksiyon",
+        writeNote: "Not Yaz",
+        intelligence: "Zeka",
+        aiModule: "AI Modül",
+        aiNote: "AI Not",
+        solvePhoto: "Soru Çöz",
+        logout: "Çıkış Yap"
+    },
+    settings: {
+        profileTab: "Profil",
+        settingsTab: "Ayarlar",
+        analyticsTab: "İstatistikler",
+        walletTab: "Cüzdan",
+        success: "Başarılı",
+        successAccuracy: "Başarı",
+        questions: "Soru",
+        duration: "Süre"
+    },
+    dashboard: {
+        greeting: "Hoşgeldin, {name}!",
+        totalDue: "Toplam Bekleyen",
+        startSession: "Çalışmaya Başla",
+        mixAll: "Hepsini Karıştır",
+        modules: "Modüller",
+        dailyReview: {
+            completedTitle: "Günlük Tekrarlar Tamamlandı! 🎉",
+            completedDesc: "Hafızan güvende. Bugün tekrar etmen gereken bir kart kalmadı. Yeni modüller keşfedebilir veya not alabilirsin.",
+            title: "Günlük Tekrar Kampı",
+            duePrefix: "Aralıklı tekrar algoritmasına göre bugün çalışman gereken",
+            dueCards: "kart",
+            dueSuffix: "var.",
+            studyJustThis: "Sadece Bunu Çalış"
         }
     },
     common: {

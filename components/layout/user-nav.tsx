@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useSession, signOut } from "next-auth/react"
+import { useTranslation } from "@/lib/i18n/i18n"
 
 export function UserNav() {
     const { data: session } = useSession()
+    const { t } = useTranslation()
     const user = session?.user
 
     // Fallback initials
@@ -54,26 +56,26 @@ export function UserNav() {
                 <DropdownMenuGroup>
                     <Link href="/dashboard/settings">
                         <DropdownMenuItem>
-                            Profil
+                            {t('settings.profileTab')}
                             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                         </DropdownMenuItem>
                     </Link>
                     <Link href="/dashboard/settings">
                         <DropdownMenuItem>
-                            Ayarlar
+                            {t('settings.settingsTab')}
                             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                         </DropdownMenuItem>
                     </Link>
                     <Link href="/dashboard/settings?tab=wallet">
                         <DropdownMenuItem>
-                            Cüzdan
+                            {t('settings.walletTab')}
                             <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
                         </DropdownMenuItem>
                     </Link>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
-                    Çıkış Yap
+                    {t('sidebar.logout')}
                     <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                 </DropdownMenuItem>
             </DropdownMenuContent>

@@ -42,10 +42,10 @@ export function VisibilityBadge({ visibility, className = "" }: VisibilityBadgeP
     return (
         <Badge
             variant="outline"
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider ${active.bg} ${active.color} ${active.border} ${className}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 shadow-sm backdrop-blur-md rounded-full font-extrabold text-[9px] uppercase tracking-[0.08em] transition-all border ${active.bg} ${active.color} ${active.border} ${className}`}
         >
-            <Icon className="h-3 w-3" strokeWidth={3} />
-            {active.label}
+            <Icon className="h-3 w-3" strokeWidth={2.5} />
+            <span className="mt-[1px]">{active.label}</span>
         </Badge>
     );
 }

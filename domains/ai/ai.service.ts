@@ -12,8 +12,8 @@ export class AIService {
         return this._provider;
     }
 
-    static async generateContent(topic: string, types: string[], count: number): Promise<AIResponseItem[]> {
-        return this.getProvider().generateContent(topic, types, count);
+    static async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto'): Promise<AIResponseItem[]> {
+        return this.getProvider().generateContent(topic, types, count, focusMode);
     }
 
     static async solvePhoto(imageBuffer: Buffer, mimeType: string): Promise<VisionResult> {

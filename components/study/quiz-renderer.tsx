@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { playStudySound } from "@/lib/audio";
 
@@ -26,7 +26,7 @@ export function QuizRenderer({ item }: { item: any }) {
     const { t } = useTranslation();
 
     // Ensure options exist
-    const options = item.content.options || [];
+    const options = useMemo(() => item.content.options || [], [item.content.options]);
 
     // Keyboard support for 1-4
     useEffect(() => {

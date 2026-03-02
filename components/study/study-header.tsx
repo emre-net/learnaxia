@@ -9,6 +9,8 @@ import { NotesSidebar } from "@/components/notes/notes-sidebar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 
+import { StudyTimer } from "./study-timer";
+
 export function StudyHeader() {
     const router = useRouter();
     const {
@@ -57,7 +59,10 @@ export function StudyHeader() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <div className="flex flex-col w-full max-w-xs gap-1">
+
+                <StudyTimer />
+
+                <div className="flex flex-col w-full max-w-xs gap-1 ml-4">
                     <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{t('study.progress')}</span>
                         <span>{currentIndex + 1} / {items.length}</span>

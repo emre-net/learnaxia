@@ -11,20 +11,20 @@ import {
     ShieldCheck,
     Database,
     Activity,
-    Terminal
+    Terminal,
+    Bot
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
-
 const menuItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Modules", href: "/admin/modules", icon: Layers },
     { name: "System Logs", href: "/admin/system/logs", icon: Terminal },
+    { name: "AI Agent Logs", href: "/admin/system/ai-logs", icon: Bot },
     { name: "System Health", href: "/admin/system", icon: Activity },
     { name: "DB Tools", href: "/admin/tools", icon: Database },
 ];
-
 export function AdminSidebar() {
     const pathname = usePathname();
 

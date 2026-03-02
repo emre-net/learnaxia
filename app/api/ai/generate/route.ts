@@ -6,17 +6,16 @@ import { AIService } from "@/domains/ai/ai.service";
 import { WalletService } from "@/domains/wallet/wallet.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { COSTS } from "@/lib/constants/costs";
 import { getAiQueue } from "@/lib/queue/client";
+import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 
 const GenerateSchema = z.object({
     topic: z.string().min(3),
     types: z.array(z.enum(['FLASHCARD', 'MC', 'GAP', 'TF'])).default(['FLASHCARD', 'MC', 'GAP', 'TF']),
-    count: z.number().min(1).max(20).default(5),
-    mode: z.enum(['sync', 'async']).default('sync')
+    count: z.number().min(-1).max(30).default(5),
+    mode: z.enum(['sync', 'async']).default('sync'),
+    focusMode: z.enum(['detailed', 'summary', 'key_concepts', 'auto']).optional()
 });
-
-const GENERATION_COST = COSTS.AI_GENERATION;
 
 export async function POST(req: Request) {
     try {
@@ -26,23 +25,40 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { topic, types, count, mode } = GenerateSchema.parse(body);
+        const { topic, types, count, mode, focusMode } = GenerateSchema.parse(body);
         const userId = session.user.id;
 
-        // 1. Check Balance & Debit
+        // 1. Dynamic Token Calculation & Rate Limit Guardian
+        const tokenEstimate = calculateAITokensAndCost({
+            text: topic,
+            targetCount: count,
+            model: "llama-3.3-70b-versatile"
+        });
+
+        if (tokenEstimate.willHitRateLimit) {
+            return NextResponse.json({
+                error: "Gönderdiğiniz metin veya analiz boyutu yapay zeka işlem sınırını aşıyor. Lütfen metninizi kısaltarak tekrar deneyin.",
+                estimatedTokens: tokenEstimate.totalTokens
+            }, { status: 413 }); // Payload Too Large
+        }
+
+        const dynamicCost = tokenEstimate.recommendedCost;
+
+        // 2. Check Balance & Debit
         try {
-            await WalletService.debit(userId, GENERATION_COST, 'AI_GENERATION', `AI Request: ${topic} (${mode})`);
+            await WalletService.debit(userId, dynamicCost, 'AI_GENERATION', `AI Request: ${topic.substring(0, 50)}... (${mode}) | Cost: ${dynamicCost}`);
         } catch (error) {
             return NextResponse.json({ error: "Yetersiz jeton. Lütfen jeton yükleyin." }, { status: 402 });
         }
 
-        // 2. Process Request
+        // 3. Process Request
         if (mode === 'async') {
             const job = await getAiQueue().add("generate-content", {
                 userId,
                 topic,
                 types,
-                count
+                count,
+                focusMode
             });
             return NextResponse.json({
                 jobId: job.id,
@@ -52,15 +68,15 @@ export async function POST(req: Request) {
         }
 
         try {
-            const items = await AIService.generateContent(topic, types, count);
+            const items = await AIService.generateContent(topic, types, count, focusMode);
             return NextResponse.json({
                 items,
                 remainingTokens: (await WalletService.getBalance(userId)).balance
             });
         } catch (aiError) {
-            // 3. Refund on Failure
+            // 4. Refund on Failure
             console.error("AI Generation Failed, refunding user:", aiError);
-            await WalletService.credit(userId, GENERATION_COST, 'REFUND', `Refund: Generation failed for ${topic}`);
+            await WalletService.credit(userId, dynamicCost, 'REFUND', `Refund: Generation failed`);
             return NextResponse.json({ error: "İçerik üretilemedi. Jetonlar iade edildi." }, { status: 500 });
         }
 

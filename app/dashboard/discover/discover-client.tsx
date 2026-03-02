@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -308,13 +307,17 @@ export function DiscoverClient() {
                                 </div>
                             ) : (
                                 <div className="space-y-12">
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        {activeTab === "modules" ? (
-                                            items.map((item: any) => (
+                                    <TabsContent value="modules" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
                                                 <ModuleCard key={item.id} module={item} showOwner={true} />
-                                            ))
-                                        ) : activeTab === "collections" ? (
-                                            items.map((item: any) => (
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="collections" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
                                                 <CollectionCard
                                                     key={item.id}
                                                     item={{
@@ -324,22 +327,26 @@ export function DiscoverClient() {
                                                     }}
                                                     viewMode="grid"
                                                 />
-                                            ))
-                                        ) : (
-                                            items.map((item: any) => (
-                                                <div key={item.id} className="relative group">
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="notes" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
+                                                <div key={item.id} className="relative group min-h-[220px]">
                                                     <div className="absolute -inset-0.5 bg-gradient-to-tr from-primary/10 to-indigo-500/10 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity blur-lg" />
                                                     <div className="h-full bg-slate-900 border border-slate-800 rounded-[1.8rem] p-6 shadow-xl relative z-10 flex flex-col justify-between overflow-hidden">
                                                         <div className="space-y-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-2xl relative">
+                                                                <div className="h-10 w-10 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-2xl relative shrink-0">
                                                                     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50" />
                                                                     <BookOpen className="h-5 w-5" />
                                                                 </div>
-                                                                <div>
-                                                                    <h3 className="font-bold text-slate-100 uppercase tracking-wider text-xs">Açık Not</h3>
+                                                                <div className="min-w-0">
+                                                                    <h3 className="font-bold text-slate-100 uppercase tracking-wider text-xs truncate">Açık Not</h3>
                                                                     {item.module && (
-                                                                        <div className="text-[10px] text-muted-foreground font-medium truncate max-w-[150px]">
+                                                                        <div className="text-[10px] text-muted-foreground font-medium truncate">
                                                                             Modül: {item.module.title}
                                                                         </div>
                                                                     )}
@@ -349,9 +356,10 @@ export function DiscoverClient() {
                                                                 <h2 className="text-xl font-bold line-clamp-2 leading-tight">
                                                                     {item.title || "İsimsiz Not"}
                                                                 </h2>
-                                                                <p className="mt-3 text-sm text-slate-400 line-clamp-3 leading-relaxed">
-                                                                    {item.content}
-                                                                </p>
+                                                                <div
+                                                                    className="mt-3 text-sm prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-0 line-clamp-4 break-words"
+                                                                    dangerouslySetInnerHTML={{ __html: item.content }}
+                                                                />
                                                             </div>
                                                         </div>
 
@@ -360,35 +368,35 @@ export function DiscoverClient() {
                                                                 {item.owner?.image ? (
                                                                     <img src={item.owner.image} alt={item.owner.handle || "user"} className="h-6 w-6 rounded-full border border-slate-700 object-cover" />
                                                                 ) : (
-                                                                    <div className="h-6 w-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                                                                    <div className="h-6 w-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">
                                                                         {(item.owner?.handle || item.owner?.name || "?").substring(0, 1).toUpperCase()}
                                                                     </div>
                                                                 )}
-                                                                <span className="text-xs font-bold text-slate-300">
+                                                                <span className="text-xs font-bold text-slate-300 truncate max-w-[100px]">
                                                                     @{item.owner?.handle || "anonim"}
                                                                 </span>
                                                             </div>
-                                                            <div className="text-xs text-muted-foreground font-medium">
+                                                            <div className="text-xs text-muted-foreground font-medium whitespace-nowrap">
                                                                 {new Date(item.createdAt).toLocaleDateString()}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ))
-                                        )}
-                                    </div>
-
-                                    {hasNextPage && (
-                                        <div ref={ref} className="flex justify-center py-8">
-                                            {isFetchingNextPage ? (
-                                                <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
-                                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                                    Daha fazla yükleniyor...
-                                                </div>
-                                            ) : (
-                                                <div className="h-8"></div>
-                                            )}
+                                            ))}
                                         </div>
+                                    </TabsContent>
+                                </div>
+                            )}
+
+                            {hasNextPage && (
+                                <div ref={ref} className="flex justify-center py-8">
+                                    {isFetchingNextPage ? (
+                                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                            Daha fazla yükleniyor...
+                                        </div>
+                                    ) : (
+                                        <div className="h-8"></div>
                                     )}
                                 </div>
                             )}

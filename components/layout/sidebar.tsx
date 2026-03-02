@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useTranslation } from "@/lib/i18n/i18n"
 import {
     Library,
     PlusCircle,
@@ -30,29 +31,30 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
+    const { t } = useTranslation()
     const [isHoveringAtölye, setIsHoveringAtölye] = useState(false)
 
     const routes = [
         {
-            label: "Akış",
+            label: t('sidebar.dashboard'),
             icon: LayoutDashboard,
             href: "/dashboard",
             active: pathname === "/dashboard",
         },
         {
-            label: "Keşfet",
+            label: t('sidebar.discover'),
             icon: Compass,
             href: "/dashboard/discover",
             active: pathname === "/dashboard/discover",
         },
         {
-            label: "Kitaplık",
+            label: t('sidebar.library'),
             icon: Library,
             href: "/dashboard/library",
             active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules"),
         },
         {
-            label: "Profil",
+            label: t('sidebar.profile'),
             icon: User,
             href: "/dashboard/settings",
             active: pathname === "/dashboard/settings",
@@ -62,15 +64,15 @@ export function Sidebar({ className }: SidebarProps) {
     const isCreateActive = pathname.startsWith("/dashboard/create")
 
     const manualShortcuts = [
-        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: "Modül Üret", href: "/dashboard/create/manual" },
-        { icon: FolderPlus, color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/50", label: "Koleksiyon", href: "/dashboard/collections/new" },
-        { icon: FileText, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: "Not Yaz", href: "/dashboard/create/manual-note" },
+        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: t('sidebar.manualModule'), href: "/dashboard/create/manual" },
+        { icon: FolderPlus, color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/50", label: t('sidebar.collection'), href: "/dashboard/collections/new" },
+        { icon: FileText, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: t('sidebar.writeNote'), href: "/dashboard/create/manual-note" },
     ]
 
     const aiShortcuts = [
-        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: "AI Modül", href: "/dashboard/create/ai" },
-        { icon: Cpu, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: "AI Not", href: "/dashboard/create/ai-notes" },
-        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: "Soru Çöz", href: "/dashboard/create/solve-photo" },
+        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: t('sidebar.aiModule'), href: "/dashboard/create/ai" },
+        { icon: Cpu, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: t('sidebar.aiNote'), href: "/dashboard/create/ai-notes" },
+        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: t('sidebar.solvePhoto'), href: "/dashboard/create/solve-photo" },
     ]
 
     return (
@@ -106,8 +108,8 @@ export function Sidebar({ className }: SidebarProps) {
                                     <PlusCircle className="h-5 w-5 text-white" />
                                 </div>
                                 <div className="flex flex-col z-10">
-                                    <span className="text-sm font-semibold text-white tracking-wide">Atölye</span>
-                                    <span className="text-[10px] text-white/70 font-medium">Sistemi İnşa Et</span>
+                                    <span className="text-sm font-semibold text-white tracking-wide">{t('sidebar.workshop')}</span>
+                                    <span className="text-[10px] text-white/70 font-medium">{t('sidebar.buildSystem')}</span>
                                 </div>
                             </div>
                         </Link>
@@ -124,7 +126,7 @@ export function Sidebar({ className }: SidebarProps) {
                                 >
                                     {/* Manual Section Branch */}
                                     <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-blue-500/20 rounded-xl shadow-2xl shadow-blue-500/10">
-                                        <div className="text-[9px] font-bold text-blue-500/70 border-r border-blue-500/20 pr-2 mr-1 uppercase tracking-tighter">Üret</div>
+                                        <div className="text-[9px] font-bold text-blue-500/70 border-r border-blue-500/20 pr-2 mr-1 uppercase tracking-tighter">{t('sidebar.produce')}</div>
                                         {manualShortcuts.map((shortcut, idx) => (
                                             <motion.div
                                                 key={shortcut.label}
@@ -151,7 +153,7 @@ export function Sidebar({ className }: SidebarProps) {
 
                                     {/* AI Section Branch */}
                                     <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-purple-500/20 rounded-xl shadow-2xl shadow-purple-500/10">
-                                        <div className="text-[9px] font-bold text-purple-500/70 border-r border-purple-500/20 pr-2 mr-1 uppercase tracking-tighter">Zeka</div>
+                                        <div className="text-[9px] font-bold text-purple-500/70 border-r border-purple-500/20 pr-2 mr-1 uppercase tracking-tighter">{t('sidebar.intelligence')}</div>
                                         {aiShortcuts.map((shortcut, idx) => (
                                             <motion.div
                                                 key={shortcut.label}
@@ -207,7 +209,7 @@ export function Sidebar({ className }: SidebarProps) {
                         onClick={() => signOut({ callbackUrl: "/" })}
                     >
                         <LogOut className="mr-2 h-5 w-5" />
-                        Çıkış Yap
+                        {t('sidebar.logout')}
                     </Button>
                 </div>
             </div>

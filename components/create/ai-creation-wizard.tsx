@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,25 +13,36 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Save, Trash2, CheckCircle2, AlertCircle, FileText, UploadCloud, FileType, BookOpen } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Sparkles, Loader2, Save, Trash2, CheckCircle2, FileText, UploadCloud, BookOpen, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { v4 as uuidv4 } from 'uuid';
+import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 
 // --- Schema ---
 const aiConfigSchema = z.object({
     topic: z.string().min(10, "Text must be at least 10 characters").max(20000), // Increased for large docs
     count: z.number().min(3).max(20),
-    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]) // Changed to single type
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE"]), // Changed to single type
+    focusMode: z.enum(["detailed", "summary", "key_concepts", "auto"])
 });
 
 type AIConfig = z.infer<typeof aiConfigSchema>;
 
 export function AICreationWizard() {
+    const { t } = useTranslation();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const { toast } = useToast();
+
     const [step, setStep] = useState<"CONFIG" | "GENERATING" | "REVIEW">("CONFIG");
     const [generatedItems, setGeneratedItems] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [inputType, setInputType] = useState<"TEXT" | "FILE">("TEXT");
+    const [isAutoCount, setIsAutoCount] = useState(false);
 
     const onFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -42,25 +53,42 @@ export function AICreationWizard() {
         setValue("topic", `[Dosya Seçildi: ${file.name}] Lütfen bu dosyadan içerik oluştur.`);
 
         toast({
-            title: "Dosya Seçildi",
+            title: t("common.success"),
             description: `${file.name} analize hazır. (Demo Modu)`,
         });
     };
-    const [inputType, setInputType] = useState<"TEXT" | "FILE">("TEXT");
-
-    const router = useRouter();
-    const { toast } = useToast();
 
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<AIConfig>({
         resolver: zodResolver(aiConfigSchema),
         defaultValues: {
             topic: "",
             count: 5,
-            type: "FLASHCARD" // Default single type
+            type: "FLASHCARD", // Default single type
+            focusMode: "auto"
         }
     });
 
     const config = watch();
+
+    // Dynamically calculate estimated cost based on what the user types
+    const tokenEstimate = calculateAITokensAndCost({
+        text: config.topic || "",
+        targetCount: isAutoCount ? -1 : config.count,
+        isVision: false
+    });
+
+    useEffect(() => {
+        const sourceText = searchParams?.get('sourceText');
+        const storageText = typeof window !== 'undefined' ? sessionStorage.getItem('magic_wand_text') : null;
+
+        if (sourceText || storageText) {
+            setInputType('TEXT');
+            setValue('topic', sourceText || storageText || "");
+            if (storageText && typeof window !== 'undefined') {
+                sessionStorage.removeItem('magic_wand_text');
+            }
+        }
+    }, [searchParams, setValue]);
 
     // ... (onFileUpload remains same) ...
 
@@ -70,7 +98,9 @@ export function AICreationWizard() {
             // Adapt single type to API expectation (array)
             const apiData = {
                 ...data,
-                types: [data.type]
+                count: isAutoCount ? -1 : data.count,
+                types: [data.type],
+                focusMode: data.focusMode
             };
 
             const res = await fetch("/api/ai/generate", {
@@ -143,10 +173,10 @@ export function AICreationWizard() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-2xl">
                             <Sparkles className="h-6 w-6 text-purple-500" />
-                            AI Configuration
+                            {t("creation.aiConfig")}
                         </CardTitle>
                         <CardDescription>
-                            Tell us what you want to learn, and we'll generate the content.
+                            {t("creation.aiDescription")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -155,18 +185,25 @@ export function AICreationWizard() {
                             {/* Input Source Tabs skipped for brevity implementation ... */}
                             <Tabs value={inputType} onValueChange={(v) => setInputType(v as any)} className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="TEXT">Text / Topic</TabsTrigger>
-                                    <TabsTrigger value="FILE">Upload Document</TabsTrigger>
+                                    <TabsTrigger value="TEXT">{t("creation.textTab")}</TabsTrigger>
+                                    <TabsTrigger value="FILE">{t("creation.fileTab")}</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="TEXT" className="pt-4">
                                     <div className="space-y-2">
-                                        <Label>Topic or Text Content</Label>
+                                        <Label>{t("creation.topicContentLabel")}</Label>
                                         <Textarea
                                             {...register("topic")}
-                                            placeholder="Paste your notes, article text, or just a topic like 'French Revolution'..."
+                                            placeholder={t("creation.topicContentPlaceholder")}
                                             className="min-h-[150px] text-base"
                                         />
-                                        <p className="text-xs text-muted-foreground text-right">{config.topic?.length || 0}/20000 chars</p>
+                                        <div className="flex justify-between items-center mt-1">
+                                            {tokenEstimate.willHitRateLimit ? (
+                                                <p className="text-xs text-red-500 font-semibold animate-pulse">⚠️ Metin çok uzun! Boyutu sınırları aşıyor.</p>
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground">≈ {tokenEstimate.totalTokens} Tokens</p>
+                                            )}
+                                            <p className="text-xs text-muted-foreground text-right">{config.topic?.length || 0}/20000 chars</p>
+                                        </div>
                                         {errors.topic && <p className="text-red-500 text-sm">{errors.topic.message}</p>}
                                     </div>
                                 </TabsContent>
@@ -175,7 +212,7 @@ export function AICreationWizard() {
                                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 flex flex-col items-center justify-center text-center hover:bg-muted/5 transition-colors">
                                         <UploadCloud className="h-10 w-10 text-muted-foreground mb-4" />
                                         <Label htmlFor="doc-upload" className="cursor-pointer">
-                                            <span className="text-primary font-semibold hover:underline">Click to upload</span> or drag and drop
+                                            <span className="text-primary font-semibold hover:underline">{t("creation.uploadClick")}</span> {t("creation.uploadDrag")}
                                             <Input
                                                 id="doc-upload"
                                                 type="file"
@@ -185,19 +222,19 @@ export function AICreationWizard() {
                                                 disabled={isUploading}
                                             />
                                         </Label>
-                                        <p className="text-xs text-muted-foreground mt-2">PDF, TXT, PPTX or DOCX (Max 10MB)</p>
+                                        <p className="text-xs text-muted-foreground mt-2">{t("creation.fileTypes")}</p>
                                     </div>
 
                                     {isUploading && (
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-                                            <Loader2 className="h-4 w-4 animate-spin" /> Extracting text from document...
+                                            <Loader2 className="h-4 w-4 animate-spin" /> {t("creation.extractingText")}
                                         </div>
                                     )}
 
                                     {inputType === 'FILE' && config.topic.length > 0 && !isUploading && (
                                         <div className="bg-muted p-4 rounded-md">
                                             <div className="flex items-center gap-2 mb-2 font-medium text-sm">
-                                                <FileText className="h-4 w-4" /> Extracted Context
+                                                <FileText className="h-4 w-4" /> {t("creation.extractedContext")}
                                             </div>
                                             <p className="text-xs text-muted-foreground line-clamp-4">{config.topic}</p>
                                         </div>
@@ -219,7 +256,7 @@ export function AICreationWizard() {
                                                 {config.type === type && <div className="h-2 w-2 rounded-full bg-purple-500" />}
                                             </div>
                                             <label className="text-sm font-medium leading-none cursor-pointer w-full">
-                                                {type === 'MC' ? 'Multiple Choice' : type === 'TRUE_FALSE' ? 'True/False' : type === 'GAP' ? 'Gap Fill' : 'Flashcard'}
+                                                {type === 'MC' ? t("creation.mcLabel") : type === 'TRUE_FALSE' ? t("creation.tfLabel") : type === 'GAP' ? t("creation.gapLabel") : t("creation.flashcardsLabel")}
                                             </label>
                                         </div>
                                     ))}
@@ -227,37 +264,89 @@ export function AICreationWizard() {
                                 {errors.type && <p className="text-red-500 text-sm">{errors.type.message}</p>}
                             </div>
 
+                            {/* Focus Mode - Extraction Strategy */}
+                            <div className="space-y-3">
+                                <Label className="flex items-center gap-2">
+                                    <Filter className="w-4 h-4 text-purple-500" />
+                                    AI Focus Mode
+                                </Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[
+                                        { id: 'auto', label: 'Auto (AI Kararı)', desc: 'AI metne en uygun stratejiyi seçer' },
+                                        { id: 'key_concepts', label: 'Key Concepts', desc: 'Sadece ana konseptleri / tanımları alır' },
+                                        { id: 'detailed', label: 'Detailed', desc: 'En ince detaylara kadar iner' },
+                                        { id: 'summary', label: 'Summary', desc: 'Yüksek seviye özet çıkarır' }
+                                    ].map((mode) => (
+                                        <div
+                                            key={mode.id}
+                                            className={cn(
+                                                "border p-3 rounded-lg cursor-pointer transition-all flex flex-col gap-1 w-full",
+                                                config.focusMode === mode.id
+                                                    ? "border-purple-500 bg-purple-500/5 ring-1 ring-purple-500"
+                                                    : "hover:bg-muted/50 border-border"
+                                            )}
+                                            onClick={() => setValue("focusMode", mode.id as any)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium">{mode.label}</span>
+                                                <div className={cn(
+                                                    "h-4 w-4 rounded-full border flex items-center justify-center shrink-0",
+                                                    config.focusMode === mode.id ? "border-purple-500" : "border-muted-foreground"
+                                                )}>
+                                                    {config.focusMode === mode.id && <div className="h-2 w-2 rounded-full bg-purple-500" />}
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground">{mode.desc}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Count */}
                             <div className="space-y-4">
-                                <div className="flex justify-between">
-                                    <Label>Item Count</Label>
-                                    <span className="font-bold text-lg">{config.count}</span>
+                                <div className="flex justify-between items-center">
+                                    <Label>{t("creation.itemCountLabel")}</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="auto-count" checked={isAutoCount} onCheckedChange={setIsAutoCount} />
+                                        <Label htmlFor="auto-count" className="text-xs font-normal cursor-pointer hover:text-purple-600 transition-colors">{t("creation.autoCount")}</Label>
+                                        {!isAutoCount && <span className="font-bold text-lg ml-2 w-6 text-right">{config.count}</span>}
+                                    </div>
                                 </div>
-                                <Slider
-                                    value={[config.count]}
-                                    onValueChange={(val) => setValue("count", val[0])}
-                                    min={3}
-                                    max={20}
-                                    step={1}
-                                />
+                                {!isAutoCount && (
+                                    <Slider
+                                        value={[config.count]}
+                                        onValueChange={(val) => setValue("count", val[0])}
+                                        min={3}
+                                        max={20}
+                                        step={1}
+                                    />
+                                )}
                             </div>
 
                             <div className="bg-muted/50 p-4 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-purple-500" />
-                                    <span className="text-sm font-medium">Estimated Cost</span>
+                                    <span className="text-sm font-medium">{t("creation.costEstimate")}</span>
                                 </div>
-                                {/* Cost from shared constants */}
-                                <span className="font-bold text-purple-600">
-                                    {inputType === 'FILE' && config.topic.length > 100 ? `${15} AXIA` : `${10} AXIA`}
+                                <span className={cn(
+                                    "font-bold",
+                                    tokenEstimate.willHitRateLimit ? "text-red-500" : "text-purple-600"
+                                )}>
+                                    {tokenEstimate.willHitRateLimit ? "Sınır Aşıldı" : `${tokenEstimate.recommendedCost} AXIA`}
                                 </span>
                             </div>
 
                         </form>
                     </CardContent>
                     <CardFooter>
-                        <Button type="submit" form="ai-form" className="w-full bg-purple-600 hover:bg-purple-700 text-white" size="lg" disabled={isUploading || (inputType === 'FILE' && config.topic.length < 10)}>
-                            <Sparkles className="mr-2 h-4 w-4" /> Generate Magic
+                        <Button
+                            type="submit"
+                            form="ai-form"
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white disabled:bg-purple-400"
+                            size="lg"
+                            disabled={isUploading || tokenEstimate.willHitRateLimit || (inputType === 'FILE' && config.topic.length < 10)}
+                        >
+                            <Sparkles className="mr-2 h-4 w-4" /> {t("creation.generateButton")}
                         </Button>
                     </CardFooter>
                 </Card>
@@ -270,8 +359,8 @@ export function AICreationWizard() {
                         <Sparkles className="h-20 w-20 text-purple-500 mx-auto animate-spin-slow relative z-10" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">Creating your content...</h2>
-                        <p className="text-muted-foreground mt-2">Our AI is analyzing your {inputType === 'FILE' ? 'document' : 'topic'} and creating questions.</p>
+                        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">{t("creation.generatingContent")}</h2>
+                        <p className="text-muted-foreground mt-2">{t("creation.analyzingContent", { type: inputType === 'FILE' ? 'document' : 'topic' })}</p>
                     </div>
                 </div>
             )}
@@ -279,8 +368,8 @@ export function AICreationWizard() {
             {step === "REVIEW" && (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold">Review Generated Content</h2>
-                        <Button variant="outline" onClick={() => setStep("CONFIG")}>Back</Button>
+                        <h2 className="text-2xl font-bold">{t("creation.reviewContent")}</h2>
+                        <Button variant="outline" onClick={() => setStep("CONFIG")}>{t("common.back")}</Button>
                     </div>
 
                     <div className="grid gap-4">
@@ -344,12 +433,12 @@ export function AICreationWizard() {
                     <div className="flex justify-end gap-4 py-8 border-t">
                         <div className="flex-1 text-muted-foreground text-sm flex items-center">
                             <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-                            {generatedItems.length} items ready to save.
+                            {t("creation.itemsReady", { count: generatedItems.length.toString() })}
                         </div>
-                        <Button variant="ghost" onClick={() => setStep("CONFIG")}>Cancel</Button>
+                        <Button variant="ghost" onClick={() => setStep("CONFIG")}>{t("common.cancel")}</Button>
                         <Button onClick={onSaveModule} disabled={isSaving || generatedItems.length === 0} className="bg-green-600 hover:bg-green-700 text-white min-w-[150px]">
                             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Save Module
+                            {t("creation.save")}
                         </Button>
                     </div>
                 </div>

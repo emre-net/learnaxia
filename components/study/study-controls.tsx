@@ -5,7 +5,7 @@ import { useStudyStore } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { playStudySound } from "@/lib/audio";
 
 export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
@@ -29,15 +29,15 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
     const currentItem = items[currentIndex];
 
-    const handleNextItem = () => {
+    const handleNextItem = useCallback(() => {
         onNext({
             itemId: currentItem.id,
             result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG',
             quality: feedback === 'CORRECT' ? 5 : 1
         });
-    };
+    }, [currentItem.id, feedback, onNext]);
 
-    const handleRate = (quality: number) => {
+    const handleRate = useCallback((quality: number) => {
         // Quality: 0-1 (Wrong/Hard), 2-3 (Good/Ok), 4-5 (Easy/Perfect)
         // Map to: "AGAIN", "HARD", "GOOD", "EASY"
         let result = "GOOD";
@@ -50,21 +50,21 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         else setWrongCount(wrongCount + 1);
 
         onNext({ itemId: currentItem.id, result, quality });
-    };
+    }, [correctCount, currentItem.id, onNext, setCorrectCount, setWrongCount, wrongCount]);
 
-    const handleShowAnswer = () => {
+    const handleShowAnswer = useCallback(() => {
         setFeedback('WRONG');
         playStudySound('FAILURE');
         setWrongCount(wrongCount + 1);
-    };
+    }, [setFeedback, setWrongCount, wrongCount]);
 
-    const handleQuizStep = () => {
+    const handleQuizStep = useCallback(() => {
         if (!feedback) {
             handleShowAnswer();
         } else {
             handleNextItem();
         }
-    };
+    }, [feedback, handleNextItem, handleShowAnswer]);
 
     // Handle Keyboard Shortcuts
     useEffect(() => {
@@ -106,7 +106,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem]);
+    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem, handleNextItem, handleQuizStep]);
 
     if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
         const isLastItem = currentIndex === items.length - 1;

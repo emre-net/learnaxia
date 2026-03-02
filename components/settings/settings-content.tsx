@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useSettingsStore } from "@/stores/settings-store";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/lib/i18n/i18n";
 
 // Sub-components
 import { ProfileHeader } from "./profile-header";
@@ -32,6 +33,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
     const router = useRouter();
     const pathname = usePathname();
     const { toast } = useToast();
+    const { t } = useTranslation();
 
     const defaultTab = (searchParams.get("tab") as Tab) || "account";
     const [activeTab, setActiveTab] = useState<Tab>(defaultTab);
@@ -111,10 +113,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
     }, [activeTab, walletData, toast]);
 
     const tabs: { id: Tab; label: string; icon: any }[] = [
-        { id: "account", label: "Profil", icon: User },
-        { id: "settings", label: "Ayarlar", icon: Pencil },
-        { id: "analytics", label: "İstatistikler", icon: BarChart2 },
-        { id: "wallet", label: "Cüzdan", icon: Coins },
+        { id: "account", label: t('settings.profileTab'), icon: User },
+        { id: "settings", label: t('settings.settingsTab'), icon: Pencil },
+        { id: "analytics", label: t('settings.analyticsTab'), icon: BarChart2 },
+        { id: "wallet", label: t('settings.walletTab'), icon: Coins },
     ];
 
     return (
@@ -127,19 +129,19 @@ export function SettingsContent({ user }: SettingsContentProps) {
             {/* Mobile Stats Summary View */}
             <div className="lg:hidden grid grid-cols-1 md:grid-cols-3 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Başarı</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.successAccuracy')}</span>
                     <span className="text-xl font-black text-blue-500">
                         {analyticsData?.stats ? `%${analyticsData.stats.globalAccuracy}` : "--"}
                     </span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Soru</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.questions')}</span>
                     <span className="text-xl font-black text-purple-500">
                         {analyticsData?.stats?.totalSolved ?? "--"}
                     </span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Süre</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.duration')}</span>
                     <span className="text-xl font-black text-emerald-500">
                         {analyticsData?.stats ? (
                             (analyticsData.stats.totalStudyMinutes ?? 0) > 60
