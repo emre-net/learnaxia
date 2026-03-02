@@ -25,8 +25,22 @@ export function QuizRenderer({ item }: { item: any }) {
 
     const { t } = useTranslation();
 
-    // Ensure options exist
-    const options = useMemo(() => item.content.options || [], [item.content.options]);
+    // Safely extract content with fallbacks for various AI JSON formats
+    const c = item?.content || {};
+    let questionText = c.question || c.Question || c.front || c.text || c.Text || "";
+    let answerText = c.answer || c.Answer || c.correct || c.Correct || c.back || "";
+
+    if (typeof questionText === 'object') questionText = JSON.stringify(questionText);
+    if (typeof answerText === 'object') answerText = JSON.stringify(answerText);
+
+    questionText = questionText || "🤔 Soru Metni Bulunamadı";
+    answerText = answerText || "Cevap Bulunamadı";
+
+    // Ensure options exist and can handle 'Options' vs 'options'
+    const options = useMemo(() => {
+        const rawOptions = c.options || c.Options || [];
+        return Array.isArray(rawOptions) ? rawOptions : Object.values(rawOptions);
+    }, [c.options, c.Options]);
 
     // Keyboard support for 1-4
     useEffect(() => {
@@ -45,14 +59,15 @@ export function QuizRenderer({ item }: { item: any }) {
         <div className="w-full max-w-2xl flex flex-col gap-8">
             <Card className="p-8 text-center border-2 shadow-sm prose dark:prose-invert max-w-none">
                 <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
-                    <ReactMarkdown>{item.content.question || item.content.front || item.content.text || ""}</ReactMarkdown>
+                    <ReactMarkdown>{String(questionText)}</ReactMarkdown>
                 </div>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {options.map((option: string, idx: number) => {
-                    const isSelected = selectedOption === option;
-                    const isCorrect = option === item.content.answer;
+                {options.map((option: any, idx: number) => {
+                    const optText = String(option);
+                    const isSelected = selectedOption === optText;
+                    const isCorrect = optText === String(answerText);
 
                     let variant = "outline";
                     if (feedback) {
@@ -80,10 +95,9 @@ export function QuizRenderer({ item }: { item: any }) {
                                 )}
                                 onClick={() => {
                                     if (feedback) return;
-                                    setSelectedOption(option);
+                                    setSelectedOption(optText);
 
                                     // Immediate Check Logic
-                                    const isCorrect = option === item.content.answer;
                                     setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
                                     playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
 
@@ -99,10 +113,10 @@ export function QuizRenderer({ item }: { item: any }) {
                                     {/* Robust T/F Localization */}
                                     {item.type === 'TRUE_FALSE' || item.type === 'TF' ? (
                                         <ReactMarkdown>
-                                            {option === 'True' ? t('study.true') : option === 'False' ? t('study.false') : option}
+                                            {optText === 'True' ? t('study.true') : optText === 'False' ? t('study.false') : optText}
                                         </ReactMarkdown>
                                     ) : (
-                                        <ReactMarkdown>{option}</ReactMarkdown>
+                                        <ReactMarkdown>{optText}</ReactMarkdown>
                                     )}
                                 </div>
                                 {feedback && isCorrect && (
@@ -153,9 +167,9 @@ export function QuizRenderer({ item }: { item: any }) {
                                     <XCircle className="h-8 w-8" />
                                     <span>
                                         {t('study.wrong', {
-                                            answer: (item.content.answer === 'True' || item.content.answer === 'False')
-                                                ? t(`study.${item.content.answer.toLowerCase()}`)
-                                                : item.content.answer
+                                            answer: (String(answerText) === 'True' || String(answerText) === 'False')
+                                                ? t(`study.${String(answerText).toLowerCase()}`)
+                                                : String(answerText)
                                         })}
                                     </span>
                                 </>
