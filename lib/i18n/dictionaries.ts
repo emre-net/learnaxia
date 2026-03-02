@@ -85,6 +85,21 @@ const en = {
             aiSolutions: "AI Solutions",
             notes: "Notes"
         },
+        modulesTab: {
+            all: "All",
+            created: "Created by Me",
+            saved: "Saved",
+            newModule: "New Module",
+            loadingMore: "Loading more...",
+            notFoundTitle: "Module not found",
+            notFoundDesc: "You haven't produced anything in the Workshop yet or added any records to your library.",
+            goToWorkshop: "Go to Workshop"
+        },
+        collectionsTab: {
+            newCollection: "New Collection",
+            notFoundTitle: "Collection not found",
+            notFoundDesc: "Group your modules into collections."
+        },
         notes: {
             title: "All Notes",
             noNotes: "No notes taken yet.",
