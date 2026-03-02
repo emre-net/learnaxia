@@ -45,8 +45,8 @@ export function LibraryClient() {
     return (
         <div className="space-y-6">
             <LibraryHeader
-                title="Kitaplık"
-                description="Öğrenme modüllerini ve koleksiyonlarını yönet."
+                title={dictionary.library.header.title}
+                description={dictionary.library.header.description}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

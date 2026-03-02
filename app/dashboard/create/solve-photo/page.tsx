@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Camera, Upload, Loader2, Save, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n/i18n";
 
 export default function SolvePhotoPage() {
     const [file, setFile] = useState<File | null>(null);
@@ -22,6 +23,7 @@ export default function SolvePhotoPage() {
     const { toast } = useToast();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -58,7 +60,7 @@ export default function SolvePhotoPage() {
 
             setResult(data);
         } catch (err) {
-            setError("Sunucu ile bağlantı kurulamadı.");
+            setError(t("solvePhoto.errors.generic"));
         } finally {
             setIsAnalyzing(false);
         }
@@ -83,16 +85,16 @@ export default function SolvePhotoPage() {
             if (!res.ok) throw new Error("Kaydedilemedi");
 
             toast({
-                title: "Başarılı!",
-                description: "Çözüm ve notunuz kütüphanenize kaydedildi.",
+                title: t("common.success"),
+                description: t("creation.itemsReady", { count: " " }),
             });
 
             router.push("/dashboard/library?tab=ai-solutions");
         } catch (err) {
             toast({
                 variant: "destructive",
-                title: "Hata",
-                description: "Kaydedilirken bir hata oluştu.",
+                title: t("common.error"),
+                description: t("solvePhoto.errors.generic"),
             });
         } finally {
             setIsSaving(false);
@@ -106,8 +108,8 @@ export default function SolvePhotoPage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Fotoğraftan Soru Çöz</h1>
-                    <p className="text-muted-foreground">AI ile anında çözüm ve analiz alın.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{t("solvePhoto.title")}</h1>
+                    <p className="text-muted-foreground">{t("solvePhoto.description")}</p>
                 </div>
             </div>
 
@@ -132,8 +134,8 @@ export default function SolvePhotoPage() {
                                         <Camera className="h-8 w-8" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="font-medium">Fotoğraf Çek veya Yükle</p>
-                                        <p className="text-sm text-muted-foreground mt-1">Soru net ve okunabilir olmalıdır.</p>
+                                        <p className="font-medium">{t("solvePhoto.uploadPhoto")}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">{t("solvePhoto.errors.noQuestion")}</p>
                                     </div>
                                 </>
                             )}
@@ -159,9 +161,9 @@ export default function SolvePhotoPage() {
                             onClick={handleSolve}
                         >
                             {isAnalyzing ? (
-                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analiz Ediliyor...</>
+                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("solvePhoto.solving")}</>
                             ) : (
-                                "Sorumu Çöz"
+                                t("solvePhoto.title")
                             )}
                         </Button>
                     </CardContent>
@@ -180,11 +182,11 @@ export default function SolvePhotoPage() {
                                 </CardHeader>
                                 <CardContent className="pt-6 space-y-4">
                                     <div className="space-y-2">
-                                        <h4 className="font-semibold text-sm uppercase text-muted-foreground tracking-wider">Tespit Edilen Soru</h4>
+                                        <h4 className="font-semibold text-sm uppercase text-muted-foreground tracking-wider">{t("study.questionLabel")}</h4>
                                         <p className="text-sm bg-muted/50 p-3 rounded-lg border">{result.questionText}</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <h4 className="font-semibold text-sm uppercase text-muted-foreground tracking-wider">Adım Adım Çözüm</h4>
+                                        <h4 className="font-semibold text-sm uppercase text-muted-foreground tracking-wider">{t("solvePhoto.solution")}</h4>
                                         <div className="whitespace-pre-wrap text-[15px] leading-relaxed italic text-foreground/90 bg-emerald-50/20 p-4 rounded-xl border border-emerald-100/50 shadow-sm">
                                             {result.solution}
                                         </div>
@@ -194,7 +196,7 @@ export default function SolvePhotoPage() {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-lg">Kişisel Notun</CardTitle>
+                                    <CardTitle className="text-lg">{t("solvePhoto.takeNote")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Textarea
@@ -211,9 +213,9 @@ export default function SolvePhotoPage() {
                                         disabled={isSaving}
                                     >
                                         {isSaving ? (
-                                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Kaydediliyor...</>
+                                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.save")}...</>
                                         ) : (
-                                            <><Save className="h-4 w-4 mr-2" /> Kütüphaneye Kaydet</>
+                                            <><Save className="h-4 w-4 mr-2" /> {t("solvePhoto.saveToLibrary")}</>
                                         )}
                                     </Button>
                                 </CardFooter>
@@ -224,7 +226,7 @@ export default function SolvePhotoPage() {
                             <div className="text-center space-y-2">
                                 <Loader2 className={`h-8 w-8 mx-auto text-muted-foreground ${isAnalyzing ? 'animate-spin' : ''}`} />
                                 <p className="text-sm font-medium">
-                                    {isAnalyzing ? "AI soruyu analiz ediyor..." : "Henüz bir soru çözülmedi."}
+                                    {isAnalyzing ? t("solvePhoto.solving") : t("solvePhoto.noHistory")}
                                 </p>
                             </div>
                         </Card>

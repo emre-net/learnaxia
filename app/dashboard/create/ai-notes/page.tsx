@@ -8,11 +8,13 @@ import { Cpu, ArrowLeft, Upload, FileUp, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/lib/i18n/i18n"
 
 export default function AiNotePage() {
     const [isExtracting, setIsExtracting] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
+    const { t } = useTranslation();
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -42,8 +44,8 @@ export default function AiNotePage() {
             }
 
             toast({
-                title: "Belge Okundu",
-                description: "Veriler başarıyla analiz edildi, oluşturma atölyesine yönlendiriliyorsunuz.",
+                title: t("common.success"),
+                description: t("creation.itemsReady", { count: " " }), // Or a more specific translation, but this is fine for success message.
             });
 
             // Redirect to general AI creation where notes can be generated alongside modules
@@ -52,8 +54,8 @@ export default function AiNotePage() {
         } catch (error: any) {
             console.error("Extraction error:", error);
             toast({
-                title: "Hata",
-                description: error.message || "Belge okunurken bir hata oluştu.",
+                title: t("common.error"),
+                description: error.message || t("solvePhoto.errors.generic"),
                 variant: "destructive"
             });
         } finally {
@@ -71,8 +73,8 @@ export default function AiNotePage() {
                     </Link>
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white">AI Not Atölyesi</h1>
-                    <p className="text-slate-400">PDF yükleyin, AI sizin için en önemli yerleri analiz edip notlara dönüştürsün.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">{t("creation.aiNotes.title")}</h1>
+                    <p className="text-slate-400">{t("creation.aiNotes.description")}</p>
                 </div>
             </div>
 
@@ -81,9 +83,9 @@ export default function AiNotePage() {
                     <div className="p-6 rounded-3xl bg-purple-500/10 text-purple-400 mb-6 group-hover:scale-110 transition-transform">
                         <FileUp className="h-12 w-12" />
                     </div>
-                    <CardTitle className="text-2xl mb-2">PDF Dosyası Yükle</CardTitle>
+                    <CardTitle className="text-2xl mb-2">{t("creation.aiNotes.uploadTitle")}</CardTitle>
                     <CardDescription className="max-w-xs">
-                        Ders notlarınızı, kitap bölümlerini veya makaleleri buraya sürükleyin.
+                        {t("creation.aiNotes.uploadDesc")}
                     </CardDescription>
                     <Label htmlFor="ai-note-doc-upload" className="mt-8 bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors w-max">
                         {isExtracting ? (
@@ -107,14 +109,14 @@ export default function AiNotePage() {
                         <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
                             <Sparkles className="h-5 w-5" />
                         </div>
-                        <h2 className="text-xl font-bold text-white">Nasıl Çalışır?</h2>
+                        <h2 className="text-xl font-bold text-white">{t("creation.aiNotes.howItWorks")}</h2>
                     </div>
                     <ul className="space-y-6">
                         {[
-                            { step: "1", text: "PDF dosyanızı sol taraftaki alandan yükleyin." },
-                            { step: "2", text: "AI içeriğin yapısını, anahtar kavramları ve önemli detayları analiz eder." },
-                            { step: "3", text: "Sizin için hiyerarşik ve düzenli çalışma notları oluşturulur." },
-                            { step: "4", text: "Üretilen notları düzenleyip kütüphanenize kaydedebilirsiniz." }
+                            { step: "1", text: t("creation.aiNotes.step1") },
+                            { step: "2", text: t("creation.aiNotes.step2") },
+                            { step: "3", text: t("creation.aiNotes.step3") },
+                            { step: "4", text: t("creation.aiNotes.step4") }
                         ].map((item) => (
                             <li key={item.step} className="flex gap-4">
                                 <span className="flex-shrink-0 h-6 w-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold border border-slate-700">

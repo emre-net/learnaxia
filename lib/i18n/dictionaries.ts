@@ -79,6 +79,10 @@ const en = {
         }
     },
     library: {
+        header: {
+            title: "Library",
+            description: "Manage your learning modules and collections."
+        },
         tabs: {
             modules: "Modules",
             collections: "Collections",
@@ -221,7 +225,26 @@ const en = {
         generatingContent: "Creating your content...",
         analyzingContent: "Our AI is analyzing your {type} and creating questions.",
         reviewContent: "Review Generated Content",
-        itemsReady: "{count} items ready to save."
+        itemsReady: "{count} items ready to save.",
+        aiNotes: {
+            title: "AI Note Workshop",
+            description: "Upload a PDF, AI will analyze the most important parts and convert them to notes for you.",
+            uploadDesc: "Drag and drop your lecture notes, book chapters or articles here.",
+            uploadTitle: "Upload PDF File",
+            howItWorks: "How It Works?",
+            step1: "Upload your PDF file from the left section.",
+            step2: "AI analyzes the structure, key concepts, and important details of the content.",
+            step3: "Hierarchical and organized study notes are generated for you.",
+            step4: "You can edit the generated notes and save them to your library."
+        },
+        manualNote: {
+            title: "Note Workshop",
+            description: "Take notes manually and save them to your system.",
+            cardTitle: "New Note",
+            cardDesc: "Start typing your notes here. Rich text editor will be added soon.",
+            placeholder: "Write your notes here...",
+            saveNote: "Save Note"
+        }
     },
     sidebar: {
         dashboard: "Dashboard",
@@ -465,6 +488,10 @@ const tr = {
         }
     },
     library: {
+        header: {
+            title: "Kitaplık",
+            description: "Öğrenme modüllerini ve koleksiyonlarını yönet."
+        },
         tabs: {
             modules: "Modüller",
             collections: "Koleksiyonlar",
@@ -607,7 +634,26 @@ const tr = {
         generatingContent: "İçeriğiniz oluşturuluyor...",
         analyzingContent: "Yapay zeka analiz ediyor ve içeriği hazırlıyor.",
         reviewContent: "Üretilen İçeriği İncele",
-        itemsReady: "{count} öğe kaydedilmeye hazır."
+        itemsReady: "{count} öğe kaydedilmeye hazır.",
+        aiNotes: {
+            title: "AI Not Atölyesi",
+            description: "PDF yükleyin, AI sizin için en önemli yerleri analiz edip notlara dönüştürsün.",
+            uploadDesc: "Ders notlarınızı, kitap bölümlerini veya makaleleri buraya sürükleyin.",
+            uploadTitle: "PDF Dosyası Yükle",
+            howItWorks: "Nasıl Çalışır?",
+            step1: "PDF dosyanızı sol taraftaki alandan yükleyin.",
+            step2: "AI içeriğin yapısını, anahtar kavramları ve önemli detayları analiz eder.",
+            step3: "Sizin için hiyerarşik ve düzenli çalışma notları oluşturulur.",
+            step4: "Üretilen notları düzenleyip kütüphanenize kaydedebilirsiniz."
+        },
+        manualNote: {
+            title: "Not Atölyesi",
+            description: "Elle not alın ve sisteminize kaydedin.",
+            cardTitle: "Yeni Not",
+            cardDesc: "Buraya notlarınızı yazmaya başlayın. Zengin metin editörü yakında eklenecek.",
+            placeholder: "Notlarınızı buraya yazın...",
+            saveNote: "Notu Kaydet"
+        }
     },
     sidebar: {
         dashboard: "Akış",
