@@ -31,7 +31,8 @@ async function fetchNotes(filters?: { moduleId?: string; itemId?: string }) {
 
     const res = await fetch(`/api/notes?${params.toString()}`);
     if (!res.ok) throw new Error("Failed to fetch notes");
-    return res.json();
+    const data = await res.json();
+    return data.items || [];
 }
 
 async function createNote(data: CreateNoteDto) {

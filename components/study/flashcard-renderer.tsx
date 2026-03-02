@@ -12,6 +12,17 @@ export function FlashcardRenderer({ item }: { item: any }) {
     const { isFlipped, setIsFlipped } = useStudyStore();
     const { t } = useTranslation();
 
+    // Safely extract text with fallbacks for various AI JSON formats
+    const c = item?.content || {};
+    let frontText = c.question || c.front || c.text || c.Question || c.Front || c.term || c.concept;
+    let backText = c.answer || c.back || c.Answer || c.Back || c.definition;
+
+    if (typeof frontText === 'object') frontText = JSON.stringify(frontText);
+    if (typeof backText === 'object') backText = JSON.stringify(backText);
+
+    frontText = frontText || "🤔 Ön Yüz (Soru Metni Bulunamadı)";
+    backText = backText || "💡 Arka Yüz (Cevap Metni Bulunamadı)";
+
     // Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,7 +57,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     <div className="flex flex-col gap-4 select-none">
                         <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">{t('study.questionLabel')}</span>
                         <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
-                            <ReactMarkdown>{item.content.question || item.content.front || item.content.text || ""}</ReactMarkdown>
+                            <ReactMarkdown>{String(frontText)}</ReactMarkdown>
                         </div>
                         {item.content.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
@@ -66,11 +77,11 @@ export function FlashcardRenderer({ item }: { item: any }) {
                     <div className="flex flex-col gap-4">
                         <span className="text-sm text-primary uppercase tracking-wider font-semibold">{t('study.answerLabel')}</span>
                         <div className="text-3xl font-bold text-primary prose dark:prose-invert prose-primary max-w-none">
-                            <ReactMarkdown>{item.content.answer || item.content.back}</ReactMarkdown>
+                            <ReactMarkdown>{String(backText)}</ReactMarkdown>
                         </div>
-                        {item.content.solution && (
+                        {item.content?.solution && (
                             <div className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg prose dark:prose-invert prose-sm max-w-none">
-                                <ReactMarkdown>{item.content.solution}</ReactMarkdown>
+                                <ReactMarkdown>{String(item.content.solution)}</ReactMarkdown>
                             </div>
                         )}
                     </div>
