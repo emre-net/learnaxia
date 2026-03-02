@@ -233,7 +233,23 @@ const en = {
         success: "Success",
         successAccuracy: "Success",
         questions: "Questions",
-        duration: "Duration"
+        duration: "Duration",
+        preferences: {
+            title: "System Settings",
+            description: "Manage your language and application preferences.",
+            languageLabel: "Language Selection",
+            languagePlaceholder: "Select language",
+            soundLabel: "Sound Effects",
+            soundDesc: "Play sound for correct/wrong notifications.",
+            focusLabel: "Study Timer (Focus Mode)",
+            focusDesc: "Shows elapsed time on the study screen. Even if you turn it off, time is measured in the background and reflected in statistics.",
+            emailLabel: "Email Notifications",
+            emailDesc: "Get important updates via email.",
+            inAppLabel: "In-App Notifications",
+            inAppDesc: "New module reminders and achievements.",
+            moduleLabel: "Module Reminders",
+            moduleDesc: "Remind me daily about unfinished studies."
+        }
     },
     dashboard: {
         greeting: "Welcome, {name}!",
@@ -603,7 +619,23 @@ const tr = {
         success: "Başarılı",
         successAccuracy: "Başarı",
         questions: "Soru",
-        duration: "Süre"
+        duration: "Süre",
+        preferences: {
+            title: "Sistem Ayarları",
+            description: "Dil ve uygulama tercihlerini yönetin.",
+            languageLabel: "Dil Seçimi",
+            languagePlaceholder: "Dil seçin",
+            soundLabel: "Ses Efektleri",
+            soundDesc: "Doğru/yanlış bildirimleri için ses çal.",
+            focusLabel: "Çalışma Süresi Göstergesi (Odaklanma)",
+            focusDesc: "Çalışma ekranında (Study) geçen süreyi gösterir. Kapatsanız bile süre arka planda ölçülür ve istatistiklere yansımaya devam eder.",
+            emailLabel: "E-posta Bildirimleri",
+            emailDesc: "Önemli güncellemeleri e-posta ile al.",
+            inAppLabel: "Uygulama İçi Bildirimler",
+            inAppDesc: "Yeni modül hatırlatıcıları ve başarılar.",
+            moduleLabel: "Modül Hatırlatıcıları",
+            moduleDesc: "Yarım kalan çalışmaları günlük olarak hatırlat."
+        }
     },
     dashboard: {
         greeting: "Hoşgeldin, {name}!",

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/stores/settings-store";
+import { useTranslation } from "@/lib/i18n/i18n";
 
 interface SystemPreferencesProps {
     language: string;
@@ -20,18 +21,20 @@ export function SystemPreferences({
     soundEnabled,
     onSoundEnabledChange
 }: SystemPreferencesProps) {
+    const { t } = useTranslation();
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Sistem Ayarları</CardTitle>
-                <CardDescription>Dil ve uygulama tercihlerini yönetin.</CardDescription>
+                <CardTitle>{t('settings.preferences.title')}</CardTitle>
+                <CardDescription>{t('settings.preferences.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-2">
-                    <Label htmlFor="language">Dil Seçimi</Label>
+                    <Label htmlFor="language">{t('settings.preferences.languageLabel')}</Label>
                     <Select value={language} onValueChange={onLanguageChange}>
                         <SelectTrigger id="language">
-                            <SelectValue placeholder="Dil seçin" />
+                            <SelectValue placeholder={t('settings.preferences.languagePlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="tr">Türkçe 🇹🇷</SelectItem>
@@ -42,8 +45,8 @@ export function SystemPreferences({
 
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                     <div className="space-y-0.5">
-                        <Label className="text-base">Ses Efektleri</Label>
-                        <p className="text-xs text-muted-foreground">Doğru/yanlış bildirimleri için ses çal.</p>
+                        <Label className="text-base">{t('settings.preferences.soundLabel')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('settings.preferences.soundDesc')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Switch checked={soundEnabled} onCheckedChange={onSoundEnabledChange} />
@@ -52,8 +55,8 @@ export function SystemPreferences({
 
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                     <div className="space-y-0.5">
-                        <Label className="text-base">Çalışma Süresi Göstergesi (Odaklanma)</Label>
-                        <p className="text-xs text-muted-foreground">Çalışma ekranında (Study) geçen süreyi gösterir. Kapatsanız bile süre arka planda ölçülür ve istatistiklere yansımaya devam eder.</p>
+                        <Label className="text-base">{t('settings.preferences.focusLabel')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('settings.preferences.focusDesc')}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Switch
@@ -66,24 +69,24 @@ export function SystemPreferences({
                 <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                         <div className="space-y-0.5">
-                            <Label className="text-base">E-posta Bildirimleri</Label>
-                            <p className="text-xs text-muted-foreground">Önemli güncellemeleri e-posta ile al.</p>
+                            <Label className="text-base">{t('settings.preferences.emailLabel')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('settings.preferences.emailDesc')}</p>
                         </div>
                         <Switch defaultChecked />
                     </div>
 
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Uygulama İçi Bildirimler</Label>
-                            <p className="text-xs text-muted-foreground">Yeni modül hatırlatıcıları ve başarılar.</p>
+                            <Label className="text-base">{t('settings.preferences.inAppLabel')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('settings.preferences.inAppDesc')}</p>
                         </div>
                         <Switch defaultChecked />
                     </div>
 
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Modül Hatırlatıcıları</Label>
-                            <p className="text-xs text-muted-foreground">Yarım kalan çalışmaları günlük olarak hatırlat.</p>
+                            <Label className="text-base">{t('settings.preferences.moduleLabel')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('settings.preferences.moduleDesc')}</p>
                         </div>
                         <Switch defaultChecked />
                     </div>

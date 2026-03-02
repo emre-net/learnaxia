@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Pencil, Target, Zap, Clock } from "lucide-react";
 import { EditProfileDialog } from "./edit-profile-dialog";
+import { useTranslation } from "@/lib/i18n/i18n";
 
 interface ProfileHeaderProps {
     user: {
@@ -16,6 +17,8 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="relative mb-8">
             {/* Cover Area */}
@@ -83,7 +86,7 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                                         <Target className="h-6 w-6 text-blue-500" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Başarı</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t('settings.successAccuracy')}</span>
                                         <span className="text-2xl font-black text-foreground tabular-nums">
                                             %{analyticsData.stats?.globalAccuracy ?? 0}
                                         </span>
@@ -100,7 +103,7 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                                         <Zap className="h-6 w-6 text-purple-500 fill-purple-500/20" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Soru</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t('settings.questions')}</span>
                                         <span className="text-2xl font-black text-foreground tabular-nums">
                                             {analyticsData.stats?.totalSolved ?? 0}
                                         </span>
@@ -117,11 +120,11 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                                         <Clock className="h-6 w-6 text-emerald-500" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Süre</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t('settings.duration')}</span>
                                         <span className="text-2xl font-black text-foreground tabular-nums">
                                             {(analyticsData.stats?.totalStudyMinutes ?? 0) > 60
-                                                ? `${Math.floor((analyticsData.stats?.totalStudyMinutes ?? 0) / 60)}s`
-                                                : `${analyticsData.stats?.totalStudyMinutes ?? 0}dk`}
+                                                ? `${Math.floor((analyticsData.stats?.totalStudyMinutes ?? 0) / 60)}h`
+                                                : `${analyticsData.stats?.totalStudyMinutes ?? 0}m`}
                                         </span>
                                     </div>
                                 </motion.div>
