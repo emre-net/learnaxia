@@ -1,5 +1,5 @@
-
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 import { auth } from "@/auth";
 import { AIService } from "@/domains/ai/ai.service";
