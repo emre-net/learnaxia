@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface AILog {
     id: string;
-    timestamp: string;
+    createdAt: string;
     level: string;
     requestId: string;
     message: string;
@@ -124,7 +124,7 @@ export default function AILogsPage() {
                                             <XCircle className="w-4 h-4 text-red-400" />
                                         )}
                                         <span className="text-xs font-mono opacity-60">
-                                            {format(new Date(log.timestamp), "HH:mm:ss")}
+                                            {log.createdAt ? format(new Date(log.createdAt), "HH:mm:ss") : "Unknown"}
                                         </span>
                                     </div>
                                     <Badge variant="outline" className={cn(
