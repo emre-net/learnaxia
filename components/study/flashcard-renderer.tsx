@@ -14,8 +14,9 @@ export function FlashcardRenderer({ item }: { item: any }) {
 
     // Safely extract text with fallbacks for various AI JSON formats
     const c = item?.content || {};
-    let frontText = c.question || c.front || c.text || c.Question || c.Front || c.term || c.concept;
-    let backText = c.answer || c.back || c.Answer || c.Back || c.definition;
+    const actualC = c.content || c; // Backward compatibility for nested {content: {front}} DB leak
+    let frontText = actualC.question || actualC.front || actualC.text || actualC.Question || actualC.Front || actualC.term || actualC.concept;
+    let backText = actualC.answer || actualC.back || actualC.Answer || actualC.Back || actualC.definition;
 
     if (typeof frontText === 'object') frontText = JSON.stringify(frontText);
     if (typeof backText === 'object') backText = JSON.stringify(backText);
@@ -59,7 +60,7 @@ export function FlashcardRenderer({ item }: { item: any }) {
                         <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
                             <ReactMarkdown>{String(frontText)}</ReactMarkdown>
                         </div>
-                        {item.content.image && (
+                        {actualC.image && (
                             <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">Image</div>
                         )}
                         <span className="mt-8 text-xs text-muted-foreground font-mono">[{t('study.flipHint')}]</span>
@@ -79,9 +80,9 @@ export function FlashcardRenderer({ item }: { item: any }) {
                         <div className="text-3xl font-bold text-primary prose dark:prose-invert prose-primary max-w-none">
                             <ReactMarkdown>{String(backText)}</ReactMarkdown>
                         </div>
-                        {item.content?.solution && (
+                        {actualC.solution && (
                             <div className="text-muted-foreground text-sm mt-4 p-4 bg-background/50 rounded-lg prose dark:prose-invert prose-sm max-w-none">
-                                <ReactMarkdown>{String(item.content.solution)}</ReactMarkdown>
+                                <ReactMarkdown>{String(actualC.solution)}</ReactMarkdown>
                             </div>
                         )}
                     </div>

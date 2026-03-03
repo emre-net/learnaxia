@@ -31,7 +31,7 @@ export class ModuleService {
      */
     static async create(userId: string, dto: CreateModuleDto) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            const module = await tx.module.create({
+            const createdModule = await tx.module.create({
                 data: {
                     title: dto.title,
                     description: dto.description,
@@ -46,20 +46,24 @@ export class ModuleService {
             });
 
             if (dto.items && dto.items.length > 0) {
-                const itemsData = dto.items.map((item, index) => ({
-                    moduleId: module.id,
-                    type: dto.type,
-                    content: item as Prisma.InputJsonValue,
-                    contentHash: computeContentHash(item),
-                    order: index,
-                }));
+                const itemsData = dto.items.map((item, index) => {
+                    const actualContent = item.content !== undefined ? item.content : item;
+                    const itemType = item.type || dto.type || 'FLASHCARD';
+                    return {
+                        moduleId: createdModule.id,
+                        type: itemType,
+                        content: actualContent as Prisma.InputJsonValue,
+                        contentHash: computeContentHash(actualContent),
+                        order: item.order !== undefined ? item.order : index,
+                    };
+                });
                 await tx.item.createMany({ data: itemsData });
             }
 
             await tx.userModuleLibrary.create({
                 data: {
                     userId: userId,
-                    moduleId: module.id,
+                    moduleId: createdModule.id,
                     role: 'OWNER',
                     lastInteractionAt: new Date(),
                 },
@@ -68,13 +72,13 @@ export class ModuleService {
             await tx.userContentAccess.create({
                 data: {
                     userId: userId,
-                    resourceId: module.id,
+                    resourceId: createdModule.id,
                     resourceType: 'MODULE',
                     accessLevel: 'OWNER',
                 },
             });
 
-            return module;
+            return createdModule;
         });
     }
 
@@ -96,7 +100,7 @@ export class ModuleService {
      * Gets a single module detail with library status.
      */
     static async getById(userId: string, moduleId: string) {
-        const module = await prisma.module.findUnique({
+        const dbModule = await prisma.module.findUnique({
             where: { id: moduleId },
             include: {
                 items: { orderBy: { order: 'asc' } },
@@ -114,13 +118,13 @@ export class ModuleService {
             }
         });
 
-        if (!module) throw new Error("Module not found");
+        if (!dbModule) throw new Error("Module not found");
 
-        const isInLibrary = module._count.userLibrary > 0;
-        const visibility = (module as any).visibility;
+        const isInLibrary = dbModule._count.userLibrary > 0;
+        const visibility = (dbModule as any).visibility;
 
-        if (visibility === 'PUBLIC' || module.ownerId === userId || visibility === 'PRIVATE') {
-            return { ...module, isInLibrary };
+        if (visibility === 'PUBLIC' || dbModule.ownerId === userId || visibility === 'PRIVATE') {
+            return { ...dbModule, isInLibrary };
         }
 
         throw new Error("Unauthorized Access");
@@ -170,13 +174,14 @@ export class ModuleService {
 
                 for (const item of items) {
                     if (item.id && existingItemIds.has(item.id)) {
+                        const actualContent = item.content !== undefined ? item.content : item;
                         await tx.item.update({
                             where: { id: item.id },
                             data: {
-                                content: item.content as Prisma.InputJsonValue,
-                                contentHash: computeContentHash(item.content),
+                                content: actualContent as Prisma.InputJsonValue,
+                                contentHash: computeContentHash(actualContent),
                                 order: item.order,
-                                type: dto.type
+                                type: item.type || dto.type || 'FLASHCARD'
                             }
                         });
                     }
@@ -184,13 +189,16 @@ export class ModuleService {
 
                 if (itemsToCreate.length > 0) {
                     await tx.item.createMany({
-                        data: itemsToCreate.map(item => ({
-                            moduleId: moduleId,
-                            type: dto.type || 'FLASHCARD',
-                            content: item.content as Prisma.InputJsonValue,
-                            contentHash: computeContentHash(item.content),
-                            order: item.order
-                        }))
+                        data: itemsToCreate.map((item: any) => {
+                            const actualContent = item.content !== undefined ? item.content : item;
+                            return {
+                                moduleId: moduleId,
+                                type: item.type || dto.type || 'FLASHCARD',
+                                content: actualContent as Prisma.InputJsonValue,
+                                contentHash: computeContentHash(actualContent),
+                                order: item.order
+                            };
+                        })
                     });
                 }
             });
@@ -238,12 +246,13 @@ export class ModuleService {
         });
         const newOrder = (lastItem?.order ?? -1) + 1;
 
+        const actualContent = itemData.content !== undefined ? itemData.content : itemData;
         return await prisma.item.create({
             data: {
                 moduleId: moduleId,
-                type: itemData.type,
-                content: itemData.content as Prisma.InputJsonValue,
-                contentHash: computeContentHash(itemData.content),
+                type: itemData.type || 'FLASHCARD',
+                content: actualContent as Prisma.InputJsonValue,
+                contentHash: computeContentHash(actualContent),
                 order: newOrder
             }
         });
@@ -266,11 +275,11 @@ export class ModuleService {
         });
 
         if (!access || access.accessLevel !== 'OWNER') {
-            const module = await prisma.module.findUnique({ where: { id: moduleId } });
-            if (!module || !module.isForkable) throw new Error("Unauthorized or not forkable");
+            const dbModule = await prisma.module.findUnique({ where: { id: moduleId } });
+            if (!dbModule || !dbModule.isForkable) throw new Error("Unauthorized or not forkable");
 
             const originalItem = await prisma.item.findUnique({ where: { id: itemId } });
-            const newHash = computeContentHash(itemData.content);
+            const newHash = computeContentHash(itemData.content !== undefined ? itemData.content : itemData);
 
             if (originalItem && originalItem.contentHash === newHash) return originalItem;
 
@@ -278,11 +287,12 @@ export class ModuleService {
             return { ...result.item, _meta: { forkedModuleId: result.module.id } };
         }
 
+        const actualContent = itemData.content !== undefined ? itemData.content : itemData;
         return await prisma.item.update({
             where: { id: itemId },
             data: {
-                content: itemData.content as Prisma.InputJsonValue,
-                contentHash: computeContentHash(itemData.content),
+                content: actualContent as Prisma.InputJsonValue,
+                contentHash: computeContentHash(actualContent),
                 type: itemData.type,
             }
         });
@@ -297,8 +307,8 @@ export class ModuleService {
         });
 
         if (!access || access.accessLevel !== 'OWNER') {
-            const module = await prisma.module.findUnique({ where: { id: moduleId } });
-            if (!module || !module.isForkable) throw new Error("Unauthorized or not forkable");
+            const dbModule = await prisma.module.findUnique({ where: { id: moduleId } });
+            if (!dbModule || !dbModule.isForkable) throw new Error("Unauthorized or not forkable");
 
             const newModule = await ForkService.fork(userId, moduleId);
             const newItem = await prisma.item.findFirst({

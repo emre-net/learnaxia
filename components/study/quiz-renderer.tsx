@@ -27,8 +27,9 @@ export function QuizRenderer({ item }: { item: any }) {
 
     // Safely extract content with fallbacks for various AI JSON formats
     const c = item?.content || {};
-    let questionText = c.question || c.Question || c.front || c.text || c.Text || "";
-    let answerText = c.answer || c.Answer || c.correct || c.Correct || c.back || "";
+    const actualC = c.content || c; // Backward compatibility for nested {content: {question}} DB leak
+    let questionText = actualC.question || actualC.Question || actualC.front || actualC.text || actualC.Text || "";
+    let answerText = actualC.answer || actualC.Answer || actualC.correct || actualC.Correct || actualC.back || "";
 
     if (typeof questionText === 'object') questionText = JSON.stringify(questionText);
     if (typeof answerText === 'object') answerText = JSON.stringify(answerText);
@@ -38,9 +39,9 @@ export function QuizRenderer({ item }: { item: any }) {
 
     // Ensure options exist and can handle 'Options' vs 'options'
     const options = useMemo(() => {
-        const rawOptions = c.options || c.Options || [];
+        const rawOptions = actualC.options || actualC.Options || [];
         return Array.isArray(rawOptions) ? rawOptions : Object.values(rawOptions);
-    }, [c.options, c.Options]);
+    }, [actualC.options, actualC.Options]);
 
     // Keyboard support for 1-4
     useEffect(() => {
