@@ -29,7 +29,7 @@ export function HeroSection() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="text-4xl font-black tracking-tight lg:text-8xl mb-6 bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400 bg-clip-text text-transparent pb-2 leading-tight"
                 >
-                    Seni <br className="hidden md:block" /> ısırıırımmmmmmm
+                    Öğrenmenin En Akıllı Yolu, <br className="hidden md:block" /> Potansiyelini Keşfet.
                 </motion.h1>
 
                 <motion.p

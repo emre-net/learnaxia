@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     default: "Learnaxia",
     template: "%s | Learnaxia",
   },
-  description: "Seni ısırıırımmmmmmm. Akıllı öğrenme platformu ile kartlarını oluştur, çalış ve ilerlemeni takip et.",
+  description: "Öğrenmenin En Akıllı Yolu, Potansiyelini Keşfet. Akıllı öğrenme platformu ile kartlarını oluştur, çalış ve ilerlemeni takip et.",
   keywords: ["öğrenme", "flashcard", "spaced repetition", "quiz", "eğitim", "AI", "yapay zeka"],
   authors: [{ name: "Learnaxia" }],
   creator: "Learnaxia",

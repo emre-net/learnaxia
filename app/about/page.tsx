@@ -32,7 +32,7 @@ export default function AboutPage() {
                         <section className="bg-muted/50 p-8 rounded-3xl border-2 border-dashed">
                             <h2 className="text-2xl font-black mb-2">Tek Kişilik Dev Kadro</h2>
                             <p className="text-sm text-muted-foreground italic mb-4">
-                                "Seni ısırıırımmmmmmm"
+                                "Öğrenmenin En Akıllı Yolu."
                             </p>
                             <p className="text-muted-foreground leading-relaxed">
                                 Learnaxia, büyük kurumsal yapılar yerine, tek bir yazılım mühendisinin tutkusu ve vizyonuyla

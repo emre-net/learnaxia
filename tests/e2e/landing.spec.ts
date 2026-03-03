@@ -8,10 +8,10 @@ test.describe('Landing Page', () => {
     test('renders hero section with heading', async ({ page }) => {
         await expect(page).toHaveTitle(/Learnaxia/i);
 
-        // Hero h1: "Seni ısırıırımmmmmmm"
+        // Hero h1: "Öğrenmenin En Akıllı Yolu"
         const hero = page.locator('h1');
         await expect(hero).toBeVisible();
-        await expect(hero).toContainText(/ısırıırımmmmmmm/i);
+        await expect(hero).toContainText(/Öğrenmenin En Akıllı Yolu/i);
     });
 
     test('displays CTA button "Hemen Başla"', async ({ page }) => {
