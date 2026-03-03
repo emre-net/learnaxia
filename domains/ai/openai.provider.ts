@@ -42,7 +42,7 @@ export class OpenAIAIProvider implements AIProvider {
         });
     }
 
-    async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto'): Promise<AIResponseItem[]> {
+    async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto', language: string = 'tr'): Promise<AIResponseItem[]> {
         if (!process.env.GROQ_API_KEY) {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
@@ -71,6 +71,8 @@ export class OpenAIAIProvider implements AIProvider {
             
             Extraction Focus / Strategy: 
             ${focusInstruction}
+
+            IMPORTANT: You MUST return all content and items within the JSON in this language: ${language.toUpperCase()}. If it is 'tr', translate and write entirely in Turkish.
 
             Instruction: ${countInstruction}
             Types to generate: ${types.join(", ")}.
@@ -232,7 +234,7 @@ export class OpenAIAIProvider implements AIProvider {
         return currentItems;
     }
 
-    async analyzeImage(imageBuffer: Buffer, mimeType: string): Promise<VisionResult> {
+    async analyzeImage(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
         if (!process.env.GROQ_API_KEY) {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
@@ -241,6 +243,9 @@ export class OpenAIAIProvider implements AIProvider {
 
         const systemPrompt = `
             You are an elite educational tutor. Analyze the image and provide the question text and solution.
+            
+            IMPORTANT: Provide the "questionText" and "solution" natively in this language: ${language.toUpperCase()}. If it is 'tr', output them strictly in Turkish.
+            
             Respond ONLY in JSON format:
             {
                 "questionText": "...",
@@ -288,7 +293,7 @@ export class OpenAIAIProvider implements AIProvider {
         }
     }
 
-    async generateJourneySlide(topic: string, parentTopic: string, depth: string): Promise<z.infer<typeof SlideGenerationSchema>> {
+    async generateJourneySlide(topic: string, parentTopic: string, depth: string, language: string = "tr"): Promise<z.infer<typeof SlideGenerationSchema>> {
         if (!process.env.GROQ_API_KEY) {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
@@ -297,6 +302,8 @@ export class OpenAIAIProvider implements AIProvider {
             You are an expert tutor creating an interactive learning module.
             Your task is to generate ONE comprehensive learning slide (section) about "${topic}" which is part of the broader subject "${parentTopic}".
             The requested depth is "${depth}".
+            
+            IMPORTANT: You MUST generate all text content in this language: ${language.toUpperCase()}. If it's 'tr', write purely in Turkish.
             
             1. Provide a clear, engaging "title" for the slide.
             2. Write the "content" in rich HTML format. Use semantic tags (<h2>, <p>, <ul>, <li>, <strong>, <em>). Make it highly readable and engaging, suitable for a learning app. Add brief examples if appropriate.

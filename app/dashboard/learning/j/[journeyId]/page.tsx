@@ -13,7 +13,7 @@ export default async function JourneySessionPage(props: { params: Promise<{ jour
     const journeyId = params.journeyId;
 
     // Validate access using userJourneyLibrary 
-    const isOwner = await prisma.userJourneyLibrary.findFirst({
+    const isOwner = await (prisma as any).userJourneyLibrary.findFirst({
         where: {
             userId: session.user.id,
             journeyId: journeyId,
@@ -24,7 +24,7 @@ export default async function JourneySessionPage(props: { params: Promise<{ jour
         return notFound();
     }
 
-    const journey = await prisma.learningJourney.findUnique({
+    const journey = await (prisma as any).learningJourney.findUnique({
         where: { id: journeyId },
         include: {
             slides: {

@@ -12,11 +12,11 @@ export class AIService {
         return this._provider;
     }
 
-    static async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto'): Promise<AIResponseItem[]> {
-        return this.getProvider().generateContent(topic, types, count, focusMode);
+    static async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto', language: string = 'tr'): Promise<AIResponseItem[]> {
+        return this.getProvider().generateContent(topic, types, count, focusMode, language);
     }
 
-    static async solvePhoto(imageBuffer: Buffer, mimeType: string): Promise<VisionResult> {
-        return this.getProvider().analyzeImage(imageBuffer, mimeType);
+    static async solvePhoto(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
+        return this.getProvider().analyzeImage(imageBuffer, mimeType, language);
     }
 }

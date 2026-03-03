@@ -9,6 +9,7 @@ import { z } from "zod";
 import { getAiQueue } from "@/lib/queue/client";
 import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import prisma from "@/lib/prisma";
+import { validateTopic } from "@/lib/ai/providers/openai.provider";
 
 const GenerateSchema = z.object({
     topic: z.string().min(3),
@@ -53,13 +54,27 @@ export async function POST(req: Request) {
         }
 
         // 3. Process Request
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const language = user?.language || "tr";
+
+        // 4. Validate Topic Meaningfulness
+        const validation = await validateTopic(topic, language);
+        if (!validation.isValid) {
+            // Refund the deducted amount since we are rejecting
+            await WalletService.credit(userId, dynamicCost, 'REFUND', `Refund: Invalid topic blocked`);
+            return NextResponse.json({
+                error: validation.reason || 'Lütfen içeriğini üretmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
+            }, { status: 400 });
+        }
+
         if (mode === 'async') {
             const job = await getAiQueue().add("generate-content", {
                 userId,
                 topic,
                 types,
                 count,
-                focusMode
+                focusMode,
+                language
             });
             return NextResponse.json({
                 jobId: job.id,
@@ -69,7 +84,7 @@ export async function POST(req: Request) {
         }
 
         try {
-            const items = await AIService.generateContent(topic, types, count, focusMode);
+            const items = await AIService.generateContent(topic, types, count, focusMode, language);
             return NextResponse.json({
                 items,
                 remainingTokens: (await WalletService.getBalance(userId)).balance

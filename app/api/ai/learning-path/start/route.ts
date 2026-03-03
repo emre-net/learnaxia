@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { getAiQueue } from "@/lib/queue/client";
+import { validateTopic } from "@/lib/ai/providers/openai.provider";
 
 const StartJourneySchema = z.object({
     topic: z.string().min(2),
@@ -28,8 +29,19 @@ export async function POST(req: Request) {
         const { topic, depth, syllabus } = StartJourneySchema.parse(body);
         const userId = session.user.id;
 
-        // 1. Create the Journey Record in DB (Status: GENERATING)
-        const journey = await prisma.learningJourney.create({
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const language = user?.language || "tr";
+
+        // 1. Validate Topic Meaningfulness
+        const validation = await validateTopic(topic, language);
+        if (!validation.isValid) {
+            return NextResponse.json({
+                error: validation.reason || 'Lütfen öğrenmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
+            }, { status: 400 });
+        }
+
+        // 2. Create the Journey Record in DB (Status: GENERATING)
+        const journey = await (prisma as any).learningJourney.create({
             data: {
                 userId,
                 title: `${topic} Journey`,
@@ -40,8 +52,8 @@ export async function POST(req: Request) {
             }
         });
 
-        // 2. Add to User's Library
-        await prisma.userJourneyLibrary.create({
+        // 3. Add to User's Library
+        await (prisma as any).userJourneyLibrary.create({
             data: {
                 userId,
                 journeyId: journey.id,
@@ -49,13 +61,14 @@ export async function POST(req: Request) {
             }
         });
 
-        // 3. Push to BullMQ for Background Generative Task
+        // 4. Push to BullMQ for Background Generative Task
         await getAiQueue().add("generate-journey", {
             userId,
             journeyId: journey.id,
             topic,
             depth,
-            syllabus
+            syllabus,
+            language
         });
 
         return NextResponse.json({

@@ -7,6 +7,7 @@ import { WalletService } from "@/domains/wallet/wallet.service";
 import { AIError } from "@/domains/ai/ai.interface";
 import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
     try {
@@ -54,7 +55,10 @@ export async function POST(req: Request) {
         // 3. Process Request
         let result;
         try {
-            result = await AIService.solvePhoto(buffer, file.type);
+            const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+            const language = user?.language || "tr";
+
+            result = await AIService.solvePhoto(buffer, file.type, language);
         } catch (aiError) {
             // 4. Refund on Failure
             console.error("AI Photo Solve Failed, refunding user:", aiError);

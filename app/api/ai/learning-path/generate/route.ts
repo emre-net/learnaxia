@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { generateSyllabus } from '@/lib/ai/providers/openai.provider';
+import { auth } from '@/auth';
+import prisma from '@/lib/prisma';
+import { generateSyllabus, validateTopic } from '@/lib/ai/providers/openai.provider';
 import { calculateAITokensAndCost } from '@/lib/utils/token-calculator';
 
 export async function POST(req: Request) {
@@ -19,8 +21,23 @@ export async function POST(req: Request) {
             targetCount: depth === "shallow" ? 3 : depth === "standard" ? 5 : 8
         });
 
-        // 2. Execute Syllabus Generation via AI
-        const syllabus = await generateSyllabus(topic, goal || '', depth);
+        const session = await auth();
+        let userLang = "tr";
+        if (session?.user?.id) {
+            const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+            if (user?.language) userLang = user.language;
+        }
+
+        // 2. Validate Topic Meaningfulness
+        const validation = await validateTopic(topic, userLang);
+        if (!validation.isValid) {
+            return NextResponse.json({
+                error: validation.reason || 'Lütfen öğrenmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
+            }, { status: 400 });
+        }
+
+        // 3. Execute Syllabus Generation via AI
+        const syllabus = await generateSyllabus(topic, goal || '', depth, userLang);
 
         return NextResponse.json({
             success: true,

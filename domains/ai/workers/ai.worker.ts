@@ -11,6 +11,8 @@ interface GenerateContentJobData {
     types: string[];
     count: number;
     moduleId?: string; // If updating an existing module
+    focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto';
+    language?: string;
 }
 
 interface GenerateJourneyJobData {
@@ -19,6 +21,7 @@ interface GenerateJourneyJobData {
     topic: string;
     depth: string;
     syllabus: any[]; // Or a specific type
+    language?: string;
 }
 
 type AIJobData = GenerateContentJobData | GenerateJourneyJobData;
@@ -45,10 +48,11 @@ export const aiWorker = new Worker(
                     const slideResult = await provider.generateJourneySlide(
                         item.title,
                         data.topic,
-                        data.depth
+                        data.depth,
+                        data.language || "tr"
                     );
 
-                    await prisma.learningSlide.create({
+                    await (prisma as any).learningSlide.create({
                         data: {
                             learningJourneyId: data.journeyId,
                             order: item.order || i + 1,
@@ -63,7 +67,7 @@ export const aiWorker = new Worker(
                 }
 
                 // Mark journey as ready
-                await prisma.learningJourney.update({
+                await (prisma as any).learningJourney.update({
                     where: { id: data.journeyId },
                     data: { status: "ACTIVE" }
                 });
@@ -73,7 +77,7 @@ export const aiWorker = new Worker(
             else {
                 // Default handling for "generate-content" or legacy jobs
                 const data = job.data as GenerateContentJobData;
-                const items = await AIService.generateContent(data.topic, data.types, data.count);
+                const items = await AIService.generateContent(data.topic, data.types, data.count, data.focusMode, data.language || "tr");
 
                 // 2. Save results (Logic depends on whether it's a new or existing module)
                 return { items };
@@ -86,7 +90,7 @@ export const aiWorker = new Worker(
                 if (job.name === "generate-journey") {
                     const data = job.data as GenerateJourneyJobData;
                     await WalletService.credit(userId, 10, 'REFUND', `Refund: Async Journey generation failed for ${topic}`);
-                    await prisma.learningJourney.update({
+                    await (prisma as any).learningJourney.update({
                         where: { id: data.journeyId },
                         data: { status: "FAILED" }
                     });

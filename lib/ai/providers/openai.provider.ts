@@ -12,10 +12,50 @@ export interface SyllabusItem {
     estimatedMinutes: number;
 }
 
+export async function validateTopic(topic: string, language: string = "tr"): Promise<{ isValid: boolean, reason?: string }> {
+    if (!process.env.GROQ_API_KEY) return { isValid: true }; // Bypass in dev if no key
+
+    const systemPrompt = `
+        You are a strict validation AI for an educational platform.
+        Your job is to determine if the user's input is a valid, meaningful topic to learn about, or if it is nonsense/gibberish (e.g., "hello", "asdfg", "test1234").
+        
+        IMPORTANT: Your response MUST be in this language: ${language.toUpperCase()}. If it is 'tr', write the "reason" in Turkish.
+        
+        Return JSON format:
+        {
+          "isValid": boolean,
+          "reason": "If isValid is false, explain briefly and nicely why it's not a valid topic to learn, in the user's language."
+        }
+    `;
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-4o-mini",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Topic input to validate: "${topic}"` }
+            ],
+            response_format: { type: "json_object" }
+        });
+
+        const content = response.choices[0]?.message?.content || "{}";
+        const parsed = JSON.parse(content);
+        return {
+            isValid: parsed.isValid === undefined ? true : parsed.isValid,
+            reason: parsed.reason
+        };
+    } catch (e) {
+        // If validation fails itself, we'll let the user proceed to not block them
+        console.error("Topic Validation Error:", e);
+        return { isValid: true };
+    }
+}
+
 export async function generateSyllabus(
     topic: string,
     goal: string = "",
-    depth: "shallow" | "standard" | "comprehensive" = "standard"
+    depth: "shallow" | "standard" | "comprehensive" = "standard",
+    language: string = "tr"
 ): Promise<SyllabusItem[]> {
 
     // MOCK DATA FOR DEVELOPMENT IF NO REAL KEY
@@ -34,6 +74,8 @@ export async function generateSyllabus(
         const systemPrompt = `You are an expert curriculum designer and educator.
                              Create a highly engaging, structured, and logical learning syllabus (journey) for the user's requested topic.
                              The target audience wants a ${depth} level of understanding.
+                             
+                             IMPORTANT: You MUST generate the content in the following language: ${language.toUpperCase()}. If the language is 'tr', write purely in Turkish.
                              
                              Output MUST BE valid JSON representing an array of syllabus sections/slides.
                              Schema:
