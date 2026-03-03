@@ -113,6 +113,41 @@ export default function CreateLearningPlanPage() {
         setSyllabus(prev => prev.filter((_, i) => i !== indexToRemove))
     }
 
+    const handleStartJourney = async () => {
+        setIsLoading(true);
+        setErrorMsg("");
+
+        try {
+            const res = await fetch("/api/ai/learning-path/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    topic,
+                    depth,
+                    syllabus
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to start learning journey");
+            }
+
+            if (data.journeyId) {
+                // Redirect user to the active learning session
+                router.push(`/dashboard/learning/j/${data.journeyId}`);
+            } else {
+                throw new Error("Invalid response missing journey ID");
+            }
+
+        } catch (error: any) {
+            console.error(error);
+            setErrorMsg(error.message || "An unexpected error occurred while starting the journey.");
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-2xl mx-auto py-8 text-black dark:text-gray-100">
             <div className="mb-8 space-y-2">
@@ -303,7 +338,7 @@ export default function CreateLearningPlanPage() {
                         <Button variant="outline" className="w-full sm:w-auto" onClick={() => setStep("input")} disabled={isLoading}>
                             {t('common.back') || "Back"}
                         </Button>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 text-base" disabled={isLoading} onClick={() => alert("Proceeding to learning session...")}>
+                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 text-base" disabled={isLoading} onClick={handleStartJourney}>
                             <BrainCircuit className="mr-2 h-5 w-5" />
                             {t('creation.startLearning') || "Start This Journey"}
                         </Button>

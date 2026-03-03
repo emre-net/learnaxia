@@ -20,6 +20,17 @@ const VisionSchema = z.object({
     hasMultipleQuestions: z.boolean()
 });
 
+const SlideGenerationSchema = z.object({
+    title: z.string(),
+    content: z.string(),
+    peekingQuestion: z.object({
+        question: z.string(),
+        options: z.array(z.string()),
+        answer: z.string(),
+        explanation: z.string()
+    }).optional()
+});
+
 export class OpenAIAIProvider implements AIProvider {
     name = "OpenAI";
     private client: OpenAI;
@@ -274,6 +285,52 @@ export class OpenAIAIProvider implements AIProvider {
             if (error instanceof AIError) throw error;
             console.error("OpenAI Vision Error:", error);
             throw new AIError('UNKNOWN', error.message || 'Vision analysis failed');
+        }
+    }
+
+    async generateJourneySlide(topic: string, parentTopic: string, depth: string): Promise<z.infer<typeof SlideGenerationSchema>> {
+        if (!process.env.GROQ_API_KEY) {
+            throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
+        }
+
+        const systemPrompt = `
+            You are an expert tutor creating an interactive learning module.
+            Your task is to generate ONE comprehensive learning slide (section) about "${topic}" which is part of the broader subject "${parentTopic}".
+            The requested depth is "${depth}".
+            
+            1. Provide a clear, engaging "title" for the slide.
+            2. Write the "content" in rich HTML format. Use semantic tags (<h2>, <p>, <ul>, <li>, <strong>, <em>). Make it highly readable and engaging, suitable for a learning app. Add brief examples if appropriate.
+            3. Provide a "peekingQuestion". This is a single multiple-choice question to test the user's understanding of this specific slide's content before they can proceed.
+            
+            Respond ONLY in valid JSON matching this schema:
+            {
+                "title": "string",
+                "content": "<p>Rich html formatted text...</p>",
+                "peekingQuestion": {
+                    "question": "string",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "answer": "Exact string of the correct option",
+                    "explanation": "Why this is correct"
+                }
+            }
+        `;
+
+        try {
+            const response = await this.client.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Generate the slide for topic: ${topic}` }
+                ],
+                response_format: { type: "json_object" }
+            });
+
+            const contentString = response.choices[0].message.content || "{}";
+            const parsed = SlideGenerationSchema.parse(JSON.parse(contentString));
+            return parsed;
+        } catch (error: any) {
+            console.error("Slide Generation Error:", error);
+            throw new AIError('UNKNOWN', error.message || 'Slide generation failed');
         }
     }
 }
