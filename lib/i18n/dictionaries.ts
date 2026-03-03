@@ -86,6 +86,7 @@ const en = {
         tabs: {
             modules: "Modules",
             collections: "Collections",
+            learnings: "Learnings",
             aiSolutions: "AI Solutions",
             notes: "Notes"
         },
@@ -506,6 +507,7 @@ const tr = {
         tabs: {
             modules: "Modüller",
             collections: "Koleksiyonlar",
+            learnings: "Öğrenmeler",
             aiSolutions: "AI Çözümleri",
             notes: "Notlar"
         },

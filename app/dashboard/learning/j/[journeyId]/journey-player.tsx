@@ -37,7 +37,22 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
     const router = useRouter()
 
     const [journey, setJourney] = useState<LearningJourney>(initialJourney)
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+
+    // Resume from where the user left off via localStorage
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(() => {
+        if (typeof window !== "undefined") {
+            const savedIndex = localStorage.getItem(`journey_progress_${initialJourney.id}`);
+            return savedIndex ? parseInt(savedIndex, 10) : 0;
+        }
+        return 0;
+    })
+
+    // Save progress whenever index changes
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            localStorage.setItem(`journey_progress_${journey.id}`, currentSlideIndex.toString());
+        }
+    }, [currentSlideIndex, journey.id]);
 
     // Quiz States
     const [showQuiz, setShowQuiz] = useState(false)

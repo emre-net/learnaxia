@@ -12,8 +12,9 @@ import { LibraryHeader } from "./library-header";
 import { LibraryFilters } from "./library-filters";
 import { ModulesTab } from "./modules-tab";
 import { CollectionsTab } from "./collections-tab";
-import { AiSolutionsTab } from "./ai-solutions-tab";
 import { NotesTab } from "./notes-tab";
+import { LearningsTab } from "./learnings-tab";
+import { AiSolutionsTab } from "./ai-solutions-tab";
 
 // Types
 import { SolvedQuestion, Note as PrismaNote } from "@prisma/client";
@@ -54,8 +55,9 @@ export function LibraryClient() {
                     <TabsList className="w-full flex-wrap h-auto p-1 justify-start sm:justify-center lg:justify-start">
                         <TabsTrigger value="modules" className="flex-1 sm:flex-none">{dictionary.library.tabs.modules}</TabsTrigger>
                         <TabsTrigger value="collections" className="flex-1 sm:flex-none">{dictionary.library.tabs.collections}</TabsTrigger>
-                        <TabsTrigger value="ai-solutions" className="flex-1 sm:flex-none">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
                         <TabsTrigger value="notes" className="flex-1 sm:flex-none">{dictionary.library.tabs.notes}</TabsTrigger>
+                        <TabsTrigger value="learnings" className="flex-1 sm:flex-none">{dictionary.library.tabs.learnings}</TabsTrigger>
+                        <TabsTrigger value="ai-solutions" className="flex-1 sm:flex-none">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
                     </TabsList>
 
                     <LibraryFilters
@@ -89,17 +91,25 @@ export function LibraryClient() {
                     />
                 </TabsContent>
 
-                <TabsContent value="ai-solutions" className="space-y-4">
-                    <AiSolutionsTab
-                        solutions={aiSolutions}
-                        isLoading={isLoadingSolutions}
+                <TabsContent value="notes" className="space-y-4">
+                    <NotesTab
                         viewMode={viewMode}
                         dictionary={dictionary}
                     />
                 </TabsContent>
 
-                <TabsContent value="notes" className="space-y-4">
-                    <NotesTab
+                <TabsContent value="learnings" className="space-y-4">
+                    <LearningsTab
+                        viewMode={viewMode}
+                        searchQuery={searchQuery}
+                        dictionary={dictionary}
+                    />
+                </TabsContent>
+
+                <TabsContent value="ai-solutions" className="space-y-4">
+                    <AiSolutionsTab
+                        solutions={aiSolutions}
+                        isLoading={isLoadingSolutions}
                         viewMode={viewMode}
                         dictionary={dictionary}
                     />
