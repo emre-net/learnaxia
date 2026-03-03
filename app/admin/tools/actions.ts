@@ -150,12 +150,38 @@ export async function seedTestDataAction() {
         }
 
         const modulesData = [
-            { title: 'Modern React Mimarileri', desc: 'React 19, Server Components, ve daha fazlası.', cat: 'Yazılım', subcat: 'React' },
-            { title: 'Gelişmiş TypeScript', desc: 'Jenerikler, Tipe Güvenli Tasarımlar ve İleri Seviye Konseptler', cat: 'Yazılım', subcat: 'TypeScript' },
-            { title: 'UI/UX Temel İlkeleri', desc: 'Etkili ve kullanıcı dostu arayüzler tasarlamak.', cat: 'Tasarım', subcat: 'UI/UX' },
-            { title: 'PostgreSQL Optimizasyonu', desc: 'Büyük verilerle çalışırken veritabanı performansı.', cat: 'Yazılım', subcat: 'Veritabanı' },
-            { title: 'Next.js App Router', desc: 'Layoutlar, loading state\'leri ve veri çekme yöntemleri', cat: 'Yazılım', subcat: 'Next.js' },
-            { title: 'Figma ile Prototipleme', desc: 'Tasarımı canlandırma ve etkileşim ekleme süreçleri.', cat: 'Tasarım', subcat: 'Figma' }
+            {
+                title: 'Modern React Mimarileri 2026',
+                desc: 'React 19, Server Components, ve daha fazlası. Bu modül güncel UI geliştirme süreçlerini kapsar.',
+                cat: 'Yazılım',
+                subcat: 'React',
+                items: [
+                    { type: 'FLASHCARD', order: 1, contentHash: `hash-r19-1`, content: { front: 'React 19 ile gelen useActionState hook\'unun avantajı nedir?', back: 'Server actionların yüklenme (pending) ve sonuç durumlarını kolayca yönetmeyi sağlar.' } },
+                    { type: 'MULTIPLE_CHOICE', order: 2, contentHash: `hash-r19-2`, content: { question: 'Hangisi React Server Components (RSC) kurallarından biridir?', options: ['useState hookunu kullanabilirler', 'onClick eventi eklenebilir', 'Sadece backend üzerinde render edilirler', 'Browser APIlerine doğrudan erişebilirler'], correctAnswer: 'Sadece backend üzerinde render edilirler', explanation: 'RSC\'ler server tarafında render edilir. Client-side interaktivite kullanılamaz.' } },
+                    { type: 'FLASHCARD', order: 3, contentHash: `hash-r19-3`, content: { front: 'React compilerın (React Forget) temel amacı nedir?', back: 'Manuel useMemo ve useCallback kullanımını ortadan kaldırarak performansı otomatik optimize etmek.' } },
+                ]
+            },
+            {
+                title: 'Gelişmiş TypeScript',
+                desc: 'Jenerikler, Tipe Güvenli Tasarımlar ve İleri Seviye Konseptler üzerine yoğunlaşmış profesyonel modül.',
+                cat: 'Yazılım',
+                subcat: 'TypeScript',
+                items: [
+                    { type: 'FLASHCARD', order: 1, contentHash: `hash-ts-1`, content: { front: 'Utility Tip: Omit<T, K> ne yapar?', back: 'Verilen bir tipten (T), belirtilen anahtarları (K) çıkartarak yeni bir tip oluşturur.' } },
+                    { type: 'MULTIPLE_CHOICE', order: 2, contentHash: `hash-ts-2`, content: { question: 'TypeScript\'te never type\'ı ne anlama gelir?', options: ['Herhangi bir değer alabilir', 'Hiç gerçekleşmeyecek olan dönüş değerini temsil eder', 'Bilinmeyen tipler içindir', 'Sadece undefined olabilir'], correctAnswer: 'Hiç gerçekleşmeyecek olan dönüş değerini temsil eder', explanation: 'Örneğin her zaman hata fırlatan veya sonsuz döngüye giren fonksiyonların dönüş tipidir.' } },
+                ]
+            },
+            {
+                title: 'Sistem Tasarımı (System Design)',
+                desc: 'Web uygulamalarının ölçeklendirilmesi, mikroservis mimarileri ve veritabanı performans teknikleri.',
+                cat: 'Yazılım',
+                subcat: 'Mimari',
+                items: [
+                    { type: 'FLASHCARD', order: 1, contentHash: `hash-sd-1`, content: { front: 'CAP Teoremi nedir?', back: 'Dağıtık sistemlerde Consistency (Tutarlılık), Availability (Erişilebilirlik) ve Partition tolerance (Bölünme toleransı) özelliklerinden aynı anda en fazla ikisinin garanti edilebileceğidir.' } },
+                    { type: 'MULTIPLE_CHOICE', order: 2, contentHash: `hash-sd-2`, content: { question: 'Hangi load balancing algoritması sunucuların kapasitelerine göre iş dağılımı yapar?', options: ['Round Robin', 'Least Connections', 'Weighted Round Robin', 'IP Hash'], correctAnswer: 'Weighted Round Robin', explanation: 'Farklı donanım özelliklerine sahip sunuculara ağırlık (weight) atanarak dağıtım yapılır.' } },
+                    { type: 'FLASHCARD', order: 3, contentHash: `hash-sd-3`, content: { front: 'Redis gibi InMemory veritabanlarının temel kullanım alanı nedir?', back: 'Sık erişilen verilerin (Session, Cache, vs) çok yüksek hızda RAM üzerinde önbelleklenmesidir.' } },
+                ]
+            }
         ];
 
         const createdModules = [];
@@ -164,7 +190,7 @@ export async function seedTestDataAction() {
                 data: {
                     title: data.title,
                     description: data.desc,
-                    type: 'FLASHCARD',
+                    type: 'MIXED',
                     status: 'ACTIVE',
                     visibility: 'PUBLIC',
                     isVerified: true,
@@ -173,10 +199,12 @@ export async function seedTestDataAction() {
                     category: data.cat,
                     subCategory: data.subcat,
                     items: {
-                        create: [
-                            { type: 'FLASHCARD', order: 1, contentHash: `hash-${data.title}-1`, content: { front: 'Soru 1', back: 'Cevap 1' } },
-                            { type: 'FLASHCARD', order: 2, contentHash: `hash-${data.title}-2`, content: { front: 'Soru 2', back: 'Cevap 2' } },
-                        ]
+                        create: data.items.map(item => ({
+                            type: item.type as any,
+                            order: item.order,
+                            contentHash: item.contentHash,
+                            content: item.content
+                        }))
                     }
                 }
             });
@@ -190,11 +218,8 @@ export async function seedTestDataAction() {
         }
 
         const collectionsData = [
-            { title: 'Frontend Mastery 2026', desc: 'Mükemmel arayüzler tasarlamak ve geliştirmek için ihtiyacınız olan her şey.', cat: 'Yazılım', subcat: 'Frontend' },
-            { title: 'Backend Geliştirme Paketi', desc: 'Sunucu tarafı teknolojiler ve veritabanı yönetimi.', cat: 'Yazılım', subcat: 'Backend' },
-            { title: 'Fullstack Yol Haritası', desc: 'Uçtan uca web uygulamaları geliştirme rehberi.', cat: 'Yazılım', subcat: 'Fullstack' },
-            { title: 'Tasarımcılar Kod Yazıyor', desc: 'Tasarımcılar için kodlama temelleri.', cat: 'Tasarım', subcat: 'UI/UX' },
-            { title: 'Gelişmiş Web Performansı', desc: 'Web sitelerini saniyenin altında yükleme hedefleri.', cat: 'Yazılım', subcat: 'Performans' },
+            { title: 'Fullstack Mimarisi Masterclass', desc: 'Modern web uygulamaları geliştirmek için React, TypeScript ve Sistem Tasarımı konularının harmanlandığı set.', cat: 'Yazılım', subcat: 'Fullstack' },
+            { title: 'Frontend Senior Hazırlık', desc: 'Sadece UI çizmek değil, mimari ve optimizasyon konularına odaklanan ileri seviye liste.', cat: 'Yazılım', subcat: 'Frontend' }
         ];
 
         for (const [idx, data] of collectionsData.entries()) {
@@ -228,17 +253,17 @@ export async function seedTestDataAction() {
 
         await prisma.note.createMany({
             data: [
-                { userId: owner.id, title: 'LibraryCard Refactoring Notları', content: 'Bugün LibraryCard tasarımını yeniledik. \n\nGlassmorphism ve soft shadow teknikleri kullanarak premium bir his oluşturmaya odaklandık. Ayrıca own-content engellemelerini ekliyoruz', visibility: 'PUBLIC' },
-                { userId: owner.id, title: 'Veritabanı Optimizasyonları', content: 'PostgreSQL indexing kullanarak query sürelerini 2ms seviyesine indirdik. Ayrıca Prisma sorgularını birleştirerek 15 farklı network requesti tek transaction içinde hallettik.', visibility: 'PUBLIC' },
-                { userId: owner.id, title: 'Sonraki Versiyon V2.0 Hedefleri', content: 'Önümüzdeki aylarda yapay zeka entegreli akıllı tekrarlama algoritmamızı test gruplarına açacağız.', visibility: 'PUBLIC' }
+                { userId: owner.id, title: 'LibraryCard Refactoring Süreç Raporu', content: '<h2>Tasarım Değişiklikleri</h2><p>Bugün LibraryCard tasarımını yeniledik. Glassmorphism kaldırıldı, daha sade ve okunaklı bir tasarım (soft shadow, clean borders) entegre edildi.</p><ul><li>Borders temizlendi</li><li>E2E Testler tamamlandı</li></ul>', visibility: 'PUBLIC' },
+                { userId: owner.id, title: 'Veritabanı Optimizasyonları (PostgreSQL)', content: '<h3>Performans Hedefi</h3><p>Veritabanı optimizasyonlarıyla query performansını artırıyoruz.</p><blockquote>Prisma sorguları tek transactionda olacak şekilde birleştirilebilir.</blockquote>', visibility: 'PUBLIC' },
+                { userId: owner.id, title: 'Sistem Hedefleri ve Yeni Modüller', content: '<strong>Güçlü Bir Sistem Platformu</strong> içerisinde planlanan test özellikleri ve yeni UI geliştirmeleri tamamlandı. Geriye kalan detaylar kullanıcı geri bildirimleriyle şekillenecek.', visibility: 'PUBLIC' }
             ]
         });
 
         revalidatePath("/admin");
-        return { success: true, message: "Test verileri (Modül, Koleksiyon, Not) başarıyla oluşturuldu." };
+        return { success: true, message: "Yeni yapıya %100 uyumlu güncel test verileri (Modül, Koleksiyon, Not) başarıyla oluşturuldu." };
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Seed test data error:", error);
-        return { success: false, message: "Test verisi üretirken bir hata oluştu." };
+        return { success: false, message: `Test verisi üretirken hata oluştu: ${error?.message}` };
     }
 }

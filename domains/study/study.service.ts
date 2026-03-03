@@ -58,8 +58,10 @@ export class StudyService {
 
             if (type === 'TRUE_FALSE') {
                 type = 'MC'; // Render TF as Multiple Choice (Quiz)
-                if (!content.question && content.statement) {
-                    content.question = content.statement;
+                // Tolerate AI JSON casing
+                const tfQuestion = content.question || content.Question || content.statement || content.Statement || content.text;
+                if (!content.question && tfQuestion) {
+                    content.question = tfQuestion;
                 }
                 // Ensure options exist for TF
                 if (!content.options || content.options.length === 0) {

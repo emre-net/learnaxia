@@ -48,14 +48,17 @@ export function LibraryCard({
     if (viewMode === 'list') {
         return (
             <Card
-                className="flex flex-row items-center gap-5 p-4 md:p-5 hover:shadow-2xl hover:shadow-zinc-200/30 dark:hover:shadow-black/50 transition-all duration-500 group border-white/60 dark:border-white/5 bg-white/40 backdrop-blur-2xl dark:bg-zinc-950/40 rounded-[2rem] cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)]"
+                className="flex flex-row items-center gap-5 p-4 md:p-5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 group border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl cursor-pointer shadow-sm relative overflow-hidden"
                 onClick={onClick}
             >
-                <div className="group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
+                {/* Glow effect on hover */}
+                <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                <div className="group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
                     {typeIcon}
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5 pt-0.5">
                         <span className="font-extrabold text-lg tracking-tight text-zinc-900 dark:text-zinc-50 group-hover:text-primary transition-colors truncate">
                             {title}
                         </span>
@@ -78,19 +81,22 @@ export function LibraryCard({
 
     return (
         <Card
-            className="flex flex-col hover:shadow-2xl hover:shadow-zinc-300/40 dark:hover:shadow-black/60 hover:-translate-y-1.5 transition-all duration-500 ease-out group h-full border-white/60 dark:border-white/5 bg-white/50 backdrop-blur-2xl dark:bg-zinc-950/50 overflow-hidden rounded-[2rem] cursor-pointer shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] relative"
+            className="flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out group h-full border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden rounded-2xl cursor-pointer shadow-sm relative"
             onClick={onClick}
         >
-            {/* Subtle gradient overlay for extra premium feel */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 dark:to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            {/* Top glow indicator */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/40 to-indigo-500/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            <div className="p-6 md:p-8 flex-grow space-y-6 relative z-10">
+            {/* Subtle background gradient on hover for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent dark:from-white/[0.02] dark:to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            <div className="p-6 md:p-7 flex-grow space-y-6 relative z-10">
                 <div className="flex justify-between items-start gap-4">
-                    <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-sm">
+                    <div className="group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                         {typeIcon}
                     </div>
-                    <div className="flex items-center gap-2 pt-1" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
-                        {visibility && <VisibilityBadge visibility={visibility as any} className="h-7 text-xs px-3 shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-white/50 dark:border-zinc-800" />}
+                    <div className="flex items-center gap-2 shrink-0 pt-0.5" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
+                        {visibility && <VisibilityBadge visibility={visibility as any} className="h-6 text-[11px] px-2.5 shadow-none border-zinc-200 dark:border-zinc-800" />}
                         {shareType && shareId && shareTitle && (
                             <ShareButton type={shareType} id={shareId} title={shareTitle} />
                         )}
@@ -98,11 +104,11 @@ export function LibraryCard({
                     </div>
                 </div>
 
-                <div className="space-y-3.5 pt-2">
-                    <CardTitle className="leading-tight text-2xl font-black tracking-tight text-zinc-900 dark:text-white group-hover:text-primary transition-colors duration-300">
+                <div className="space-y-3 pt-2">
+                    <CardTitle className="leading-tight text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 group-hover:text-primary transition-colors duration-200">
                         {title}
                     </CardTitle>
-                    <div className="text-[15px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 min-h-[44px] leading-relaxed">
+                    <div className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 min-h-[40px] leading-relaxed">
                         {description || "Bu içerik için henüz bir açıklama girilmemiş."}
                     </div>
                 </div>
@@ -138,7 +144,7 @@ export function LibraryCard({
             </div>
 
             {(owner || actionButton) && (
-                <div className="p-5 md:p-6 mb-1 mx-2 flex flex-col xs:flex-row items-center justify-between gap-4 mt-auto rounded-[1.5rem] bg-zinc-50/50 dark:bg-zinc-900/30 backdrop-blur-md relative z-10 border border-transparent dark:border-white/5" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
+                <div className="px-6 pb-6 pt-4 mt-auto border-t border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-900/20 relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" onClick={(e) => onClick ? undefined : e.stopPropagation()}>
                     {owner ? (
                         <CardOwner
                             handle={owner.handle}

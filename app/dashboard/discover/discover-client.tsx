@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CATEGORIES } from "@/lib/constants/categories";
 import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
+import { LibraryCard } from "@/components/shared/library-card";
 import { Separator } from "@/components/ui/separator";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -334,54 +335,30 @@ export function DiscoverClient() {
                                     <TabsContent value="notes" className="mt-0 w-full outline-none">
                                         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                             {items.map((item: any) => (
-                                                <div key={item.id} className="relative group min-h-[220px]">
-                                                    <div className="absolute -inset-0.5 bg-gradient-to-tr from-primary/10 to-indigo-500/10 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity blur-lg" />
-                                                    <div className="h-full bg-slate-900 border border-slate-800 rounded-[1.8rem] p-6 shadow-xl relative z-10 flex flex-col justify-between overflow-hidden">
-                                                        <div className="space-y-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-2xl relative shrink-0">
-                                                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50" />
-                                                                    <BookOpen className="h-5 w-5" />
-                                                                </div>
-                                                                <div className="min-w-0">
-                                                                    <h3 className="font-bold text-slate-100 uppercase tracking-wider text-xs truncate">Açık Not</h3>
-                                                                    {item.module && (
-                                                                        <div className="text-[10px] text-muted-foreground font-medium truncate">
-                                                                            Modül: {item.module.title}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <h2 className="text-xl font-bold line-clamp-2 leading-tight">
-                                                                    {item.title || "İsimsiz Not"}
-                                                                </h2>
-                                                                <div
-                                                                    className="mt-3 text-sm prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-0 line-clamp-4 break-words"
-                                                                    dangerouslySetInnerHTML={{ __html: item.content }}
-                                                                />
-                                                            </div>
+                                                <LibraryCard
+                                                    key={item.id}
+                                                    typeIcon={
+                                                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                                            <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
                                                         </div>
-
-                                                        <div className="pt-6 mt-6 border-t border-slate-800/60 flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                {item.owner?.image ? (
-                                                                    <img src={item.owner.image} alt={item.owner.handle || "user"} className="h-6 w-6 rounded-full border border-slate-700 object-cover" />
-                                                                ) : (
-                                                                    <div className="h-6 w-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">
-                                                                        {(item.owner?.handle || item.owner?.name || "?").substring(0, 1).toUpperCase()}
-                                                                    </div>
-                                                                )}
-                                                                <span className="text-xs font-bold text-slate-300 truncate max-w-[100px]">
-                                                                    @{item.owner?.handle || "anonim"}
-                                                                </span>
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-                                                                {new Date(item.createdAt).toLocaleDateString()}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                    }
+                                                    visibility={item.visibility || "PUBLIC"}
+                                                    title={item.title || "İsimsiz Not"}
+                                                    description={
+                                                        <div className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 min-h-[40px] leading-relaxed break-words"
+                                                            dangerouslySetInnerHTML={{ __html: item.content }}
+                                                        />
+                                                    }
+                                                    owner={item.owner}
+                                                    viewMode="grid"
+                                                    metadata={[
+                                                        new Date(item.createdAt).toLocaleDateString(),
+                                                        item.module ? `Modül: ${item.module.title}` : "Bağımsız Not"
+                                                    ]}
+                                                    shareType="note"
+                                                    shareId={item.id}
+                                                    shareTitle={item.title}
+                                                />
                                             ))}
                                         </div>
                                     </TabsContent>

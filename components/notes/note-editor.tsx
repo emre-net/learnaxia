@@ -110,7 +110,7 @@ export function NoteEditor({ moduleId, itemId, existingNote, onClose, onSaved }:
                         className="bg-purple-50 hover:bg-purple-100 text-purple-600 border-purple-200 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:text-purple-400 dark:border-purple-800"
                     >
                         <Sparkles className="h-4 w-4 mr-2" />
-                        AI Magic Wand
+                        Smart Content Extractor
                     </Button>
                 </div>
                 <div className="flex gap-2">
