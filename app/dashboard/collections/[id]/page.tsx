@@ -11,14 +11,15 @@ export default async function CollectionDetailPage(props: { params: Promise<{ id
         redirect("/auth/login");
     }
 
+    let collection;
     try {
         const { id } = await params;
-        const collection = await CollectionService.getById(session.user.id, id);
-        if (!collection) return notFound();
-
-        return <CollectionDetailClient collection={collection} />;
+        collection = await CollectionService.getById(session.user.id, id);
     } catch (error) {
         console.error("Collection Detail Error:", error);
         return notFound();
     }
+
+    if (!collection) return notFound();
+    return <CollectionDetailClient collection={collection} />;
 }

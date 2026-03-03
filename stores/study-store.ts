@@ -8,7 +8,6 @@ export interface StudyItem {
     id: string;
     moduleId: string;
     type: 'FLASHCARD' | 'MC' | 'GAP';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     content: any; // JSONB content
     hash: string;
     // Progress snapshot

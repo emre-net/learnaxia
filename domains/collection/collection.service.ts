@@ -6,7 +6,6 @@ export class CollectionService {
 
     static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean; category?: string; subCategory?: string }) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const collection = await (tx as any).collection.create({
                 data: {
                     title: data.title,
@@ -107,13 +106,11 @@ export class CollectionService {
         if (!collection) throw new Error("Collection not found");
 
         // Access Rule: PUBLIC or OWNER or linked access (PRIVATE but has ID)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((collection as any).visibility === 'PRIVATE' && collection.ownerId !== userId) {
             // Implicit access via Link is allowed for PRIVATE collections
         }
 
         // Extract modules from items
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const modules = (collection as any).items.map((item: any) => item.module);
 
         return {
@@ -135,7 +132,6 @@ export class CollectionService {
         // Transaction to update details and items
         return await prisma.$transaction(async (tx: any) => {
             // Update basic details
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (tx as any).collection.update({
                 where: { id: collectionId },
                 data: {

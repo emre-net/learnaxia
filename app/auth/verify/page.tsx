@@ -15,6 +15,7 @@ export default function VerifyPage() {
 
     useEffect(() => {
         if (!token) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setStatus("error");
             setMessage("Doğrulama linki geçersiz.");
             return;

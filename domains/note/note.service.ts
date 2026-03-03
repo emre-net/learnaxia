@@ -29,14 +29,14 @@ export class NoteService {
             });
 
             if (!access) {
-                const module = await prisma.module.findUnique({
+                const dbModule = await prisma.module.findUnique({
                     where: { id: dto.moduleId },
                     select: { isForkable: true, ownerId: true }
                 });
 
-                if (!module) throw new Error("Module not found");
+                if (!dbModule) throw new Error("Module not found");
 
-                if (!module.isForkable && module.ownerId !== userId) {
+                if (!dbModule.isForkable && dbModule.ownerId !== userId) {
                     throw new Error("Access Denied: Cannot take notes on a private module you do not own.");
                 }
             }

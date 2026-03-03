@@ -42,6 +42,7 @@ export function ItemEditorSheet({
         if (open) {
             if (initialData) {
                 // Edit Mode
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setId(initialData.id);
                 setQuestion(initialData.content?.question || "");
                 setAnswer(initialData.content?.answer || "");
@@ -73,8 +74,8 @@ export function ItemEditorSheet({
 
         // Logic to extract answers for GAP
         let finalAnswer = answer;
-        let finalSolution = solution;
-        let finalOptions = type === 'MC' ? options : undefined;
+        const finalSolution = solution;
+        const finalOptions = type === 'MC' ? options : undefined;
         let finalQuestion = question;
 
         if (type === 'GAP') {
@@ -205,8 +206,8 @@ export function ItemEditorSheet({
                                     type="button"
                                     variant={answer === "True" ? "default" : "outline"}
                                     className={`flex-1 h-14 rounded-2xl text-lg font-bold transition-all ${answer === "True"
-                                            ? "bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/20"
-                                            : "border-muted-foreground/10 hover:border-green-500/30 hover:bg-green-500/5"
+                                        ? "bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/20"
+                                        : "border-muted-foreground/10 hover:border-green-500/30 hover:bg-green-500/5"
                                         }`}
                                     onClick={() => setAnswer("True")}
                                 >
@@ -216,8 +217,8 @@ export function ItemEditorSheet({
                                     type="button"
                                     variant={answer === "False" ? "default" : "outline"}
                                     className={`flex-1 h-14 rounded-2xl text-lg font-bold transition-all ${answer === "False"
-                                            ? "bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20"
-                                            : "border-muted-foreground/10 hover:border-red-500/30 hover:bg-red-500/5"
+                                        ? "bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20"
+                                        : "border-muted-foreground/10 hover:border-red-500/30 hover:bg-red-500/5"
                                         }`}
                                     onClick={() => setAnswer("False")}
                                 >
@@ -249,8 +250,8 @@ export function ItemEditorSheet({
                                                 }}
                                                 placeholder={t('creation.itemEditor.optionPlaceholder', { index: idx + 1 })}
                                                 className={`h-12 rounded-xl pr-12 transition-all ${answer === opt && opt !== ""
-                                                        ? "border-green-500/50 bg-green-500/5 focus:border-green-500"
-                                                        : "bg-muted/30 border-muted-foreground/10 focus:border-primary/50"
+                                                    ? "border-green-500/50 bg-green-500/5 focus:border-green-500"
+                                                    : "bg-muted/30 border-muted-foreground/10 focus:border-primary/50"
                                                     }`}
                                             />
                                             {answer === opt && opt !== "" && (
@@ -265,8 +266,8 @@ export function ItemEditorSheet({
                                                 variant="ghost"
                                                 size="icon"
                                                 className={`h-10 w-10 rounded-xl transition-all ${answer === opt && opt !== ""
-                                                        ? "text-green-600 bg-green-500/10"
-                                                        : "text-muted-foreground hover:text-green-600 hover:bg-green-500/5"
+                                                    ? "text-green-600 bg-green-500/10"
+                                                    : "text-muted-foreground hover:text-green-600 hover:bg-green-500/5"
                                                     }`}
                                                 onClick={() => setAnswer(opt)}
                                                 title={t('creation.itemEditor.markAsCorrect')}

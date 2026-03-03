@@ -48,7 +48,7 @@ export function PricingSection() {
                         Basit ve Şeffaf Fiyatlandırma
                     </h2>
                     <p className="text-muted-foreground md:text-xl max-w-[800px] mx-auto">
-                        Learnaxia'nın tüm gücünü ücretsiz deneyimleyin veya gelişmiş özelliklerle öğrenme hızınızı ikiye katlayın.
+                        Learnaxia&apos;nın tüm gücünü ücretsiz deneyimleyin veya gelişmiş özelliklerle öğrenme hızınızı ikiye katlayın.
                     </p>
                 </div>
 

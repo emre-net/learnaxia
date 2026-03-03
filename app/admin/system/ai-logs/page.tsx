@@ -61,6 +61,7 @@ export default function AILogsPage() {
 
     useEffect(() => {
         fetchLogs(page);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     return (

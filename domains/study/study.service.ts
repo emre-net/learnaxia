@@ -4,7 +4,7 @@ import { ItemType, StudyMode } from "@/lib/types";
 export class StudyService {
     static async startSession(userId: string, moduleId: string, mode: StudyMode) {
         // 1. Fetch Module & Items First
-        const module = await prisma.module.findUnique({
+        const dbModule = await prisma.module.findUnique({
             where: { id: moduleId },
             include: {
                 items: {
@@ -13,14 +13,14 @@ export class StudyService {
             }
         });
 
-        if (!module) throw new Error("Module not found");
+        if (!dbModule) throw new Error("Module not found");
 
         // 2. Permissive Access Check
         // Rule: Access allowed if Public OR Owner OR Linked Access (Private but has valid ID)
         // Since we are fetching by unique ID here, having the ID is proof of linked access.
-        const isPublic = (module as any).visibility === 'PUBLIC';
-        const isOwner = module.ownerId === userId;
-        const isPrivateLinked = (module as any).visibility === 'PRIVATE';
+        const isPublic = (dbModule as any).visibility === 'PUBLIC';
+        const isOwner = dbModule.ownerId === userId;
+        const isPrivateLinked = (dbModule as any).visibility === 'PRIVATE';
 
         let hasAccess = isPublic || isOwner || isPrivateLinked;
 
@@ -31,15 +31,15 @@ export class StudyService {
         // 3. Fetch User Progress (Parallel)
         const [itemProgresses, sm2Progresses] = await Promise.all([
             prisma.itemProgress.findMany({
-                where: { userId, itemId: { in: module.items.map((i: any) => i.id) } }
+                where: { userId, itemId: { in: (dbModule as any).items.map((i: any) => i.id) } }
             }),
             prisma.sM2Progress.findMany({
-                where: { userId, itemId: { in: module.items.map((i: any) => i.id) } }
+                where: { userId, itemId: { in: (dbModule as any).items.map((i: any) => i.id) } }
             })
         ]);
 
         // 4. Merge & Filter Logic
-        let items = module.items.map((item: any) => {
+        let items = (dbModule as any).items.map((item: any) => {
             const progress = itemProgresses.find((p: any) => p.itemId === item.id);
             const sm2 = sm2Progresses.find((p: any) => p.itemId === item.id);
 
@@ -116,7 +116,7 @@ export class StudyService {
 
         // 6. Find Resumption Index (Improved)
         // Find the index of the first item that doesn't have a CORRECT progress
-        const firstUnsolvedIndex = module.items.findIndex((item: any) => {
+        const firstUnsolvedIndex = (dbModule as any).items.findIndex((item: any) => {
             const progress = itemProgresses.find((p: any) => p.itemId === item.id);
             return !progress || progress.lastResult !== 'CORRECT';
         });
@@ -133,9 +133,9 @@ export class StudyService {
         return {
             sessionId: session.id,
             module: {
-                id: module.id,
-                title: module.title,
-                type: module.type
+                id: dbModule.id,
+                title: dbModule.title,
+                type: dbModule.type
             },
             items,
             mode,

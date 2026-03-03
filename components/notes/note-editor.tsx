@@ -31,6 +31,7 @@ export function NoteEditor({ moduleId, itemId, existingNote, onClose, onSaved }:
 
     useEffect(() => {
         if (existingNote) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setTitle(existingNote.title || "");
             setContent(existingNote.content || "");
         }

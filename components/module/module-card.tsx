@@ -87,7 +87,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
         }
     };
 
-    const StudyModeOptions = () => (
+    const StudyModeOptions = (
         <div className="grid gap-3 pt-4">
             <Button className="w-full h-14 justify-start text-lg gap-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/10" onClick={() => router.push(`/study/${module.id}`)}>
                 <Play className="h-6 w-6 fill-current" />
@@ -182,7 +182,7 @@ export function ModuleCard({ module, solvedCount = 0, viewMode = 'grid', showOwn
                         <DialogTitle className="text-2xl font-black text-zinc-900 dark:text-white mb-2">{module.title}</DialogTitle>
                         <DialogDescription className="text-zinc-500 dark:text-zinc-400 font-medium">Nasıl devam etmek istersiniz?</DialogDescription>
                     </DialogHeader>
-                    <StudyModeOptions />
+                    {StudyModeOptions}
                 </DialogContent>
             </Dialog>
         </>

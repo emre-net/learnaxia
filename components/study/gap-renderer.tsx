@@ -28,6 +28,7 @@ export function GapRenderer({ item }: { item: any }) {
 
     // Initialize state when item changes
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUserAnswers(new Array(gapIndices.length).fill(""));
     }, [item.id, gapIndices.length]);
 

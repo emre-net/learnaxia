@@ -48,10 +48,11 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
             toast({ title: "Başarılı", description: "Profil güncellendi." });
             router.refresh();
             setOpen(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error;
             toast({
                 title: "Hata",
-                description: error.message || "Bir hata oluştu.",
+                description: err.message || "Bir hata oluştu.",
                 variant: "destructive"
             });
         } finally {
@@ -94,7 +95,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                             placeholder="https://example.com/photo.jpg"
                         />
                         <p className="text-xs text-muted-foreground">
-                            Resminizin URL'sini buraya yapıştırın.
+                            Resminizin URL&apos;sini buraya yapıştırın.
                         </p>
                     </div>
                 </div>

@@ -54,6 +54,7 @@ export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTab
                 newMap[j.id] = 1;
             }
         }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setProgressMap(newMap);
     }, [journeys]);
 
