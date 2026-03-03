@@ -4,8 +4,9 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(req: Request, { params }: { params: { journeyId: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ journeyId: string }> }) {
     try {
+        const params = await props.params;
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

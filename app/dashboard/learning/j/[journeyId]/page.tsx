@@ -3,7 +3,8 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { JourneyPlayer } from "./journey-player";
 
-export default async function JourneySessionPage({ params }: { params: { journeyId: string } }) {
+export default async function JourneySessionPage(props: { params: Promise<{ journeyId: string }> }) {
+    const params = await props.params;
     const session = await auth();
     if (!session || !session.user?.id) {
         redirect("/auth/login");
