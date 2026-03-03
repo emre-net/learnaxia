@@ -31,6 +31,7 @@ model User {
   itemProgress      ItemProgress[]
   itemSessions      ItemSession[]
   learningSessions  LearningSession[]
+  learningJourneys  LearningJourney[]       @relation("CreatedJourneys")
   createdModules    Module[]                @relation("CreatedModules")
   modules           Module[]                @relation("OwnedModules")
   notes             Note[]
@@ -44,6 +45,7 @@ model User {
   wallet            TokenWallet?
   collectionLibrary UserCollectionLibrary[]
   contentAccess     UserContentAccess[]
+  journeyLibrary    UserJourneyLibrary[]
   moduleLibrary     UserModuleLibrary[]
   questionOverrides UserQuestionOverride[]
   userRetention     UserRetention[]
@@ -492,4 +494,43 @@ enum LogLevel {
   WARN
   ERROR
   CRITICAL
+}
+
+model LearningJourney {
+  id              String               @id @default(uuid())
+  userId          String
+  title           String
+  topic           String
+  depth           String               @default("standard")
+  status          String               @default("DRAFT") // DRAFT, GENERATING, ACTIVE, COMPLETED
+  syllabus        Json?                
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  user            User                 @relation("CreatedJourneys", fields: [userId], references: [id], onDelete: Cascade)
+  slides          LearningSlide[]
+  userLibrary     UserJourneyLibrary[]
+}
+
+model LearningSlide {
+  id               String            @id @default(uuid())
+  learningJourneyId String
+  order            Int
+  title            String
+  content          String            @db.Text
+  peekingQuestion  Json?
+  createdAt        DateTime          @default(now())
+  journey          LearningJourney   @relation(fields: [learningJourneyId], references: [id], onDelete: Cascade)
+
+  @@index([learningJourneyId])
+}
+
+model UserJourneyLibrary {
+  userId            String
+  journeyId         String
+  role              String // "OWNER"
+  lastInteractionAt DateTime @default(now())
+  journey           LearningJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, journeyId])
 }
