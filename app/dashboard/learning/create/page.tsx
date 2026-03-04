@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target } from "lucide-react"
+import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target, AlertTriangle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,6 +42,24 @@ export default function CreateLearningPlanPage() {
     const [syllabus, setSyllabus] = useState<SyllabusItem[]>([])
     const [estimatedTokens, setEstimatedTokens] = useState<number | null>(null)
     const [recommendedCost, setRecommendedCost] = useState<number | null>(null)
+    const [walletBalance, setWalletBalance] = useState<number | null>(null)
+
+    useEffect(() => {
+        const fetchWallet = async () => {
+            try {
+                const res = await fetch('/api/wallet');
+                const data = await res.json();
+                if (data.balance !== undefined) {
+                    setWalletBalance(data.balance);
+                }
+            } catch (error) {
+                console.error("Cüzdan bilgisi çekilemedi:", error);
+            }
+        };
+        fetchWallet();
+    }, []);
+
+    const isInsufficientTokens = recommendedCost !== null && walletBalance !== null && walletBalance < recommendedCost;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -369,24 +387,33 @@ export default function CreateLearningPlanPage() {
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="p-8 pt-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 items-center justify-end rounded-b-3xl">
-                                <Button
-                                    variant="ghost"
-                                    className="w-full sm:w-auto text-slate-500 hover:text-slate-900 dark:hover:text-white h-12 rounded-xl"
-                                    onClick={() => setStep("input")}
-                                    disabled={isLoading}
-                                >
-                                    Geri Dön
-                                </Button>
-                                <Button
-                                    className="w-full sm:w-auto px-8 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-base group"
-                                    disabled={isLoading || syllabus.length === 0}
-                                    onClick={handleStartJourney}
-                                >
-                                    <Zap className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                                    {recommendedCost ? `Maceraya Başla (${recommendedCost} Token)` : "Maceraya Başla"}
-                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
+                            <CardFooter className="p-8 pt-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex flex-col items-end rounded-b-3xl">
+                                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end w-full mb-3">
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full sm:w-auto text-slate-500 hover:text-slate-900 dark:hover:text-white h-12 rounded-xl"
+                                        onClick={() => setStep("input")}
+                                        disabled={isLoading}
+                                    >
+                                        Geri Dön
+                                    </Button>
+                                    <Button
+                                        className="w-full sm:w-auto px-8 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 disabled:opacity-50 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-base group"
+                                        disabled={isLoading || syllabus.length === 0 || isInsufficientTokens}
+                                        onClick={handleStartJourney}
+                                    >
+                                        <Zap className="w-4 h-4 mr-2 group-hover:animate-pulse" />
+                                        {recommendedCost ? `Maceraya Başla (${recommendedCost} Token)` : "Maceraya Başla"}
+                                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    </Button>
+                                </div>
+
+                                {isInsufficientTokens && (
+                                    <div className="flex items-center gap-2 text-sm text-red-500 dark:text-red-400 font-medium">
+                                        <AlertTriangle className="w-4 h-4" />
+                                        Yetersiz Bakiye! Bu işlem için {recommendedCost} Token gerekiyor ancak cüzdanınızda {walletBalance} Token var.
+                                    </div>
+                                )}
                             </CardFooter>
                         </div>
                     )}

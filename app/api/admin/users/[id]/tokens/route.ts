@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { WalletService } from "@/domains/wallet/wallet.service";
 
-export async function POST(req: Request, context: any) {
-    const params = context.params;
+export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+    const params = await context.params;
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
