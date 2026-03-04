@@ -349,7 +349,7 @@ export default function CreateLearningPlanPage() {
                                     {syllabus.map((item: SyllabusItem, idx: number) => (
                                         <div key={idx} className="relative group">
                                             {/* Process Dot */}
-                                            <div className="absolute -left-[30px] top-1 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border-[3px] border-indigo-500 flex items-center justify-center group-hover:scale-125 transition-transform shadow-md shadow-indigo-500/20 z-10">
+                                            <div className="absolute -left-6 top-1 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border-[3px] border-indigo-500 flex items-center justify-center group-hover:scale-125 transition-transform shadow-md shadow-indigo-500/20 z-10">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-pink-500 transition-colors" />
                                             </div>
 
