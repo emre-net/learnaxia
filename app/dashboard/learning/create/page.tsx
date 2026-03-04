@@ -41,6 +41,7 @@ export default function CreateLearningPlanPage() {
     // Generated Syllabus
     const [syllabus, setSyllabus] = useState<SyllabusItem[]>([])
     const [estimatedTokens, setEstimatedTokens] = useState<number | null>(null)
+    const [recommendedCost, setRecommendedCost] = useState<number | null>(null)
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -78,6 +79,7 @@ export default function CreateLearningPlanPage() {
             if (data.syllabus) {
                 setSyllabus(data.syllabus)
                 setEstimatedTokens(data.metadata?.estimatedInputTokens)
+                setRecommendedCost(data.metadata?.recommendedCost)
                 setStep("review")
             } else {
                 throw new Error("Yapay zeka herhangi bir müfredat döndürmedi.")
@@ -382,7 +384,7 @@ export default function CreateLearningPlanPage() {
                                     onClick={handleStartJourney}
                                 >
                                     <Zap className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                                    Maceraya Başla
+                                    {recommendedCost ? `Maceraya Başla (${recommendedCost} Token)` : "Maceraya Başla"}
                                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </CardFooter>

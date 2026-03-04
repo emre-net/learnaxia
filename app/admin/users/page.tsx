@@ -8,10 +8,15 @@ import {
     MoreVertical
 } from "lucide-react";
 
+import { UserActions } from "@/components/admin/user-actions";
+
 export default async function AdminUsersPage() {
     const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 50
+        take: 50,
+        include: {
+            wallet: true
+        }
     });
 
     return (
@@ -40,8 +45,9 @@ export default async function AdminUsersPage() {
                                 <th className="px-6 py-4 font-semibold text-slate-300">Kullanıcı</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Rol</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Durum</th>
+                                <th className="px-6 py-4 font-semibold text-slate-300">Bakiye</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Kayıt Tarihi</th>
-                                <th className="px-6 py-4 font-semibold text-slate-300">İşlemler</th>
+                                <th className="px-6 py-4 text-right font-semibold text-slate-300">İşlemler</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
@@ -83,15 +89,18 @@ export default async function AdminUsersPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
+                                            <span className="text-sm font-medium text-emerald-400 pl-2">
+                                                {user.wallet?.balance || 0}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <div className="text-sm text-slate-400 flex items-center gap-1">
                                                 <Calendar className="w-3.5 h-3.5" />
                                                 {new Date(user.createdAt).toLocaleDateString()}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                                                <MoreVertical className="w-4 h-4 text-slate-500" />
-                                            </button>
+                                            <UserActions user={user} />
                                         </td>
                                     </tr>
                                 ))

@@ -6,6 +6,8 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { getAiQueue } from "@/lib/queue/client";
 import { validateTopic } from "@/lib/ai/providers/openai.provider";
+import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
+import { WalletService } from "@/domains/wallet/wallet.service";
 
 const StartJourneySchema = z.object({
     topic: z.string().min(2),
@@ -40,42 +42,66 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // 2. Create the Journey Record in DB (Status: GENERATING)
-        const journey = await (prisma as any).learningJourney.create({
-            data: {
-                userId,
-                title: `${topic} Journey`,
-                topic,
-                depth,
-                status: "GENERATING",
-                syllabus: syllabus,
-            }
+        // 2. Dynamic Token Calculation
+        const tokenEstimate = calculateAITokensAndCost({
+            text: topic,
+            targetCount: syllabus.length,
+            model: "llama-3.3-70b-versatile"
         });
 
-        // 3. Add to User's Library
-        await (prisma as any).userJourneyLibrary.create({
-            data: {
+        const dynamicCost = tokenEstimate.recommendedCost;
+
+        // 3. Check Balance & Debit
+        try {
+            await WalletService.debit(userId, dynamicCost, 'AI_JOURNEY', `Özel Müfredat Üretimi: ${topic.substring(0, 50)}...`);
+        } catch (error) {
+            return NextResponse.json({ error: "Yetersiz jeton bakiyesi. Lütfen jeton yükleyin." }, { status: 402 });
+        }
+
+        // 4. Create the Journey Record in DB and Push to Queue
+        try {
+            const journey = await (prisma as any).learningJourney.create({
+                data: {
+                    userId,
+                    title: `${topic} Journey`,
+                    topic,
+                    depth,
+                    status: "GENERATING",
+                    syllabus: syllabus,
+                }
+            });
+
+            await (prisma as any).userJourneyLibrary.create({
+                data: {
+                    userId,
+                    journeyId: journey.id,
+                    role: "OWNER"
+                }
+            });
+
+            await getAiQueue().add("generate-journey", {
                 userId,
                 journeyId: journey.id,
-                role: "OWNER"
+                topic,
+                depth,
+                syllabus,
+                language
+            });
+
+            return NextResponse.json({
+                success: true,
+                journeyId: journey.id,
+                message: "Journey creation started in background"
+            });
+        } catch (dbError) {
+            // Hata Durumu (Refund) - Cüzdan iadesi
+            try {
+                await WalletService.credit(userId, dynamicCost, 'REFUND', `Yolculuk başlatılamadı: Sistem hatası.`);
+            } catch (refundErr) {
+                console.error("Failed to refund tokens:", refundErr);
             }
-        });
-
-        // 4. Push to BullMQ for Background Generative Task
-        await getAiQueue().add("generate-journey", {
-            userId,
-            journeyId: journey.id,
-            topic,
-            depth,
-            syllabus,
-            language
-        });
-
-        return NextResponse.json({
-            success: true,
-            journeyId: journey.id,
-            message: "Journey creation started in background"
-        });
+            throw dbError; // Rethrow outer block for general catch logging
+        }
 
     } catch (error: unknown) {
         if (error instanceof z.ZodError) {

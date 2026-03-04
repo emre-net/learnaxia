@@ -44,6 +44,7 @@ export async function POST(req: Request) {
             syllabus,
             metadata: {
                 estimatedInputTokens: inputTokens.estimatedInputTokens,
+                recommendedCost: inputTokens.recommendedCost
             }
         });
 
