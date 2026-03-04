@@ -154,7 +154,8 @@ export default function CreateLearningPlanPage() {
                 data = JSON.parse(textResponse);
             } catch (err) {
                 console.error("Non-JSON API start Response:", textResponse);
-                throw new Error("Sunucu işleminizi başlatamadı (Beklenmeyen metin formatı). Lütfen sayfayı yenileyip tekrar deneyin.");
+                const snippet = textResponse.substring(0, 150) + "...";
+                throw new Error(`Sunucu işleminizi başlatamadı. Dönen Yanıt: ${snippet}`);
             }
 
             if (!res.ok) {
