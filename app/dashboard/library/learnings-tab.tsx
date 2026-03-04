@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, LayoutGrid, List, PlayCircle, Clock } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, LayoutGrid, List, PlayCircle, Clock, Trash2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
@@ -31,6 +32,22 @@ interface LearningsTabProps {
 
 export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTabProps) {
     const { language } = useSettingsStore();
+    const queryClient = useQueryClient();
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await fetch(`/api/library/journeys/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete journey');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['library-journeys'] });
+            toast({ title: "Silindi", description: "Öğrenme yolculuğu başarıyla kaldırıldı." });
+        },
+        onError: () => {
+            toast({ title: "Hata", description: "Silme işlemi başarısız oldu.", variant: "destructive" });
+        }
+    });
 
     const { data: journeys, isLoading } = useQuery<LearningJourney[]>({
         queryKey: ['library-journeys'],
@@ -110,13 +127,29 @@ export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTab
                                 <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
                                     {journey.topic}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground flex items-center">
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    {formatDistanceToNow(new Date(journey.createdAt), {
-                                        addSuffix: true,
-                                        locale: language === 'tr' ? tr : enUS
-                                    })}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground flex items-center">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        {formatDistanceToNow(new Date(journey.createdAt), {
+                                            addSuffix: true,
+                                            locale: language === 'tr' ? tr : enUS
+                                        })}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
+                                        disabled={deleteMutation.isPending}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (confirm("Bu öğrenme yolculuğunu kalıcı olarak silmek istediğinize emin misiniz?")) {
+                                                deleteMutation.mutate(journey.id);
+                                            }
+                                        }}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
 
                             <h3 className="font-semibold text-lg line-clamp-2 mt-3">{journey.title}</h3>
