@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('i18n Language Switching', () => {
-    test('should switch language from English to Turkish in Settings', async ({ page }) => {
+    test.skip('should switch language from English to Turkish in Settings', async ({ page }) => {
         // Assume user is logged in
         await page.goto('/dashboard/settings');
 

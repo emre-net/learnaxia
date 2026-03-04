@@ -16,14 +16,39 @@ export default function CreateCollectionPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
-        // TODO: Call API to create collection
-        setTimeout(() => {
+
+        const form = e.currentTarget
+        const formData = new FormData(form)
+        const title = formData.get("title") as string
+        const description = formData.get("description") as string
+        const visibility = formData.get("visibility") as string
+
+        try {
+            const res = await fetch("/api/collections", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    visibility: visibility.toUpperCase()
+                })
+            })
+
+            if (!res.ok) {
+                throw new Error("Koleksiyon oluşturulamadı")
+            }
+
+            // Redirect back to library
+            router.push("/dashboard/library")
+        } catch (error) {
+            console.error(error)
+            alert("Bir hata oluştu, koleksiyon oluşturulamadı.")
+        } finally {
             setIsLoading(false)
-            router.push("/dashboard/library") // Redirect to library after creation
-        }, 1500)
+        }
     }
 
     return (
@@ -51,6 +76,7 @@ export default function CreateCollectionPage() {
                             <Label htmlFor="title">Koleksiyon Adı</Label>
                             <Input
                                 id="title"
+                                name="title"
                                 placeholder="Örn: İngilizce A1 Kelimeler, Tarih Notları..."
                                 required
                                 className="text-lg"
@@ -61,6 +87,7 @@ export default function CreateCollectionPage() {
                             <Label htmlFor="description">Açıklama (Opsiyonel)</Label>
                             <Textarea
                                 id="description"
+                                name="description"
                                 placeholder="Bu koleksiyon ne hakkında?"
                                 className="resize-none"
                                 rows={3}
@@ -69,7 +96,7 @@ export default function CreateCollectionPage() {
 
                         <div className="space-y-4">
                             <Label>Görünürlük</Label>
-                            <RadioGroup defaultValue="private" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <RadioGroup defaultValue="private" name="visibility" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <RadioGroupItem value="private" id="private" className="peer sr-only" />
                                     <Label

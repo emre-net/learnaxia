@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2 } from "lucide-react"
+import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,7 +23,6 @@ interface SyllabusItem {
     order: number;
     title: string;
     overview: string;
-    estimatedMinutes: number;
 }
 
 export default function CreateLearningPlanPage() {
@@ -48,7 +47,7 @@ export default function CreateLearningPlanPage() {
         setErrorMsg("")
 
         if (!topic.trim()) {
-            setErrorMsg("Topic is required.")
+            setErrorMsg("Lütfen öğrenmek istediğiniz konuyu girin.")
             return
         }
 
@@ -62,10 +61,18 @@ export default function CreateLearningPlanPage() {
                 body: JSON.stringify({ topic, goal, depth })
             })
 
-            const data = await res.json()
+            const textResponse = await res.text();
+            let data;
+
+            try {
+                data = JSON.parse(textResponse);
+            } catch (err) {
+                console.error("Non-JSON Response received:", textResponse);
+                throw new Error("Sunucu geçersiz bir format gönderdi. Lütfen tekrar deneyin.");
+            }
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to generate syllabus")
+                throw new Error(data.error || "Müfredat oluşturulurken bir hata oluştu.")
             }
 
             if (data.syllabus) {
@@ -73,11 +80,11 @@ export default function CreateLearningPlanPage() {
                 setEstimatedTokens(data.metadata?.estimatedInputTokens)
                 setStep("review")
             } else {
-                throw new Error("No syllabus returned from AI.")
+                throw new Error("Yapay zeka herhangi bir müfredat döndürmedi.")
             }
         } catch (error: unknown) {
             console.error(error)
-            const msg = error instanceof Error ? error.message : "An unexpected error occurred."
+            const msg = error instanceof Error ? error.message : "Beklenmeyen bir hata oluştu."
             setErrorMsg(msg)
             setStep("input")
         } finally {
@@ -86,23 +93,15 @@ export default function CreateLearningPlanPage() {
     }
 
     const handleDynamicAction = async (action: string) => {
-        // Here we could re-call to AI with instructions like "make this more technical"
-        // For now, let's keep it visually interactive or mock a modification
         setIsLoading(true)
-
         try {
-            // Suppose we have a feature in future to re-generate with a specific instruction modifier
-            // We just mock the reload behavior for now to show the user it is working
-            await new Promise(res => setTimeout(res, 2000))
-
+            await new Promise(res => setTimeout(res, 1500))
             if (action === "expand") {
-                // Mock behavior:
-                // We will just tell User it's expanded (In reality this will be an AI call)
-                alert("This will call the AI to add more sub-topics.")
+                alert("Daha fazla alt başlık eklenecek (AI bağlantısı yakında eklenecek).")
             } else if (action === "condense") {
-                alert("This will call the AI to summarize and shorten the current syllabus.")
+                alert("Müfredat özetlenecek ve kısaltılacak (AI bağlantısı yakında eklenecek).")
             } else if (action === "technical") {
-                alert("This will call the AI to make the outline more technical and advanced.")
+                alert("İçerik daha teknik ve ileri düzey hale getirilecek (AI bağlantısı yakında eklenecek).")
             }
         } finally {
             setIsLoading(false)
@@ -110,7 +109,7 @@ export default function CreateLearningPlanPage() {
     }
 
     const handleRemoveItem = (indexToRemove: number) => {
-        setSyllabus(prev => prev.filter((_, i) => i !== indexToRemove))
+        setSyllabus((prev: SyllabusItem[]) => prev.filter((_: SyllabusItem, i: number) => i !== indexToRemove))
     }
 
     const handleStartJourney = async () => {
@@ -131,220 +130,258 @@ export default function CreateLearningPlanPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to start learning journey");
+                throw new Error(data.error || "Öğrenme yolculuğu başlatılamadı.");
             }
 
             if (data.journeyId) {
-                // Redirect user to the active learning session
                 router.push(`/dashboard/learning/j/${data.journeyId}`);
             } else {
-                throw new Error("Invalid response missing journey ID");
+                throw new Error("Geçersiz yanıt: Yolculuk ID'si eksik.");
             }
 
         } catch (error: any) {
             console.error(error);
-            setErrorMsg(error.message || "An unexpected error occurred while starting the journey.");
+            setErrorMsg(error.message || "Beklenmeyen bir hata oluştu.");
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-2xl mx-auto py-8 text-black dark:text-gray-100">
-            <div className="mb-8 space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">{t('creation.title') || "AI Learning Wizard"}</h1>
-                <p className="text-muted-foreground">
-                    {t('creation.description') || "Describe what you want to learn, and let the AI generate a complete learning pathway."}
-                </p>
+        <div className="relative min-h-[calc(100vh-80px)] w-full py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+            {/* Ambient Background Effects */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-500/10 dark:bg-purple-600/10 rounded-full blur-[120px] mix-blend-screen" />
+                <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[140px] mix-blend-screen" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/5 dark:bg-emerald-500/5 rounded-full blur-[160px] mix-blend-screen" />
             </div>
 
-            {errorMsg && (
-                <Alert variant="destructive" className="mb-6">
-                    <XCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{errorMsg}</AlertDescription>
-                </Alert>
-            )}
+            <div className="relative z-10 w-full max-w-3xl flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                {/* Header Section */}
+                <div className="text-center space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 ring-1 ring-indigo-500/20 mb-4 transition-all hover:ring-indigo-500/40 cursor-default">
+                        <Sparkles className="w-4 h-4" />
+                        <span className="text-xs font-semibold tracking-wider uppercase">Yapay Zeka Destekli Öğrenim</span>
+                    </div>
+                    <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                            Yeni Bir Şeyler
+                        </span> Öğrenin.
+                    </h1>
+                    <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+                        Öğrenmek istediğiniz konuyu ve hedefinizi belirtin, sizin için anında adım adım, vizyoner bir müfredat oluşturalım.
+                    </p>
+                </div>
 
-            {step === "input" && (
-                <Card className="border-indigo-500/20 shadow-lg bg-card">
-                    <CardHeader>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
-                                <BrainCircuit className="h-6 w-6" />
-                            </div>
-                            <span className="text-sm font-medium text-indigo-500 uppercase tracking-wider">AI Studio</span>
-                        </div>
-                        <CardTitle>{t('creation.wizardTitle') || "Configure Your Journey"}</CardTitle>
-                        <CardDescription>
-                            {t('creation.wizardDescription') || "Enter a topic and learning goal to begin."}
-                        </CardDescription>
-                    </CardHeader>
+                {errorMsg && (
+                    <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 backdrop-blur-md rounded-2xl">
+                        <XCircle className="h-5 w-5" />
+                        <AlertTitle className="font-semibold">Bir sorun oluştu</AlertTitle>
+                        <AlertDescription>{errorMsg}</AlertDescription>
+                    </Alert>
+                )}
 
-                    <form onSubmit={handleGenerate}>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="topic">{t('creation.topicLabel') || "Topic"}</Label>
-                                <Input
-                                    id="topic"
-                                    value={topic}
-                                    onChange={(e) => setTopic(e.target.value)}
-                                    placeholder={t('creation.topicPlaceholder') || "E.g. The Cold War, Next.js Routing, etc."}
-                                    required
-                                    className="text-lg bg-background"
-                                />
-                            </div>
+                {/* Main Card */}
+                <Card className="rounded-3xl border-slate-200/50 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl shadow-2xl shadow-indigo-500/5 overflow-hidden">
 
-                            <div className="space-y-2">
-                                <Label htmlFor="goal">{t('creation.goalLabel') || "Personal Goal"}</Label>
-                                <Textarea
-                                    id="goal"
-                                    value={goal}
-                                    onChange={(e) => setGoal(e.target.value)}
-                                    placeholder={t('creation.goalPlaceholder') || "What do you want to achieve?"}
-                                    className="bg-background"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>{t('creation.depthLabel') || "Learning Depth"}</Label>
-                                <Select value={depth} onValueChange={(val: "shallow" | "standard" | "deep") => setDepth(val)}>
-                                    <SelectTrigger className="bg-background">
-                                        <SelectValue placeholder={t('creation.depthStandard')} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="shallow">⚡ Shallow (Quick Overview)</SelectItem>
-                                        <SelectItem value="standard">📚 Standard (Balanced)</SelectItem>
-                                        <SelectItem value="deep">🔬 Deep (Comprehensive)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="pt-4 border-t border-dashed border-border">
-                                <Label className="mb-2 block">{t('creation.fileLabel') || "Upload Material"} <span className="text-muted-foreground text-xs ml-2">({t('common.optional') || "optional"})</span></Label>
-                                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer border-muted-foreground/25 bg-background">
-                                    <UploadCloud className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                                    <div className="text-sm text-muted-foreground">
-                                        <span className="font-semibold text-primary">{t('creation.uploadClick') || "Click to upload"}</span> {t('creation.uploadDrag') || "or drag and drop"}
+                    {step === "input" && (
+                        <div className="animate-in fade-in zoom-in-95 duration-500">
+                            <form onSubmit={handleGenerate}>
+                                <CardContent className="p-8 space-y-8">
+                                    <div className="space-y-3">
+                                        <Label htmlFor="topic" className="text-base font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                            <Target className="w-4 h-4 text-indigo-500" /> Neyi Öğrenmek İstiyorsunuz?
+                                        </Label>
+                                        <Input
+                                            id="topic"
+                                            value={topic}
+                                            onChange={(e) => setTopic(e.target.value)}
+                                            placeholder="Örn: Kuantum Fiziği, Roma İmparatorluğu Tarihi, Next.js..."
+                                            required
+                                            className="h-14 text-lg bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 rounded-xl focus-visible:ring-indigo-500/50 focus-visible:border-indigo-500 transition-all placeholder:text-slate-400"
+                                        />
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1">{t('creation.fileTypes') || "PDF, DOCX, TXT up to 10MB"}</p>
+
+                                    <div className="space-y-3">
+                                        <Label htmlFor="goal" className="text-base font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                            <BookOpen className="w-4 h-4 text-purple-500" /> Kişisel Hedefiniz Nedir?
+                                        </Label>
+                                        <Textarea
+                                            id="goal"
+                                            value={goal}
+                                            onChange={(e) => setGoal(e.target.value)}
+                                            placeholder="Örn: Bu konuda uzmanlaşmak ve kendi projelerimde kullanmak istiyorum..."
+                                            className="min-h-[100px] resize-none bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 rounded-xl focus-visible:ring-purple-500/50 focus-visible:border-purple-500 transition-all placeholder:text-slate-400"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-3">
+                                            <Label className="text-base font-semibold text-slate-700 dark:text-slate-300">Öğrenme Derinliği</Label>
+                                            <Select value={depth} onValueChange={(val: "shallow" | "standard" | "deep") => setDepth(val)}>
+                                                <SelectTrigger className="h-12 bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 rounded-xl">
+                                                    <SelectValue placeholder="Standart" />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-xl">
+                                                    <SelectItem value="shallow">⚡ Yüzeysel (Hızlı Bakış)</SelectItem>
+                                                    <SelectItem value="standard">📚 Standart (Dengeli)</SelectItem>
+                                                    <SelectItem value="deep">🔬 Derinlemesine (Kapsamlı)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    {/* Upload Area (Disabled visually for now) */}
+                                    {/* <div className="pt-6 border-t border-slate-200 dark:border-slate-800 border-dashed">
+                                        <div className="group relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer text-center">
+                                            <UploadCloud className="w-10 h-10 mx-auto text-slate-400 group-hover:text-indigo-500 transition-colors mb-3" />
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">İçerik Yükle (İsteğe Bağlı)</p>
+                                            <p className="text-xs text-slate-500 mt-1">PDF, TXT, DOCX dosyaları desteklenir</p>
+                                        </div>
+                                    </div> */}
+                                </CardContent>
+                                <div className="p-8 pt-0 mt-4 relative z-20">
+                                    <Button
+                                        type="submit"
+                                        disabled={isLoading || !topic.trim()}
+                                        className="w-full h-14 rounded-2xl text-lg font-semibold text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 group overflow-hidden relative"
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
+                                        {isLoading ? (
+                                            <span className="flex items-center gap-2 relative z-10">
+                                                <Loader2 className="w-5 h-5 animate-spin" /> Sihir Gerçekleşiyor...
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-2 relative z-10">
+                                                <BrainCircuit className="w-5 h-5" /> Yapay Zeka ile Müfredat Oluştur
+                                            </span>
+                                        )}
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {step === "generating" && (
+                        <CardContent className="p-16 flex flex-col items-center justify-center min-h-[400px] text-center animate-in fade-in duration-700">
+                            <div className="relative mb-8 group">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-full blur-[40px] opacity-40 animate-pulse" />
+                                <div className="relative w-24 h-24 bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 rotate-3 transition-transform group-hover:rotate-6">
+                                    <BrainCircuit className="w-12 h-12 text-indigo-500" />
+                                </div>
+                                <div className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                                    <Sparkles className="w-4 h-4 text-white" />
                                 </div>
                             </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button type="submit" className="w-full h-12 text-lg bg-indigo-600 hover:bg-indigo-700 text-white" disabled={isLoading}>
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <BrainCircuit className="mr-2 h-5 w-5" />
-                                        Generate Curriculum
-                                    </>
-                                )}
-                            </Button>
-                        </CardFooter>
-                    </form>
-                </Card>
-            )}
-
-            {step === "generating" && (
-                <Card className="border-indigo-500/20 shadow-lg py-12 text-center bg-card">
-                    <CardContent className="space-y-6 flex flex-col items-center justify-center">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full" />
-                            <BrainCircuit className="h-16 w-16 text-indigo-500 animate-pulse relative z-10" />
-                        </div>
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-bold">{t('creation.generating') || "Mapping the Knowledge..."}</h2>
-                            <p className="text-muted-foreground max-w-sm mx-auto">
-                                AI is analyzing your topic and determining the best pedagogical path. Please wait a few seconds.
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Bilgi Ağları Örülüyor...</h2>
+                            <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+                                Gelişmiş yapay zeka modelimiz sizin için en uygun öğrenme yolculuğunu piyon piyon hesaplıyor. Lütfen bekleyin.
                             </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+                        </CardContent>
+                    )}
 
-            {step === "review" && (
-                <Card className="border-emerald-500/20 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500 bg-card">
-                    <CardHeader>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-                                <CheckCircle2 className="h-6 w-6" />
-                            </div>
-                            <span className="text-sm font-medium text-emerald-500 uppercase tracking-wider">Plan Ready</span>
-                        </div>
-                        <CardTitle>{t('creation.syllabusTitle') || "Your Learning Syllabus"}</CardTitle>
-                        <CardDescription>
-                            Review your generated curriculum below. You can modify it or start learning immediately.
-                        </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="space-y-6">
-                        {/* Dynamic Action Buttons */}
-                        <div className="flex flex-wrap gap-2 p-4 rounded-xl bg-slate-100 dark:bg-slate-800/50">
-                            <span className="text-xs font-semibold text-slate-500 uppercase w-full mb-1">AI Modifiers ({estimatedTokens} initial tokens used)</span>
-                            <Button variant="outline" size="sm" onClick={() => handleDynamicAction('expand')} disabled={isLoading} className="bg-background">
-                                <Plus className="h-4 w-4 mr-1" /> Expand
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDynamicAction('condense')} disabled={isLoading} className="bg-background">
-                                <Minus className="h-4 w-4 mr-1" /> Condense
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleDynamicAction('technical')} disabled={isLoading} className="bg-background">
-                                <Settings2 className="h-4 w-4 mr-1" /> Make Technical
-                            </Button>
-                        </div>
-
-                        {/* Syllabus List */}
-                        <div className="rounded-xl border border-border divide-y divide-border relative overflow-hidden bg-background">
-                            {isLoading && (
-                                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                                    <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-                                </div>
-                            )}
-                            {syllabus.map((item, idx) => (
-                                <div key={idx} className="p-4 flex items-start justify-between group hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                    <div className="flex items-start gap-4 flex-1">
-                                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold shrink-0 mt-0.5 text-foreground">
-                                            {item.order || idx + 1}
+                    {step === "review" && (
+                        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <CardHeader className="p-8 pb-4 border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-950/20">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                                            <CheckCircle2 className="w-6 h-6 text-white" />
                                         </div>
-                                        <div className="flex-1 pr-4">
-                                            <div className="font-semibold text-foreground">{item.title}</div>
-                                            <div className="text-sm text-muted-foreground mt-1">{item.overview}</div>
+                                        <div>
+                                            <CardTitle className="text-2xl text-slate-900 dark:text-white">Müfredatınız Hazır</CardTitle>
+                                            <CardDescription className="text-base mt-1">İşte sizin için kişiselleştirilmiş öğrenme planı.</CardDescription>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-2 shrink-0">
-                                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                            ~{item.estimatedMinutes} mins
-                                        </span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-                                            onClick={() => handleRemoveItem(idx)}
-                                        >
-                                            <XCircle className="h-4 w-4" />
-                                        </Button>
-                                    </div>
                                 </div>
-                            ))}
-                            {syllabus.length === 0 && (
-                                <div className="p-8 text-center text-muted-foreground">List is empty.</div>
-                            )}
+                            </CardHeader>
+
+                            <CardContent className="p-8 space-y-6">
+                                {/* AI Modifiers Tool Bar */}
+                                <div className="p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/50 inline-flex flex-wrap gap-1 shadow-inner border border-slate-200/50 dark:border-slate-700/50">
+                                    <Button variant="ghost" size="sm" onClick={() => handleDynamicAction('expand')} disabled={isLoading} className="rounded-xl hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm text-slate-600 dark:text-slate-300 font-medium h-9 px-4">
+                                        <Plus className="w-4 h-4 mr-2 text-indigo-500" /> Genişlet
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => handleDynamicAction('condense')} disabled={isLoading} className="rounded-xl hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm text-slate-600 dark:text-slate-300 font-medium h-9 px-4">
+                                        <Minus className="w-4 h-4 mr-2 text-pink-500" /> Kısalt
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => handleDynamicAction('technical')} disabled={isLoading} className="rounded-xl hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm text-slate-600 dark:text-slate-300 font-medium h-9 px-4">
+                                        <Settings2 className="w-4 h-4 mr-2 text-blue-500" /> Daha Akademik
+                                    </Button>
+                                </div>
+
+                                {/* Modern Timeline Syllabus List */}
+                                <div className="relative pl-6 space-y-8 before:absolute before:inset-y-0 before:left-[11px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500 before:via-purple-500 before:to-pink-500 before:rounded-full">
+                                    {isLoading && (
+                                        <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-2xl">
+                                            <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                                        </div>
+                                    )}
+
+                                    {syllabus.map((item: SyllabusItem, idx: number) => (
+                                        <div key={idx} className="relative group">
+                                            {/* Process Dot */}
+                                            <div className="absolute -left-[30px] top-1 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border-[3px] border-indigo-500 flex items-center justify-center group-hover:scale-125 transition-transform shadow-md shadow-indigo-500/20 z-10">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-pink-500 transition-colors" />
+                                            </div>
+
+                                            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm group-hover:shadow-md transition-all group-hover:border-indigo-500/30 flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <span className="text-sm font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md">
+                                                            Adım {item.order || idx + 1}
+                                                        </span>
+                                                        <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">
+                                                            {item.title}
+                                                        </h3>
+                                                    </div>
+                                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                                                        {item.overview}
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full h-8 w-8 shrink-0 -mt-1 -mr-1"
+                                                    onClick={() => handleRemoveItem(idx)}
+                                                    title="Adımı Kaldır"
+                                                >
+                                                    <XCircle className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {syllabus.length === 0 && (
+                                        <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                                            <p className="text-slate-500">Müfredat listesi boş görünüyor. Önceki adıma dönerek yeniden oluşturmayı deneyin.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+
+                            <CardFooter className="p-8 pt-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 items-center justify-end rounded-b-3xl">
+                                <Button
+                                    variant="ghost"
+                                    className="w-full sm:w-auto text-slate-500 hover:text-slate-900 dark:hover:text-white h-12 rounded-xl"
+                                    onClick={() => setStep("input")}
+                                    disabled={isLoading}
+                                >
+                                    Geri Dön
+                                </Button>
+                                <Button
+                                    className="w-full sm:w-auto px-8 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-base group"
+                                    disabled={isLoading || syllabus.length === 0}
+                                    onClick={handleStartJourney}
+                                >
+                                    <Zap className="w-4 h-4 mr-2 group-hover:animate-pulse" />
+                                    Maceraya Başla
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                            </CardFooter>
                         </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-border mt-4">
-                        <Button variant="outline" className="w-full sm:w-auto" onClick={() => setStep("input")} disabled={isLoading}>
-                            {t('common.back') || "Back"}
-                        </Button>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 text-base" disabled={isLoading} onClick={handleStartJourney}>
-                            <BrainCircuit className="mr-2 h-5 w-5" />
-                            {t('creation.startLearning') || "Start This Journey"}
-                        </Button>
-                    </CardFooter>
+                    )}
                 </Card>
-            )}
+            </div>
         </div>
     )
 }

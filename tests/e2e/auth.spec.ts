@@ -4,17 +4,16 @@ test.describe('Authentication Flow', () => {
     test('login page renders with heading', async ({ page }) => {
         await page.goto('/login');
 
-        // h1: "Hesabına Giriş Yap"
-        const heading = page.locator('h1');
-        await expect(heading).toBeVisible();
-        await expect(heading).toContainText(/Hesabına Giriş Yap/i);
+        // h3: "Tekrar Hoş Geldin"
+        const heading = page.locator('h3:has-text("Tekrar Hoş Geldin")').or(page.locator('h1:has-text("Tekrar Hoş Geldin")')).or(page.locator('.text-2xl:has-text("Tekrar Hoş Geldin")'));
+        await expect(heading.first()).toBeVisible();
     });
 
     test('shows Google sign-in button', async ({ page }) => {
         await page.goto('/login');
 
-        // Button text: "Google ile Giriş Yap"
-        const googleBtn = page.getByRole('button', { name: /Google ile Giriş Yap/i });
+        // Button text: "Google ile Devam Et"
+        const googleBtn = page.getByRole('button', { name: /Google ile Devam Et/i });
         await expect(googleBtn).toBeVisible();
     });
 

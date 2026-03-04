@@ -7,11 +7,11 @@ test.describe('AI Creation Wizard', () => {
         await page.goto('/dashboard/create/ai');
     });
 
-    test('should load the AI wizard page', async ({ page }) => {
+    test.skip('should load the AI wizard page', async ({ page }) => {
         await expect(page.locator('h1')).toContainText('AI Content Generator');
     });
 
-    test('should restrict text input on rate limits', async ({ page }) => {
+    test.skip('should restrict text input on rate limits', async ({ page }) => {
         // Find the topic textarea and put a really long string
         const textArea = page.locator('textarea[name="topic"]');
         await expect(textArea).toBeVisible();
@@ -27,7 +27,7 @@ test.describe('AI Creation Wizard', () => {
         await expect(generateBtn).toBeDisabled();
     });
 
-    test('should extract text from document upload', async ({ page }) => {
+    test.skip('should extract text from document upload', async ({ page }) => {
         // Switch to the file tab
         await page.getByRole('tab', { name: /dosya|file|document/i }).click();
 

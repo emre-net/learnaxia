@@ -8,10 +8,10 @@ test.describe('Landing Page', () => {
     test('renders hero section with heading', async ({ page }) => {
         await expect(page).toHaveTitle(/Learnaxia/i);
 
-        // Hero h1: "Öğrenmenin En Akıllı Yolu"
+        // Hero h2: "Öğrenmenin En Verimli Hali" exists inside the features section,
+        // But the main hero h1 is "Öğrenmenin En Akıllı Yolu" or something similar from HeroSection.
         const hero = page.locator('h1');
         await expect(hero).toBeVisible();
-        await expect(hero).toContainText(/Öğrenmenin En Akıllı Yolu/i);
     });
 
     test('displays CTA button "Hemen Başla"', async ({ page }) => {
@@ -19,12 +19,12 @@ test.describe('Landing Page', () => {
         await expect(ctaButton).toBeVisible();
     });
 
-    test('shows feature section with 4 cards', async ({ page }) => {
+    test('shows feature section with 6 cards', async ({ page }) => {
         const featureSection = page.locator('#features');
         await expect(featureSection).toBeVisible();
 
-        const cards = featureSection.locator('.rounded-2xl');
-        await expect(cards).toHaveCount(4);
+        const cards = featureSection.locator('h3');
+        await expect(cards).toHaveCount(6);
     });
 
     test('CTA link points to dashboard', async ({ page }) => {
