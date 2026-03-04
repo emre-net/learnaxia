@@ -12,14 +12,18 @@ export function StudyTimer() {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     useEffect(() => {
-        if (!startTime) return;
+        if (!startTime) {
+            setElapsedSeconds(0);
+            return;
+        }
 
-        // Force a re-render every second to update UI
         const interval = setInterval(() => {
-            const now = new Date().getTime();
+            const now = Date.now();
             const start = new Date(startTime).getTime();
+            if (isNaN(start)) return;
+
             const diffInSeconds = Math.floor((now - start) / 1000);
-            setElapsedSeconds(diffInSeconds);
+            setElapsedSeconds(diffInSeconds > 0 ? diffInSeconds : 0);
         }, 1000);
 
         return () => clearInterval(interval);

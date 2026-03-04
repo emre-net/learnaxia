@@ -33,22 +33,36 @@ export function useTimer({
 
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
+        let expectedNextTick = Date.now() + 1000;
 
         if (isRunning) {
             interval = setInterval(() => {
+                const now = Date.now();
+                // If device went to sleep and woke up, or heavy throttle:
+                if (now - expectedNextTick > 2000) {
+                    // It lagged a lot, we must compensate
+                    const missedSeconds = Math.floor((now - expectedNextTick) / 1000) + 1;
+                    if (modeRef.current === 'COUNTDOWN') {
+                        setSeconds(s => Math.max(0, s - missedSeconds));
+                    } else {
+                        setSeconds(s => s + missedSeconds);
+                    }
+                    expectedNextTick = now + 1000;
+                    return;
+                }
+
                 if (modeRef.current === 'COUNTDOWN') {
                     if (secondsRef.current > 0) {
                         setSeconds(s => s - 1);
                     } else {
-                        // Timer expired
                         setIsRunning(false);
                         if (interval) clearInterval(interval);
 
                         if (playSound) {
                             try {
-                                const audio = new Audio('/sounds/bell.mp3'); // We'll assume a generic bell sound if it exists, or just browser beep fallback later.
+                                const audio = new Audio('/sounds/bell.mp3');
                                 audio.volume = 0.5;
-                                audio.play().catch(() => { }); // Catch if user hasn't interacted
+                                audio.play().catch(() => { });
                             } catch (e) { }
                         }
 
@@ -57,6 +71,8 @@ export function useTimer({
                 } else if (modeRef.current === 'STOPWATCH') {
                     setSeconds(s => s + 1);
                 }
+
+                expectedNextTick += 1000;
             }, 1000);
         }
 
