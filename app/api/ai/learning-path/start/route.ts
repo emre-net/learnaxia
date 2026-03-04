@@ -81,7 +81,29 @@ export async function POST(req: Request) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Invalid schema", details: error.issues }, { status: 400 });
         }
+
         console.error("Start Journey API Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+
+        const errorMsg = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
+        const stackTrace = error instanceof Error ? error.stack : undefined;
+
+        try {
+            // Hata kaydını sistem loglarına düşür (Admin Dashboard için)
+            await prisma.systemLog.create({
+                data: {
+                    requestId: crypto.randomUUID(),
+                    level: "ERROR",
+                    environment: process.env.NODE_ENV || "development",
+                    service: "journey-api",
+                    message: "Yolculuk (Journey) oluşturulurken kritik hata: " + errorMsg,
+                    source: "SERVER",
+                    stack: stackTrace
+                }
+            });
+        } catch (logErr) {
+            console.error("Failed to write to systemLog:", logErr);
+        }
+
+        return NextResponse.json({ error: "Sunucu hatası: Yolculuk başlatılamadı. (" + errorMsg + ")" }, { status: 500 });
     }
 }

@@ -127,13 +127,21 @@ export default function CreateLearningPlanPage() {
                 })
             });
 
-            const data = await res.json();
+            const textResponse = await res.text();
+            let data;
 
-            if (!res.ok) {
-                throw new Error(data.error || "Öğrenme yolculuğu başlatılamadı.");
+            try {
+                data = JSON.parse(textResponse);
+            } catch (err) {
+                console.error("Non-JSON API start Response:", textResponse);
+                throw new Error("Sunucu işleminizi başlatamadı (Beklenmeyen metin formatı). Lütfen sayfayı yenileyip tekrar deneyin.");
             }
 
-            if (data.journeyId) {
+            if (!res.ok) {
+                throw new Error(data?.error || "Öğrenme yolculuğu başlatılamadı.");
+            }
+
+            if (data?.journeyId) {
                 router.push(`/dashboard/learning/j/${data.journeyId}`);
             } else {
                 throw new Error("Geçersiz yanıt: Yolculuk ID'si eksik.");
