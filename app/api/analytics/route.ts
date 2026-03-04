@@ -111,12 +111,42 @@ export async function GET(req: Request) {
         });
 
 
+        // Calculate Streak
+        let currentStreak = 0;
+        let d = new Date();
+        const toYMD = (date: Date) => {
+            const tzOff = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - tzOff).toISOString().split('T')[0];
+        };
+
+        let checkDateStr = toYMD(d);
+        if (activityMap.has(checkDateStr)) {
+            currentStreak++;
+            d.setDate(d.getDate() - 1);
+            checkDateStr = toYMD(d);
+        } else {
+            d.setDate(d.getDate() - 1);
+            checkDateStr = toYMD(d);
+            if (activityMap.has(checkDateStr)) {
+                currentStreak++;
+                d.setDate(d.getDate() - 1);
+                checkDateStr = toYMD(d);
+            }
+        }
+
+        while (activityMap.has(checkDateStr)) {
+            currentStreak++;
+            d.setDate(d.getDate() - 1);
+            checkDateStr = toYMD(d);
+        }
+
         return NextResponse.json({
             stats: {
                 totalStudyMinutes: Math.round((totalDuration._sum.durationMs || 0) / 60000),
                 modulesStarted: activeModulesCount,
                 totalSolved,
                 globalAccuracy,
+                dailyStreak: currentStreak,
             },
             dailyActivity,
             moduleStats
