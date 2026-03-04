@@ -40,12 +40,12 @@ export function FocusWidget() {
         <Card className="relative overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] w-full transition-all duration-500 group">
 
             {/* Ambient Background Glow */}
-            <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20 transition-colors duration-1000 ${activeTab === 'POMODORO'
-                    ? (timer.isRunning ? 'bg-rose-500' : 'bg-orange-500')
-                    : (timer.isRunning ? 'bg-blue-500' : 'bg-slate-500')
+            <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none transition-colors duration-1000 ${activeTab === 'POMODORO'
+                ? (timer.isRunning ? 'bg-rose-500' : 'bg-orange-500')
+                : (timer.isRunning ? 'bg-blue-500' : 'bg-slate-500')
                 }`} />
 
-            <CardContent className="p-6 relative z-10 flex flex-col h-full">
+            <CardContent className="p-6 relative z-10 flex flex-col h-full pointer-events-auto">
 
                 {/* Header & Mode Switcher */}
                 <div className="flex justify-between items-center mb-6">
@@ -69,8 +69,8 @@ export function FocusWidget() {
                 <div className="flex flex-col items-center justify-center flex-1 py-4">
                     <div className="relative">
                         <span className={`text-6xl font-black tracking-tighter tabular-nums transition-colors duration-500 ${timer.isRunning
-                                ? (activeTab === 'POMODORO' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400')
-                                : 'text-slate-800 dark:text-slate-100'
+                            ? (activeTab === 'POMODORO' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400')
+                            : 'text-slate-800 dark:text-slate-100'
                             }`}>
                             {timer.displayTime}
                         </span>
@@ -99,8 +99,8 @@ export function FocusWidget() {
                         size="icon"
                         onClick={timer.toggle}
                         className={`h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${timer.isRunning
-                                ? 'bg-slate-800 hover:bg-slate-900 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900'
-                                : (activeTab === 'POMODORO' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700')
+                            ? 'bg-slate-800 hover:bg-slate-900 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900'
+                            : (activeTab === 'POMODORO' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700')
                             } text-white`}
                     >
                         {timer.isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}

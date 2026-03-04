@@ -125,14 +125,14 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                     </Button>
                 ) : (
                     <Button
-                        className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700" : "w-full text-lg h-12"}
+                        className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700 text-white" : "w-full text-lg h-12"}
                         size="lg"
                         onClick={handleNextItem}
                     >
                         {isLastItem ? (
-                            <>{dict.finishSession} <Check className="ml-2 h-5 w-5" /></>
+                            <>{dict.finishSession || "Bitir"} <Check className="ml-2 h-5 w-5" /></>
                         ) : (
-                            <>{dict.nextQuestion} <ArrowRight className="ml-2 h-5 w-5" /></>
+                            <>{dict.nextQuestion || "Sıradaki"} <ArrowRight className="ml-2 h-5 w-5" /></>
                         )}
                     </Button>
                 )}

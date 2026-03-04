@@ -325,30 +325,31 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
                                                 }
 
                                                 return (
-                                                    <div
+                                                    <button
                                                         key={idx}
-                                                        onClick={() => (!selectedOption || !isCorrect) && handleOptionSelect(opt)}
+                                                        onClick={() => {
+                                                            if (!selectedOption || !isCorrect) handleOptionSelect(opt);
+                                                        }}
+                                                        disabled={selectedOption !== null && isCorrect === true}
                                                         className={cn(
-                                                            "p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 text-lg",
+                                                            "w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 text-lg flex items-center gap-4",
                                                             btnClass
                                                         )}
                                                     >
-                                                        <div className="flex items-center gap-4">
-                                                            <div className={cn(
-                                                                "w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 text-sm font-bold",
-                                                                selectedOption ? (isActualAnswer ? "border-emerald-500 text-emerald-600" : isSelected ? "border-red-500 text-red-600" : "border-muted-foreground") : "border-muted-foreground"
-                                                            )}>
-                                                                {String.fromCharCode(65 + idx)}
-                                                            </div>
-                                                            <span className="flex-1 leading-relaxed text-slate-800 dark:text-slate-200 font-medium">{opt}</span>
-                                                            {selectedOption && isActualAnswer && (
-                                                                <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-500 animate-in zoom-in" />
-                                                            )}
-                                                            {isSelected && !isCorrect && (
-                                                                <XCircle className="h-6 w-6 shrink-0 text-red-500 animate-in zoom-in" />
-                                                            )}
+                                                        <div className={cn(
+                                                            "w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 text-sm font-bold",
+                                                            selectedOption ? (isActualAnswer ? "border-emerald-500 text-emerald-600" : isSelected ? "border-red-500 text-red-600" : "border-muted-foreground") : "border-muted-foreground"
+                                                        )}>
+                                                            {String.fromCharCode(65 + idx)}
                                                         </div>
-                                                    </div>
+                                                        <span className="flex-1 leading-relaxed text-slate-800 dark:text-slate-200 font-medium">{opt}</span>
+                                                        {selectedOption && isActualAnswer && (
+                                                            <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-500 animate-in zoom-in" />
+                                                        )}
+                                                        {isSelected && !isCorrect && (
+                                                            <XCircle className="h-6 w-6 shrink-0 text-red-500 animate-in zoom-in" />
+                                                        )}
+                                                    </button>
                                                 )
                                             })}
                                         </div>
