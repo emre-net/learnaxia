@@ -303,7 +303,11 @@ export class OpenAIAIProvider implements AIProvider {
             Your task is to generate ONE comprehensive learning slide (section) about "${topic}" which is part of the broader subject "${parentTopic}".
             The requested depth is "${depth}".
             
-            IMPORTANT: You MUST generate all text content in this language: ${language.toUpperCase()}. If it's 'tr', write purely in Turkish.
+            IMPORTANT RULES FOR LANGUAGE:
+            1. You MUST generate all text content EXCLUSIVELY in the following language: ${language.toUpperCase()}.
+            2. If the language is 'tr' (Turkish), you must write PURELY in Turkish without any mixed English terms.
+            3. DO NOT mix languages (e.g., do not write "temeldefinitionsını").
+            4. ABSOLUTELY NO Chinese, Japanese, or any other foreign characters/alphabets. Output must be clean and grammatically perfect.
             
             1. Provide a clear, engaging "title" for the slide.
             2. Write the "content" in rich HTML format. Use semantic tags (<h2>, <p>, <ul>, <li>, <strong>, <em>). Make it highly readable and engaging, suitable for a learning app. Add brief examples if appropriate.

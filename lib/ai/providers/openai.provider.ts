@@ -75,8 +75,11 @@ export async function generateSyllabus(
                              Create a highly engaging, structured, and logical learning syllabus (journey) for the user's requested topic.
                              The target audience wants a ${depth} level of understanding.
                              
-                             IMPORTANT: You MUST generate the content in the following language: ${language.toUpperCase()}. If the language is 'tr', write purely in Turkish.
-                             
+                             IMPORTANT RULES FOR LANGUAGE:
+                             1. You MUST generate the content EXCLUSIVELY in the following language: ${language.toUpperCase()}.
+                             2. If the language is 'tr' (Turkish), you must write PURELY in Turkish.
+                             3. DO NOT mix languages (e.g., do not write "temeldefinitionsını"). Use only valid words in the target language.
+                             4. ABSOLUTELY NO Chinese, Japanese, or any other foreign characters/alphabets unless explicitly requested by the topic. Output must be clean and grammatically correct.
                              Output MUST BE valid JSON representing an array of syllabus sections/slides.
                              Schema:
                              {
