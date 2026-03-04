@@ -58,9 +58,16 @@ export function UserActions({ user }: UserActionsProps) {
                 })
             })
 
-            const data = await res.json()
+            const textData = await res.text();
+            let data;
+            try {
+                data = JSON.parse(textData);
+            } catch (err) {
+                console.error("Non-JSON Admin Token Response:", textData);
+                throw new Error("Sunucu işlemi reddetti veya zaman aşımına uğradı. Lütfen sayfayı yenileyip tekrar deneyin.");
+            }
 
-            if (!res.ok) throw new Error(data.error || "Token işlemi başarısız.");
+            if (!res.ok) throw new Error(data?.error || "Token işlemi başarısız.");
 
             toast({
                 title: "İşlem Başarılı",

@@ -79,7 +79,7 @@ export async function POST(req: Request) {
                 }
             });
 
-            await getAiQueue().add("generate-journey", {
+            const queuePromise = getAiQueue().add("generate-journey", {
                 userId,
                 journeyId: journey.id,
                 topic,
@@ -87,6 +87,13 @@ export async function POST(req: Request) {
                 syllabus,
                 language
             });
+
+            // 2.5 saniyelik Timeout koruması (Redis ulaşılamazsa Vercel Serverless çökmesin diye)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Redis kuyruğuna bağlanılamadı (Timeout).")), 2500)
+            );
+
+            await Promise.race([queuePromise, timeoutPromise]);
 
             return NextResponse.json({
                 success: true,
