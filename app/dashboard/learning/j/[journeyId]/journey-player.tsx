@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { toast } from "@/components/ui/use-toast"
 
 // Needs to match the Prisma Schema output + our API
 interface PeekingQuestion {
@@ -168,8 +169,11 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
             setIsCorrect(null);
         } else {
             // Journey complete
-            alert("Journey Complete! Returning to dashboard...");
-            router.push("/dashboard");
+            toast({
+                title: "Mükemmel İlerleyiş! 🎉",
+                description: "Maceranızı başarıyla tamamladınız. Öğrendiklerinizi kütüphanenizde bulabilirsiniz.",
+            });
+            router.push("/dashboard/library");
         }
     }
 

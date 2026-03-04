@@ -164,7 +164,7 @@ export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTab
                             "p-5 pt-0",
                             viewMode === 'list' && "pt-5 pb-5 w-48 justify-end"
                         )}>
-                            <Link href={`/learning/j/${journey.id}`} className="w-full">
+                            <Link href={`/dashboard/learning/j/${journey.id}`} className="w-full">
                                 <Button className="w-full gap-2 transition-transform group-hover:scale-[1.02]" variant={isCompleted ? "outline" : "default"}>
                                     <PlayCircle className="h-4 w-4" />
                                     {isGenerating ? "Check Status" : (isCompleted ? "Review Journey" : "Continue")}

@@ -163,7 +163,7 @@ export default function CreateLearningPlanPage() {
             }
 
             if (data?.journeyId) {
-                router.push(`/learning/j/${data.journeyId}`);
+                router.push(`/dashboard/learning/j/${data.journeyId}`);
             } else {
                 throw new Error("Geçersiz yanıt: Yolculuk ID'si eksik.");
             }
