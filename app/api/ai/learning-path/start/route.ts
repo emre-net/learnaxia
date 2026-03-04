@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { getAiQueue } from "@/lib/queue/client";
 import { validateTopic } from "@/lib/ai/providers/openai.provider";
 import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import { WalletService } from "@/domains/wallet/wallet.service";
@@ -79,26 +78,10 @@ export async function POST(req: Request) {
                 }
             });
 
-            const queuePromise = getAiQueue().add("generate-journey", {
-                userId,
-                journeyId: journey.id,
-                topic,
-                depth,
-                syllabus,
-                language
-            });
-
-            // 2.5 saniyelik Timeout koruması (Redis ulaşılamazsa Vercel Serverless çökmesin diye)
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Redis kuyruğuna bağlanılamadı (Timeout).")), 2500)
-            );
-
-            await Promise.race([queuePromise, timeoutPromise]);
-
             return NextResponse.json({
                 success: true,
                 journeyId: journey.id,
-                message: "Journey creation started in background"
+                message: "Journey created. Ready for client orchestration."
             });
         } catch (dbError) {
             // Hata Durumu (Refund) - Cüzdan iadesi

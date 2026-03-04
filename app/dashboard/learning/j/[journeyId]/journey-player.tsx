@@ -28,6 +28,8 @@ interface LearningSlide {
 interface LearningJourney {
     id: string;
     title: string;
+    topic?: string;
+    depth?: string;
     status: string;
     syllabus: any;
     slides: LearningSlide[];
@@ -63,25 +65,93 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
     const isGenerating = journey.status === "GENERATING";
     const currentSlide = journey.slides[currentSlideIndex];
 
-    // Polling logic
+    // Lazy Generation Orchestrator (Background sliding)
     useEffect(() => {
         if (!isGenerating) return;
 
-        const interval = setInterval(async () => {
-            try {
-                const res = await fetch(`/api/ai/learning-path/${journey.id}/status`);
-                const data = await res.json();
+        let isMounted = true;
+        let isRequestPending = false;
 
-                if (res.ok && data.journey) {
-                    setJourney(data.journey);
+        const generateNextSlide = async () => {
+            if (isRequestPending || !isMounted) return;
+
+            const expectedSlidesCount = Array.isArray(journey.syllabus) ? journey.syllabus.length : 0;
+            const currentSlides = journey.slides || [];
+
+            // Eğer hepsi üretilmişse tamamla
+            if (currentSlides.length >= expectedSlidesCount) {
+                if (expectedSlidesCount !== 0) {
+                    try {
+                        await fetch('/api/ai/learning-path/complete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ journeyId: journey.id })
+                        });
+
+                        if (isMounted) {
+                            setJourney(prev => ({ ...prev, status: "ACTIVE" }));
+                        }
+                    } catch (e) {
+                        console.error("Failed to complete journey", e);
+                    }
+                }
+                return;
+            }
+
+            // Üretilecek sıradaki slayt
+            const nextItemIndex = currentSlides.length;
+            const nextSyllabusItem = journey.syllabus[nextItemIndex];
+
+            if (!nextSyllabusItem) return;
+
+            isRequestPending = true;
+
+            try {
+                const res = await fetch('/api/ai/learning-path/generate-slide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        journeyId: journey.id,
+                        topic: journey.topic || journey.title, // DB'de topic de var, title da var.
+                        depth: (journey as any).depth || "standard",
+                        language: "tr", // Şimdilik varsayılan destek
+                        item: nextSyllabusItem
+                    })
+                });
+
+                if (res.ok) {
+                    // Slayt üretildi, güncel durumu çekip state'i güncelle
+                    const statusRes = await fetch(`/api/ai/learning-path/${journey.id}/status`);
+                    if (statusRes.ok) {
+                        const statusData = await statusRes.json();
+                        if (isMounted && statusData.journey) {
+                            setJourney(statusData.journey);
+                        }
+                    }
+                } else {
+                    // API hata verirse (rate limit vb) 5 saniye bekle
+                    console.error("Slide generation error response", await res.text());
+                    await new Promise(r => setTimeout(r, 5000));
                 }
             } catch (err) {
-                console.error("Failed to poll journey status", err);
-            }
-        }, 3000);
+                console.error("Generation error", err);
+                await new Promise(r => setTimeout(r, 5000));
+            } finally {
+                isRequestPending = false;
 
-        return () => clearInterval(interval);
-    }, [isGenerating, journey.id]);
+                // Eğer halen eksik varsa döngüyü yeniden tetikle (recursive değil, useEffect dependency ile)
+                // Ancak dependency'e currentSlides.length ekli olduğu için state güncellenince tekrar çalışacaktır.
+                // State güncellenmemişse (örnek hata durumu) manuel tetiklemek gerek:
+                if (isMounted && isGenerating) {
+                    setTimeout(generateNextSlide, 1000);
+                }
+            }
+        };
+
+        generateNextSlide();
+
+        return () => { isMounted = false; };
+    }, [isGenerating, journey.id, journey.slides?.length]);
 
     const handleOptionSelect = (option: string) => {
         if (!currentSlide || !currentSlide.peekingQuestion) return;
@@ -103,19 +173,19 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
         }
     }
 
-    // Loading State
+    // Loading State (Sadece ilk slayt için bekler)
     if (isGenerating && journey.slides.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center flex-1 h-full p-8 text-center">
                 <Loader2 className="h-12 w-12 animate-spin text-indigo-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Preparing your Journey...</h2>
+                <h2 className="text-2xl font-bold mb-2">Makinenin Motorları Isınırken...</h2>
                 <p className="text-muted-foreground max-w-md">
-                    We are crafting personalized interactive slides based on your syllabus. This typically takes about 1-2 minutes.
+                    İlk öğrenme slaytınız üretiliyor. Sadece birkaç saniye sürecek, hazırsanız derin bir nefes alın!
                 </p>
                 {totalExpectedSlides > 0 && (
                     <div className="w-full max-w-sm mt-8">
-                        <Progress value={0} className="h-2" />
-                        <p className="text-xs text-muted-foreground mt-2">Generating 0 of {totalExpectedSlides} slides</p>
+                        <Progress value={10} className="h-2 animate-pulse" />
+                        <p className="text-xs text-muted-foreground mt-2">1. Adım başlatılıyor...</p>
                     </div>
                 )}
             </div>

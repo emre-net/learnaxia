@@ -6,7 +6,6 @@ import { AIService } from "@/domains/ai/ai.service";
 import { WalletService } from "@/domains/wallet/wallet.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getAiQueue } from "@/lib/queue/client";
 import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import prisma from "@/lib/prisma";
 import { validateTopic } from "@/lib/ai/providers/openai.provider";
@@ -15,7 +14,6 @@ const GenerateSchema = z.object({
     topic: z.string().min(3),
     types: z.array(z.enum(['FLASHCARD', 'MC', 'GAP', 'TF'])).default(['FLASHCARD', 'MC', 'GAP', 'TF']),
     count: z.number().min(-1).max(30).default(5),
-    mode: z.enum(['sync', 'async']).default('sync'),
     focusMode: z.enum(['detailed', 'summary', 'key_concepts', 'auto']).optional()
 });
 
@@ -27,7 +25,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { topic, types, count, mode, focusMode } = GenerateSchema.parse(body);
+        const { topic, types, count, focusMode } = GenerateSchema.parse(body);
         const userId = session.user.id;
 
         // 1. Dynamic Token Calculation & Rate Limit Guardian
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
 
         // 2. Check Balance & Debit
         try {
-            await WalletService.debit(userId, dynamicCost, 'AI_GENERATION', `AI Request: ${topic.substring(0, 50)}... (${mode}) | Cost: ${dynamicCost}`);
+            await WalletService.debit(userId, dynamicCost, 'AI_GENERATION', `AI Request: ${topic.substring(0, 50)}... | Cost: ${dynamicCost}`);
         } catch (error) {
             return NextResponse.json({ error: "Yetersiz jeton. Lütfen jeton yükleyin." }, { status: 402 });
         }
@@ -65,22 +63,6 @@ export async function POST(req: Request) {
             return NextResponse.json({
                 error: validation.reason || 'Lütfen içeriğini üretmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
             }, { status: 400 });
-        }
-
-        if (mode === 'async') {
-            const job = await getAiQueue().add("generate-content", {
-                userId,
-                topic,
-                types,
-                count,
-                focusMode,
-                language
-            });
-            return NextResponse.json({
-                jobId: job.id,
-                message: "İşlem arka planda başlatıldı.",
-                remainingTokens: (await WalletService.getBalance(userId)).balance
-            });
         }
 
         try {
