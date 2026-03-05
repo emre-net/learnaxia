@@ -1,0 +1,134 @@
+
+> web@0.1.2 build
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 232ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 5.22.0 -> 7.4.2                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  ✓ optimizeCss
+  ✓ scrollRestoration
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 7.5s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/60) ...
+  Generating static pages using 11 workers (15/60) 
+  Generating static pages using 11 workers (30/60) 
+  Generating static pages using 11 workers (45/60) 
+✓ Generating static pages using 11 workers (60/60) in 10.2s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /about
+├ ƒ /admin
+├ ƒ /admin/modules
+├ ƒ /admin/system
+├ ƒ /admin/system/ai-logs
+├ ƒ /admin/system/logs
+├ ƒ /admin/tools
+├ ƒ /admin/users
+├ ƒ /api/admin/ai-logs
+├ ƒ /api/admin/logs
+├ ƒ /api/admin/seed-test
+├ ƒ /api/admin/sync-visibility
+├ ƒ /api/admin/users/[id]/tokens
+├ ƒ /api/admin/wipe-db
+├ ƒ /api/ai/generate
+├ ƒ /api/ai/learning-path/[journeyId]/status
+├ ƒ /api/ai/learning-path/complete
+├ ƒ /api/ai/learning-path/generate
+├ ƒ /api/ai/learning-path/generate-slide
+├ ƒ /api/ai/learning-path/start
+├ ƒ /api/ai/solve-photo
+├ ƒ /api/analytics
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/merge-guest-data
+├ ƒ /api/auth/register
+├ ƒ /api/auth/verify
+├ ƒ /api/collections
+├ ƒ /api/collections/[id]
+├ ƒ /api/collections/[id]/save
+├ ƒ /api/discover
+├ ƒ /api/file/extract
+├ ƒ /api/library/journeys
+├ ƒ /api/library/journeys/[id]
+├ ƒ /api/logs
+├ ƒ /api/mobile/login
+├ ƒ /api/mobile/refresh
+├ ƒ /api/mobile/register
+├ ƒ /api/modules
+├ ƒ /api/modules/[id]
+├ ƒ /api/modules/[id]/fork
+├ ƒ /api/modules/[id]/items
+├ ƒ /api/modules/[id]/items/[itemId]
+├ ƒ /api/modules/[id]/save
+├ ƒ /api/notes
+├ ƒ /api/notes/[id]
+├ ƒ /api/solved-questions
+├ ƒ /api/study/daily-queue
+├ ƒ /api/study/log
+├ ƒ /api/study/start
+├ ƒ /api/study/start-daily
+├ ƒ /api/user/profile
+├ ƒ /api/wallet
+├ ƒ /api/wallet/reward
+├ ƒ /auth/verify
+├ ƒ /contact
+├ ƒ /dashboard
+├ ƒ /dashboard/analytics
+├ ƒ /dashboard/collections/[id]
+├ ƒ /dashboard/collections/create
+├ ƒ /dashboard/collections/new
+├ ƒ /dashboard/create
+├ ƒ /dashboard/create/ai
+├ ƒ /dashboard/create/ai-notes
+├ ƒ /dashboard/create/manual
+├ ƒ /dashboard/create/manual-note
+├ ƒ /dashboard/create/solve-photo
+├ ƒ /dashboard/discover
+├ ƒ /dashboard/learning/create
+├ ƒ /dashboard/learning/j/[journeyId]
+├ ƒ /dashboard/library
+├ ƒ /dashboard/modules/[id]
+├ ƒ /dashboard/notes
+├ ƒ /dashboard/profile
+├ ƒ /dashboard/settings
+├ ƒ /login
+├ ƒ /privacy
+├ ƒ /study/[moduleId]
+├ ƒ /study/daily
+└ ƒ /terms
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+
+npm notice
+npm notice New minor version of npm available! 11.6.2 -> 11.11.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+npm notice To update run: npm install -g npm@11.11.0
+npm notice

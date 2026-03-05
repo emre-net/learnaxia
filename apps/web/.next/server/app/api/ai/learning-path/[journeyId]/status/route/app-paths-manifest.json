@@ -1,0 +1,3 @@
+{
+  "/api/ai/learning-path/[journeyId]/status/route": "app/api/ai/learning-path/[journeyId]/status/route.js"
+}

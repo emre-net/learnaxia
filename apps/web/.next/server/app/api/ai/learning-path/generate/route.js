@@ -1,0 +1,11 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/ai/learning-path/generate/route.js")
+R.c("server/chunks/[root-of-the-server]__379c2505._.js")
+R.c("server/chunks/_a1f60c7e._.js")
+R.c("server/chunks/node_modules_bcryptjs_index_42ebb250.js")
+R.c("server/chunks/node_modules_openai_index_mjs_88cf4560._.js")
+R.c("server/chunks/node_modules_zod_v4_classic_external_fa90cebf.js")
+R.c("server/chunks/[root-of-the-server]__f408c708._.js")
+R.c("server/chunks/_5eddcb76._.js")
+R.c("server/chunks/37f04__next-internal_server_app_api_ai_learning-path_generate_route_actions_70fefd30.js")
+R.m(355865)
+module.exports=R.m(355865).exports

@@ -1,0 +1,3 @@
+{
+  "/api/ai/learning-path/generate/route": "app/api/ai/learning-path/generate/route.js"
+}
