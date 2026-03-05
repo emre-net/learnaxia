@@ -354,13 +354,13 @@ export function AICreationWizard() {
                                 )}
                             </div>
 
-                            <div className="bg-muted/50 p-4 rounded-lg flex items-center justify-between">
+                            <div className="bg-muted/50 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-purple-500" />
                                     <span className="text-sm font-medium">{t("creation.costEstimate")}</span>
                                 </div>
                                 <span className={cn(
-                                    "font-bold",
+                                    "font-bold text-sm sm:text-base",
                                     tokenEstimate.willHitRateLimit ? "text-red-500" : "text-purple-600"
                                 )}>
                                     {tokenEstimate.willHitRateLimit ? "Sınır Aşıldı" : `${tokenEstimate.recommendedCost} AXIA`}

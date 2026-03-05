@@ -353,10 +353,10 @@ export default function CreateLearningPlanPage() {
                                                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-pink-500 transition-colors" />
                                             </div>
 
-                                            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm group-hover:shadow-md transition-all group-hover:border-indigo-500/30 flex items-start gap-4">
+                                            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm group-hover:shadow-md transition-all group-hover:border-indigo-500/30 flex items-start justify-between gap-4">
                                                 <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <span className="text-sm font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <span className="text-sm font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md whitespace-nowrap">
                                                             Adım {item.order || idx + 1}
                                                         </span>
                                                         <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">
@@ -370,7 +370,7 @@ export default function CreateLearningPlanPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full h-8 w-8 shrink-0 -mt-1 -mr-1"
+                                                    className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full h-8 w-8 shrink-0 -mt-1 -mr-1"
                                                     onClick={() => handleRemoveItem(idx)}
                                                     title="Adımı Kaldır"
                                                 >
@@ -389,23 +389,23 @@ export default function CreateLearningPlanPage() {
                             </CardContent>
 
                             <CardFooter className="p-8 pt-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex flex-col items-end rounded-b-3xl">
-                                <div className="flex flex-col sm:flex-row gap-4 items-center justify-end w-full mb-3">
+                                <div className="flex flex-col sm:flex-row gap-4 items-center sm:justify-end w-full mb-3">
                                     <Button
-                                        variant="ghost"
-                                        className="w-full sm:w-auto text-slate-500 hover:text-slate-900 dark:hover:text-white h-12 rounded-xl"
+                                        variant="outline"
+                                        className="w-full sm:w-auto text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white h-12 rounded-xl"
                                         onClick={() => setStep("input")}
                                         disabled={isLoading}
                                     >
                                         Geri Dön
                                     </Button>
                                     <Button
-                                        className="w-full sm:w-auto px-8 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 disabled:opacity-50 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-base group"
+                                        className="w-full sm:w-auto flex-1 sm:flex-none px-6 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 disabled:opacity-50 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-sm sm:text-base group whitespace-nowrap"
                                         disabled={isLoading || syllabus.length === 0 || isInsufficientTokens}
                                         onClick={handleStartJourney}
                                     >
-                                        <Zap className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                                        {recommendedCost ? `Maceraya Başla (${recommendedCost} Token)` : "Maceraya Başla"}
-                                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        <Zap className="w-4 h-4 mr-2 shrink-0 group-hover:animate-pulse" />
+                                        <span className="truncate">{recommendedCost ? `Başla (${recommendedCost} AXIA)` : "Maceraya Başla"}</span>
+                                        <ArrowRight className="w-4 h-4 ml-2 shrink-0 group-hover:translate-x-1 transition-transform" />
                                     </Button>
                                 </div>
 

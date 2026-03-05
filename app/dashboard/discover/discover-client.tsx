@@ -271,14 +271,14 @@ export function DiscoverClient() {
                     </div>
 
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <div className="flex items-center justify-between mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                            <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground">
-                                <TabsTrigger value="modules" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Modüller</TabsTrigger>
-                                <TabsTrigger value="collections" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Koleksiyonlar</TabsTrigger>
-                                <TabsTrigger value="notes" className="rounded-lg px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notlar</TabsTrigger>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                            <TabsList className="inline-flex h-auto w-full sm:w-auto items-center justify-start sm:justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground overflow-x-auto whitespace-nowrap scrollbar-hide">
+                                <TabsTrigger value="modules" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Modüller</TabsTrigger>
+                                <TabsTrigger value="collections" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Koleksiyonlar</TabsTrigger>
+                                <TabsTrigger value="notes" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notlar</TabsTrigger>
                             </TabsList>
 
-                            <div className="hidden sm:block text-sm text-muted-foreground font-medium">
+                            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap">
                                 <span className="text-foreground font-bold">{total}</span> içerik bulundu
                             </div>
                         </div>
