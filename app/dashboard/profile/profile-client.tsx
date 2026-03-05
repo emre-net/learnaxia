@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { EditProfileDialog } from "@/components/settings/edit-profile-dialog"; // Reuse existing
+import { ShareButton } from "@/components/shared/share-button";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 
 export function ProfileClient() {
@@ -50,6 +52,17 @@ export function ProfileClient() {
             return res.json();
         }
     });
+
+    const { data: myNotesPayload, isLoading: isLoadingNotes } = useQuery({
+        queryKey: ['profile-notes'],
+        queryFn: async () => {
+            const res = await fetch('/api/notes?limit=100');
+            if (!res.ok) throw new Error('Failed to fetch notes');
+            return res.json();
+        }
+    });
+
+    const myNotes = myNotesPayload?.items || [];
 
     if (isLoadingProfile) {
         return <div className="space-y-6">
@@ -94,9 +107,9 @@ export function ProfileClient() {
                             </Button>
                         }
                     />
-                    <Button variant="ghost" size="icon">
-                        <Share2 className="h-4 w-4" />
-                    </Button>
+                    {profile?.handle && (
+                        <ShareButton type="profile" id={profile.handle} title={`@${profile.handle} Profili`} />
+                    )}
                 </div>
             </div>
 
@@ -138,6 +151,7 @@ export function ProfileClient() {
                 <TabsList className="mb-4">
                     <TabsTrigger value="modules">Üretimlerim</TabsTrigger>
                     <TabsTrigger value="collections">Koleksiyonlarım</TabsTrigger>
+                    <TabsTrigger value="notes">Notlarım</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="modules" className="space-y-4">
@@ -175,6 +189,43 @@ export function ProfileClient() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {myCollections?.map((item: any) => (
                                 <CollectionCard key={item.collectionId} item={item} viewMode="grid" />
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="notes" className="space-y-4">
+                    {isLoadingNotes ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3].map(i => <Skeleton key={i} className="h-[150px]" />)}
+                        </div>
+                    ) : myNotes?.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground border border-dashed rounded-lg flex flex-col items-center justify-center">
+                            <FileText className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
+                            <p>Henüz not almadınız.</p>
+                            <Button variant="link" asChild className="mt-2">
+                                <Link href="/dashboard/create/manual-note">Not Yaz</Link>
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {myNotes?.map((note: any) => (
+                                <Card key={note.id} className="hover:border-primary/50 transition-colors">
+                                    <CardHeader className="p-4 pb-2">
+                                        <div className="flex items-center justify-between">
+                                            <Badge variant="secondary" className="text-[10px]">
+                                                {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
+                                            </Badge>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {new Date(note.updatedAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <CardTitle className="text-sm mt-2">{note.title || "Adsız Not"}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-0">
+                                        <p className="text-sm text-muted-foreground line-clamp-3">{note.content}</p>
+                                    </CardContent>
+                                </Card>
                             ))}
                         </div>
                     )}
