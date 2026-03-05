@@ -120,10 +120,10 @@ export default function AtölyePage() {
                             </h2>
                         </div>
 
-                        <Card className="h-full bg-slate-900/50 border-slate-800 backdrop-blur-sm hover:border-slate-700/50 transition-colors shadow-xl">
+                        <Card className="h-full bg-slate-900 border-slate-800 hover:border-slate-700/50 transition-colors shadow-2xl">
                             <CardHeader>
                                 <CardTitle className="text-xl text-white">{pillar.title} Atölyesi</CardTitle>
-                                <CardDescription className="text-slate-400">
+                                <CardDescription className="text-slate-300">
                                     {pillar.description}
                                 </CardDescription>
                             </CardHeader>
@@ -133,12 +133,12 @@ export default function AtölyePage() {
                                         <div className={cn(
                                             "group relative flex items-center gap-4 p-4 rounded-xl border border-transparent transition-all duration-300 cursor-pointer overflow-hidden mb-3",
                                             action.type === "ai"
-                                                ? "bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500/30"
-                                                : "bg-slate-800/40 hover:bg-slate-800/60 hover:border-slate-700/50"
+                                                ? "bg-purple-900/40 hover:bg-purple-900/60 hover:border-purple-500/30"
+                                                : "bg-slate-800 hover:bg-slate-700 hover:border-slate-600"
                                         )}>
                                             <div className={cn(
                                                 "p-2.5 rounded-lg shrink-0 transition-transform group-hover:scale-110",
-                                                action.type === "ai" ? "bg-purple-500/20 text-purple-400" : "bg-slate-700/50 text-slate-300"
+                                                action.type === "ai" ? "bg-purple-500/30 text-purple-300" : "bg-slate-700 text-slate-200"
                                             )}>
                                                 <action.icon className="h-5 w-5" />
                                             </div>
@@ -179,30 +179,30 @@ export default function AtölyePage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
                     <Link href="/dashboard/create/solve-photo">
-                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all cursor-pointer">
-                            <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
+                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-emerald-900/40 border border-emerald-500/20 hover:bg-emerald-900/60 transition-all cursor-pointer">
+                            <div className="p-3 bg-emerald-500/30 rounded-xl text-emerald-300 group-hover:scale-110 transition-transform">
                                 <Camera className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="text-white font-bold">Fotoğraftan Soru Çöz</h3>
-                                <p className="text-xs text-slate-400">Kitaplardan soru çekin, AI anında çözsün.</p>
+                                <p className="text-xs text-slate-300 mt-1">Kitaplardan soru çekin, AI anında çözsün.</p>
                             </div>
-                            <div className="ml-auto p-2 rounded-full bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ArrowRight className="h-4 w-4 text-emerald-400" />
+                            <div className="ml-auto p-2 rounded-full bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight className="h-4 w-4 text-emerald-300" />
                             </div>
                         </div>
                     </Link>
                     <Link href="/dashboard/learning/create">
-                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-zinc-500/5 border border-zinc-500/10 hover:bg-zinc-500/10 hover:border-zinc-500/30 transition-all cursor-pointer">
-                            <div className="p-3 bg-zinc-500/20 rounded-xl text-zinc-400 group-hover:scale-110 transition-transform">
+                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-all cursor-pointer">
+                            <div className="p-3 bg-slate-700 rounded-xl text-slate-300 group-hover:scale-110 transition-transform">
                                 <Zap className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="text-white font-bold">Öğrenme Rotası</h3>
-                                <p className="text-xs text-slate-400">Kişiselleştirilmiş çalışma planı oluşturun.</p>
+                                <p className="text-xs text-slate-300 mt-1">Kişiselleştirilmiş çalışma planı oluşturun.</p>
                             </div>
-                            <div className="ml-auto p-2 rounded-full bg-zinc-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ArrowRight className="h-4 w-4 text-zinc-400" />
+                            <div className="ml-auto p-2 rounded-full bg-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight className="h-4 w-4 text-slate-300" />
                             </div>
                         </div>
                     </Link>

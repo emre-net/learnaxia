@@ -74,11 +74,11 @@ export function ProfileClient() {
                         <AvatarFallback className="text-2xl">{profile?.handle?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold">@{profile?.handle || "kullanici"}</h1>
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">@{profile?.handle || "kullanici"}</h1>
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                             <span className="font-medium">@{profile?.handle || "kullanici"}</span>
                             <span>•</span>
-                            <span className="flex items-center gap-1 text-sm">
+                            <span className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
                                 <CalendarDays className="h-3 w-3" />
                                 {new Date(profile?.createdAt).toLocaleDateString("tr-TR")} tarihinde katıldı
                             </span>
