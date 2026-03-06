@@ -12,38 +12,7 @@ function getOpenAI() {
     return _openai;
 }
 
-// Zod Schemas for Validation
-const FlashcardSchema = z.object({
-    type: z.literal("FLASHCARD"),
-    front: z.string(),
-    back: z.string(),
-});
-
-const MCSchema = z.object({
-    type: z.literal("MC"),
-    question: z.string(),
-    options: z.array(z.string()),
-    answer: z.string(),
-    explanation: z.string().optional(),
-});
-
-const GapSchema = z.object({
-    type: z.literal("GAP"),
-    text: z.string(), // "The {{capital}} of France is {{Paris}}."
-    answers: z.array(z.string()),
-});
-
-const TFSchema = z.object({
-    type: z.literal("TRUE_FALSE"),
-    statement: z.string(),
-    answer: z.enum(["True", "False"]),
-    explanation: z.string().optional()
-});
-
-const GenerationSchema = z.object({
-    items: z.array(z.union([FlashcardSchema, MCSchema, GapSchema, TFSchema])),
-});
-
+import { GenerationSchema } from "@learnaxia/shared";
 export class OpenAIService {
     static async generateModuleContent(topic: string, types: ('FLASHCARD' | 'MC' | 'GAP' | 'TF')[] = ['FLASHCARD', 'MC', 'GAP', 'TF'], count: number = 5) {
         if (!process.env.GROQ_API_KEY) {

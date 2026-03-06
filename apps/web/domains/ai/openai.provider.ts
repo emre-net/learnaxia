@@ -3,32 +3,10 @@ import { AIProvider, AIResponseItem, VisionResult, AIError } from "./ai.interfac
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-const GenerationSchema = z.object({
+import { EvaluationSchema, VisionSchema, SlideGenerationSchema } from "@learnaxia/shared";
+
+const ProviderGenerationSchema = z.object({
     items: z.array(z.any()),
-});
-
-const EvaluationSchema = z.object({
-    isValid: z.boolean(),
-    feedback: z.string().optional()
-});
-
-const VisionSchema = z.object({
-    questionText: z.string(),
-    solution: z.string(),
-    isQuestionPresent: z.boolean(),
-    isReadable: z.boolean(),
-    hasMultipleQuestions: z.boolean()
-});
-
-const SlideGenerationSchema = z.object({
-    title: z.string(),
-    content: z.string(),
-    peekingQuestion: z.object({
-        question: z.string(),
-        options: z.array(z.string()),
-        answer: z.string(),
-        explanation: z.string()
-    }).optional()
 });
 
 export class OpenAIAIProvider implements AIProvider {
@@ -112,7 +90,7 @@ export class OpenAIAIProvider implements AIProvider {
 
                 try {
                     content = JSON.parse(contentString);
-                    parsed = GenerationSchema.parse(content);
+                    parsed = ProviderGenerationSchema.parse(content);
                 } catch (parseError: any) {
                     await prisma.systemLog.create({
                         data: {

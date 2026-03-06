@@ -2,5 +2,17 @@
     "name": "@learnaxia/shared",
     "version": "1.0.0",
     "private": true,
-    "main": "index.ts"
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "lint": "eslint \"src/**/*.ts*\"",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "typescript": "^5",
+        "@types/node": "^20"
+    }
 }

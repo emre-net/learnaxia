@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Externalize packages that crash Turbopack (DOMMatrix, canvas etc.)
   serverExternalPackages: ['pdf-parse', 'officeparser'],
 
+  // Transpile shared monorepo packages
+  transpilePackages: ['@learnaxia/shared'],
+
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],

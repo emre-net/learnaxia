@@ -17,6 +17,7 @@
     "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
+    "@learnaxia/shared": "workspace:*",
     "@auth/prisma-adapter": "^2.11.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.10.2",

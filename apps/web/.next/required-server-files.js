@@ -297,6 +297,9 @@ self.__SERVER_FILES_MANIFEST={
       "pdf-parse",
       "officeparser"
     ],
+    "transpilePackages": [
+      "@learnaxia/shared"
+    ],
     "turbopack": {
       "root": "C:\\Users\\Emre\\.gemini\\antigravity\\scratch\\learnaxity\\learnaxia"
     },
