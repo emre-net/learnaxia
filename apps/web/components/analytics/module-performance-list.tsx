@@ -15,17 +15,11 @@ interface ModulePerformanceProps {
 
 export function ModulePerformanceList({ data }: ModulePerformanceProps) {
     return (
-        <ChartContainer title="Top Module Performance" description="Accuracy in your most active modules.">
+        <ChartContainer title="Top Active Modules" description="Most interactions in your modules.">
             <div className="space-y-4">
                 {data.map((mod, i) => (
-                    <div key={i} className="space-y-1.5">
-                        <div className="flex justify-between text-sm">
-                            <span className="font-medium truncate max-w-[70%]">{mod.title}</span>
-                            <span className="text-muted-foreground">{mod.accuracy}%</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Progress value={mod.accuracy} className={mod.accuracy > 80 ? "bg-green-100" : ""} />
-                        </div>
+                    <div key={i} className="space-y-1.5 flex flex-col p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        <div className="text-sm font-medium">{mod.title}</div>
                         <p className="text-xs text-muted-foreground text-right">{mod.totalInteractions} interactions</p>
                     </div>
                 ))}

@@ -120,7 +120,10 @@ const nextAuth = NextAuth({
     }
 })
 
-export const { handlers, signIn, signOut } = nextAuth
+const { handlers: rawHandlers, signIn: rawSignIn, signOut: rawSignOut, auth: rawAuth } = nextAuth;
+export const handlers = rawHandlers as any;
+export const signIn = rawSignIn as any;
+export const signOut = rawSignOut as any;
 
 export async function auth(): Promise<Session | null> {
     const session = await (nextAuth.auth as any)()

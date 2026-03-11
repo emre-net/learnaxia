@@ -72,18 +72,12 @@ export async function POST(req: Request) {
                 } else {
                     const localAttempts = local.correctCount + local.wrongCount;
                     const serverAttempts = serverProgress.correctCount + serverProgress.wrongCount;
-                    const localAccuracy = localAttempts > 0 ? local.correctCount / localAttempts : 0;
-                    const serverAccuracy = serverAttempts > 0 ? serverProgress.correctCount / serverAttempts : 0;
 
-                    if (localAccuracy > serverAccuracy) {
+                    if (localAttempts > serverAttempts) {
                         shouldUpdate = true;
-                    } else if (localAccuracy === serverAccuracy) {
-                        if (localAttempts > serverAttempts) {
+                    } else if (localAttempts === serverAttempts) {
+                        if (new Date(local.lastReviewedAt) > serverProgress.lastReviewedAt) {
                             shouldUpdate = true;
-                        } else if (localAttempts === serverAttempts) {
-                            if (new Date(local.lastReviewedAt) > serverProgress.lastReviewedAt) {
-                                shouldUpdate = true;
-                            }
                         }
                     }
                 }

@@ -41,8 +41,6 @@ model User {
   sessions          Session[]
   solvedQuestions   SolvedQuestion[]
   subscription      Subscription?
-  tokenTransactions TokenTransaction[]
-  wallet            TokenWallet?
   collectionLibrary UserCollectionLibrary[]
   contentAccess     UserContentAccess[]
   journeyLibrary    UserJourneyLibrary[]
@@ -114,34 +112,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model TokenWallet {
-  id           String             @id @default(uuid())
-  userId       String             @unique
-  balance      Int                @default(50)
-  currency     String             @default("AXIA")
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  transactions TokenTransaction[]
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-}
-
-model TokenTransaction {
-  id          String      @id @default(uuid())
-  userId      String
-  walletId    String
-  amount      Int
-  type        String
-  description String?
-  metadata    Json?
-  createdAt   DateTime    @default(now())
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallet      TokenWallet @relation(fields: [walletId], references: [id])
-
-  @@index([userId, createdAt])
-  @@index([type])
-}
 
 model Plan {
   id                String         @id @default(uuid())
@@ -149,8 +120,6 @@ model Plan {
   displayName       String
   priceMonthly      Int?
   priceYearly       Int?
-  monthlyTokenGrant Int            @default(0)
-  tokenDiscountRate Float          @default(0.0)
   features          Json
   isActive          Boolean        @default(true)
   subscriptions     Subscription[]
@@ -245,7 +214,6 @@ model PDFAsset {
   pageCount Int
   status    String
   ocrUsed   Boolean  @default(false)
-  tokenCost Int      @default(0)
   metadata  Json?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])

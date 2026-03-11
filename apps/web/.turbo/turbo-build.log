@@ -5,11 +5,11 @@
 Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 314ms
+✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 427ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
 
 ▲ Next.js 16.1.6 (Turbopack)
 - Environments: .env
@@ -19,101 +19,156 @@ Tip: Interested in query caching in just a few lines of code? Try Accelerate tod
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
   Creating an optimized production build ...
-✓ Compiled successfully in 10.9s
-  Running TypeScript ...
-  Collecting page data using 11 workers ...
-  Generating static pages using 11 workers (0/60) ...
-  Generating static pages using 11 workers (15/60) 
-  Generating static pages using 11 workers (30/60) 
-  Generating static pages using 11 workers (45/60) 
-✓ Generating static pages using 11 workers (60/60) in 7.1s
-  Finalizing page optimization ...
+TypeError: Cannot read properties of undefined (reading 'All')
+    [2m[at N (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@tailwindcss\postcss\dist\index.js:10:4156)][0m
+    [2m[at Object.Once (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@tailwindcss\postcss\dist\index.js:10:4246)][0m
+    [2mat LazyResult.runOnRoot (node_modules/postcss/lib/lazy-result.js:359:23) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:6270:31][0m
+    [2mat LazyResult.runAsync (node_modules/postcss/lib/lazy-result.js:290:26) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:6211:32][0m
+    [2mat LazyResult.async (node_modules/postcss/lib/lazy-result.js:192:30) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:6143:36][0m
+    [2mat LazyResult.then (node_modules/postcss/lib/lazy-result.js:436:17) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:6329:21][0m
+    [2m[at process.processTicksAndRejections (node:internal/process/task_queues:103:5)][0m
 
-Route (app)
-┌ ƒ /
-├ ƒ /_not-found
-├ ƒ /about
-├ ƒ /admin
-├ ƒ /admin/modules
-├ ƒ /admin/system
-├ ƒ /admin/system/ai-logs
-├ ƒ /admin/system/logs
-├ ƒ /admin/tools
-├ ƒ /admin/users
-├ ƒ /api/admin/ai-logs
-├ ƒ /api/admin/logs
-├ ƒ /api/admin/seed-test
-├ ƒ /api/admin/sync-visibility
-├ ƒ /api/admin/users/[id]/tokens
-├ ƒ /api/admin/wipe-db
-├ ƒ /api/ai/generate
-├ ƒ /api/ai/learning-path/[journeyId]/status
-├ ƒ /api/ai/learning-path/complete
-├ ƒ /api/ai/learning-path/generate
-├ ƒ /api/ai/learning-path/generate-slide
-├ ƒ /api/ai/learning-path/start
-├ ƒ /api/ai/solve-photo
-├ ƒ /api/analytics
-├ ƒ /api/auth/[...nextauth]
-├ ƒ /api/auth/merge-guest-data
-├ ƒ /api/auth/register
-├ ƒ /api/auth/verify
-├ ƒ /api/collections
-├ ƒ /api/collections/[id]
-├ ƒ /api/collections/[id]/save
-├ ƒ /api/discover
-├ ƒ /api/file/extract
-├ ƒ /api/library/journeys
-├ ƒ /api/library/journeys/[id]
-├ ƒ /api/logs
-├ ƒ /api/mobile/login
-├ ƒ /api/mobile/refresh
-├ ƒ /api/mobile/register
-├ ƒ /api/modules
-├ ƒ /api/modules/[id]
-├ ƒ /api/modules/[id]/fork
-├ ƒ /api/modules/[id]/items
-├ ƒ /api/modules/[id]/items/[itemId]
-├ ƒ /api/modules/[id]/save
-├ ƒ /api/notes
-├ ƒ /api/notes/[id]
-├ ƒ /api/solved-questions
-├ ƒ /api/study/daily-queue
-├ ƒ /api/study/log
-├ ƒ /api/study/start
-├ ƒ /api/study/start-daily
-├ ƒ /api/user/profile
-├ ƒ /api/wallet
-├ ƒ /api/wallet/reward
-├ ƒ /auth/verify
-├ ƒ /contact
-├ ƒ /dashboard
-├ ƒ /dashboard/analytics
-├ ƒ /dashboard/collections/[id]
-├ ƒ /dashboard/collections/create
-├ ƒ /dashboard/collections/new
-├ ƒ /dashboard/create
-├ ƒ /dashboard/create/ai
-├ ƒ /dashboard/create/ai-notes
-├ ƒ /dashboard/create/manual
-├ ƒ /dashboard/create/manual-note
-├ ƒ /dashboard/create/solve-photo
-├ ƒ /dashboard/discover
-├ ƒ /dashboard/learning/create
-├ ƒ /dashboard/learning/j/[journeyId]
-├ ƒ /dashboard/library
-├ ƒ /dashboard/modules/[id]
-├ ƒ /dashboard/notes
-├ ƒ /dashboard/profile
-├ ƒ /dashboard/settings
-├ ƒ /login
-├ ƒ /privacy
-├ ƒ /study/[moduleId]
-├ ƒ /study/daily
-└ ƒ /terms
+> Build error occurred
+Error: Turbopack build failed with 5 errors:
+./apps/web/app/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\app\globals.css:1:1: Cannot read properties of undefined (reading 'All')
+    at Input.error (node_modules/postcss/lib/input.js:135:16) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:4651:22]
+    at Root.error (node_modules/postcss/lib/node.js:146:32) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:928:38]
+    [at Object.Once (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@tailwindcss\postcss\dist\index.js:10:6913)]
+    [at process.processTicksAndRejections (node:internal/process/task_queues:103:5)]
+    at async LazyResult.runAsync (node_modules/postcss/lib/lazy-result.js:293:11) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\node_modules_fe693df6._.js:6214:21]
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\[root-of-the-server]__4a07fad2._.js:146:36]
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\[root-of-the-server]__623ed9a7._.js:443:31]
+
+Import trace:
+  Client Component Browser:
+    ./apps/web/app/globals.css [Client Component Browser]
+    ./apps/web/app/layout.tsx [Server Component]
 
 
-ƒ Proxy (Middleware)
+./apps/web/auth.ts:10:1
+Export extractBearerToken doesn't exist in target module
+[0m [90m  8 |[39m [36mimport[39m bcrypt [36mfrom[39m [32m"bcryptjs"[39m
+ [90m  9 |[39m [36mimport[39m { headers } [36mfrom[39m [32m"next/headers"[39m
+[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { extractBearerToken[33m,[39m verifyMobileAccessToken } [36mfrom[39m [32m"@/lib/auth/mobile-jwt"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m [36mimport[39m type { [33mSession[39m } [36mfrom[39m [32m"next-auth"[39m
+ [90m 12 |[39m
+ [90m 13 |[39m [36mconst[39m nextAuth [33m=[39m [33mNextAuth[39m({[0m
 
-ƒ  (Dynamic)  server-rendered on demand
+The export extractBearerToken was not found in module [project]/apps/web/lib/auth/mobile-jwt.ts [app-route] (ecmascript).
+Did you mean to import getMobileUser?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
 
+Import traces:
+  #1 [App Route]:
+    ./apps/web/auth.ts
+    ./apps/web/app/api/admin/ai-logs/route.ts
+
+  #2 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/layout.tsx
+
+  #3 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/tools/actions.ts
+
+
+./apps/web/auth.ts:10:1
+Export extractBearerToken doesn't exist in target module
+[0m [90m  8 |[39m [36mimport[39m bcrypt [36mfrom[39m [32m"bcryptjs"[39m
+ [90m  9 |[39m [36mimport[39m { headers } [36mfrom[39m [32m"next/headers"[39m
+[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { extractBearerToken[33m,[39m verifyMobileAccessToken } [36mfrom[39m [32m"@/lib/auth/mobile-jwt"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m [36mimport[39m type { [33mSession[39m } [36mfrom[39m [32m"next-auth"[39m
+ [90m 12 |[39m
+ [90m 13 |[39m [36mconst[39m nextAuth [33m=[39m [33mNextAuth[39m({[0m
+
+The export extractBearerToken was not found in module [project]/apps/web/lib/auth/mobile-jwt.ts [app-rsc] (ecmascript).
+Did you mean to import getMobileUser?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  #1 [App Route]:
+    ./apps/web/auth.ts
+    ./apps/web/app/api/admin/ai-logs/route.ts
+
+  #2 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/layout.tsx
+
+  #3 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/tools/actions.ts
+
+
+./apps/web/auth.ts:10:1
+Export verifyMobileAccessToken doesn't exist in target module
+[0m [90m  8 |[39m [36mimport[39m bcrypt [36mfrom[39m [32m"bcryptjs"[39m
+ [90m  9 |[39m [36mimport[39m { headers } [36mfrom[39m [32m"next/headers"[39m
+[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { extractBearerToken[33m,[39m verifyMobileAccessToken } [36mfrom[39m [32m"@/lib/auth/mobile-jwt"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m [36mimport[39m type { [33mSession[39m } [36mfrom[39m [32m"next-auth"[39m
+ [90m 12 |[39m
+ [90m 13 |[39m [36mconst[39m nextAuth [33m=[39m [33mNextAuth[39m({[0m
+
+The export verifyMobileAccessToken was not found in module [project]/apps/web/lib/auth/mobile-jwt.ts [app-route] (ecmascript).
+Did you mean to import getMobileUser?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  #1 [App Route]:
+    ./apps/web/auth.ts
+    ./apps/web/app/api/admin/ai-logs/route.ts
+
+  #2 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/layout.tsx
+
+  #3 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/tools/actions.ts
+
+
+./apps/web/auth.ts:10:1
+Export verifyMobileAccessToken doesn't exist in target module
+[0m [90m  8 |[39m [36mimport[39m bcrypt [36mfrom[39m [32m"bcryptjs"[39m
+ [90m  9 |[39m [36mimport[39m { headers } [36mfrom[39m [32m"next/headers"[39m
+[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { extractBearerToken[33m,[39m verifyMobileAccessToken } [36mfrom[39m [32m"@/lib/auth/mobile-jwt"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m [36mimport[39m type { [33mSession[39m } [36mfrom[39m [32m"next-auth"[39m
+ [90m 12 |[39m
+ [90m 13 |[39m [36mconst[39m nextAuth [33m=[39m [33mNextAuth[39m({[0m
+
+The export verifyMobileAccessToken was not found in module [project]/apps/web/lib/auth/mobile-jwt.ts [app-rsc] (ecmascript).
+Did you mean to import getMobileUser?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  #1 [App Route]:
+    ./apps/web/auth.ts
+    ./apps/web/app/api/admin/ai-logs/route.ts
+
+  #2 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/layout.tsx
+
+  #3 [Server Component]:
+    ./apps/web/auth.ts
+    ./apps/web/app/admin/tools/actions.ts
+
+
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\[root-of-the-server]__4a07fad2._.js:146:36])
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web\.next\build\chunks\[root-of-the-server]__623ed9a7._.js:443:31])
+    at <unknown> (./apps/web/auth.ts:10:1)
+    at <unknown> (./apps/web/auth.ts:10:1)
+    at <unknown> (./apps/web/auth.ts:10:1)
+    at <unknown> (./apps/web/auth.ts:10:1)
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web
+npm error workspace web@0.1.2
+npm error location C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c prisma generate && next build

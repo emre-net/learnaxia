@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { DailyActivityChart } from "@/components/analytics/daily-activity-chart";
 import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, BookOpen, Clock, Loader2, TrendingUp } from "lucide-react";
+import { BookOpen, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function AnalyticsPage() {
@@ -62,16 +62,6 @@ export default function AnalyticsPage() {
                     <CardContent>
                         <div className="text-2xl font-bold">{data.stats.modulesStarted}</div>
                         <p className="text-xs text-muted-foreground">Active modules in your library.</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Daily Streak</CardTitle>
-                        <Activity className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.dailyStreak ?? 0} {data.stats.dailyStreak === 1 ? 'day' : 'days'}</div>
-                        <p className="text-xs text-muted-foreground">Current learning streak.</p>
                     </CardContent>
                 </Card>
             </div>

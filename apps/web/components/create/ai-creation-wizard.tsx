@@ -19,7 +19,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n";
 import { v4 as uuidv4 } from 'uuid';
-import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 
 // --- Schema ---
 const aiConfigSchema = z.object({
@@ -100,13 +99,6 @@ export function AICreationWizard() {
     });
 
     const config = watch();
-
-    // Dynamically calculate estimated cost based on what the user types
-    const tokenEstimate = calculateAITokensAndCost({
-        text: config.topic || "",
-        targetCount: isAutoCount ? -1 : config.count,
-        isVision: false
-    });
 
     useEffect(() => {
         const sourceText = searchParams?.get('sourceText');
@@ -228,10 +220,10 @@ export function AICreationWizard() {
                                             className="min-h-[150px] text-base"
                                         />
                                         <div className="flex justify-between items-center mt-1">
-                                            {tokenEstimate.willHitRateLimit ? (
-                                                <p className="text-xs text-red-500 font-semibold animate-pulse">⚠️ Metin çok uzun! Boyutu sınırları aşıyor.</p>
+                                            {config.topic?.length > 18000 ? (
+                                                <p className="text-xs text-red-500 font-semibold animate-pulse">⚠️ Metin çok uzun! Lütfen kısaltın.</p>
                                             ) : (
-                                                <p className="text-xs text-muted-foreground">≈ {tokenEstimate.totalTokens} Tokens</p>
+                                                <p className="text-xs text-muted-foreground">&nbsp;</p>
                                             )}
                                             <p className="text-xs text-muted-foreground text-right">{config.topic?.length || 0}/20000 chars</p>
                                         </div>
@@ -354,18 +346,7 @@ export function AICreationWizard() {
                                 )}
                             </div>
 
-                            <div className="bg-muted/50 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                    <Sparkles className="h-4 w-4 text-purple-500" />
-                                    <span className="text-sm font-medium">{t("creation.costEstimate")}</span>
-                                </div>
-                                <span className={cn(
-                                    "font-bold text-sm sm:text-base",
-                                    tokenEstimate.willHitRateLimit ? "text-red-500" : "text-purple-600"
-                                )}>
-                                    {tokenEstimate.willHitRateLimit ? "Sınır Aşıldı" : `${tokenEstimate.recommendedCost} AXIA`}
-                                </span>
-                            </div>
+
 
                         </form>
                     </CardContent>
@@ -375,7 +356,7 @@ export function AICreationWizard() {
                             form="ai-form"
                             className="w-full bg-purple-600 hover:bg-purple-700 text-white disabled:bg-purple-400"
                             size="lg"
-                            disabled={isUploading || tokenEstimate.willHitRateLimit || (inputType === 'FILE' && config.topic.length < 10)}
+                            disabled={isUploading || config.topic?.length > 18000 || (inputType === 'FILE' && config.topic.length < 10)}
                         >
                             <Sparkles className="mr-2 h-4 w-4" /> {t("creation.generateButton")}
                         </Button>

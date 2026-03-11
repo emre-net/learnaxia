@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
 
   // Power bundle optimization
   experimental: {
-    optimizeCss: true,
     scrollRestoration: true,
   },
 

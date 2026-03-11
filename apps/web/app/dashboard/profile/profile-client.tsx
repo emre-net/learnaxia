@@ -133,7 +133,7 @@ export function ProfileClient() {
                         <div className="text-2xl font-bold">{profile?.stats?.collections || 0}</div>
                     </CardContent>
                 </Card>
-                {/* Placeholder for Study Streak or similar */}
+                {/* Achievement Score */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Başarı Puanı</CardTitle>

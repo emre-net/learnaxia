@@ -5,24 +5,28 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+import { Theme as SharedThemeImport } from '@learnaxia/shared';
+
+export const SharedTheme = SharedThemeImport;
+
+const tintColorLight = SharedThemeImport.colors.primary;
+const tintColorDark = SharedThemeImport.colors.primary;
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: SharedTheme.colors.background,
+    background: SharedTheme.colors.foreground,
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: SharedTheme.colors.mutedForeground,
+    tabIconDefault: SharedTheme.colors.mutedForeground,
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: SharedTheme.colors.foreground,
+    background: SharedTheme.colors.background,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: SharedTheme.colors.mutedForeground,
+    tabIconDefault: SharedTheme.colors.mutedForeground,
     tabIconSelected: tintColorDark,
   },
 };

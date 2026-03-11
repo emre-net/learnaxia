@@ -1,3 +1,0 @@
-module.exports=[638960,(a,b,c)=>{}];
-
-//# sourceMappingURL=apps_web__next-internal_server_app_about_page_actions_0dce1deb.js.map

@@ -1,10 +1,4 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
-
-@source "../app";
-@source "../components";
-@source "../domains";
-@source "../lib";
 
 @theme {
   --color-border: hsl(var(--border));

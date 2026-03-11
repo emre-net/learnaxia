@@ -4,7 +4,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Pencil, Target, Zap, Clock } from "lucide-react";
+import { Pencil, Zap, Clock } from "lucide-react";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { useTranslation } from "@/lib/i18n/i18n";
 
@@ -77,21 +77,6 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                     <AnimatePresence>
                         {analyticsData?.stats && (
                             <>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
-                                >
-                                    <div className="bg-blue-500/20 p-2 rounded-lg">
-                                        <Target className="h-6 w-6 text-blue-500" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t('settings.successAccuracy')}</span>
-                                        <span className="text-2xl font-black text-foreground tabular-nums">
-                                            %{analyticsData.stats?.globalAccuracy ?? 0}
-                                        </span>
-                                    </div>
-                                </motion.div>
 
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}

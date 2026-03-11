@@ -11,7 +11,7 @@ async function main() {
         console.log(`--- Checking Admin User: ${adminEmail} ---`);
         const admin = await prisma.user.findUnique({
             where: { email: adminEmail },
-            include: { moduleLibrary: true, wallet: true }
+            include: { moduleLibrary: true }
         });
 
         if (!admin) {
@@ -22,7 +22,6 @@ async function main() {
         console.log("Admin ID:", admin.id);
         console.log("Admin Role:", admin.role);
         console.log("Library Count:", admin.moduleLibrary.length);
-        console.log("Wallet Balance:", admin.wallet?.balance);
 
         console.log("\n--- Testing Module Creation for Admin ---");
         // We will just verify if the ID is a valid source for a module

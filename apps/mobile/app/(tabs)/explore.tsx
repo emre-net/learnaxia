@@ -1,112 +1,203 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View, Text, FlatList, TouchableOpacity, ActivityIndicator,
+  SafeAreaView, RefreshControl, TextInput, Dimensions
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Theme as SharedTheme } from '@learnaxia/shared';
+import api from '@/lib/api';
 
-export default function TabTwoScreen() {
+const { width } = Dimensions.get('window');
+
+type DiscoverItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  type?: string;
+  owner?: { name?: string; handle?: string; image?: string | null };
+  _count?: { items: number };
+  createdAt: string;
+};
+
+type TabType = 'MODULE' | 'COLLECTION';
+
+export default function ExploreScreen() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabType>('MODULE');
+  const [items, setItems] = useState<DiscoverItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [total, setTotal] = useState(0);
+
+  const fetchDiscover = useCallback(async (reset = false) => {
+    try {
+      const params = new URLSearchParams();
+      params.set('type', activeTab);
+      params.set('limit', '20');
+      params.set('offset', '0');
+      if (searchQuery.trim()) {
+        params.set('search', searchQuery.trim());
+      }
+
+      const res = await api.get(`/mobile/discover?${params.toString()}`);
+      setItems(res.data.items || []);
+      setTotal(res.data.total || 0);
+    } catch (error) {
+      console.error('[ExploreScreen] Error:', error);
+      setItems([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [activeTab, searchQuery]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDiscover(true);
+  }, [fetchDiscover]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchDiscover(true);
+  }, [fetchDiscover]);
+
+  const tabs: { id: TabType; label: string; icon: string }[] = [
+    { id: 'MODULE', label: 'Modüller', icon: 'menu-book' },
+    { id: 'COLLECTION', label: 'Koleksiyonlar', icon: 'folder-special' },
+  ];
+
+  const renderItem = ({ item }: { item: DiscoverItem }) => (
+    <TouchableOpacity
+      className="bg-slate-900 rounded-3xl p-5 mb-4 border border-slate-800 active:bg-slate-800"
+      onPress={() => {
+        if (activeTab === 'MODULE') {
+          router.push(`/study/${item.id}`);
+        }
+      }}
+    >
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="bg-indigo-500/10 px-3 py-1 rounded-lg border border-indigo-500/20">
+          <Text className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
+            {activeTab === 'MODULE' ? 'Modül' : 'Koleksiyon'}
+          </Text>
+        </View>
+        {item.owner?.handle && (
+          <Text className="text-slate-600 text-[10px] font-bold">@{item.owner.handle}</Text>
+        )}
+      </View>
+
+      <Text className="text-lg font-bold text-white mb-1.5 tracking-tight" numberOfLines={2}>
+        {item.title}
+      </Text>
+
+      {item.description && (
+        <Text className="text-slate-500 text-sm mb-4 leading-5" numberOfLines={2}>
+          {item.description}
+        </Text>
+      )}
+
+      <View className="flex-row items-center justify-between mt-auto pt-3 border-t border-slate-800/50">
+        <View className="flex-row items-center">
+          <MaterialIcons name="layers" size={14} color={SharedTheme.colors.primary} />
+          <Text className="text-slate-400 text-xs ml-1.5 font-bold">{item._count?.items || 0} içerik</Text>
+        </View>
+        <View className="flex-row items-center">
+          <MaterialIcons name="schedule" size={12} color="#64748b" />
+          <Text className="text-slate-600 text-[10px] ml-1 font-medium">
+            {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+      {/* Header */}
+      <View className="px-6 pt-10 pb-4">
+        <Text className="text-3xl font-bold text-white mb-1 tracking-tight">Keşfet</Text>
+        <Text className="text-slate-500 font-medium">Topluluktan en yeni üretimler</Text>
+      </View>
+
+      {/* Search Bar */}
+      <View className="px-6 mb-4">
+        <View className="flex-row items-center bg-slate-900 rounded-2xl border border-slate-800 px-4 py-3">
+          <MaterialIcons name="search" size={20} color="#64748b" />
+          <TextInput
+            className="flex-1 text-white ml-3 text-base"
+            placeholder="İçeriklerde ara..."
+            placeholderTextColor="#475569"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <MaterialIcons name="close" size={20} color="#64748b" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Tab Bar */}
+      <View className="flex-row px-6 mb-4">
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.id}
+            className={`flex-row items-center mr-3 px-5 py-2.5 rounded-xl border ${activeTab === tab.id
+              ? 'bg-indigo-600/20 border-indigo-500/30'
+              : 'bg-slate-900/50 border-slate-800'
+              }`}
+            onPress={() => setActiveTab(tab.id)}
+          >
+            <MaterialIcons
+              name={tab.icon as any}
+              size={16}
+              color={activeTab === tab.id ? '#818cf8' : '#64748b'}
+            />
+            <Text className={`ml-2 text-sm font-bold ${activeTab === tab.id ? 'text-indigo-400' : 'text-slate-500'}`}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        <View className="flex-1" />
+        <View className="justify-center">
+          <Text className="text-slate-600 text-xs font-bold">{total} sonuç</Text>
+        </View>
+      </View>
+
+      {/* Content List */}
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color={SharedTheme.colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />
+          }
+          ListEmptyComponent={
+            <View className="items-center mt-16 px-10">
+              <View className="w-20 h-20 bg-slate-900 rounded-full items-center justify-center mb-6 border border-slate-800">
+                <MaterialIcons name="explore" size={32} color="#475569" />
+              </View>
+              <Text className="text-white text-lg font-bold mb-2">Henüz İçerik Yok</Text>
+              <Text className="text-slate-500 text-center leading-5 font-medium">
+                {searchQuery
+                  ? `"${searchQuery}" için sonuç bulunamadı. Farklı bir arama deneyin.`
+                  : 'Topluluk üretimleri burada görünecek.'}
+              </Text>
+            </View>
+          }
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+      )}
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});

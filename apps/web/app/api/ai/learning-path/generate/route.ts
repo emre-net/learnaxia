@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { generateSyllabus, validateTopic } from '@/lib/ai/providers/openai.provider';
-import { calculateAITokensAndCost } from '@/lib/utils/token-calculator';
 
 export async function POST(req: Request) {
     try {
@@ -14,12 +13,6 @@ export async function POST(req: Request) {
         }
 
         // Optional: Implement rate limiting
-
-        // 1. Calculate Cost Estimate
-        const inputTokens = calculateAITokensAndCost({
-            text: topic + " " + (goal || ""),
-            targetCount: depth === "shallow" ? 3 : depth === "standard" ? 5 : 8
-        });
 
         const session = await auth();
         let userLang = "tr";
@@ -36,16 +29,12 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // 3. Execute Syllabus Generation via AI
+        // 1. Execute Syllabus Generation via AI
         const syllabus = await generateSyllabus(topic, goal || '', depth, userLang);
 
         return NextResponse.json({
             success: true,
-            syllabus,
-            metadata: {
-                estimatedInputTokens: inputTokens.estimatedInputTokens,
-                recommendedCost: inputTokens.recommendedCost
-            }
+            syllabus
         });
 
     } catch (error: unknown) {

@@ -1,0 +1,50 @@
+﻿  beginWork (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  runWithFiberInDEV (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performUnitOfWork (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  workLoopSync (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  renderRootSync (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performWorkOnRoot (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performWorkOnRootViaSchedulerTask (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js) 
+
+Call Stack
+  SceneView (node_modules\@react-navigation\core\lib\module\SceneView.js)
+  render (node_modules\@react-navigation\core\lib\module\useDescriptors.js)
+  routes.reduce$argument_0 (node_modules\@react-navigation\core\lib\module\useDescriptors.js)
+  reduce (apps\mobile\<native>)
+  useDescriptors (node_modules\@react-navigation\core\lib\module\useDescriptors.js)
+  useNavigationBuilder (node_modules\@react-navigation\core\lib\module\useNavigationBuilder.js)
+  Content (apps\mobile\node_modules\expo-router\build\ExpoRoot.js)
+  call (apps\mobile\<native>)
+  apply (apps\mobile\<native>)
+  <anonymous> (node_modules\react-native-css-interop\dist\runtime\wrap-jsx.js)
+  ContextNavigator (apps\mobile\node_modules\expo-router\build\ExpoRoot.js)
+  call (apps\mobile\<native>)
+  apply (apps\mobile\<native>)
+  <anonymous> (node_modules\react-native-css-interop\dist\runtime\wrap-jsx.js)
+  ExpoRoot (apps\mobile\node_modules\expo-router\build\ExpoRoot.js)
+  call (apps\mobile\<native>)
+  apply (apps\mobile\<native>)
+  <anonymous> (node_modules\react-native-css-interop\dist\runtime\wrap-jsx.js)
+  App (apps\mobile\node_modules\expo-router\build\qualified-entry.js)
+  call (apps\mobile\<native>)
+  apply (apps\mobile\<native>)
+  <anonymous> (node_modules\react-native-css-interop\dist\runtime\wrap-jsx.js)
+  WithDevTools (node_modules\expo\src\launch\withDevTools.tsx)
+| 2026-03-06T16:45:17.116Z expo:babel:exports Found assignment to module.exports or exports at 11
+| 2026-03-06T16:45:17.135Z expo:babel:exports Found assignment to module.exports or exports at 17
+| 2026-03-06T16:45:17.138Z expo:babel:exports Found assignment to module.exports or exports at 16
+| 2026-03-06T16:45:17.161Z expo:babel:exports Found assignment to module.exports or exports at 6
+| 2026-03-06T16:45:17.163Z expo:babel:exports Found assignment to module.exports or exports at 6
+| 2026-03-06T16:45:17.180Z expo:babel:exports Found assignment to module.exports or exports at 16
+| 2026-03-06T16:45:17.180Z expo:babel:exports Found assignment to module.exports or exports at 6
+| 2026-03-06T16:45:17.190Z expo:babel:exports Found assignment to module.exports or exports at 51
+| 2026-03-06T16:45:17.225Z expo:babel:exports Found assignment to module.exports or exports at 6
+| 2026-03-06T16:45:17.253Z expo:babel:exports Found assignment to module.exports or exports at 4
+| 2026-03-06T16:45:17.809Z expo:babel:exports Found assignment to module.exports or exports at 20
+| 2026-03-06T16:45:18.125Z expo:babel:exports Found assignment to module.exports or exports at 5
+| 2026-03-06T16:45:18.127Z expo:babel:exports Found assignment to module.exports or exports at 24
+| 2026-03-06T16:45:18.127Z expo:babel:exports Found assignment to module.exports or exports at 69
+| 2026-03-06T16:45:18.128Z expo:babel:exports Found assignment to module.exports or exports at 45
+| 2026-03-06T16:45:18.186Z expo:babel:exports Found assignment to module.exports or exports at 4
+Android Bundled 1580ms apps\mobile\app\_layout.tsx (1288 modules)
+Android Bundled 1668ms apps\mobile\app\(tabs)\_layout.tsx (1422 modules)

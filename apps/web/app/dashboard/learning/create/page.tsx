@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target, AlertTriangle } from "lucide-react"
+import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target } from "lucide-react"
 
+import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,6 +29,7 @@ interface SyllabusItem {
 export default function CreateLearningPlanPage() {
     const router = useRouter()
     const { t } = useTranslation()
+    const { toast } = useToast()
 
     const [isLoading, setIsLoading] = useState(false)
     const [step, setStep] = useState<"input" | "generating" | "review">("input")
@@ -40,26 +42,6 @@ export default function CreateLearningPlanPage() {
 
     // Generated Syllabus
     const [syllabus, setSyllabus] = useState<SyllabusItem[]>([])
-    const [estimatedTokens, setEstimatedTokens] = useState<number | null>(null)
-    const [recommendedCost, setRecommendedCost] = useState<number | null>(null)
-    const [walletBalance, setWalletBalance] = useState<number | null>(null)
-
-    useEffect(() => {
-        const fetchWallet = async () => {
-            try {
-                const res = await fetch('/api/wallet');
-                const data = await res.json();
-                if (data.balance !== undefined) {
-                    setWalletBalance(data.balance);
-                }
-            } catch (error) {
-                console.error("Cüzdan bilgisi çekilemedi:", error);
-            }
-        };
-        fetchWallet();
-    }, []);
-
-    const isInsufficientTokens = recommendedCost !== null && walletBalance !== null && walletBalance < recommendedCost;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -96,8 +78,6 @@ export default function CreateLearningPlanPage() {
 
             if (data.syllabus) {
                 setSyllabus(data.syllabus)
-                setEstimatedTokens(data.metadata?.estimatedInputTokens)
-                setRecommendedCost(data.metadata?.recommendedCost)
                 setStep("review")
             } else {
                 throw new Error("Yapay zeka herhangi bir müfredat döndürmedi.")
@@ -117,11 +97,20 @@ export default function CreateLearningPlanPage() {
         try {
             await new Promise(res => setTimeout(res, 1500))
             if (action === "expand") {
-                alert("Daha fazla alt başlık eklenecek (AI bağlantısı yakında eklenecek).")
+                toast({
+                    title: "Yakında",
+                    description: "Daha fazla alt başlık eklenecek (AI entegrasyonu).",
+                })
             } else if (action === "condense") {
-                alert("Müfredat özetlenecek ve kısaltılacak (AI bağlantısı yakında eklenecek).")
+                toast({
+                    title: "Yakında",
+                    description: "Müfredat özetlenecek ve kısaltılacak (AI entegrasyonu).",
+                })
             } else if (action === "technical") {
-                alert("İçerik daha teknik ve ileri düzey hale getirilecek (AI bağlantısı yakında eklenecek).")
+                toast({
+                    title: "Yakında",
+                    description: "İçerik daha teknik ve ileri düzey hale getirilecek (AI entegrasyonu).",
+                })
             }
         } finally {
             setIsLoading(false)
@@ -400,21 +389,15 @@ export default function CreateLearningPlanPage() {
                                     </Button>
                                     <Button
                                         className="w-full sm:w-auto flex-1 sm:flex-none px-6 h-12 rounded-xl bg-slate-900 hover:bg-indigo-600 disabled:opacity-50 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors shadow-xl shadow-slate-900/10 dark:shadow-none font-semibold text-sm sm:text-base group whitespace-nowrap"
-                                        disabled={isLoading || syllabus.length === 0 || isInsufficientTokens}
+                                        disabled={isLoading || syllabus.length === 0}
                                         onClick={handleStartJourney}
                                     >
                                         <Zap className="w-4 h-4 mr-2 shrink-0 group-hover:animate-pulse" />
-                                        <span className="truncate">{recommendedCost ? `Başla (${recommendedCost} AXIA)` : "Maceraya Başla"}</span>
+                                        <span className="truncate">Maceraya Başla</span>
                                         <ArrowRight className="w-4 h-4 ml-2 shrink-0 group-hover:translate-x-1 transition-transform" />
                                     </Button>
                                 </div>
 
-                                {isInsufficientTokens && (
-                                    <div className="flex items-center gap-2 text-sm text-red-500 dark:text-red-400 font-medium">
-                                        <AlertTriangle className="w-4 h-4" />
-                                        Yetersiz Bakiye! Bu işlem için {recommendedCost} Token gerekiyor ancak cüzdanınızda {walletBalance} Token var.
-                                    </div>
-                                )}
                             </CardFooter>
                         </div>
                     )}

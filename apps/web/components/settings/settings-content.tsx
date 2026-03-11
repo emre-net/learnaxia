@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { User, BarChart2, Pencil, Coins, SeparatorHorizontal } from "lucide-react";
+import { User, BarChart2, Pencil, SeparatorHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -14,7 +14,6 @@ import { useTranslation } from "@/lib/i18n/i18n";
 import { ProfileHeader } from "./profile-header";
 import { AccountSection } from "./account-section";
 import { SystemPreferences } from "./system-preferences";
-import { WalletSection } from "./wallet-section";
 import { AnalyticsSection } from "./analytics-section";
 
 interface SettingsContentProps {
@@ -26,7 +25,7 @@ interface SettingsContentProps {
     };
 }
 
-type Tab = "account" | "wallet" | "analytics" | "settings";
+type Tab = "account" | "analytics" | "settings";
 
 export function SettingsContent({ user }: SettingsContentProps) {
     const searchParams = useSearchParams();
@@ -85,8 +84,6 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
-    const [walletData, setWalletData] = useState<any>(null);
-    const [walletLoading, setWalletLoading] = useState(false);
 
     useEffect(() => {
         if (!analyticsData) {
@@ -99,24 +96,10 @@ export function SettingsContent({ user }: SettingsContentProps) {
         }
     }, [analyticsData]);
 
-    useEffect(() => {
-        if (activeTab === "wallet" && !walletData) {
-            setWalletLoading(true);
-            fetch("/api/wallet")
-                .then((res) => res.ok ? res.json() : Promise.reject())
-                .then(setWalletData)
-                .catch(() => {
-                    toast({ title: "Hata", description: "Cüzdan verileri yüklenemedi.", variant: "destructive" });
-                })
-                .finally(() => setWalletLoading(false));
-        }
-    }, [activeTab, walletData, toast]);
-
     const tabs: { id: Tab; label: string; icon: any }[] = [
         { id: "account", label: t('settings.profileTab'), icon: User },
         { id: "settings", label: t('settings.settingsTab'), icon: Pencil },
         { id: "analytics", label: t('settings.analyticsTab'), icon: BarChart2 },
-        { id: "wallet", label: t('settings.walletTab'), icon: Coins },
     ];
 
     return (
@@ -127,13 +110,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
             <div className="h-16 md:h-20"></div>
 
             {/* Mobile Stats Summary View */}
-            <div className="lg:hidden grid grid-cols-1 md:grid-cols-3 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
-                <div className="flex flex-col items-center">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.successAccuracy')}</span>
-                    <span className="text-xl font-black text-blue-500">
-                        {analyticsData?.stats ? `%${analyticsData.stats.globalAccuracy}` : "--"}
-                    </span>
-                </div>
+            <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4 py-4 px-6 border-y bg-muted/20 rounded-xl mx-6">
                 <div className="flex flex-col items-center">
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.questions')}</span>
                     <span className="text-xl font-black text-purple-500">
@@ -183,7 +160,6 @@ export function SettingsContent({ user }: SettingsContentProps) {
                             onSoundEnabledChange={setSoundEnabled}
                         />
                     )}
-                    {activeTab === "wallet" && <WalletSection data={walletData} loading={walletLoading} />}
                     {activeTab === "analytics" && <AnalyticsSection data={analyticsData} loading={analyticsLoading} />}
                 </div>
             </div>

@@ -66,12 +66,6 @@ export function UserNav() {
                             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
                         </DropdownMenuItem>
                     </Link>
-                    <Link href="/dashboard/settings?tab=wallet">
-                        <DropdownMenuItem>
-                            {t('settings.walletTab')}
-                            <DropdownMenuShortcut>⌘W</DropdownMenuShortcut>
-                        </DropdownMenuItem>
-                    </Link>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>

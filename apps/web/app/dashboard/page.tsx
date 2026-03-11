@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, BookOpen, Clock, Coins, Target, ShieldCheck } from "lucide-react";
+import { Activity, BookOpen, Clock, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -12,8 +12,6 @@ import { useTranslation } from "@/lib/i18n/i18n";
 interface DashboardStats {
     totalStudyMinutes: number;
     modulesStarted: number;
-    tokenBalance: number;
-    accuracy: number;
 }
 
 import { FocusWidget } from "@/components/dashboard/focus-widget";
@@ -28,27 +26,18 @@ export default function DashboardPage() {
     const [stats, setStats] = useState<DashboardStats>({
         totalStudyMinutes: 0,
         modulesStarted: 0,
-        tokenBalance: 0,
-        accuracy: 0,
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchStats() {
             try {
-                const [analyticsRes, walletRes] = await Promise.all([
-                    fetch("/api/analytics"),
-                    fetch("/api/wallet"),
-                ]);
-
+                const analyticsRes = await fetch("/api/analytics");
                 const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
-                const wallet = walletRes.ok ? await walletRes.json() : null;
 
                 setStats({
                     totalStudyMinutes: analytics?.stats?.totalStudyMinutes || 0,
                     modulesStarted: analytics?.stats?.modulesStarted || 0,
-                    tokenBalance: wallet?.balance || 0,
-                    accuracy: analytics?.stats?.globalAccuracy || 0,
                 });
             } catch (error) {
                 console.error("Dashboard stats fetch error:", error);
@@ -105,30 +94,6 @@ export default function DashboardPage() {
                         <CardContent>
                             <div className="text-2xl font-bold">{loading ? "..." : stats.modulesStarted}</div>
                             <p className="text-xs text-muted-foreground mt-1">İlerleme kaydettiğin setler</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">AXIA Tokens</CardTitle>
-                            <Coins className="h-4 w-4 text-amber-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-amber-600 dark:text-amber-500">
-                                {loading ? "..." : `${stats.tokenBalance} 🪙`}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">Ürettiğin kart sayısı kadar harcanır</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">{t('settings.successAccuracy')}</CardTitle>
-                            <Target className="h-4 w-4 text-purple-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                                {loading ? "..." : `%${stats.accuracy}`}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">Tüm cevaplara göre isabetin</p>
                         </CardContent>
                     </Card>
                 </div>

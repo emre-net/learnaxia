@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth"
 import Google from "next-auth/providers/google"
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
     pages: {
         signIn: '/login',
     },

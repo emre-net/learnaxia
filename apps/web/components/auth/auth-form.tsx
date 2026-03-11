@@ -113,156 +113,224 @@ export function AuthForm() {
     }
 
     return (
-        <Card className="w-full max-w-md mx-auto shadow-2xl border-muted/50">
-            <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold tracking-tight text-center">
-                    {activeTab === "login" ? "Tekrar Hoş Geldin" : "Hesap Oluştur"}
-                </CardTitle>
-                <CardDescription className="text-center">
-                    {activeTab === "login"
-                        ? "Öğrenme yolculuğuna kaldığın yerden devam et."
-                        : "Hemen aramıza katıl ve öğrenmeye başla."}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {error && (
-                    <Alert variant="destructive" className="mb-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-                {success && (
-                    <Alert className="mb-4 border-green-500/50 bg-green-500/10">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <AlertDescription className="text-green-600">{success}</AlertDescription>
-                    </Alert>
-                )}
+        <Card className="w-full relative group">
+            {/* Highly vibrant multi-color glowing border effect behind the card */}
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 rounded-[30px] blur-md opacity-75 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
 
-                <div className="grid gap-4">
-                    <Button
-                        variant="outline"
-                        type="button"
-                        disabled={isLoading}
-                        onClick={handleGoogleLogin}
-                        className="w-full py-6 text-md font-medium relative overflow-hidden group hover:border-primary/50 transition-all duration-300"
-                    >
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        {isLoading ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <svg className="mr-2 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                                <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-                            </svg>
-                        )}
-                        Google ile Devam Et
-                    </Button>
+            <div className="relative w-full h-full bg-[#0A1128]/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] rounded-[28px] overflow-hidden">
+                <div className="px-8 py-10 space-y-6">
+                    {error && (
+                        <Alert variant="destructive" className="bg-red-500/10 border border-red-500/30 py-2.5 px-3 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                            <AlertCircle className="h-4 w-4 text-red-400" />
+                            <AlertDescription className="text-red-400 text-xs ml-2 font-medium">{error}</AlertDescription>
+                        </Alert>
+                    )}
+                    {success && (
+                        <Alert className="bg-emerald-500/10 border border-emerald-500/30 py-2.5 px-3 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                            <AlertDescription className="text-emerald-400 text-xs ml-2 font-medium">{success}</AlertDescription>
+                        </Alert>
+                    )}
 
-                    <div className="relative">
+                    {/* Social Login */}
+                    <div className="space-y-4">
+                        <Button
+                            variant="default"
+                            type="button"
+                            disabled={isLoading}
+                            onClick={handleGoogleLogin}
+                            className="w-full bg-white hover:bg-zinc-100 text-zinc-900 shadow-[0_0_20px_rgba(255,255,255,0.15)] border border-white h-[52px] rounded-2xl text-base font-bold transition-all duration-300 active:scale-[0.98] group relative overflow-hidden"
+                        >
+                            {/* Subtle hover gradient inside google button */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                            {isLoading ? (
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin relative z-10" />
+                            ) : (
+                                <svg className="mr-3 h-5 w-5 relative z-10" viewBox="0 0 488 512" fill="currentColor">
+                                    <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
+                                </svg>
+                            )}
+                            <span className="relative z-10">Google ile Devam Et</span>
+                        </Button>
+                    </div>
+
+                    <div className="relative py-2">
                         <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
+                            <span className="w-full border-t border-indigo-500/30" />
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">
+                        <div className="relative flex justify-center text-xs font-medium">
+                            <span className="bg-[#0A1128] px-4 text-cyan-200/60 border border-indigo-500/30 rounded-full py-1">
                                 veya E-Posta ile
                             </span>
                         </div>
                     </div>
 
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-4">
-                            <TabsTrigger value="login">Giriş Yap</TabsTrigger>
-                            <TabsTrigger value="register">Kayıt Ol</TabsTrigger>
-                        </TabsList>
+                    {activeTab === "login" ? (
+                        <Form {...loginForm}>
+                            <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
+                                <FormField
+                                    control={loginForm.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#64748B] group-focus-within:text-blue-400 transition-colors">
+                                                        <span className="text-lg font-bold">@</span>
+                                                    </div>
+                                                    <Input
+                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        placeholder="E-posta adresi"
+                                                        {...field} disabled={isLoading}
+                                                    />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs text-red-400" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={loginForm.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#64748B] group-focus-within:text-blue-400 transition-colors">
+                                                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                                        </svg>
+                                                    </div>
+                                                    <Input
+                                                        type="password"
+                                                        className="pl-12 pr-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        placeholder="Parola"
+                                                        {...field} disabled={isLoading}
+                                                    />
+                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-[#94A3B8] cursor-pointer transition-colors">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs text-red-400" />
+                                        </FormItem>
+                                    )}
+                                />
 
-                        <TabsContent value="login">
-                            <Form {...loginForm}>
-                                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
-                                    <FormField
-                                        control={loginForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>E-Posta</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="ornek@email.com" {...field} disabled={isLoading} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={loginForm.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Parola</FormLabel>
-                                                <FormControl>
-                                                    <Input type="password" placeholder="******" {...field} disabled={isLoading} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button type="submit" className="w-full" disabled={isLoading}>
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Giriş Yap
-                                    </Button>
-                                </form>
-                            </Form>
-                        </TabsContent>
+                                <div className="flex justify-end pb-1">
+                                    <span className="text-xs font-medium text-[#64748B] cursor-pointer hover:text-white transition-colors">Şifremi unuttum?</span>
+                                </div>
 
-                        <TabsContent value="register">
-                            <Form {...registerForm}>
-                                <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="username"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Kullanıcı Adı</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="kullanici_adi" {...field} disabled={isLoading} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>E-Posta</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="ornek@email.com" {...field} disabled={isLoading} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Parola</FormLabel>
-                                                <FormControl>
-                                                    <Input type="password" placeholder="En az 6 karakter" {...field} disabled={isLoading} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
+                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Giriş Yap
+                                </Button>
+
+                                <div className="text-center pt-4">
+                                    <span className="text-[13px] text-[#64748B] font-medium">Hesabın yok mu? </span>
+                                    <span className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setActiveTab("register")}>Kaydol</span>
+                                </div>
+                            </form>
+                        </Form>
+                    ) : (
+                        <Form {...registerForm}>
+                            <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-5">
+                                <FormField
+                                    control={registerForm.control}
+                                    name="username"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#64748B] group-focus-within:text-blue-400 transition-colors">
+                                                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                                                        </svg>
+                                                    </div>
+                                                    <Input
+                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        placeholder="Kullanıcı Adı"
+                                                        {...field} disabled={isLoading}
+                                                    />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs text-red-400" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={registerForm.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#64748B] group-focus-within:text-blue-400 transition-colors">
+                                                        <span className="text-lg font-bold">@</span>
+                                                    </div>
+                                                    <Input
+                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        placeholder="E-posta adresi"
+                                                        {...field} disabled={isLoading}
+                                                    />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs text-red-400" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={registerForm.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#64748B] group-focus-within:text-blue-400 transition-colors">
+                                                        <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                                        </svg>
+                                                    </div>
+                                                    <Input
+                                                        type="password"
+                                                        className="pl-12 pr-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        placeholder="Parola (En az 6 karakter)"
+                                                        {...field} disabled={isLoading}
+                                                    />
+                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-[#94A3B8] cursor-pointer transition-colors">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs text-red-400" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="pt-3">
+                                    <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
                                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Kayıt Ol
+                                        Hesabı Oluştur
                                     </Button>
-                                </form>
-                            </Form>
-                        </TabsContent>
-                    </Tabs>
+                                </div>
+
+                                <div className="text-center pt-4">
+                                    <span className="text-[13px] text-[#64748B] font-medium">Zaten hesabın var mı? </span>
+                                    <span className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setActiveTab("login")}>Giriş Yap</span>
+                                </div>
+                            </form>
+                        </Form>
+                    )}
                 </div>
-            </CardContent>
+            </div>
         </Card>
     )
 }

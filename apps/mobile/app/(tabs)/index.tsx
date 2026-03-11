@@ -1,98 +1,123 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Theme as SharedTheme } from '@learnaxia/shared';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { FocusWidget } from '@/components/dashboard/focus-widget';
+import { DailyReviewWidget } from '@/components/dashboard/daily-review-widget';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+const { width } = Dimensions.get('window');
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+interface DashboardStats {
+  totalStudyMinutes: number;
+  modulesStarted: number;
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default function HomeScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const analyticsRes = await api.get('/mobile/analytics').catch(() => ({ data: { stats: {} } }));
+
+      const data = analyticsRes.data?.stats || {};
+
+      setStats({
+        totalStudyMinutes: data.totalStudyMinutes || 0,
+        modulesStarted: data.modulesStarted || 0,
+      });
+    } catch (error) {
+      console.error('[HomeScreen] Error fetching dashboard data:', error);
+      setStats({
+        totalStudyMinutes: 0,
+        modulesStarted: 0,
+      });
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const statCards = [
+    { label: 'Süre', value: stats ? `${stats.totalStudyMinutes} dk` : '0 dk', icon: 'schedule', color: SharedTheme.colors.brandEmerald },
+    { label: 'Setler', value: stats ? stats.modulesStarted.toString() : '0', icon: 'menu-book', color: SharedTheme.colors.brandBlue },
+  ];
+
+  return (
+    <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />
+        }
+      >
+        {/* Header Section */}
+        <View className="px-6 pt-10 pb-6 flex-row justify-between items-center">
+          <View>
+            <Text className="text-white text-3xl font-bold tracking-tight">
+              Merhaba, {user?.name?.split(' ')[0] || user?.handle || 'Kullanıcı'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            className="w-12 h-12 rounded-full bg-slate-900 items-center justify-center border border-slate-800 shadow-xl"
+            onPress={() => router.push('/profile')}
+          >
+            <IconSymbol name="person.fill" size={24} color="#3B82F6" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Daily Review Widget */}
+        <View className="px-6 mb-2">
+          <DailyReviewWidget />
+        </View>
+
+        {/* Focus Widget */}
+        <View className="px-6">
+          <FocusWidget />
+        </View>
+
+        {/* Quick Stats Grid */}
+        <View className="px-6 flex-row flex-wrap justify-between mt-2 mb-8">
+          {statCards.map((stat, i) => {
+            const isLastOdd = statCards.length % 2 !== 0 && i === statCards.length - 1;
+            return (
+              <View
+                key={i}
+                className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800 mb-4"
+                style={{ width: isLastOdd ? width - 48 : (width - 60) / 2 }}
+              >
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-slate-200 text-xs font-medium">{stat.label}</Text>
+                  <MaterialIcons name={stat.icon as any} size={16} color={stat.color} />
+                </View>
+                <Text className="text-2xl font-bold text-white">
+                  {stat.value}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

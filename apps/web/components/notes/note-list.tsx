@@ -55,10 +55,33 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                 typeIcon={<TypeIcon type="NOTE" size="md" />}
                                 title={note.title || "İsimsiz Not"}
                                 description={
-                                    <div
-                                        className="prose prose-sm dark:prose-invert max-w-none line-clamp-3 text-muted-foreground"
-                                        dangerouslySetInnerHTML={{ __html: note.content }}
-                                    />
+                                    (() => {
+                                        try {
+                                            const parsed = JSON.parse(note.content);
+                                            if (Array.isArray(parsed)) {
+                                                const textPreview = parsed
+                                                    .map((block: any) => {
+                                                        if (block.content && Array.isArray(block.content)) {
+                                                            return block.content.map((c: any) => c.text || "").join("");
+                                                        }
+                                                        return "";
+                                                    })
+                                                    .filter(Boolean)
+                                                    .join(" ")
+                                                    .substring(0, 150);
+                                                return <p className="text-sm text-muted-foreground line-clamp-3">{textPreview || "..."}</p>;
+                                            }
+                                        } catch (e) {
+                                            // Fallback for legacy raw text or HTML
+                                            return (
+                                                <div
+                                                    className="prose prose-sm dark:prose-invert max-w-none line-clamp-3 text-muted-foreground"
+                                                    dangerouslySetInnerHTML={{ __html: note.content }}
+                                                />
+                                            );
+                                        }
+                                        return null;
+                                    })()
                                 }
                                 metadata={[
                                     <span key="date" className="text-xs text-muted-foreground whitespace-nowrap">
@@ -73,7 +96,23 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                 metrics={[
                                     {
                                         icon: <FileText className="h-4.5 w-4.5" />,
-                                        count: note.content.length,
+                                        count: (() => {
+                                            try {
+                                                const parsed = JSON.parse(note.content);
+                                                if (Array.isArray(parsed)) {
+                                                    let totalLength = 0;
+                                                    parsed.forEach((block: any) => {
+                                                        if (block.content && Array.isArray(block.content)) {
+                                                            block.content.forEach((c: any) => {
+                                                                if (c.text) totalLength += c.text.length;
+                                                            });
+                                                        }
+                                                    });
+                                                    return totalLength;
+                                                }
+                                            } catch (e) { }
+                                            return note.content.replace(/<[^>]*>?/gm, '').length;
+                                        })(),
                                         label: "Karakter"
                                     }
                                 ]}

@@ -3,10 +3,8 @@ export const maxDuration = 60;
 
 import { auth } from "@/auth";
 import { AIService } from "@/domains/ai/ai.service";
-import { WalletService } from "@/domains/wallet/wallet.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { calculateAITokensAndCost } from "@/lib/utils/token-calculator";
 import prisma from "@/lib/prisma";
 import { validateTopic } from "@/lib/ai/providers/openai.provider";
 
@@ -28,38 +26,13 @@ export async function POST(req: Request) {
         const { topic, types, count, focusMode } = GenerateSchema.parse(body);
         const userId = session.user.id;
 
-        // 1. Dynamic Token Calculation & Rate Limit Guardian
-        const tokenEstimate = calculateAITokensAndCost({
-            text: topic,
-            targetCount: count,
-            model: "llama-3.3-70b-versatile"
-        });
-
-        if (tokenEstimate.willHitRateLimit) {
-            return NextResponse.json({
-                error: "Gönderdiğiniz metin veya analiz boyutu yapay zeka işlem sınırını aşıyor. Lütfen metninizi kısaltarak tekrar deneyin.",
-                estimatedTokens: tokenEstimate.totalTokens
-            }, { status: 413 }); // Payload Too Large
-        }
-
-        const dynamicCost = tokenEstimate.recommendedCost;
-
-        // 2. Check Balance & Debit
-        try {
-            await WalletService.debit(userId, dynamicCost, 'AI_GENERATION', `AI Request: ${topic.substring(0, 50)}... | Cost: ${dynamicCost}`);
-        } catch (error) {
-            return NextResponse.json({ error: "Yetersiz jeton. Lütfen jeton yükleyin." }, { status: 402 });
-        }
-
-        // 3. Process Request
+        // 1. Process Request
         const user = await prisma.user.findUnique({ where: { id: userId } });
         const language = user?.language || "tr";
 
-        // 4. Validate Topic Meaningfulness
+        // 2. Validate Topic Meaningfulness
         const validation = await validateTopic(topic, language);
         if (!validation.isValid) {
-            // Refund the deducted amount since we are rejecting
-            await WalletService.credit(userId, dynamicCost, 'REFUND', `Refund: Invalid topic blocked`);
             return NextResponse.json({
                 error: validation.reason || 'Lütfen içeriğini üretmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
             }, { status: 400 });
@@ -67,14 +40,9 @@ export async function POST(req: Request) {
 
         try {
             const items = await AIService.generateContent(topic, types, count, focusMode, language);
-            return NextResponse.json({
-                items,
-                remainingTokens: (await WalletService.getBalance(userId)).balance
-            });
+            return NextResponse.json({ items });
         } catch (aiError: any) {
-            // 4. Refund on Failure
-            console.error("AI Generation Failed, refunding user:", aiError);
-            await WalletService.credit(userId, dynamicCost, 'REFUND', `Refund: Generation failed`);
+            console.error("AI Generation Failed:", aiError);
 
             await prisma.systemLog.create({
                 data: {
@@ -91,7 +59,7 @@ export async function POST(req: Request) {
                 }
             }).catch(() => { });
 
-            return NextResponse.json({ error: aiError.message || "İçerik üretilemedi. Jetonlar iade edildi." }, { status: 500 });
+            return NextResponse.json({ error: aiError.message || "İçerik üretilemedi." }, { status: 500 });
         }
 
     } catch (error) {

@@ -6,14 +6,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTimer, TimerMode } from "@/hooks/use-timer";
+import { cn } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function FocusWidget() {
     const [activeTab, setActiveTab] = useState<'POMODORO' | 'STOPWATCH'>('POMODORO');
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [pomodoroDuration, setPomodoroDuration] = useState(25 * 60);
 
     // Timer instances
     const timer = useTimer({
         initialMode: 'COUNTDOWN',
-        initialSeconds: 25 * 60
+        initialSeconds: pomodoroDuration
     });
 
     const handleTabChange = (value: string) => {
@@ -22,7 +33,7 @@ export function FocusWidget() {
         timer.pause();
 
         if (mode === 'POMODORO') {
-            timer.reset(25 * 60, 'COUNTDOWN');
+            timer.reset(pomodoroDuration, 'COUNTDOWN');
         } else {
             timer.reset(0, 'STOPWATCH');
         }
@@ -30,22 +41,35 @@ export function FocusWidget() {
 
     const handleReset = () => {
         if (activeTab === 'POMODORO') {
-            timer.reset(25 * 60, 'COUNTDOWN');
+            timer.reset(pomodoroDuration, 'COUNTDOWN');
         } else {
             timer.reset(0, 'STOPWATCH');
         }
     };
 
+    const changePomodoroDuration = (mins: number) => {
+        const secs = mins * 60;
+        setPomodoroDuration(secs);
+        if (activeTab === 'POMODORO') {
+            timer.reset(secs, 'COUNTDOWN');
+        }
+    };
+
     return (
-        <Card className="relative overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] w-full transition-all duration-500 group">
+        <Card className={cn(
+            "relative overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 transition-all duration-500 group",
+            isFullscreen
+                ? "fixed inset-0 z-[100] m-0 rounded-none w-screen h-screen flex flex-col justify-center items-center shadow-none bg-white/90 dark:bg-slate-950/90"
+                : "w-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]"
+        )}>
 
             {/* Ambient Background Glow */}
             <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none transition-colors duration-1000 ${activeTab === 'POMODORO'
-                ? (timer.isRunning ? 'bg-rose-500' : 'bg-orange-500')
-                : (timer.isRunning ? 'bg-blue-500' : 'bg-slate-500')
+                    ? (timer.isRunning ? 'bg-rose-500' : 'bg-orange-500')
+                    : (timer.isRunning ? 'bg-blue-500' : 'bg-slate-500')
                 }`} />
 
-            <CardContent className="p-6 relative z-10 flex flex-col h-full pointer-events-auto">
+            <CardContent className={cn("p-6 relative z-10 flex flex-col pointer-events-auto", isFullscreen ? "w-full max-w-2xl h-[500px]" : "h-full")}>
 
                 {/* Header & Mode Switcher */}
                 <div className="flex justify-between items-center mb-6">
@@ -60,7 +84,12 @@ export function FocusWidget() {
                         </TabsList>
                     </Tabs>
 
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
                         <Maximize2 className="h-4 w-4" />
                     </Button>
                 </div>
@@ -106,14 +135,34 @@ export function FocusWidget() {
                         {timer.isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
                     </Button>
 
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-10 w-10 rounded-full border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Ayarlar (Yakında)"
-                    >
-                        <Settings2 className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10 rounded-full border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                title="Ayarlar"
+                            >
+                                <Settings2 className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+                            <DropdownMenuLabel>Zamanlayıcı Ayarları</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => changePomodoroDuration(15)}>
+                                15 Dakika (Kısa Odak)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => changePomodoroDuration(25)}>
+                                25 Dakika (Klasik Pomodoro)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => changePomodoroDuration(45)}>
+                                45 Dakika (Uzun Odak)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => changePomodoroDuration(60)}>
+                                60 Dakika (Derin Çalışma)
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </CardContent>
         </Card>

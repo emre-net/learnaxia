@@ -14,9 +14,6 @@ export default async function AdminUsersPage() {
     const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
         take: 50,
-        include: {
-            wallet: true
-        }
     });
 
     return (
@@ -45,7 +42,6 @@ export default async function AdminUsersPage() {
                                 <th className="px-6 py-4 font-semibold text-slate-300">Kullanıcı</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Rol</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Durum</th>
-                                <th className="px-6 py-4 font-semibold text-slate-300">Bakiye</th>
                                 <th className="px-6 py-4 font-semibold text-slate-300">Kayıt Tarihi</th>
                                 <th className="px-6 py-4 text-right font-semibold text-slate-300">İşlemler</th>
                             </tr>
@@ -53,7 +49,7 @@ export default async function AdminUsersPage() {
                         <tbody className="divide-y divide-slate-800/50">
                             {users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 italic">
+                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500 italic">
                                         Henüz kullanıcı bulunmuyor.
                                     </td>
                                 </tr>
@@ -87,11 +83,6 @@ export default async function AdminUsersPage() {
                                                 <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-600'}`}></div>
                                                 <span className="text-sm text-slate-400 capitalize">{user.status.toLowerCase()}</span>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-medium text-emerald-400 pl-2">
-                                                {user.wallet?.balance || 0}
-                                            </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-slate-400 flex items-center gap-1">
