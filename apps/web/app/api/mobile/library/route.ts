@@ -40,9 +40,18 @@ export async function GET(req: Request) {
             orderBy: { createdAt: 'desc' }
         });
 
+        // Get user's notes
+        const notes = await prisma.note.findMany({
+            where: {
+                userId: user.id
+            },
+            orderBy: { updatedAt: 'desc' } // or createdAt
+        });
+
         return NextResponse.json({
             modules,
-            collections
+            collections,
+            notes
         });
     } catch (error) {
         console.error('Mobile Library Error:', error);

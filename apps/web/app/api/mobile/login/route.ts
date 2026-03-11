@@ -7,11 +7,15 @@ const JWT_SECRET = new TextEncoder().encode(process.env.AUTH_SECRET || 'fallback
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const email = body.email?.trim().toLowerCase();
+    const password = body.password?.trim();
 
     if (!email || !password) {
       return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
     }
+
+    console.log(`[Mobile Login] Attempt for: ${email}`);
 
     const user = await prisma.user.findUnique({
       where: { email },

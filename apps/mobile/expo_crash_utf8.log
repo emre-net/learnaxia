@@ -1,0 +1,54 @@
+﻿Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+node.exe : Error [ERR_UNSUPPORTED_
+ESM_URL_SCHEME]: Error loading Met
+ro config at: C:\Users\Emre\.gemin
+i\antigravity\scratch\learnaxity\l
+earnaxia\apps\mobile\metro.config.
+js
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.
+exe" "C:\Program Files\nodejs/node
+_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Error [ERR_UNSU..  
+  .metro.config.js:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+Only URLs with a scheme in: file, 
+data, and node are supported by th
+e default ESM loader. On Windows, 
+absolute paths must be valid file:
+// URLs. Received protocol 'c:'
+Error: Only URLs with a scheme in:
+ file, data, and node are supporte
+d by the default ESM loader. On Wi
+ndows, absolute paths must be vali
+d file:// URLs. Received protocol 
+'c:'
+    at throwIfUnsupportedURLScheme
+ (node:internal/modules/esm/load:1
+95:11)
+    at defaultLoadSync (node:inter
+nal/modules/esm/load:142:3)
+    at ModuleLoader.load (node:int
+ernal/modules/esm/loader:821:12)
+    at ModuleLoader.loadAndTransla
+te (node:internal/modules/esm/load
+er:591:31)
+    at ModuleLoader.#createModuleJ
+ob (node:internal/modules/esm/load
+er:623:36)
+    at ModuleLoader.#getJobFromRes
+olveResult (node:internal/modules/
+esm/loader:329:34)
+    at ModuleLoader.getModuleJobFo
+rImport (node:internal/modules/esm
+/loader:294:41)
+    at onImport.tracePromise.__pro
+to__ (node:internal/modules/esm/lo
+ader:665:25)

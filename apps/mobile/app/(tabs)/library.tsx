@@ -30,11 +30,19 @@ type CollectionData = {
     createdAt: string;
 };
 
-type TabType = 'modules' | 'collections';
+type NoteData = {
+    id: string;
+    title: string | null;
+    content: string;
+    updatedAt: string;
+};
+
+type TabType = 'modules' | 'collections' | 'notes';
 
 export default function LibraryScreen() {
     const [modules, setModules] = useState<ModuleData[]>([]);
     const [collections, setCollections] = useState<CollectionData[]>([]);
+    const [notes, setNotes] = useState<NoteData[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('modules');
@@ -46,6 +54,7 @@ export default function LibraryScreen() {
             const response = await api.get('/mobile/library');
             setModules(response.data.modules || []);
             setCollections(response.data.collections || []);
+            setNotes(response.data.notes || []);
         } catch (error) {
             console.error('Failed to fetch library', error);
         } finally {
@@ -71,11 +80,16 @@ export default function LibraryScreen() {
         !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const currentData = activeTab === 'modules' ? filteredModules : filteredCollections;
+    const filteredNotes = notes.filter(n =>
+        !searchQuery || (n.title && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const currentData = activeTab === 'modules' ? filteredModules : activeTab === 'collections' ? filteredCollections : filteredNotes;
 
     const tabs: { id: TabType; label: string; icon: string; count: number }[] = [
         { id: 'modules', label: 'Modüller', icon: 'menu-book', count: modules.length },
         { id: 'collections', label: 'Koleksiyonlar', icon: 'folder-special', count: collections.length },
+        { id: 'notes', label: 'Notlar', icon: 'edit-note', count: notes.length },
     ];
 
     if (loading) {
@@ -159,12 +173,54 @@ export default function LibraryScreen() {
         </TouchableOpacity>
     );
 
+    const renderNoteItem = ({ item }: { item: NoteData }) => (
+        <TouchableOpacity
+            className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
+            onPress={() => router.push(`/notes/${item.id}`)}
+        >
+            <View className="flex-row items-center justify-between mb-3">
+                <View className="bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
+                    <Text className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Not</Text>
+                </View>
+                <Text className="text-slate-600 text-[10px] font-bold">
+                    {new Date(item.updatedAt).toLocaleDateString('tr-TR')}
+                </Text>
+            </View>
+
+            <Text className="text-xl font-bold text-white mb-2 tracking-tight" numberOfLines={2}>
+                {item.title || "İsimsiz Not"}
+            </Text>
+
+            <View className="flex-row items-center justify-between mt-auto pt-4 border-t border-slate-800/50">
+                <View className="flex-row items-center">
+                    <MaterialIcons name="edit-note" size={16} color={SharedTheme.colors.brandEmerald} />
+                    <Text className="text-slate-400 text-xs ml-1.5 font-bold uppercase tracking-tighter">
+                        BLOKLAR
+                    </Text>
+                </View>
+                <View className="bg-emerald-600 px-5 py-2 rounded-full">
+                    <Text className="text-white text-xs font-bold w-12 text-center">Aç</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+
     return (
         <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
             {/* Header */}
-            <View className="px-6 pt-10 pb-4">
-                <Text className="text-3xl font-bold text-white mb-1 tracking-tight">Kütüphane</Text>
-                <Text className="text-slate-500 font-medium">Öğrenme modüllerin ve koleksiyonların</Text>
+            <View className="px-6 pt-10 pb-4 flex-row justify-between items-center">
+                <View>
+                    <Text className="text-3xl font-bold text-white mb-1 tracking-tight">Kütüphane</Text>
+                    <Text className="text-slate-500 font-medium">Öğrenme modüllerin ve koleksiyonların</Text>
+                </View>
+                {activeTab === 'notes' && (
+                    <TouchableOpacity
+                        className="bg-emerald-600 w-10 h-10 rounded-full items-center justify-center"
+                        onPress={() => router.push('/notes/new')}
+                    >
+                        <MaterialIcons name="add" size={24} color="white" />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Search Bar */}
@@ -217,9 +273,9 @@ export default function LibraryScreen() {
 
             {/* Content List */}
             <FlatList
-                data={currentData}
-                keyExtractor={(item) => item.id}
-                renderItem={activeTab === 'modules' ? renderModuleItem : renderCollectionItem}
+                data={currentData as any}
+                keyExtractor={(item: any) => item.id}
+                renderItem={activeTab === 'modules' ? renderModuleItem as any : activeTab === 'collections' ? renderCollectionItem as any : renderNoteItem as any}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />
                 }
@@ -228,20 +284,22 @@ export default function LibraryScreen() {
                     <View className="items-center mt-16 px-10">
                         <View className="w-20 h-20 bg-slate-900 rounded-full items-center justify-center mb-6 border border-slate-800">
                             <MaterialIcons
-                                name={activeTab === 'modules' ? 'menu-book' : 'folder-special'}
+                                name={activeTab === 'modules' ? 'menu-book' : activeTab === 'collections' ? 'folder-special' : 'edit-note'}
                                 size={32}
                                 color="#475569"
                             />
                         </View>
                         <Text className="text-white text-lg font-bold mb-2">
-                            {searchQuery ? 'Sonuç Bulunamadı' : activeTab === 'modules' ? 'Modül Yok' : 'Koleksiyon Yok'}
+                            {searchQuery ? 'Sonuç Bulunamadı' : activeTab === 'modules' ? 'Modül Yok' : activeTab === 'collections' ? 'Koleksiyon Yok' : 'Not Yok'}
                         </Text>
                         <Text className="text-slate-500 text-center leading-5 font-medium">
                             {searchQuery
-                                ? `"${searchQuery}" aramasına uygun ${activeTab === 'modules' ? 'modül' : 'koleksiyon'} bulunamadı.`
+                                ? `"${searchQuery}" aramasına uygun ${activeTab === 'modules' ? 'modül' : activeTab === 'collections' ? 'koleksiyon' : 'not'} bulunamadı.`
                                 : activeTab === 'modules'
                                     ? 'Web üzerinden yeni modüller ekleyerek kütüphaneni canlandırabilirsin.'
-                                    : 'Henüz koleksiyon oluşturmadın. Web üzerinden koleksiyon oluşturabilirsin.'}
+                                    : activeTab === 'collections'
+                                        ? 'Henüz koleksiyon oluşturmadın. Web üzerinden koleksiyon oluşturabilirsin.'
+                                        : 'Henüz not oluşturmadın. Sağ üstteki + butonuna basarak modern blok editörüyle dilediğini yaz!'}
                         </Text>
                     </View>
                 }

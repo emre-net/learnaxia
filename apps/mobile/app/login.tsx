@@ -20,7 +20,7 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             if (isLogin) {
-                await login(email, password);
+                await login(email.trim(), password.trim());
             } else {
                 // Register logic would go here
                 Alert.alert('Bilgi', 'Kayıt işlemi web üzerinden veya yakında eklenecek.');

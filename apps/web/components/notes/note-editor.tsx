@@ -16,7 +16,6 @@ interface NoteEditorProps {
 
 export function NoteEditor({ moduleId, itemId, existingNote, onClose, onSaved }: NoteEditorProps) {
     const { createNote, updateNote, isCreating, isUpdating } = useNotes();
-    const router = useRouter();
     const [title, setTitle] = useState(existingNote?.title || "");
     const [content, setContent] = useState(existingNote?.content || "");
 

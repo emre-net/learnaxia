@@ -4,6 +4,7 @@ import { useNotes } from "@/hooks/use-notes";
 import { NoteEditor } from "./note-editor";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Edit2, Trash2, FileText } from "lucide-react";
 import { useState } from "react";
@@ -121,15 +122,16 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                 shareTitle={note.title || "İsimsiz Not"}
                                 actionButton={
                                     <div className="flex gap-2 w-full justify-end">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-10 rounded-xl px-4 flex-1 xs:flex-none border-primary/20 text-primary hover:bg-primary/5"
-                                            onClick={() => setEditingNoteId(note.id)}
-                                        >
-                                            <Edit2 className="h-4 w-4 mr-2" />
-                                            Düzenle
-                                        </Button>
+                                        <Link href={`/dashboard/notes/${note.id}`} className="flex-1 xs:flex-none">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full h-10 rounded-xl px-4 border-primary/20 text-primary hover:bg-primary/5"
+                                            >
+                                                <Edit2 className="h-4 w-4 mr-2" />
+                                                Düzenle
+                                            </Button>
+                                        </Link>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 flex-1 xs:flex-none border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive">

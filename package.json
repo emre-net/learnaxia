@@ -18,9 +18,11 @@
         "react-dom": "19.1.0"
     },
     "devDependencies": {
-        "turbo": "latest",
         "@types/react": "~19.1.0",
-        "@types/react-dom": "~19.1.0"
+        "@types/react-dom": "~19.1.0",
+        "patch-package": "^8.0.1",
+        "tailwindcss": "^3.3.2",
+        "turbo": "latest"
     },
     "overrides": {
         "react": "19.1.0",
