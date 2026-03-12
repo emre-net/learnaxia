@@ -43,8 +43,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ text });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("File Upload Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: error.message || "Sunucu hatası oluştu." }, { status: 500 });
     }
 }

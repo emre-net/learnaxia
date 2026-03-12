@@ -15,6 +15,7 @@ export interface VisionResult {
 export interface AIProvider {
     name: string;
     generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto', language?: string): Promise<AIResponseItem[]>;
+    generateNote(topic: string, language?: string): Promise<string>;
     analyzeImage(imageBuffer: Buffer, mimeType: string, language?: string): Promise<VisionResult>;
 }
 

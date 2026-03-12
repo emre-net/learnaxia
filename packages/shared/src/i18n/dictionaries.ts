@@ -243,7 +243,11 @@ const en = {
             step1: "Upload your PDF file from the left section.",
             step2: "The system analyzes the structure, key concepts, and important details of the content.",
             step3: "Hierarchical and organized study notes are generated for you.",
-            step4: "You can edit the generated notes and save them to your library."
+            step4: "You can edit the generated notes and save them to your library.",
+            errors: {
+                noText: "No readable text found in the document.",
+                scannedPdf: "This PDF seems to be a scanned image without a text layer. Learnaxia requires a text layer to process documents."
+            }
         },
         manualNote: {
             title: "Note Workshop",
@@ -659,7 +663,11 @@ const tr = {
             step1: "PDF dosyanızı sol taraftaki alandan yükleyin.",
             step2: "AI içeriğin yapısını, anahtar kavramları ve önemli detayları analiz eder.",
             step3: "Sizin için hiyerarşik ve düzenli çalışma notları oluşturulur.",
-            step4: "Üretilen notları düzenleyip kütüphanenize kaydedebilirsiniz."
+            step4: "Üretilen notları düzenleyip kütüphanenize kaydedebilirsiniz.",
+            errors: {
+                noText: "Belgede okunabilir metin bulunamadı.",
+                scannedPdf: "Bu PDF salt resimden oluşuyor gibi görünüyor. Metin tabakası olmayan dosyalar işlenememektedir."
+            }
         },
         manualNote: {
             title: "Not Atölyesi",

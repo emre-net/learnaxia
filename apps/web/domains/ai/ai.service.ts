@@ -16,6 +16,10 @@ export class AIService {
         return this.getProvider().generateContent(topic, types, count, focusMode, language);
     }
 
+    static async generateNote(topic: string, language: string = 'tr'): Promise<string> {
+        return this.getProvider().generateNote(topic, language);
+    }
+
     static async solvePhoto(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
         return this.getProvider().analyzeImage(imageBuffer, mimeType, language);
     }

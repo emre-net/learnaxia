@@ -212,6 +212,42 @@ export class OpenAIAIProvider implements AIProvider {
         return currentItems;
     }
 
+    async generateNote(topic: string, language: string = 'tr'): Promise<string> {
+        if (!process.env.GROQ_API_KEY) {
+            throw new AIError('AUTH_ERROR', 'Groq API key is missing.');
+        }
+
+        const systemPrompt = `
+            You are an expert academic writer and educator.
+            Your task is to create a COMPREHENSIVE, HIERARCHICAL, and WELL-STRUCTURED study note based on the provided topic or text.
+            
+            Format requirements:
+            1. Use clean HTML structure (h1, h2, h3, p, ul, li, strong, blockquote).
+            2. Organize content logically with clear headings.
+            3. Include definitions for key terms.
+            4. If the input is large, synthesize it into a clear narrative.
+            5. IMPORTANT: You MUST write entirely in this language: ${language.toUpperCase()}. If 'tr', use natural academic Turkish.
+            
+            Respond ONLY with the HTML content of the note. No extra chat.
+        `;
+
+        try {
+            const response = await this.client.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Generate a study note for: ${topic}` }
+                ],
+                temperature: 0.5,
+            });
+
+            return response.choices[0].message.content || "";
+        } catch (error: any) {
+            console.error("AI Note Generation Error:", error);
+            throw new AIError('UNKNOWN', error.message || 'Note generation failed');
+        }
+    }
+
     async analyzeImage(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
         if (!process.env.GROQ_API_KEY) {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');

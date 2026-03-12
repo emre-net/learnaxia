@@ -12,7 +12,7 @@ import { useTranslation } from "@/lib/i18n/i18n"
 import { motion } from "framer-motion"
 
 export default function AiNotePage() {
-    const [isExtracting, setIsExtracting] = useState(false);
+    const [status, setStatus] = useState<"IDLE" | "EXTRACTING" | "GENERATING">("IDLE");
     const { toast } = useToast();
     const router = useRouter();
     const { t } = useTranslation();
@@ -21,44 +21,60 @@ export default function AiNotePage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setIsExtracting(true);
+        setStatus("EXTRACTING");
         try {
             const formData = new FormData();
             formData.append("file", file);
 
-            const res = await fetch("/api/file/extract", {
+            // Step 1: Extract Text
+            const extractRes = await fetch("/api/file/extract", {
                 method: "POST",
                 body: formData
             });
 
-            if (!res.ok) {
-                const errorData = await res.json();
+            if (!extractRes.ok) {
+                const errorData = await extractRes.json();
                 throw new Error(errorData.error || "Failed to extract document");
             }
 
-            const data = await res.json();
+            const extractData = await extractRes.json();
 
-            // Redirect to AI Creation Wizard with the extracted text via session storage
-            if (typeof window !== 'undefined') {
-                sessionStorage.setItem('magic_wand_text', data.text.substring(0, 19500));
+            // Step 2: Generate AI Note
+            setStatus("GENERATING");
+            const generateRes = await fetch("/api/ai/generate-note", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text: extractData.text,
+                    title: file.name.split('.')[0],
+                    language: 'tr' // Could be dynamic based on user profile
+                })
+            });
+
+            if (!generateRes.ok) {
+                const errorData = await generateRes.json();
+                throw new Error(errorData.error || "Failed to generate AI note");
             }
+
+            const generateData = await generateRes.json();
 
             toast({
                 title: t("common.success") || "Başarılı",
-                description: t("creation.itemsReady", { count: " " }) || "İçerik başarıyla çözümlendi. Oluşturucuya yönlendiriliyorsunuz.",
+                description: "Notunuz başarıyla üretildi. Düzenleyiciye yönlendiriliyorsunuz.",
             });
 
-            router.push('/dashboard/create/ai');
+            // Step 3: Redirect to the note editor
+            router.push(`/dashboard/notes/${generateData.noteId}`);
 
         } catch (error: any) {
-            console.error("Extraction error:", error);
+            console.error("AI Note Flow Error:", error);
             toast({
                 title: t("common.error"),
                 description: error.message || t("solvePhoto.errors.generic"),
                 variant: "destructive"
             });
+            setStatus("IDLE");
         } finally {
-            setIsExtracting(false);
             e.target.value = '';
         }
     };
@@ -119,12 +135,12 @@ export default function AiNotePage() {
 
                             <Label
                                 htmlFor="ai-note-doc-upload"
-                                className={`relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-10 py-4 rounded-2xl flex items-center justify-center cursor-pointer transition-all shadow-xl shadow-purple-500/25 hover:scale-105 active:scale-95 w-max ${isExtracting ? 'pointer-events-none opacity-80' : ''}`}
+                                className={`relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-10 py-4 rounded-2xl flex items-center justify-center cursor-pointer transition-all shadow-xl shadow-purple-500/25 hover:scale-105 active:scale-95 w-max ${status !== 'IDLE' ? 'pointer-events-none opacity-80' : ''}`}
                             >
-                                {isExtracting ? (
+                                {status !== 'IDLE' ? (
                                     <span className="flex items-center gap-3">
                                         <Cpu className="h-5 w-5 border-t border-t-white rounded-full animate-spin" />
-                                        Yapay Zeka Okuyor...
+                                        {status === 'EXTRACTING' ? 'Yapay Zeka Okuyor...' : 'Not Hazırlanıyor...'}
                                     </span>
                                 ) : (
                                     <span className="flex items-center gap-3 text-lg">
@@ -137,7 +153,7 @@ export default function AiNotePage() {
                                     accept=".pdf,.txt,.pptx,.docx"
                                     className="hidden"
                                     onChange={handleFileUpload}
-                                    disabled={isExtracting}
+                                    disabled={status !== 'IDLE'}
                                 />
                                 {/* Glow Effect on button */}
                                 <div className="absolute inset-0 bg-white/20 blur-xl opacity-0 hover:opacity-100 transition-opacity" />
