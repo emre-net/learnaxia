@@ -143,7 +143,7 @@ export default function LibraryScreen() {
     const renderCollectionItem = ({ item }: { item: CollectionData }) => (
         <TouchableOpacity
             className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
-            onPress={() => {/* TODO: Navigate to collection detail */ }}
+            onPress={() => router.push(`/collections/${item.id}`)}
         >
             <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20">

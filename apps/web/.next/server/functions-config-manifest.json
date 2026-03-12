@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/ai/generate": {
+      "maxDuration": 60
+    },
+    "/api/ai/generate-note": {
+      "maxDuration": 60
+    },
+    "/api/ai/learning-path/modify": {
+      "maxDuration": 60
+    },
+    "/api/ai/solve-photo": {
+      "maxDuration": 60
+    },
+    "/api/file/extract": {
+      "maxDuration": 60
+    }
+  }
+}

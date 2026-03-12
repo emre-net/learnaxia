@@ -33,6 +33,11 @@ const MAPPING = {
   'xmark': 'close',
   'arrow.left': 'arrow-back',
   'arrow.right': 'arrow-forward',
+  'keyboard': 'keyboard',
+  'sparkles': 'auto-awesome',
+  'xmark.circle.fill': 'cancel',
+  'camera.fill': 'photo-camera',
+  'checkmark': 'check',
 } as IconMapping;
 
 /**

@@ -16,6 +16,8 @@ const { width } = Dimensions.get('window');
 interface DashboardStats {
   totalStudyMinutes: number;
   modulesStarted: number;
+  totalSolved: number;
+  averageAccuracy: number;
 }
 
 export default function HomeScreen() {
@@ -34,12 +36,16 @@ export default function HomeScreen() {
       setStats({
         totalStudyMinutes: data.totalStudyMinutes || 0,
         modulesStarted: data.modulesStarted || 0,
+        totalSolved: data.totalSolved || 0,
+        averageAccuracy: data.averageAccuracy || 0,
       });
     } catch (error) {
       console.error('[HomeScreen] Error fetching dashboard data:', error);
       setStats({
         totalStudyMinutes: 0,
         modulesStarted: 0,
+        totalSolved: 0,
+        averageAccuracy: 0,
       });
     } finally {
       setLoading(false);
@@ -59,6 +65,8 @@ export default function HomeScreen() {
   const statCards = [
     { label: 'Süre', value: stats ? `${stats.totalStudyMinutes} dk` : '0 dk', icon: 'schedule', color: SharedTheme.colors.brandEmerald },
     { label: 'Setler', value: stats ? stats.modulesStarted.toString() : '0', icon: 'menu-book', color: SharedTheme.colors.brandBlue },
+    { label: 'Başarı', value: stats ? `%${stats.averageAccuracy}` : '%0', icon: 'track-changes', color: SharedTheme.colors.primary },
+    { label: 'Çözüm', value: stats ? stats.totalSolved.toString() : '0', icon: 'psychology', color: '#A855F7' },
   ];
 
   return (

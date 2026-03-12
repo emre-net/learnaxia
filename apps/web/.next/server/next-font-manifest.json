@@ -1,0 +1,13 @@
+{
+  "app": {
+    "[project]/apps/web/app/dashboard/notes/[id]/page": [],
+    "[project]/apps/web/app/dashboard/notes/new/page": [],
+    "[project]/apps/web/app/dashboard/notes/page": [],
+    "[project]/apps/web/app/mobile-editor/page": [],
+    "[project]/apps/web/app/study/[moduleId]/page": [],
+    "[project]/apps/web/app/study/daily/page": []
+  },
+  "appUsingSizeAdjust": false,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

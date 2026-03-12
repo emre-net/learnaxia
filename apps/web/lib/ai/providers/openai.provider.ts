@@ -55,7 +55,9 @@ export async function generateSyllabus(
     topic: string,
     goal: string = "",
     depth: "shallow" | "standard" | "comprehensive" = "standard",
-    language: string = "tr"
+    language: string = "tr",
+    instruction: string = "",
+    existingSyllabus: SyllabusItem[] = []
 ): Promise<SyllabusItem[]> {
 
     // MOCK DATA FOR DEVELOPMENT
@@ -77,6 +79,7 @@ export async function generateSyllabus(
                              IMPORTANT RULES:
                              1. Language: ${language.toUpperCase()}.
                              2. Content: Balanced and logically sequenced.
+                             ${instruction ? `3. SPECIAL INSTRUCTION: ${instruction}` : ""}
                              
                              Output JSON format:
                              {
@@ -107,7 +110,12 @@ export async function generateSyllabus(
                 model: process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-4o-mini",
                 messages: [
                     { role: "system", content: systemPrompt },
-                    { role: "user", content: `Topic: ${topic}\nLearning Goal: ${goal || 'General Mastery'}\nDepth Required: ${depth}\n\nGenerate the syllabus array in JSON.` }
+                    { 
+                        role: "user", 
+                        content: `Topic: ${topic}\nLearning Goal: ${goal || 'General Mastery'}\nDepth Required: ${depth}\n` +
+                                 `${existingSyllabus?.length > 0 ? `CURRENT SYLLABUS: ${JSON.stringify(existingSyllabus, null, 2)}\n` : ""}` +
+                                 `Generate the NEW/MODIFIED syllabus array in JSON.` 
+                    }
                 ],
                 response_format: { type: "json_object" }
             });

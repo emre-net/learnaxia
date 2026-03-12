@@ -24,28 +24,42 @@ export function BlockEditor({ initialContent, onChange, readOnly = false }: Bloc
             return;
         }
 
+        // 1. Check if it's already a BlockNote JSON array
         try {
             const parsed = JSON.parse(initialContent);
             if (Array.isArray(parsed) && parsed.length > 0) {
                 setInitialBlocks(parsed as PartialBlock[]);
-            } else {
-                setInitialBlocks(undefined);
+                return;
             }
         } catch (e) {
-            console.error("Failed to parse initial note content:", e);
-            // Fallback to text if it was legacy string content
-            setInitialBlocks([
-                {
-                    type: "paragraph",
-                    content: initialContent,
-                },
-            ]);
+            // Not JSON, continue to HTML check
         }
+
+        // 2. Fallback to Content (could be HTML or plain text)
+        setInitialBlocks(undefined); // Let the editor initialize empty, then we'll try to convert if it's HTML
     }, [initialContent]);
 
-    const editor = useCreateBlockNote({
-        initialContent: initialBlocks === "loading" ? undefined : initialBlocks,
-    });
+    const editor = useCreateBlockNote();
+
+    useEffect(() => {
+        if (editor && initialContent && initialBlocks === undefined) {
+            // If it's HTML, try to parse it
+            if (initialContent.trim().startsWith("<")) {
+                const blocks = editor.tryParseHTMLToBlocks(initialContent);
+                if (blocks && blocks.length > 0) {
+                    editor.replaceBlocks(editor.document, blocks);
+                }
+            } else {
+                // Otherwise treat as plain text
+                editor.replaceBlocks(editor.document, [
+                    {
+                        type: "paragraph",
+                        content: initialContent,
+                    },
+                ]);
+            }
+        }
+    }, [editor, initialContent, initialBlocks]);
 
     if (initialBlocks === "loading") {
         return <div className="animate-pulse h-40 bg-zinc-900/50 rounded-lg w-full"></div>;

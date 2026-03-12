@@ -1,0 +1,3 @@
+{
+  "/api/admin/wipe-db/route": "app/api/admin/wipe-db/route.js"
+}

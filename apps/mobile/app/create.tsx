@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Platform, ScrollView, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import * as DocumentPicker from 'expo-document-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import api from '@/lib/api';
 
 export default function CreateScreen() {
     const router = useRouter();
     const [cameraPermission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
+    const [showTopicModal, setShowTopicModal] = useState(false);
+    const [topic, setTopic] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const handleDocumentPick = async () => {
         try {
@@ -21,6 +25,45 @@ export default function CreateScreen() {
             }
         } catch (err) {
             console.log('Error picking document', err);
+        }
+    };
+
+    const handleTopicGenerate = async () => {
+        if (topic.length < 3) {
+            Alert.alert('Geçersiz Konu', 'Lütfen en az 3 karakterli bir konu girin.');
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            // 1. Generate Syllabus
+            const genRes = await api.post('/ai/learning-path/generate', { 
+                topic,
+                depth: 'standard',
+                language: 'tr'
+            });
+
+            if (!genRes.data.syllabus) throw new Error('Müfredat oluşturulamadı.');
+
+            // 2. Start Journey (Directly for mobile convenience)
+            const startRes = await api.post('/ai/learning-path/start', {
+                topic,
+                depth: 'standard',
+                syllabus: genRes.data.syllabus
+            });
+
+            if (startRes.data.journeyId) {
+                setShowTopicModal(false);
+                setTopic('');
+                router.push(`/study/${startRes.data.journeyId}`); // Journeys are treated as modules in study flow
+            } else {
+                throw new Error('Yolculuk başlatılamadı.');
+            }
+        } catch (error: any) {
+            console.error('Mobile AI Generation Error:', error);
+            Alert.alert('Hata', error.response?.data?.error || 'Beklenmeyen bir hata oluştu.');
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -72,7 +115,7 @@ export default function CreateScreen() {
                     <IconSymbol name="xmark" size={24} color="#D1D5DB" />
                 </TouchableOpacity>
                 <Text className="text-white font-semibold text-base flex-1 text-center">
-                    Create Module (Preview)
+                    Yeni İçerik Oluştur
                 </Text>
                 <View className="p-2 -mr-2 opacity-0">
                     <IconSymbol name="ellipsis.circle" size={24} color="#D1D5DB" />
@@ -81,7 +124,7 @@ export default function CreateScreen() {
 
             <ScrollView className="flex-1 px-6">
                 <Text className="text-3xl font-bold text-white mb-8 mt-4 text-center">
-                    What would you like to learn today?
+                    Bugün ne öğrenmek istersin?
                 </Text>
 
                 <View className="space-y-4">
@@ -93,8 +136,8 @@ export default function CreateScreen() {
                             <IconSymbol name="camera.fill" size={32} color="#818CF8" />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-white text-xl font-bold mb-1">Scan Document</Text>
-                            <Text className="text-gray-400 text-sm">Use your camera to scan physical notes and books</Text>
+                            <Text className="text-white text-xl font-bold mb-1">Belge Tara</Text>
+                            <Text className="text-gray-400 text-sm">Kitap veya notlarının fotoğrafını çekerek çalış.</Text>
                         </View>
                     </TouchableOpacity>
 
@@ -106,26 +149,77 @@ export default function CreateScreen() {
                             <IconSymbol name="doc.fill" size={32} color="#60A5FA" />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-white text-xl font-bold mb-1">Upload PDF</Text>
-                            <Text className="text-gray-400 text-sm">Generate a module from your existing PDF files</Text>
+                            <Text className="text-white text-xl font-bold mb-1">PDF Yükle</Text>
+                            <Text className="text-gray-400 text-sm">Mevcut PDF dosyalarından otomatik içerik üret.</Text>
                         </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={() => Alert.alert('Yakında', 'Yapay zeka ile metin üzerinden müfredat oluşturma arayüzü yakında eklenecektir.')}
+                        onPress={() => setShowTopicModal(true)}
                         className="w-full bg-purple-600/20 border border-purple-500/30 rounded-3xl p-6 items-center flex-row"
                     >
                         <View className="w-16 h-16 rounded-full bg-purple-500/20 items-center justify-center mr-4">
                             <IconSymbol name="keyboard" size={32} color="#C084FC" />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-white text-xl font-bold mb-1">Type Topic</Text>
-                            <Text className="text-gray-400 text-sm">Tell the AI what you want to learn right now</Text>
+                            <Text className="text-white text-xl font-bold mb-1">Konu Gir</Text>
+                            <Text className="text-gray-400 text-sm">Yapay zekaya ne öğrenmek istediğini söyle.</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
 
             </ScrollView>
+
+            {/* Topic Modal */}
+            <Modal
+                visible={showTopicModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowTopicModal(false)}
+            >
+                <View className="flex-1 justify-end bg-black/60">
+                    <View className="bg-neutral-900 rounded-t-[40px] p-8 pb-12 border-t border-white/10">
+                        <View className="flex-row justify-between items-center mb-6">
+                            <Text className="text-2xl font-bold text-white">Konu Belirle</Text>
+                            <TouchableOpacity onPress={() => setShowTopicModal(false)}>
+                                <IconSymbol name="xmark.circle.fill" size={28} color="#4B5563" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text className="text-gray-400 mb-4 font-medium">Öğrenmek istediğin konuyu yaz, senin için özel bir müfredat hazırlayalım.</Text>
+                        
+                        <TextInput
+                            className="bg-neutral-800 border border-neutral-700 rounded-2xl p-5 text-white text-lg mb-8"
+                            placeholder="Örn: Roma İmparatorluğu Tarihi"
+                            placeholderTextColor="#6B7280"
+                            value={topic}
+                            onChangeText={setTopic}
+                            autoFocus={true}
+                            editable={!isGenerating}
+                        />
+
+                        <TouchableOpacity 
+                            onPress={handleTopicGenerate}
+                            disabled={isGenerating || topic.length < 3}
+                            className={`w-full h-16 rounded-2xl items-center justify-center flex-row ${isGenerating || topic.length < 3 ? 'bg-neutral-800' : 'bg-purple-600'}`}
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <ActivityIndicator color="white" className="mr-3" />
+                                    <Text className="text-white font-bold text-lg">Hazırlanıyor...</Text>
+                                </>
+                            ) : (
+                                <>
+                                    <View className="mr-2">
+                                        <IconSymbol name="sparkles" size={20} color="white" />
+                                    </View>
+                                    <Text className="text-white font-bold text-lg">Yolculuğu Başlat</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
         </SafeAreaView>
     );

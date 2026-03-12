@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/ai/generate/route.js")
+R.c("server/chunks/node_modules_jose_dist_webapi_be368595._.js")
+R.c("server/chunks/[root-of-the-server]__f7d80229._.js")
+R.c("server/chunks/node_modules_openai_index_mjs_88cf4560._.js")
+R.c("server/chunks/node_modules_bcryptjs_index_42ebb250.js")
+R.c("server/chunks/apps_web_domains_ai_openai_provider_ts_9114090b._.js")
+R.c("server/chunks/node_modules_zod_v4_classic_external_fa90cebf.js")
+R.c("server/chunks/_5eddcb76._.js")
+R.c("server/chunks/[root-of-the-server]__f408c708._.js")
+R.c("server/chunks/apps_web__next-internal_server_app_api_ai_generate_route_actions_ebb61ef7.js")
+R.m(829650)
+module.exports=R.m(829650).exports

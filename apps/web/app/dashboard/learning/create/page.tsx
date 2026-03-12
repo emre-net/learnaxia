@@ -93,27 +93,51 @@ export default function CreateLearningPlanPage() {
     }
 
     const handleDynamicAction = async (action: string) => {
-        setIsLoading(true)
+        setIsLoading(true);
+        setErrorMsg("");
+
+        let instruction = "";
+        if (action === "expand") {
+            instruction = "Genişlet: Mevcut müfredata daha fazla alt başlık ve detay ekle. Adım sayısını 2-3 adet artırabilirsin.";
+        } else if (action === "condense") {
+            instruction = "Kısalt: Müfredatı daha öz hale getir, gereksiz veya çok benzer adımları birleştir. Daha az adım olsun.";
+        } else if (action === "technical") {
+            instruction = "Daha Akademik: İçeriği daha bilimsel, akademik ve derinlemesine terimlerle güncelle. Tonu ciddileştir.";
+        }
+
         try {
-            await new Promise(res => setTimeout(res, 1500))
-            if (action === "expand") {
-                toast({
-                    title: "Yakında",
-                    description: "Daha fazla alt başlık eklenecek (AI entegrasyonu).",
+            const res = await fetch("/api/ai/learning-path/modify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    topic,
+                    depth,
+                    instruction,
+                    syllabus,
+                    language: "tr"
                 })
-            } else if (action === "condense") {
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Güncelleme başarısız.");
+
+            if (data.syllabus) {
+                setSyllabus(data.syllabus);
                 toast({
-                    title: "Yakında",
-                    description: "Müfredat özetlenecek ve kısaltılacak (AI entegrasyonu).",
-                })
-            } else if (action === "technical") {
-                toast({
-                    title: "Yakında",
-                    description: "İçerik daha teknik ve ileri düzey hale getirilecek (AI entegrasyonu).",
-                })
+                    title: "Başarılı",
+                    description: "Müfredat yapay zeka tarafından güncellendi.",
+                });
             }
+        } catch (error: any) {
+            console.error(error);
+            setErrorMsg(error.message || "Müfredat güncellenirken bir hata oluştu.");
+            toast({
+                title: "Hata",
+                description: error.message || "Güncelleme yapılamadı.",
+                variant: "destructive"
+            });
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     }
 
