@@ -1,0 +1,50 @@
+﻿03-12 10:37:30.524   751   905 E WifiStaIfaceAidlImpl: stopRssiMonitoring failed with service-specific exception: android.os.ServiceSpecificException:  (code 5)
+03-12 10:37:30.527   751   905 E WifiStaIfaceAidlImpl: setRoamingState failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:30.601   751   905 E WifiScoringParams: Invalid frequency(-1), using 5G as default rssi array
+03-12 10:37:30.619   751  1826 E WifiService: Attempt to retrieve passpoint with invalid scanResult List
+03-12 10:37:30.629   751   905 E WifiStaIfaceAidlImpl: setDtimMultiplier failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:30.682   751   905 E WifiChipAidlImpl: getUsableChannels failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:31.134   751  1825 E AppOps  : Bad call made by uid 1001. Package "com.android.phone" does not belong to uid 10147.
+03-12 10:37:31.136   751  1825 E AppOps  : Cannot noteOperation
+03-12 10:37:31.136   751  1825 E AppOps  : java.lang.SecurityException: Specified package "com.android.phone" under uid 10147 but it is not
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:5033)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.verifyAndGetBypass(AppOpsService.java:4894)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.noteOperationUnchecked(AppOpsService.java:3409)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.noteOperationImpl(AppOpsService.java:3396)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.-$$Nest$mnoteOperationImpl(AppOpsService.java:0)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService$CheckOpsDelegateDispatcher.$r8$lambda$eTKLGbByFLiOzK62QHhpSvtx4do(AppOpsService.java:0)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService$CheckOpsDelegateDispatcher$$ExternalSyntheticLambda5.apply(R8$$SyntheticClass:0)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.policy.AppOpsPolicy.noteOperation(AppOpsPolicy.java:254)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService$CheckOpsDelegateDispatcher.noteOperation(AppOpsService.java:7918)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.server.appop.AppOpsService.noteOperation(AppOpsService.java:3343)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at com.android.internal.app.IAppOpsService$Stub.onTransact(IAppOpsService.java:585)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at android.os.Binder.execTransactInternal(Binder.java:1478)
+03-12 10:37:31.136   751  1825 E AppOps  : 	at android.os.Binder.execTransact(Binder.java:1418)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: ERROR [Non-HAL API] Cannot get APF capabilities: : getApfCapabilities failed: ENOSYS (Function not implemented)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: android.system.ErrnoException: getApfCapabilities failed: ENOSYS (Function not implemented)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.util.NetworkStackUtils.getApfCapabilities(Native Method)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.android.net.ip.IpClient$Dependencies.getApfCapabilities(IpClient.java:1092)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.android.net.ip.IpClient.maybeCreateApfFilter(IpClient.java:2959)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.android.net.ip.IpClient.-$$Nest$mmaybeCreateApfFilter(IpClient.java:0)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.android.net.ip.IpClient$RunningState.enter(IpClient.java:3613)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.com.android.internal.util.StateMachine$SmHandler.invokeEnterMethods(StateMachine.java:1048)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.com.android.internal.util.StateMachine$SmHandler.performTransitions(StateMachine.java:889)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at com.android.networkstack.com.android.internal.util.StateMachine$SmHandler.handleMessage(StateMachine.java:829)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at android.os.Handler.dispatchMessage(Handler.java:132)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at android.os.Looper.loopOnce(Looper.java:263)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at android.os.Looper.loop(Looper.java:367)
+03-12 10:37:34.695  1097  1246 E IpClient.wlan0: 	at android.os.HandlerThread.run(HandlerThread.java:139)
+03-12 10:37:34.767   751   905 E WifiStaIfaceAidlImpl: setDtimMultiplier failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:34.974   751   905 E WifiStaIfaceAidlImpl: setRoamingMode failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:34.981   751   905 E WifiRoamingModeManager: Failed to set roaming mode due to unknown error.
+03-12 10:37:34.991   538   605 E NetlinkEvent: NetlinkEvent::FindParam(): Parameter 'INTERFACE' not found
+03-12 10:37:34.991   538   605 E NetlinkEvent: NetlinkEvent::FindParam(): Parameter 'STATE' not found
+03-12 10:37:34.991   538   605 E NetlinkEvent: NetlinkEvent::FindParam(): Parameter 'TIME_NS' not found
+03-12 10:37:34.991   538   605 E NetlinkEvent: NetlinkEvent::FindParam(): Parameter 'UID' not found
+03-12 10:37:34.996   751   905 E WifiStaIfaceAidlImpl: stopRssiMonitoring failed with service-specific exception: android.os.ServiceSpecificException:  (code 5)
+03-12 10:37:35.001   751  2081 E WifiService: Attempt to retrieve passpoint with invalid scanResult List
+03-12 10:37:35.163   751   905 E WifiChipAidlImpl: getUsableChannels failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:35.632   751   905 E WifiStaIfaceAidlImpl: setDtimMultiplier failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+03-12 10:37:35.633   538 13062 E netd    : Error adding route ::/0 -> fe80::2 wlan0 to table 1015: File exists
+03-12 10:37:58.164   751  1661 E WifiService: Attempt to retrieve passpoint with invalid scanResult List

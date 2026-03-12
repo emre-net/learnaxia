@@ -1,0 +1,200 @@
+﻿03-12 19:04:33.982 26021 26021 W unknown:BridgelessReact: ReactHost{5}.onHostPause()
+03-12 19:04:33.982 26021 26051 D SessionLifecycleClient: Sending lifecycle 2 to service
+03-12 19:04:33.982 26021 26166 D SessionLifecycleService: Activity backgrounding at 86831126
+03-12 19:04:34.004   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.015   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.016   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.027 26021 26021 W SoLoader: SoLoader already initialized
+03-12 19:04:34.029 26021 26021 W SoLoader: SoLoader already initialized
+03-12 19:04:34.031   751  2106 D ActivityManager: sync unfroze 19385 com.google.android.gms for 4
+03-12 19:04:34.033   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.038   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:34.041 26021 26021 W unknown:BridgelessReact: ReactHost{5}.raiseSoftException(onNewIntent(intent = "Intent { act=android.intent.action.VIEW dat=exp://localhost:8081/... }")): Tried to access onNewIntent while context is not ready
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: Unhandled SoftException
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: com.facebook.react.bridge.ReactNoCrashSoftException: raiseSoftException(onNewIntent(intent = "Intent { act=android.intent.action.VIEW dat=exp://localhost:8081/... }")): Tried to access onNewIntent while context is not ready
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException(SourceFile:48)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException$default(SourceFile:6)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at com.facebook.react.runtime.ReactHostImpl.onNewIntent(SourceFile:87)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at host.exp.exponent.experience.x.onNewIntent(SourceFile:14)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at host.exp.exponent.experience.ExperienceActivity.d1(SourceFile:12)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at host.exp.exponent.experience.ExperienceActivity.c1(SourceFile:7)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at host.exp.exponent.experience.ExperienceActivity.n1(SourceFile:36)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at Xh.r.Z(SourceFile:104)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at Xh.r.d0(SourceFile:112)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at Xh.r.e0(SourceFile:6)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at Xh.r.f(SourceFile:21)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at Xh.r.U(SourceFile:211)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at host.exp.exponent.LauncherActivity.onCreate(SourceFile:40)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.Activity.performCreate(Activity.java:9306)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.Activity.performCreate(Activity.java:9284)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1541)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4480)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4699)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:224)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2961)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.os.Handler.dispatchMessage(Handler.java:132)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.os.Looper.loopOnce(Looper.java:263)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.os.Looper.loop(Looper.java:367)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at android.app.ActivityThread.main(ActivityThread.java:9282)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at java.lang.reflect.Method.invoke(Native Method)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:566)
+03-12 19:04:34.041 26021 26021 E unknown:ReactHost: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+03-12 19:04:34.046   751  2106 W ActivityTaskManager: callingPackage for (uid=-1, pid=-1) has no WPC
+03-12 19:04:34.046   751  2106 W ActivityTaskManager: callingPackage for (uid=-1, pid=-1) has no WPC
+03-12 19:04:34.046   751  2106 W TransitionChain: Combining findTaskToFront into #138(OPEN|R|0x0) from startAct
+03-12 19:04:34.047   751  2109 W ProcessStats: Tracking association SourceState{5d37238 host.exp.exponent/10219 BTop #27944} whose proc state 2 is better than process ProcessState{28f83b0 com.google.android.gms/10147 pkg=com.google.android.gms} proc state 14 (7 skipped)
+03-12 19:04:34.049  1002  1084 D WindowManagerShell: onActivityRestartAttempt: topActivity=ComponentInfo{host.exp.exponent/host.exp.exponent.experience.ExperienceActivity}, wasVisible=true, displayId=0, pipDisplayLayoutState#displayId=0
+03-12 19:04:34.053  1146  1146 D b/417220811: invalidateLoadedTasks - previous requestLoadId: -1
+03-12 19:04:34.053 26021 26049 D SessionLifecycleClient: Sending lifecycle 1 to service
+03-12 19:04:34.053 26021 26166 D SessionLifecycleService: Activity foregrounding at 86831197.
+03-12 19:04:34.064 26021 26051 D SessionLifecycleClient: Sending lifecycle 2 to service
+03-12 19:04:34.063 26021 26166 D SessionLifecycleService: Activity backgrounding at 86831207
+03-12 19:04:34.068   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.075 26021 26021 D VRI[LauncherActivity]: WindowInsets changed: 1080x2400 statusBars:[0,118,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,150,0,84] 
+03-12 19:04:34.075 26021 26021 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): android.view.ViewRootImpl$$ExternalSyntheticLambda12@61a0115
+03-12 19:04:34.076   751  2109 D CoreBackPreview: Window{2287f8f u0 host.exp.exponent/host.exp.exponent.LauncherActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@9b26e25, mPriority=0, mIsAnimationCallback=false, mOverrideBehavior=0}
+03-12 19:04:34.075   751   778 V WindowManager: Sent Transition (#138) createdAt=03-12 19:04:33.968 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=31 effectiveUid=10219 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=host.exp.exponent/.experience.HomeActivity } baseActivity=ComponentInfo{host.exp.exponent/host.exp.exponent.experience.HomeActivity} topActivity=ComponentInfo{host.exp.exponent/host.exp.exponent.LauncherActivity} origActivity=null realActivity=ComponentInfo{host.exp.exponent/host.exp.exponent.experience.HomeActivity} numActivities=2 lastActiveTime=86788397 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{59dc223 Task{687b28f #31 type=standard A=10219:host.exp.exponent}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 118 - 0, 0) topActivityInfo=ActivityInfo{4265bfa host.exp.exponent.LauncherActivity} launchCookies=[android.os.BinderProxy@87fc4d9] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=true isActivityStackTransparent=false lastNonFullscreenBounds=null capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2400) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatMode=inactive0} topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransition = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 138 }
+03-12 19:04:34.075   751   778 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] errorCallbackToken=null taskFragmentOrganizer=null }
+03-12 19:04:34.075   751   778 V WindowManager:     info={id=138 t=OPEN f=0x0 trk=0 r=[] c=[]}
+03-12 19:04:34.077   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.077   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.079  1002  1013 V WindowManagerShell: onTransitionReady(transaction=3225520455694)
+03-12 19:04:34.081  1002  1084 V WindowManagerShell: onTransitionReady (#138) android.os.BinderProxy@db44ebb: {id=138 t=OPEN f=0x0 trk=0 r=[] c=[]}
+03-12 19:04:34.082  1002  1084 V WindowManagerShell: No transition roots in (#138) android.os.BinderProxy@db44ebb@0 so abort
+03-12 19:04:34.084  1002  1084 V WindowManagerShell: Transition animation finished (aborted=true), notifying core (#138) android.os.BinderProxy@db44ebb@0
+03-12 19:04:34.098   751   778 V WindowManager: Finish Transition (#138): created at 03-12 19:04:33.968 collect-started=0.108ms request-sent=10.661ms started=12.225ms ready=102.229ms sent=105.369ms commit=15.82ms finished=130.079ms
+03-12 19:04:34.103  1002  1084 V WindowManagerShell: Track 0 became idle
+03-12 19:04:34.103  1002  1084 V WindowManagerShell: All active transition animations finished
+03-12 19:04:34.177  1146  1146 D b/417220811: invalidateLoadedTasks - previous requestLoadId: -1
+03-12 19:04:34.368 26021 26021 W unknown:BridgelessReact: ReactHost{5}.onHostResume(activity)
+03-12 19:04:34.369   751   874 I ImeTracker: host.exp.exponent:13dddd73: onRequestHide at ORIGIN_SERVER reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR fromUser false
+03-12 19:04:34.374 26021 26021 W SoLoader: SoLoader already initialized
+03-12 19:04:34.375 26021 26049 D SessionLifecycleClient: Sending lifecycle 1 to service
+03-12 19:04:34.375 26021 26166 D SessionLifecycleService: Activity foregrounding at 86831518.
+03-12 19:04:34.378 24460 24460 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2057 
+03-12 19:04:34.381 24460 24460 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():100 repeatCheckTimes = 0, locked = false
+03-12 19:04:34.382 24460 24460 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1318 onStartInput(EditorInfo{EditorInfo{packageName=host.exp.exponent, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+03-12 19:04:34.389 24460 24460 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():100 repeatCheckTimes = 1, locked = false
+03-12 19:04:34.392   751  2109 W PackageConfigPersister: App-specific configuration not found for packageName: host.exp.exponent and userId: 0
+03-12 19:04:34.430 26021 26021 D InsetsController: hide(ime())
+03-12 19:04:34.430 26021 26021 I ImeTracker: host.exp.exponent:13dddd73: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+03-12 19:04:34.431   751  1329 I ActivityTaskManager: Activity reported stop, but no longer stopping: ActivityRecord{98492013 u0 host.exp.exponent/.LauncherActivity t31 f}} DESTROYING
+03-12 19:04:34.434 26021 26021 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): null
+03-12 19:04:34.435   751   844 W UsageStatsService: Unexpected activity event reported! (host.exp.exponent/host.exp.exponent.experience.HomeActivity event : 23 instanceId : 164153628)
+03-12 19:04:34.438   751  2106 D CoreBackPreview: Window{2287f8f u0 host.exp.exponent/host.exp.exponent.LauncherActivity}: Setting back callback null
+03-12 19:04:34.446   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:34.459 19385 20994 D AdvertisingIdClient: AdvertisingIdClient already created.
+03-12 19:04:34.459 19385 20994 D AdvertisingIdClient: AdvertisingIdClient is not bounded. Starting to bind it...
+03-12 19:04:34.469 19385 20994 D AdvertisingIdClient: AdvertisingIdClient is bounded
+03-12 19:04:34.477 19385 20994 I AdvertisingIdClient: shouldSendLog 86136956
+03-12 19:04:34.477 19385 20994 I AdvertisingIdClient: GetInfoInternal elapse 18ms
+03-12 19:04:34.484 24163 24163 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.presencemanager.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+03-12 19:04:34.495 24163 24163 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.presencemanager.service.INTERNAL_IDENTITY dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+03-12 19:04:35.846 20996 20996 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: package
+03-12 19:04:35.920 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/base.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+03-12 19:04:35.927 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_AdsDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.931 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_CronetDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.933 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteLoader_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.935 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteModulesA_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.937 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteModulesC_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.938 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_GoogleCertificates_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.939 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_MapsDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.941 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_MeasurementDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:35.943 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000d/dl-MlkitBarcodeUi.optional_253434100800.apk has no usable artifacts
+03-12 19:04:35.945 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000a/dl-TfliteDynamiteDynamite.integ_252130102100800.apk has no usable artifacts
+03-12 19:04:35.946 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000001/CronetDynamite.apk has no usable artifacts
+03-12 19:04:35.948 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000014/dl-MlkitBarcodeUi.optional_260931100800.apk has no usable artifacts
+03-12 19:04:35.949 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000002/DynamiteLoader.apk has no usable artifacts
+03-12 19:04:35.951 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000010/dl-PlayCloudSearch.optional_260931100000.apk has no usable artifacts
+03-12 19:04:35.952 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000005/GoogleCertificates.apk has no usable artifacts
+03-12 19:04:35.954 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000b/dl-VisionOcr.optional_253434100000.apk has no usable artifacts
+03-12 19:04:35.955 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000c/dl-PlayCloudSearch.optional_253434100000.apk has no usable artifacts
+03-12 19:04:35.957 19090 19236 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/E893C01D331CD1FBE6F076D28A1BA871F16A1DEC/oat/x86_64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+03-12 19:04:35.959 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000f/dl-MlkitOcrCommon.optional_253434100800.apk has no usable artifacts
+03-12 19:04:35.962 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000012/dl-Appsearch.optional_260931100800.apk has no usable artifacts
+03-12 19:04:35.964 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000009/dl-Appsearch.optional_253434100800.apk has no usable artifacts
+03-12 19:04:35.965 19090 19236 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/0B5F21648920603C6816E0B76773EED17E15FB77/oat/x86_64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+03-12 19:04:35.966 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000007/MeasurementDynamite.apk has no usable artifacts
+03-12 19:04:37.042   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:38.003   751  1591 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+03-12 19:04:40.049   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: Cannot acquire BluetoothActivityEnergyInfo
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: java.util.concurrent.ExecutionException: java.lang.RuntimeException: error: 11
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:372)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2072)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.BluetoothPowerStatsCollector.collectBluetoothActivityInfo(BluetoothPowerStatsCollector.java:191)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.BluetoothPowerStatsCollector.collectStats(BluetoothPowerStatsCollector.java:155)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.PowerStatsCollector.collectAndDeliverStats(PowerStatsCollector.java:196)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.PowerStatsCollector.lambda$schedule$0(PowerStatsCollector.java:166)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.PowerStatsCollector.$r8$lambda$G7G_yFY7rV7oxQbQHnZ5FHX8eBk(PowerStatsCollector.java:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.PowerStatsCollector$$ExternalSyntheticLambda1.run(R8$$SyntheticClass:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Handler.handleCallback(Handler.java:1070)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Handler.dispatchMessage(Handler.java:125)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Looper.loopOnce(Looper.java:263)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Looper.loop(Looper.java:367)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.HandlerThread.run(HandlerThread.java:139)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: Caused by: java.lang.RuntimeException: error: 11
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.power.stats.BluetoothPowerStatsCollector$1.onBluetoothActivityEnergyInfoError(BluetoothPowerStatsCollector.java:180)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothAdapter$OnBluetoothActivityEnergyInfoProxy.lambda$onBluetoothActivityEnergyInfoAvailable$0(BluetoothAdapter.java:1010)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothAdapter$OnBluetoothActivityEnergyInfoProxy.$r8$lambda$ks_hN9Vo_x2Jp1k5f-s67WiAd4A(Unknown Source:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothAdapter$OnBluetoothActivityEnergyInfoProxy$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothUtils.lambda$executeFromBinder$0(BluetoothUtils.java:346)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothUtils$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at com.android.server.SystemServerInitThreadPool$$ExternalSyntheticLambda0.execute(R8$$SyntheticClass:0)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothUtils.executeFromBinder(BluetoothUtils.java:346)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.BluetoothAdapter$OnBluetoothActivityEnergyInfoProxy.onBluetoothActivityEnergyInfoAvailable(BluetoothAdapter.java:1008)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.bluetooth.IBluetoothActivityEnergyInfoListener$Stub.onTransact(IBluetoothActivityEnergyInfoListener.java:98)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Binder.execTransactInternal(Binder.java:1478)
+03-12 19:04:41.223   751   798 E BluetoothPowerStatsCollector: 	at android.os.Binder.execTransact(Binder.java:1418)
+03-12 19:04:42.394  1134  1270 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+03-12 19:04:42.395  1134  1270 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+03-12 19:04:43.055   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:45.853 20999 20999 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: package
+03-12 19:04:45.964 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/base.odex) is kOatUpToDate with filter 'speed-profile' executable 'false'
+03-12 19:04:45.971 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_AdsDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.975 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_CronetDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.978 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteLoader_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.979 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteModulesA_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.985 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_DynamiteModulesC_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.987 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_GoogleCertificates_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.988 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_MapsDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.991 19090 19236 I artd    : GetBestInfo: odex next to the dex file (/data/app/~~wwg6Mso0CL8cEm7KvML34Q==/com.google.android.gms-rdliwFXwplG-PcEydvsuHg==/oat/x86_64/split_MeasurementDynamite_installtime.odex) is kOatUpToDate with filter 'speed' executable 'false'
+03-12 19:04:45.993 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000d/dl-MlkitBarcodeUi.optional_253434100800.apk has no usable artifacts
+03-12 19:04:45.995 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000a/dl-TfliteDynamiteDynamite.integ_252130102100800.apk has no usable artifacts
+03-12 19:04:45.996 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000001/CronetDynamite.apk has no usable artifacts
+03-12 19:04:45.997 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000014/dl-MlkitBarcodeUi.optional_260931100800.apk has no usable artifacts
+03-12 19:04:45.999 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000002/DynamiteLoader.apk has no usable artifacts
+03-12 19:04:46.001 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000010/dl-PlayCloudSearch.optional_260931100000.apk has no usable artifacts
+03-12 19:04:46.003 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000005/GoogleCertificates.apk has no usable artifacts
+03-12 19:04:46.006 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000b/dl-VisionOcr.optional_253434100000.apk has no usable artifacts
+03-12 19:04:46.008 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000c/dl-PlayCloudSearch.optional_253434100000.apk has no usable artifacts
+03-12 19:04:46.012 19090 19236 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/E893C01D331CD1FBE6F076D28A1BA871F16A1DEC/oat/x86_64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+03-12 19:04:46.019 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/0000000f/dl-MlkitOcrCommon.optional_253434100800.apk has no usable artifacts
+03-12 19:04:46.024 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000012/dl-Appsearch.optional_260931100800.apk has no usable artifacts
+03-12 19:04:46.031 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000009/dl-Appsearch.optional_253434100800.apk has no usable artifacts
+03-12 19:04:46.034 19090 19236 I artd    : GetBestInfo: vdex next to the dex file (/data/user/0/com.google.android.gms/app_dg_cache/0B5F21648920603C6816E0B76773EED17E15FB77/oat/x86_64/the.vdex) is kOatUpToDate with filter 'verify' executable 'false'
+03-12 19:04:46.034 19090 19236 I artd    : GetBestInfo: /data/user_de/0/com.google.android.gms/app_chimera/m/00000007/MeasurementDynamite.apk has no usable artifacts
+03-12 19:04:46.061   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:49.066   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:49.574 24163 24163 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.presencemanager.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+03-12 19:04:49.575 24163 24163 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.presencemanager.service.INTERNAL_IDENTITY dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+03-12 19:04:50.660   751   958 D BackgroundInstallControlService: Package event received: 0
+03-12 19:04:50.672 15344 15349 W gs.intelligence: Cleared Reference was only reachable from finalizer (only reported once)
+03-12 19:04:50.690 15344 15357 I gs.intelligence: Waiting for a blocking GC ProfileSaver
+03-12 19:04:50.705 15344 15357 I gs.intelligence: WaitForGcToComplete blocked ProfileSaver on Background for 14.547ms
+03-12 19:04:51.252   751  2109 W AppSearchManagerService: Received persistToDisk call. Use AppSearchManagerService persistence schedule.
+03-12 19:04:52.078   751   905 I HalDevMgr: bestIfaceCreationProposal is null, requestIface=STA, existingIface=[name=wlan0 type=STA]
+03-12 19:04:52.398  1134  1270 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+03-12 19:04:52.398  1134  1270 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy
+03-12 19:04:52.403   751   847 W JobScheduler.JobStatus: Exempted app com.android.vending considered buggy

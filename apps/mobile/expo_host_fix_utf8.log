@@ -1,0 +1,20 @@
+﻿env: load .env
+env: export EXPO_ROUTER_APP_ROOT EXPO_PUBLIC_API_URL
+node.exe : CommandError: Specify a
+t most one of: --offline, --host, 
+--tunnel, --lan, --localhost
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.
+exe" "C:\Program Files\nodejs/node
+_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (CommandError: S..  
+  .an, --localhost:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+

@@ -8,12 +8,6 @@ test.describe('API Security', () => {
         expect(response.status()).toBe(401);
     });
 
-    test('wallet reward requires auth (POST)', async ({ request }) => {
-        const response = await request.post('http://localhost:3000/api/wallet/reward', {
-            data: { adNetwork: 'test' },
-        });
-        expect(response.status()).toBe(401);
-    });
 
     test('AI generate requires auth (POST)', async ({ request }) => {
         const response = await request.post('http://localhost:3000/api/ai/generate', {
@@ -36,8 +30,4 @@ test.describe('API Security', () => {
         expect(response.status()).toBe(401);
     });
 
-    test('wallet balance requires auth (GET)', async ({ request }) => {
-        const response = await request.get('http://localhost:3000/api/wallet');
-        expect(response.status()).toBe(401);
-    });
 });

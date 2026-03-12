@@ -1,0 +1,28 @@
+﻿Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+
+node.exe : Skipping dependency val
+idation in offline mode
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.
+exe" "C:\Program Files\nodejs/node
+_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Skipping depend..  
+  .in offline mode:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+TypeScript: A tsconfig.json has been auto-generated
+
+ÔÇ║ Opening exp://127.0.0.1:8081 on Pixel_7a
+Skipping Expo Go version validatio
+n in offline mode
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+
