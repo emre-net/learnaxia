@@ -217,7 +217,7 @@ export class OpenAIAIProvider implements AIProvider {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing.');
         }
 
-        const systemPrompt = `
+        const baseSystemPrompt = `
             You are an expert academic writer and educator.
             Your task is to create a COMPREHENSIVE, HIERARCHICAL, and WELL-STRUCTURED study note based on the provided topic or text.
             
@@ -231,21 +231,87 @@ export class OpenAIAIProvider implements AIProvider {
             Respond ONLY with the HTML content of the note. No extra chat.
         `;
 
-        try {
-            const response = await this.client.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: `Generate a study note for: ${topic}` }
-                ],
-                temperature: 0.5,
-            });
+        let currentNote = "";
+        let feedback = "";
+        const MAX_RETRIES = 1;
+        const generationId = crypto.randomUUID();
 
-            return response.choices[0].message.content || "";
-        } catch (error: any) {
-            console.error("AI Note Generation Error:", error);
-            throw new AIError('UNKNOWN', error.message || 'Note generation failed');
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            const systemPrompt = feedback
+                ? `${baseSystemPrompt}\n\nPREVIOUS ATTEMPT FEEDBACK: The previous note had issues. Please fix them. Feedback: ${feedback}`
+                : baseSystemPrompt;
+
+            try {
+                // 1. Generator AI
+                const response = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: `Generate a study note for: ${topic}` }
+                    ],
+                    temperature: 0.5,
+                });
+
+                currentNote = response.choices[0].message.content || "";
+
+                if (attempt === MAX_RETRIES) break;
+
+                // 2. Evaluator (Checker) AI
+                const evaluatorPrompt = `
+                    You are an elite educational content reviewer.
+                    Review the generated study note against the original input.
+                    
+                    Original Input:
+                    ${topic}
+
+                    Requirements:
+                    1. Must be factually accurate and cover the main points.
+                    2. Must be in ${language.toUpperCase()}.
+                    3. Must use hierarchical HTML tags correctly.
+                    
+                    Respond ONLY in JSON format:
+                    {
+                        "isValid": boolean,
+                        "feedback": "string, leave empty if true. if false, clearly list mistakes."
+                    }
+                `;
+
+                const evalResponse = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: evaluatorPrompt },
+                        { role: "user", content: `Review this note:\n\n${currentNote}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+
+                const evalContent = JSON.parse(evalResponse.choices[0].message.content || "{}");
+                const evalParsed = EvaluationSchema.parse(evalContent);
+
+                // Log to System
+                await prisma.systemLog.create({
+                    data: {
+                        requestId: generationId,
+                        level: evalParsed.isValid ? "INFO" : "WARN",
+                        environment: process.env.NODE_ENV || "development",
+                        service: "ai",
+                        message: evalParsed.isValid ? `Note Generated Successfully (Attempt ${attempt})` : `Note Evaluator Requested Changes (Attempt ${attempt})`,
+                        source: "SERVER",
+                        metadata: { attempt, feedback: evalParsed.feedback }
+                    }
+                }).catch(() => { });
+
+                if (evalParsed.isValid) break;
+                feedback = evalParsed.feedback || "Improve the structure and clarity.";
+
+            } catch (error: any) {
+                console.error(`Note Generation Error (Attempt ${attempt}):`, error);
+                if (attempt === MAX_RETRIES) throw new AIError('UNKNOWN', error.message);
+                feedback = `Error occurred: ${error.message}. Please try again.`;
+            }
         }
+
+        return currentNote;
     }
 
     async analyzeImage(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
@@ -312,7 +378,7 @@ export class OpenAIAIProvider implements AIProvider {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
 
-        const systemPrompt = `
+        const baseSystemPrompt = `
             You are an expert tutor creating an interactive learning module.
             Your task is to generate ONE comprehensive learning slide (section) about "${topic}" which is part of the broader subject "${parentTopic}".
             The requested depth is "${depth}".
@@ -323,39 +389,95 @@ export class OpenAIAIProvider implements AIProvider {
             3. DO NOT mix languages (e.g., do not write "temeldefinitionsını").
             4. ABSOLUTELY NO Chinese, Japanese, or any other foreign characters/alphabets. Output must be clean and grammatically perfect.
             
+            Requirements:
             1. Provide a clear, engaging "title" for the slide.
-            2. Write the "content" in rich HTML format. Use semantic tags (<h2>, <p>, <ul>, <li>, <strong>, <em>). Make it highly readable and engaging, suitable for a learning app. Add brief examples if appropriate.
-            3. Provide a "peekingQuestion". This is a single multiple-choice question to test the user's understanding of this specific slide's content before they can proceed.
+            2. Write the "content" in rich HTML format. Use semantic tags (<h2>, <p>, <ul>, <li>, <strong>, <em>).
+            3. Provide a "peekingQuestion". This is a single multiple-choice question to test user's understanding.
             
-            Respond ONLY in valid JSON matching this schema:
-            {
-                "title": "string",
-                "content": "<p>Rich html formatted text...</p>",
-                "peekingQuestion": {
-                    "question": "string",
-                    "options": ["Option A", "Option B", "Option C", "Option D"],
-                    "answer": "Exact string of the correct option",
-                    "explanation": "Why this is correct"
-                }
-            }
+            Respond ONLY in valid JSON matching the schema.
         `;
 
-        try {
-            const response = await this.client.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: `Generate the slide for topic: ${topic}` }
-                ],
-                response_format: { type: "json_object" }
-            });
+        let currentSlide: z.infer<typeof SlideGenerationSchema> | null = null;
+        let feedback = "";
+        const MAX_RETRIES = 1;
+        const generationId = crypto.randomUUID();
 
-            const contentString = response.choices[0].message.content || "{}";
-            const parsed = SlideGenerationSchema.parse(JSON.parse(contentString));
-            return parsed;
-        } catch (error: any) {
-            console.error("Slide Generation Error:", error);
-            throw new AIError('UNKNOWN', error.message || 'Slide generation failed');
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            const systemPrompt = feedback
+                ? `${baseSystemPrompt}\n\nPREVIOUS ATTEMPT FEEDBACK: The previous slide had issues. Please fix them. Feedback: ${feedback}`
+                : baseSystemPrompt;
+
+            try {
+                // 1. Generator AI
+                const response = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: `Generate the slide for topic: ${topic}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+
+                const contentString = response.choices[0].message.content || "{}";
+                currentSlide = SlideGenerationSchema.parse(JSON.parse(contentString));
+
+                if (attempt === MAX_RETRIES) break;
+
+                // 2. Evaluator (Checker) AI
+                const evaluatorPrompt = `
+                    You are an elite educational content reviewer.
+                    Review the generated slide for quality, accuracy, and tone.
+                    
+                    Subject: ${parentTopic} -> ${topic}
+                    Language: ${language.toUpperCase()}
+                    
+                    Requirements:
+                    1. Must be factually accurate and relevant.
+                    2. Must be in ${language.toUpperCase()}.
+                    3. JSON must be valid.
+                    
+                    Respond ONLY in JSON format:
+                    {
+                        "isValid": boolean,
+                        "feedback": "string, leave empty if true."
+                    }
+                `;
+
+                const evalResponse = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: evaluatorPrompt },
+                        { role: "user", content: `Review this slide:\n\n${JSON.stringify(currentSlide, null, 2)}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+
+                const evalParsed = EvaluationSchema.parse(JSON.parse(evalResponse.choices[0].message.content || "{}"));
+
+                // Log to System
+                await prisma.systemLog.create({
+                    data: {
+                        requestId: generationId,
+                        level: evalParsed.isValid ? "INFO" : "WARN",
+                        environment: process.env.NODE_ENV || "development",
+                        service: "ai",
+                        message: evalParsed.isValid ? `Slide Generated Successfully (Attempt ${attempt})` : `Slide Evaluator Requested Changes (Attempt ${attempt})`,
+                        source: "SERVER",
+                        metadata: { attempt, feedback: evalParsed.feedback }
+                    }
+                }).catch(() => { });
+
+                if (evalParsed.isValid) break;
+                feedback = evalParsed.feedback || "Improve the content quality and clarity.";
+
+            } catch (error: any) {
+                console.error(`Slide Generation Error (Attempt ${attempt}):`, error);
+                if (attempt === MAX_RETRIES) throw new AIError('UNKNOWN', error.message);
+                feedback = `Error occurred: ${error.message}. Please generate valid JSON.`;
+            }
         }
+
+        if (!currentSlide) throw new AIError('UNKNOWN', 'Slide generation failed');
+        return currentSlide;
     }
 }

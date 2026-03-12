@@ -58,7 +58,7 @@ export async function generateSyllabus(
     language: string = "tr"
 ): Promise<SyllabusItem[]> {
 
-    // MOCK DATA FOR DEVELOPMENT IF NO REAL KEY
+    // MOCK DATA FOR DEVELOPMENT
     if (process.env.NODE_ENV !== 'production' && !process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY) {
         console.warn("Using MOCK Syllabus Generation due to missing API Key");
         const multiplier = depth === "shallow" ? 3 : depth === "standard" ? 5 : 8;
@@ -70,60 +70,89 @@ export async function generateSyllabus(
         }));
     }
 
-    try {
-        const systemPrompt = `You are an expert curriculum designer and educator.
+    const baseSystemPrompt = `You are an expert curriculum designer and educator.
                              Create a highly engaging, structured, and logical learning syllabus (journey) for the user's requested topic.
                              The target audience wants a ${depth} level of understanding.
                              
-                             IMPORTANT RULES FOR LANGUAGE:
-                             1. You MUST generate the content EXCLUSIVELY in the following language: ${language.toUpperCase()}.
-                             2. If the language is 'tr' (Turkish), you must write PURELY in Turkish.
-                             3. DO NOT mix languages (e.g., do not write "temeldefinitionsını"). Use only valid words in the target language.
-                             4. ABSOLUTELY NO Chinese, Japanese, or any other foreign characters/alphabets unless explicitly requested by the topic. Output must be clean and grammatically correct.
-                             Output MUST BE valid JSON representing an array of syllabus sections/slides.
-                             Schema:
+                             IMPORTANT RULES:
+                             1. Language: ${language.toUpperCase()}.
+                             2. Content: Balanced and logically sequenced.
+                             
+                             Output JSON format:
                              {
                                "syllabus": [
                                   {
-                                    "order": number (1-based index),
-                                    "title": "string (Catchy title for the sub-topic)",
-                                    "overview": "string (A brief 1-2 sentence overview of what this section covers)",
-                                    "estimatedMinutes": number (Estimated time to consume)
+                                    "order": number,
+                                    "title": "string",
+                                    "overview": "string",
+                                    "estimatedMinutes": number
                                   }
                                ]
                              }
                              
-                             Provide AT LEAST 3 items and AT MOST 10 items depending on the depth and topic breadth.`;
+                             Provide 3-10 items.`;
 
-        const completion = await openai.chat.completions.create({
-            model: process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-4o-mini", // Use groq or fallback to openai
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: `Topic: ${topic}\nLearning Goal: ${goal || 'General Mastery'}\nDepth Required: ${depth}\n\nGenerate the syllabus array in JSON.` }
-            ],
-            response_format: { type: "json_object" }
-        });
+    let currentSyllabus: SyllabusItem[] = [];
+    let feedback = "";
+    const MAX_RETRIES = 1;
 
-        const content = completion.choices[0]?.message?.content;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        const systemPrompt = feedback
+            ? `${baseSystemPrompt}\n\nPREVIOUS ATTEMPT FEEDBACK: ${feedback}`
+            : baseSystemPrompt;
 
-        if (!content) {
-            throw new Error("No content received from AI");
+        try {
+            // 1. Generator AI
+            const completion = await openai.chat.completions.create({
+                model: process.env.GROQ_API_KEY ? "llama-3.3-70b-versatile" : "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Topic: ${topic}\nLearning Goal: ${goal || 'General Mastery'}\nDepth Required: ${depth}\n\nGenerate the syllabus array in JSON.` }
+                ],
+                response_format: { type: "json_object" }
+            });
+
+            const content = completion.choices[0]?.message?.content || "{}";
+            const parsed = JSON.parse(content);
+            currentSyllabus = parsed.syllabus || (Array.isArray(parsed) ? parsed : []);
+
+            if (attempt === MAX_RETRIES) break;
+
+            // 2. Evaluator AI
+            const evaluatorPrompt = `
+                You are an elite curriculum reviewer.
+                Review the generated syllabus for logical flow, topic coverage, and language consistency (${language.toUpperCase()}).
+                
+                Topic: ${topic}
+                Goal: ${goal}
+                Depth: ${depth}
+                
+                Respond ONLY with JSON:
+                {
+                  "isValid": boolean,
+                  "feedback": "string, if false"
+                }
+            `;
+
+            const evalResponse = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: evaluatorPrompt },
+                    { role: "user", content: `Review this syllabus:\n\n${JSON.stringify(currentSyllabus, null, 2)}` }
+                ],
+                response_format: { type: "json_object" }
+            });
+
+            const evalParsed = JSON.parse(evalResponse.choices[0]?.message?.content || "{}");
+            if (evalParsed.isValid) break;
+            feedback = evalParsed.feedback || "Logical flow needs improvement.";
+
+        } catch (error: any) {
+            console.error(`Syllabus Generation Error (Attempt ${attempt}):`, error);
+            if (attempt === MAX_RETRIES) throw new Error(`Failed to generate syllabus: ${error.message}`);
+            feedback = `Error occurred: ${error.message}. Please generate valid JSON.`;
         }
-
-        const parsed = JSON.parse(content);
-        if (parsed.syllabus && Array.isArray(parsed.syllabus)) {
-            return parsed.syllabus;
-        }
-
-        // Fallback for arrays
-        if (Array.isArray(parsed)) {
-            return parsed;
-        }
-
-        throw new Error("Invalid output format from AI");
-
-    } catch (error: any) {
-        console.error("[generateSyllabus] Error:", error);
-        throw new Error(`Failed to generate syllabus: ${error.message}`);
     }
+
+    return currentSyllabus;
 }
