@@ -7,6 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "enabled": false
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
