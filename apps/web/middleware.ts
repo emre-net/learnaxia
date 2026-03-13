@@ -3,7 +3,9 @@ import { authConfig } from "./auth.config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export default NextAuth(authConfig).auth((req) => {
+const { auth } = NextAuth(authConfig);
+
+export default auth((req) => {
     const requestId = crypto.randomUUID();
 
     const requestHeaders = new Headers(req.headers);
@@ -18,7 +20,7 @@ export default NextAuth(authConfig).auth((req) => {
     response.headers.set("x-request-id", requestId);
 
     return response;
-});
+}) as any;
 
 export const config = {
     matcher: ["/dashboard/:path*", "/admin", "/admin/:path*", "/login", "/api/:path*"],

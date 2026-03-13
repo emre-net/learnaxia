@@ -1,6 +1,6 @@
 var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/ai/learning-path/modify/route.js")
-R.c("server/chunks/[root-of-the-server]__8209598d._.js")
-R.c("server/chunks/node_modules_openai_index_mjs_88cf4560._.js")
+R.c("server/chunks/[root-of-the-server]__e5fe7421._.js")
+R.c("server/chunks/apps_web_domains_ai_openai_provider_ts_9114090b._.js")
 R.c("server/chunks/node_modules_jose_dist_webapi_be368595._.js")
 R.c("server/chunks/_5eddcb76._.js")
 R.c("server/chunks/node_modules_zod_v4_classic_external_fa90cebf.js")
