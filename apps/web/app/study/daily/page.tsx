@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useStudyStore } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
-import { Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { AlertCircle, Sparkles } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Button } from "@/components/ui/button";
 
 import { StudyHeader } from "@/components/study/study-header";
@@ -116,8 +117,7 @@ export default function DailyStudyPage() {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-screen gap-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-muted-foreground animate-pulse">Günlük kampın hazırlanıyor...</p>
+                <BrandLoader size="lg" label="Günlük kampın hazırlanıyor..." />
             </div>
         );
     }

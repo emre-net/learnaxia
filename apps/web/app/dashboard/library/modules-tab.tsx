@@ -1,7 +1,8 @@
 
 "use client";
 
-import { BookOpen, Plus, Loader2 } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCard } from "@/components/module/module-card";
@@ -110,8 +111,8 @@ export function ModulesTab({
             {hasNextPage && (
                 <div ref={ref} className="flex justify-center py-8">
                     {isFetchingNextPage ? (
-                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
-                            <Loader2 className="h-5 w-5 animate-spin" />
+                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <BrandLoader size="sm" />
                             {t('library.modulesTab.loadingMore')}
                         </div>
                     ) : (

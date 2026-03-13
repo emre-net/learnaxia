@@ -9,9 +9,9 @@ import {
     Wrench,
     Server,
     Zap,
-    Loader2,
     CheckCircle2
 } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { repairLibrariesAction, resetContentAction, seedTestDataAction } from "./actions";
 
 export default function AdminToolsClient() {
@@ -68,7 +68,7 @@ export default function AdminToolsClient() {
                         onClick={() => handleAction('repair', repairLibrariesAction)}
                         className="w-full py-4 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-50 text-amber-500 border border-amber-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 group"
                     >
-                        {loading === 'repair' ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
+                        {loading === 'repair' ? <BrandLoader size="sm" showBlur={false} /> : <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
                         Reputation Repair Başlat
                     </button>
                 </div>
@@ -88,7 +88,7 @@ export default function AdminToolsClient() {
                         onClick={() => handleAction('reset', resetContentAction)}
                         className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 text-red-500 border border-red-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 group italic"
                     >
-                        {loading === 'reset' ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldAlert className="w-5 h-5" />}
+                        {loading === 'reset' ? <BrandLoader size="sm" showBlur={false} /> : <ShieldAlert className="w-5 h-5" />}
                         Veritabanını Sıfırla (DİKKAT!)
                     </button>
                 </div>
@@ -106,7 +106,7 @@ export default function AdminToolsClient() {
                         onClick={() => handleAction('seed-test', seedTestDataAction)}
                         className="w-full py-4 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 text-green-500 border border-green-500/20 rounded-2xl font-bold transition-all flex items-center justify-center gap-2"
                     >
-                        {loading === 'seed-test' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Database className="w-5 h-5" />}
+                        {loading === 'seed-test' ? <BrandLoader size="sm" showBlur={false} /> : <Database className="w-5 h-5" />}
                         Otomatik Test Verisi Üret
                     </button>
                 </div>

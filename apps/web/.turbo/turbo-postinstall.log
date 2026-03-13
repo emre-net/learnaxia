@@ -5,9 +5,14 @@
 Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 552ms
+✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 352ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
 
+npm notice
+npm notice New minor version of npm available! 11.6.2 -> 11.11.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.1
+npm notice To update run: npm install -g npm@11.11.1
+npm notice

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -250,7 +251,7 @@ export function AICreationWizard() {
 
                                     {isUploading && (
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-                                            <Loader2 className="h-4 w-4 animate-spin" /> {t("creation.extractingText")}
+                                            <BrandLoader size="sm" /> {t("creation.extractingText")}
                                         </div>
                                     )}
 
@@ -365,15 +366,9 @@ export function AICreationWizard() {
             )}
 
             {step === "GENERATING" && (
-                <div className="text-center py-20 space-y-6 animate-pulse">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-purple-500 blur-3xl opacity-20 rounded-full h-32 w-32 mx-auto"></div>
-                        <Sparkles className="h-20 w-20 text-purple-500 mx-auto animate-spin-slow relative z-10" />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">{t("creation.generatingContent")}</h2>
-                        <p className="text-muted-foreground mt-2">{t("creation.analyzingContent", { type: inputType === 'FILE' ? 'document' : 'topic' })}</p>
-                    </div>
+                <div className="text-center py-20 space-y-6">
+                    <BrandLoader size="xl" label={t("creation.generatingContent")} />
+                    <p className="text-muted-foreground mt-2">{t("creation.analyzingContent", { type: inputType === 'FILE' ? 'document' : 'topic' })}</p>
                 </div>
             )}
 
@@ -449,7 +444,7 @@ export function AICreationWizard() {
                         </div>
                         <Button variant="ghost" onClick={() => setStep("CONFIG")}>{t("common.cancel")}</Button>
                         <Button onClick={onSaveModule} disabled={isSaving || generatedItems.length === 0} className="bg-green-600 hover:bg-green-700 text-white min-w-[150px]">
-                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            {isSaving ? <BrandLoader size="sm" className="mr-2" /> : <Save className="mr-2 h-4 w-4" />}
                             {t("creation.save")}
                         </Button>
                     </div>

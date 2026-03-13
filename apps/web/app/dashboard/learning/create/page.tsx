@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { BookOpen, Sparkles, BrainCircuit, Loader2, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target } from "lucide-react"
+import { BookOpen, Sparkles, BrainCircuit, UploadCloud, CheckCircle2, XCircle, Plus, Minus, Settings2, Zap, ArrowRight, Target } from "lucide-react"
+import { BrandLoader } from "@/components/ui/brand-loader"
 
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
@@ -290,7 +291,7 @@ export default function CreateLearningPlanPage() {
                                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
                                         {isLoading ? (
                                             <span className="flex items-center gap-2 relative z-10">
-                                                <Loader2 className="w-5 h-5 animate-spin" /> Sihir Gerçekleşiyor...
+                                                <BrandLoader size="sm" showBlur={false} /> Sihir Gerçekleşiyor...
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2 relative z-10">
@@ -355,7 +356,7 @@ export default function CreateLearningPlanPage() {
                                 <div className="relative pl-6 space-y-8 before:absolute before:inset-y-0 before:left-[11px] before:w-[2px] before:bg-gradient-to-b before:from-indigo-500 before:via-purple-500 before:to-pink-500 before:rounded-full">
                                     {isLoading && (
                                         <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-2xl">
-                                            <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                                            <BrandLoader size="lg" />
                                         </div>
                                     )}
 

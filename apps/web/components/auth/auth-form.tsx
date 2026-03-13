@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { BrandLoader } from "@/components/ui/brand-loader"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -145,7 +146,7 @@ export function AuthForm() {
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                             {isLoading ? (
-                                <Loader2 className="mr-2 h-5 w-5 animate-spin relative z-10" />
+                                <BrandLoader size="sm" className="mr-2" />
                             ) : (
                                 <svg className="mr-3 h-5 w-5 relative z-10" viewBox="0 0 488 512" fill="currentColor">
                                     <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
@@ -227,7 +228,7 @@ export function AuthForm() {
                                 </div>
 
                                 <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isLoading && <BrandLoader size="sm" className="mr-2" />}
                                     Giriş Yap
                                 </Button>
 
@@ -317,7 +318,7 @@ export function AuthForm() {
                                 />
                                 <div className="pt-3">
                                     <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isLoading && <BrandLoader size="sm" className="mr-2" />}
                                         Hesabı Oluştur
                                     </Button>
                                 </div>

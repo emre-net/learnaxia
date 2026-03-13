@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -53,7 +54,7 @@ export function DailyReviewWidget() {
         return (
             <View className="rounded-3xl border border-blue-500/20 overflow-hidden mb-6" style={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}>
                 <View className="p-8 items-center justify-center">
-                    <ActivityIndicator size="small" color="#3B82F6" />
+                    <BrandLoader size={48} />
                 </View>
             </View>
         );

@@ -13,7 +13,7 @@ export function FocusWidget() {
     const [showSettings, setShowSettings] = useState(false);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: ReturnType<typeof setInterval>;
         if (isRunning) {
             interval = setInterval(() => {
                 setSeconds((s) => {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, ActivityIndicator,
+  View, Text, FlatList, TouchableOpacity,
   SafeAreaView, RefreshControl, TextInput, Dimensions
 } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -74,9 +75,9 @@ export default function ExploreScreen() {
       className="bg-slate-900 rounded-3xl p-5 mb-4 border border-slate-800 active:bg-slate-800"
       onPress={() => {
         if (activeTab === 'MODULE') {
-          router.push(`/study/${item.id}`);
+          router.push(`/study/${item.id}` as any);
         } else {
-          router.push(`/collections/${item.id}`);
+          router.push(`/collections/${item.id}` as any);
         }
       }}
     >
@@ -174,7 +175,7 @@ export default function ExploreScreen() {
       {/* Content List */}
       {loading ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={SharedTheme.colors.primary} />
+          <BrandLoader size="lg" />
         </View>
       ) : (
         <FlatList

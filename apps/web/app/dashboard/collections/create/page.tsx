@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { FolderPlus, Loader2, BookOpen, Globe, Lock } from "lucide-react"
+import { FolderPlus, BookOpen, Globe, Lock } from "lucide-react"
+import { BrandLoader } from "@/components/ui/brand-loader"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -133,7 +134,7 @@ export default function CreateCollectionPage() {
                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <BrandLoader size="sm" className="mr-2" showBlur={false} />
                                     Oluşturuluyor...
                                 </>
                             ) : (

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { ArrowLeft, Save, Loader2, FileText, Sparkles } from "lucide-react"
+import { ArrowLeft, Save, FileText, Sparkles } from "lucide-react"
+import { BrandLoader } from "@/components/ui/brand-loader"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n/i18n"
 import { useToast } from "@/components/ui/use-toast"
@@ -96,7 +97,7 @@ export default function ManualNotePage() {
                         disabled={isSaving || content.length === 0}
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 px-6 rounded-xl transition-all hover:scale-105 active:scale-95 h-11"
                     >
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? <BrandLoader size="sm" className="mr-2" showBlur={false} /> : <Save className="mr-2 h-4 w-4" />}
                         {t("creation.manualNote.saveNote") || "Notu Kaydet"}
                     </Button>
                 </div>
@@ -133,15 +134,15 @@ export default function ManualNotePage() {
                             <span>{content.split(/\s+/).filter(word => word.length > 0).length} kelime</span>
                         </div>
                         <div className="md:hidden">
-                            <Button
-                                onClick={handleSave}
-                                disabled={isSaving || content.length === 0}
-                                size="sm"
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg h-8"
-                            >
-                                {isSaving ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Save className="mr-2 h-3 w-3" />}
-                                Kaydet
-                            </Button>
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={isSaving || content.length === 0}
+                                    size="sm"
+                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg h-8"
+                                >
+                                    {isSaving ? <BrandLoader size="sm" className="mr-2" showBlur={false} /> : <Save className="mr-2 h-3 w-3" />}
+                                    Kaydet
+                                </Button>
                         </div>
                     </div>
                 </Card>

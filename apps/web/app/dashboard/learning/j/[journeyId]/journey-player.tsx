@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, ArrowLeft, ArrowRight, CheckCircle2, XCircle, Beaker, ChevronRight, BrainCircuit } from "lucide-react"
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Beaker, ChevronRight, BrainCircuit } from "lucide-react"
+import { BrandLoader } from "@/components/ui/brand-loader"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -181,8 +182,7 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
     if (isGenerating && journey.slides.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center flex-1 h-full p-8 text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-indigo-500 mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Makinenin Motorları Isınırken...</h2>
+                <BrandLoader size="lg" label="Makinenin Motorları Isınırken..." className="mb-4" />
                 <p className="text-muted-foreground max-w-md">
                     İlk öğrenme slaytınız üretiliyor. Sadece birkaç saniye sürecek, hazırsanız derin bir nefes alın!
                 </p>
@@ -287,7 +287,7 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
 
                                     {isGenerating && currentSlideIndex === journey.slides.length - 1 && (
                                         <p className="text-xs text-muted-foreground mt-6 flex items-center justify-center">
-                                            <Loader2 className="h-4 w-4 mr-2 animate-spin text-indigo-500" /> Arka planda sıradaki slayt üretiliyor...
+                                            <BrandLoader size="sm" className="mr-2" /> Arka planda sıradaki slayt üretiliyor...
                                         </p>
                                     )}
                                 </div>
@@ -387,9 +387,8 @@ export function JourneyPlayer({ initialJourney }: { initialJourney: LearningJour
             ) : (
                 <div className="flex items-center justify-center p-12 flex-1">
                     <div className="text-center animate-in fade-in zoom-in duration-500">
-                        <Loader2 className="h-10 w-10 animate-spin text-indigo-500 mx-auto mb-6" />
-                        <h3 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">Motorlara Yetişiliyor...</h3>
-                        <p className="text-muted-foreground">İşlem bekleniyor, lütfen ayrılmayın.</p>
+                        <BrandLoader size="lg" label="Motorlara Yetişiliyor..." />
+                        <p className="text-muted-foreground mt-4">İşlem bekleniyor, lütfen ayrılmayın.</p>
                     </div>
                 </div>
             )}

@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, User } from "lucide-react";
+import { User } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -104,7 +105,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                         İptal
                     </Button>
                     <Button onClick={handleSave} disabled={isLoading || !handle}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isLoading && <BrandLoader size="sm" className="mr-2" />}
                         Kaydet
                     </Button>
                 </DialogFooter>

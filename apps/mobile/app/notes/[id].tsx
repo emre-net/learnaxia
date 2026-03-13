@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -17,7 +18,7 @@ export default function NoteEditorScreen() {
     const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
     // Save timeout ref for debouncing
-    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 1. Fetch Note Data
     useEffect(() => {
@@ -105,7 +106,7 @@ export default function NoteEditorScreen() {
     if (isLoading) {
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-[#04101A]">
-                <ActivityIndicator size="large" color="#00D2FF" />
+                <BrandLoader size={80} label="Not Yükleniyor..." />
             </SafeAreaView>
         );
     }
@@ -130,7 +131,7 @@ export default function NoteEditorScreen() {
                     <View className="flex-row items-center">
                         {isSaving ? (
                             <View className="flex-row items-center">
-                                <ActivityIndicator size="small" color="#9CA3AF" className="mr-2" />
+                                <BrandLoader size={16} showBlur={false} className="mr-2" />
                                 <Text className="text-xs text-gray-400">Kaydediliyor...</Text>
                             </View>
                         ) : showSavedIndicator ? (

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { BrainCircuit, CheckCircle2, XCircle } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import Link from "next/link";
 
 export default function VerifyPage() {
@@ -53,8 +54,7 @@ export default function VerifyPage() {
                 <CardContent className="space-y-6">
                     {status === "loading" && (
                         <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="text-muted-foreground">Doğrulanıyor...</p>
+                            <BrandLoader size="lg" label="Doğrulanıyor..." />
                         </div>
                     )}
                     {status === "success" && (

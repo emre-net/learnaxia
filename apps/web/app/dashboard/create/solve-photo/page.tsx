@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Upload, Loader2, Save, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { Camera, Upload, Save, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import { useTranslation } from "@/lib/i18n/i18n";
@@ -161,7 +162,7 @@ export default function SolvePhotoPage() {
                             onClick={handleSolve}
                         >
                             {isAnalyzing ? (
-                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("solvePhoto.solving")}</>
+                                <><BrandLoader size="sm" className="mr-2" /> {t("solvePhoto.solving")}</>
                             ) : (
                                 t("solvePhoto.title")
                             )}
@@ -213,7 +214,7 @@ export default function SolvePhotoPage() {
                                         disabled={isSaving}
                                     >
                                         {isSaving ? (
-                                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.save")}...</>
+                                            <><BrandLoader size="sm" className="mr-2" /> {t("common.save")}...</>
                                         ) : (
                                             <><Save className="h-4 w-4 mr-2" /> {t("solvePhoto.saveToLibrary")}</>
                                         )}
@@ -224,7 +225,7 @@ export default function SolvePhotoPage() {
                     ) : (
                         <Card className="h-full flex items-center justify-center p-12 border-dashed opacity-50">
                             <div className="text-center space-y-2">
-                                <Loader2 className={`h-8 w-8 mx-auto text-muted-foreground ${isAnalyzing ? 'animate-spin' : ''}`} />
+                                <BrandLoader size="md" className={isAnalyzing ? 'animate-pulse' : ''} />
                                 <p className="text-sm font-medium">
                                     {isAnalyzing ? t("solvePhoto.solving") : t("solvePhoto.noHistory")}
                                 </p>

@@ -2,7 +2,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, BookOpen, Activity, Loader2 } from "lucide-react";
+import { Clock, BookOpen, Activity } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { DailyActivityChart } from "@/components/analytics/daily-activity-chart";
 import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
 
@@ -15,7 +16,7 @@ export function AnalyticsSection({ data, loading }: AnalyticsSectionProps) {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <BrandLoader size="lg" />
             </div>
         );
     }

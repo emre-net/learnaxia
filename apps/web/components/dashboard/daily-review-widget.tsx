@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, BookType, ArrowRight, Loader2, Play } from "lucide-react";
+import { BrainCircuit, BookType, ArrowRight, Play } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/lib/i18n/i18n";
@@ -52,7 +53,7 @@ export function DailyReviewWidget() {
         return (
             <Card className="border-blue-500/20 shadow-lg shadow-blue-500/5 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-blue-900/10 dark:to-purple-900/10">
                 <CardContent className="flex items-center justify-center p-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                    <BrandLoader size="lg" />
                 </CardContent>
             </Card>
         );

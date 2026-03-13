@@ -5,7 +5,8 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useStudyStore, StudyMode } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Button } from "@/components/ui/button";
 
 import { StudyHeader } from "@/components/study/study-header";
@@ -113,7 +114,7 @@ export default function StudyPage() {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-screen gap-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <BrandLoader size="lg" />
                 <p className="text-muted-foreground animate-pulse">{dict.initializing}</p>
             </div>
         );

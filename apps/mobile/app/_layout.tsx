@@ -5,7 +5,12 @@ import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import './global.css';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 // Suppress non-critical API error banners from showing in the UI
 LogBox.ignoreLogs([
@@ -24,6 +29,11 @@ import { AuthProvider } from '../context/AuthContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    // In a real app, you might wait for fonts or data here
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
     <SafeAreaProvider>

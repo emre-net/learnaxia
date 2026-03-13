@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, Platform, ScrollView, Alert, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Platform, ScrollView, Alert, Modal, TextInput } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import * as DocumentPicker from 'expo-document-picker';
@@ -205,7 +206,7 @@ export default function CreateScreen() {
                         >
                             {isGenerating ? (
                                 <>
-                                    <ActivityIndicator color="white" className="mr-3" />
+                                    <BrandLoader size={24} showBlur={false} className="mr-3" />
                                     <Text className="text-white font-bold text-lg">Hazırlanıyor...</Text>
                                 </>
                             ) : (

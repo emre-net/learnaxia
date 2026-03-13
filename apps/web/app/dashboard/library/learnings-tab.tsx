@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, LayoutGrid, List, PlayCircle, Clock, Trash2 } from "lucide-react";
+import { LayoutGrid, List, PlayCircle, Clock, Trash2 } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { toast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,14 +72,13 @@ export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTab
                 newMap[j.id] = 1;
             }
         }
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setProgressMap(newMap);
     }, [journeys]);
 
     if (isLoading) {
         return (
             <div className="flex justify-center items-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <BrandLoader size="lg" />
             </div>
         );
     }
@@ -155,7 +155,7 @@ export function LearningsTab({ viewMode, searchQuery, dictionary }: LearningsTab
                             <h3 className="font-semibold text-lg line-clamp-2 mt-3">{journey.title}</h3>
 
                             <div className="mt-4 text-sm text-muted-foreground flex flex-col gap-1">
-                                <div>Status: {isGenerating ? <Loader2 className="inline h-3 w-3 animate-spin" /> : (isCompleted ? "Completed" : "Active")}</div>
+                                <div>Status: {isGenerating ? <BrandLoader size="sm" className="inline mr-2" /> : (isCompleted ? "Completed" : "Active")}</div>
                                 <div>Progress: {isGenerating ? "Generating..." : `${currentSlide} / ${totalSlides} Slides`}</div>
                             </div>
                         </CardContent>

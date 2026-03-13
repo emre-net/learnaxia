@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SettingsContent } from "@/components/settings/settings-content";
-import { Loader2 } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import prisma from "@/lib/prisma";
 
 export default async function SettingsPage() {
@@ -34,7 +34,7 @@ export default async function SettingsPage() {
 
             <Suspense fallback={
                 <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <BrandLoader size="lg" />
                 </div>
             }>
                 <SettingsContent user={user} />

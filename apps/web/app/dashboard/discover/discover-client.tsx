@@ -6,7 +6,8 @@ import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, X, Loader2, BookOpen, Layers } from "lucide-react";
+import { Search, Filter, X, BookOpen, Layers } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CATEGORIES } from "@/lib/constants/categories";
@@ -368,8 +369,8 @@ export function DiscoverClient() {
                             {hasNextPage && (
                                 <div ref={ref} className="flex justify-center py-8">
                                     {isFetchingNextPage ? (
-                                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
-                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                            <BrandLoader size="sm" />
                                             Daha fazla yükleniyor...
                                         </div>
                                     ) : (

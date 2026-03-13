@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Dimensions, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions, Alert, ScrollView } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -154,7 +155,7 @@ export default function LoginScreen() {
                                     className="h-[52px] flex-row items-center justify-center"
                                 >
                                     {loading ? (
-                                        <ActivityIndicator color="white" className="mr-2" />
+                                        <BrandLoader size={24} showBlur={false} className="mr-2" />
                                     ) : null}
                                     <Text className="text-white font-bold text-base tracking-wide">
                                         {isLogin ? "Giriş Yap" : "Hesabı Oluştur"}

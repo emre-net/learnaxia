@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, SafeAreaView, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../../lib/api';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -34,7 +35,7 @@ export default function StudyScreen() {
     if (loading) {
         return (
             <SafeAreaView className="flex-1 bg-neutral-900 justify-center items-center">
-                <ActivityIndicator size="large" color="#6366f1" />
+                <BrandLoader size={80} label="İçerik Hazırlanıyor..." />
             </SafeAreaView>
         );
     }

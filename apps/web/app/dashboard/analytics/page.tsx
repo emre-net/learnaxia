@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { DailyActivityChart } from "@/components/analytics/daily-activity-chart";
 import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Clock, Loader2 } from "lucide-react";
+import { BookOpen, Clock } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function AnalyticsPage() {
@@ -30,7 +31,7 @@ export default function AnalyticsPage() {
     }, [toast]);
 
     if (loading) {
-        return <div className="flex h-full items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+        return <div className="flex h-full items-center justify-center p-8"><BrandLoader size="lg" /></div>;
     }
 
     if (!data) return null;

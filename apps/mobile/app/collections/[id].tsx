@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, ActivityIndicator,
+    View, Text, FlatList, TouchableOpacity,
     SafeAreaView, RefreshControl, Dimensions, Image
 } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -57,7 +58,7 @@ export default function CollectionDetailScreen() {
     if (loading) {
         return (
             <View className="flex-1 bg-slate-950 justify-center items-center" style={{ backgroundColor: SharedTheme.colors.background }}>
-                <ActivityIndicator size="large" color={SharedTheme.colors.primary} />
+                <BrandLoader size="lg" />
             </View>
         );
     }

@@ -1,7 +1,8 @@
 
 "use client";
 
-import { FileText, BookOpen, Loader2 } from "lucide-react";
+import { FileText, BookOpen } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,8 +93,8 @@ export function NotesTab({
             {hasNextPage && (
                 <div ref={ref} className="flex justify-center py-8">
                     {isFetchingNextPage ? (
-                        <div className="flex items-center gap-2 text-muted-foreground font-medium animate-pulse">
-                            <Loader2 className="h-5 w-5 animate-spin" />
+                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                            <BrandLoader size="sm" />
                             Daha fazla yükleniyor...
                         </div>
                     ) : (

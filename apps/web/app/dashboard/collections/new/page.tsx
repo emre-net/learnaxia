@@ -15,9 +15,10 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     ArrowRight, ArrowLeft, FolderPlus, Info, BookOpen, Layers,
-    Check, Search, AlertCircle, Loader2, RotateCw, Globe,
+    Check, Search, AlertCircle, RotateCw, Globe,
     Lock, Sparkles, Search as SearchIcon
 } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { CATEGORIES } from "@/lib/constants/categories";
 import Link from "next/link";
 
@@ -367,8 +368,7 @@ export default function NewCollectionPage() {
                         <CardContent className="p-0 flex-1 overflow-auto max-h-[500px]">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                    <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                                    <p className="text-muted-foreground font-medium">Modüller yükleniyor...</p>
+                                    <BrandLoader size="lg" label="Modüller yükleniyor..." />
                                 </div>
                             ) : libraryItems?.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center p-12 text-center h-full">
@@ -445,7 +445,7 @@ export default function NewCollectionPage() {
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Oluşturuluyor...
+                                    <BrandLoader size="sm" className="mr-2" showBlur={false} /> Oluşturuluyor...
                                 </>
                             ) : (
                                 <>

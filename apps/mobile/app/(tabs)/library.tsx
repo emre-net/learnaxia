@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, ActivityIndicator,
+    View, Text, FlatList, TouchableOpacity,
     SafeAreaView, RefreshControl, TextInput, Dimensions
 } from 'react-native';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -95,7 +96,7 @@ export default function LibraryScreen() {
     if (loading) {
         return (
             <View className="flex-1 bg-slate-950 justify-center items-center" style={{ backgroundColor: SharedTheme.colors.background }}>
-                <ActivityIndicator size="large" color={SharedTheme.colors.primary} />
+                <BrandLoader size="lg" />
             </View>
         );
     }
@@ -143,7 +144,7 @@ export default function LibraryScreen() {
     const renderCollectionItem = ({ item }: { item: CollectionData }) => (
         <TouchableOpacity
             className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
-            onPress={() => router.push(`/collections/${item.id}`)}
+            onPress={() => router.push(`/collections/${item.id}` as any)}
         >
             <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20">

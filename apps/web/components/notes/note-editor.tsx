@@ -4,7 +4,8 @@ import { useNotes } from "@/hooks/use-notes";
 import { BlockEditor } from "@/components/notes/block-editor";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useCallback } from "react";
-import { Save, Loader2, X } from "lucide-react";
+import { Save, X } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 interface NoteEditorProps {
     moduleId?: string;
@@ -64,7 +65,7 @@ export function NoteEditor({ moduleId, itemId, existingNote, onClose, onSaved }:
             <div className="flex justify-between items-center px-4 mb-6">
                 <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                     {isSaving ? (
-                        <span className="flex items-center"><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Kaydediliyor...</span>
+                        <span className="flex items-center"><BrandLoader size="sm" className="mr-2" /> Kaydediliyor...</span>
                     ) : (
                         <span className="flex items-center"><Save className="h-3 w-3 mr-1 opacity-50" /> Kaydedildi</span>
                     )}

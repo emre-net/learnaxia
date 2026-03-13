@@ -14,6 +14,7 @@ import {
     XCircle,
     ShieldCheck
 } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -102,7 +103,7 @@ export default function AILogsPage() {
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
                         {loading && logs.length === 0 ? (
                             <div className="flex justify-center p-8">
-                                <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                                <BrandLoader size="md" />
                             </div>
                         ) : logs.map(log => (
                             <button
