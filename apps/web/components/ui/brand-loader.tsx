@@ -7,9 +7,10 @@ interface BrandLoaderProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   label?: string;
+  showBlur?: boolean;
 }
 
-export function BrandLoader({ className, size = "md", label }: BrandLoaderProps) {
+export function BrandLoader({ className, size = "md", label, showBlur = true }: BrandLoaderProps) {
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-12 h-12",
@@ -24,7 +25,9 @@ export function BrandLoader({ className, size = "md", label }: BrandLoaderProps)
         <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-500 border-r-purple-500 animate-[spin_1.5s_linear_infinite]" />
         
         {/* Pulsing Core */}
-        <div className="absolute inset-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full filter blur-[2px] animate-pulse opacity-20" />
+        {showBlur && (
+          <div className="absolute inset-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full filter blur-[2px] animate-pulse opacity-20" />
+        )}
         
         {/* Learnaxia Logo Shape (Stylized 'L') */}
         <svg
