@@ -47,11 +47,13 @@ export default function MobileEditor() {
         }
 
         debounceTimerRef.current = setTimeout(() => {
-            window.ReactNativeWebView?.postMessage(JSON.stringify({
-                type: "CONTENT_CHANGED",
-                content
-            }));
-        }, 500); // 500ms debounce
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: "CONTENT_CHANGED",
+                    content
+                }));
+            }
+        }, 500);
     };
 
     if (!isReady) {

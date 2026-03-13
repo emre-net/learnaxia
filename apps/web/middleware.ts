@@ -3,10 +3,9 @@ import { authConfig } from "./auth.config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const middleware = NextAuth(authConfig).auth((req) => {
+export default NextAuth(authConfig).auth((req) => {
     const requestId = crypto.randomUUID();
 
-    // Proper way to pass headers to downstream in Next.js Middleware
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-request-id", requestId);
 
@@ -20,7 +19,6 @@ const middleware = NextAuth(authConfig).auth((req) => {
 
     return response;
 });
-export default middleware as any;
 
 export const config = {
     matcher: ["/dashboard/:path*", "/admin", "/admin/:path*", "/login", "/api/:path*"],
