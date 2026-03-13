@@ -86,9 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (email: string, password?: string) => {
         try {
             const res = await api.post('/mobile/login', { email, password });
-            const { token, refreshToken, user: userData } = res.data;
+            const { accessToken, refreshToken, user: userData } = res.data;
 
-            await setAuthToken(token, refreshToken);
+            await setAuthToken(accessToken, refreshToken);
             setUser(userData);
             router.replace('/(tabs)');
         } catch (error: any) {
@@ -100,9 +100,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = async (name: string, email: string, password?: string) => {
         try {
             const res = await api.post('/mobile/register', { name, email, password });
-            const { token, refreshToken, user: userData } = res.data;
+            const { accessToken, refreshToken, user: userData } = res.data;
 
-            await setAuthToken(token, refreshToken);
+            await setAuthToken(accessToken, refreshToken);
             setUser(userData);
             router.replace('/(tabs)');
         } catch (error: any) {

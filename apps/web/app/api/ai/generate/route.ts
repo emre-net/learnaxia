@@ -6,7 +6,6 @@ import { AIService } from "@/domains/ai/ai.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { validateTopic } from "@/lib/ai/providers/openai.provider";
 
 const GenerateSchema = z.object({
     topic: z.string().min(3),
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
         const language = user?.language || "tr";
 
         // 2. Validate Topic Meaningfulness
-        const validation = await validateTopic(topic, language);
+        const validation = await AIService.validateTopic(topic, language);
         if (!validation.isValid) {
             return NextResponse.json({
                 error: validation.reason || 'Lütfen içeriğini üretmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'

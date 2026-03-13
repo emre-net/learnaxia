@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       .sign(JWT_SECRET);
 
     return NextResponse.json({
-      token,
+      accessToken: token,
       refreshToken,
       user: {
         id: user.id,

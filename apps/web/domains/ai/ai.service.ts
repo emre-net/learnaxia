@@ -1,5 +1,5 @@
 
-import { AIProvider, VisionResult, AIResponseItem } from "./ai.interface";
+import { AIProvider, VisionResult, AIResponseItem, SyllabusItem } from "./ai.interface";
 import { OpenAIAIProvider } from "./openai.provider";
 
 export class AIService {
@@ -22,5 +22,13 @@ export class AIService {
 
     static async solvePhoto(imageBuffer: Buffer, mimeType: string, language: string = 'tr'): Promise<VisionResult> {
         return this.getProvider().analyzeImage(imageBuffer, mimeType, language);
+    }
+
+    static async generateSyllabus(topic: string, goal: string = "", depth: string = "standard", language: string = "tr", instruction: string = "", existingSyllabus: SyllabusItem[] = []): Promise<SyllabusItem[]> {
+        return this.getProvider().generateSyllabus(topic, goal, depth, language, instruction, existingSyllabus);
+    }
+
+    static async validateTopic(topic: string, language: string = "tr"): Promise<{ isValid: boolean, reason?: string }> {
+        return this.getProvider().validateTopic(topic, language);
     }
 }

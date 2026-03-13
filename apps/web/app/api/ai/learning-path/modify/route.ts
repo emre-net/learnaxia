@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { auth } from "@/auth";
-import { generateSyllabus } from "@/lib/ai/providers/openai.provider";
+import { AIService } from "@/domains/ai/ai.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { topic, depth, instruction, syllabus, language } = ModifySyllabusSchema.parse(body);
 
-        const modifiedSyllabus = await generateSyllabus(
+        const modifiedSyllabus = await AIService.generateSyllabus(
             topic,
             "", // goal not strictly needed for mods
             depth as any,

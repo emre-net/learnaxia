@@ -275,8 +275,8 @@ model CollectionItem {
   collectionId String
   moduleId     String
   order        Int
-  collection   Collection @relation(fields: [collectionId], references: [id])
-  module       Module     @relation(fields: [moduleId], references: [id])
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  module       Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@id([collectionId, moduleId])
 }
@@ -405,9 +405,9 @@ model Note {
   visibility       Visibility      @default(PRIVATE)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
-  item             Item?           @relation(fields: [itemId], references: [id])
+  item             Item?           @relation(fields: [itemId], references: [id], onDelete: Cascade)
   module           Module?         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  solvedQuestion   SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id])
+  solvedQuestion   SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id], onDelete: Cascade)
   user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])

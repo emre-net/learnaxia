@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
-import { generateSyllabus, validateTopic } from '@/lib/ai/providers/openai.provider';
+import { AIService } from '@/domains/ai/ai.service';
 
 export async function POST(req: Request) {
     try {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         }
 
         // 2. Validate Topic Meaningfulness
-        const validation = await validateTopic(topic, userLang);
+        const validation = await AIService.validateTopic(topic, userLang);
         if (!validation.isValid) {
             return NextResponse.json({
                 error: validation.reason || 'Lütfen öğrenmek istediğiniz konuyu daha net açıklayın. Anlamsız girişler kabul edilmemektedir.'
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         }
 
         // 1. Execute Syllabus Generation via AI
-        const syllabus = await generateSyllabus(topic, goal || '', depth, userLang);
+        const syllabus = await AIService.generateSyllabus(topic, goal || '', depth, userLang);
 
         return NextResponse.json({
             success: true,

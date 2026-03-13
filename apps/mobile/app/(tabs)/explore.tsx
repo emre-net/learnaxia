@@ -75,6 +75,8 @@ export default function ExploreScreen() {
       onPress={() => {
         if (activeTab === 'MODULE') {
           router.push(`/study/${item.id}`);
+        } else {
+          router.push(`/collections/${item.id}`);
         }
       }}
     >

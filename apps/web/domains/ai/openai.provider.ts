@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { AIProvider, AIResponseItem, VisionResult, AIError } from "./ai.interface";
+import { AIProvider, AIResponseItem, VisionResult, AIError, SyllabusItem } from "./ai.interface";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
@@ -479,5 +479,156 @@ export class OpenAIAIProvider implements AIProvider {
 
         if (!currentSlide) throw new AIError('UNKNOWN', 'Slide generation failed');
         return currentSlide;
+    }
+
+    async generateSyllabus(
+        topic: string,
+        goal: string = "",
+        depth: string = "standard",
+        language: string = "tr",
+        instruction: string = "",
+        existingSyllabus: SyllabusItem[] = []
+    ): Promise<SyllabusItem[]> {
+        if (!process.env.GROQ_API_KEY) {
+            // Support development mock if needed, but for consolidation we rely on the main logic
+            console.warn("GROQ_API_KEY missing for Syllabus Generation");
+        }
+
+        const baseSystemPrompt = `You are an expert curriculum designer and educator.
+                                 Create a highly engaging, structured, and logical learning syllabus (journey) for the user's requested topic.
+                                 The target audience wants a ${depth} level of understanding.
+                                 
+                                 IMPORTANT RULES:
+                                 1. Language: ${language.toUpperCase()}.
+                                 2. Content: Balanced and logically sequenced.
+                                 ${instruction ? `3. SPECIAL INSTRUCTION: ${instruction}` : ""}
+                                 
+                                 Output JSON format:
+                                 {
+                                   "syllabus": [
+                                      {
+                                        "order": number,
+                                        "title": "string",
+                                        "overview": "string",
+                                        "estimatedMinutes": number
+                                      }
+                                   ]
+                                 }
+                                 
+                                 Provide 3-10 items.`;
+
+        let currentSyllabus: SyllabusItem[] = [];
+        let feedback = "";
+        const MAX_RETRIES = 1;
+        const generationId = crypto.randomUUID();
+
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            const systemPrompt = feedback
+                ? `${baseSystemPrompt}\n\nPREVIOUS ATTEMPT FEEDBACK: ${feedback}`
+                : baseSystemPrompt;
+
+            try {
+                // 1. Generator AI
+                const response = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        {
+                            role: "user",
+                            content: `Topic: ${topic}\nLearning Goal: ${goal || 'General Mastery'}\nDepth Required: ${depth}\n` +
+                                     `${existingSyllabus?.length > 0 ? `CURRENT SYLLABUS: ${JSON.stringify(existingSyllabus, null, 2)}\n` : ""}` +
+                                     `Generate the NEW/MODIFIED syllabus array in JSON.`
+                        }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+
+                const content = JSON.parse(response.choices[0]?.message?.content || "{}");
+                currentSyllabus = content.syllabus || (Array.isArray(content) ? content : []);
+
+                if (attempt === MAX_RETRIES) break;
+
+                // 2. Evaluator (Checker) AI
+                const evaluatorPrompt = `
+                    You are an elite curriculum reviewer.
+                    Review the generated syllabus for logical flow, topic coverage, and language consistency (${language.toUpperCase()}).
+                    
+                    Respond ONLY with JSON:
+                    {
+                      "isValid": boolean,
+                      "feedback": "string, if false"
+                    }
+                `;
+
+                const evalResponse = await this.client.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: evaluatorPrompt },
+                        { role: "user", content: `Review this syllabus:\n\n${JSON.stringify(currentSyllabus, null, 2)}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+
+                const evalParsed = JSON.parse(evalResponse.choices[0]?.message?.content || "{}");
+                
+                // Logging
+                await prisma.systemLog.create({
+                    data: {
+                        requestId: generationId,
+                        level: evalParsed.isValid ? "INFO" : "WARN",
+                        environment: process.env.NODE_ENV || "development",
+                        service: "ai",
+                        message: evalParsed.isValid ? `Syllabus Generated (Attempt ${attempt})` : `Syllabus Review Requested Changes (Attempt ${attempt})`,
+                        source: "SERVER",
+                        metadata: { attempt, feedback: evalParsed.feedback }
+                    }
+                }).catch(() => { });
+
+                if (evalParsed.isValid) break;
+                feedback = evalParsed.feedback || "Logical flow needs improvement.";
+
+            } catch (error: any) {
+                console.error(`Syllabus Generation Error (Attempt ${attempt}):`, error);
+                if (attempt === MAX_RETRIES) throw new AIError('UNKNOWN', error.message);
+                feedback = `Error occurred: ${error.message}. Please generate valid JSON.`;
+            }
+        }
+
+        return currentSyllabus;
+    }
+
+    async validateTopic(topic: string, language: string = "tr"): Promise<{ isValid: boolean, reason?: string }> {
+        const systemPrompt = `
+            You are a strict validation AI for an educational platform.
+            Your job is to determine if the user's input is a valid, meaningful topic to learn about, or if it is nonsense/gibberish (e.g., "hello", "asdfg", "test1234").
+            
+            IMPORTANT: Your response MUST be in this language: ${language.toUpperCase()}. If it is 'tr', write the "reason" in Turkish.
+            
+            Return JSON format:
+            {
+              "isValid": boolean,
+              "reason": "If isValid is false, explain briefly and nicely why it's not a valid topic to learn, in the user's language."
+            }
+        `;
+
+        try {
+            const response = await this.client.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Topic input to validate: "${topic}"` }
+                ],
+                response_format: { type: "json_object" }
+            });
+
+            const parsed = JSON.parse(response.choices[0]?.message?.content || "{}");
+            return {
+                isValid: parsed.isValid ?? true,
+                reason: parsed.reason
+            };
+        } catch (e) {
+            console.error("Topic Validation Error:", e);
+            return { isValid: true };
+        }
     }
 }
