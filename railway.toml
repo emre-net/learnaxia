@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci --legacy-peer-deps && npm run build -w web && cp -r apps/web/public apps/web/.next/standalone/apps/web/public && mkdir -p apps/web/.next/standalone/apps/web/.next && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static"
+buildCommand = "npm run build -w web && cp -r apps/web/public apps/web/.next/standalone/apps/web/public && mkdir -p apps/web/.next/standalone/apps/web/.next && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static"
+installCommand = "npm ci --legacy-peer-deps"
 
 [deploy]
 preDeployCommand = "cd apps/web && npx prisma migrate deploy"
