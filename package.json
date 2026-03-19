@@ -1,0 +1,59 @@
+{
+  "name": "learnaxia-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "npm start -w web",
+    "lint": "turbo run lint",
+    "postinstall": "turbo run postinstall",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "dependencies": {
+    "expo": "~54.0.33",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-css": "^3.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "autoprefixer": "^10.4.27",
+    "next": "15.1.11",
+    "patch-package": "^8.0.1",
+    "tailwindcss": "^4.0.0",
+    "turbo": "latest"
+  },
+  "overrides": {
+    "next": "15.1.11",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4"
+  },
+  "optionalDependencies": {
+    "@next/swc-linux-arm64-gnu": "15.1.11",
+    "@next/swc-linux-arm64-musl": "15.1.11",
+    "@next/swc-linux-x64-gnu": "15.1.11",
+    "@next/swc-linux-x64-musl": "15.1.11",
+    "@tailwindcss/oxide-linux-arm64-gnu": "4.2.1",
+    "@tailwindcss/oxide-linux-arm64-musl": "4.2.1",
+    "@tailwindcss/oxide-linux-x64-gnu": "4.2.1",
+    "@tailwindcss/oxide-linux-x64-musl": "4.2.1",
+    "lightningcss-linux-arm64-gnu": "1.31.1",
+    "lightningcss-linux-arm64-musl": "1.31.1",
+    "lightningcss-linux-x64-gnu": "1.31.1",
+    "lightningcss-linux-x64-musl": "1.31.1"
+  }
+}

@@ -1,0 +1,506 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String                  @id @default(uuid())
+  name              String?
+  email             String?                 @unique
+  handle            String?                 @unique
+  timezone          String                  @default("UTC")
+  role              String                  @default("USER")
+  status            String                  @default("ACTIVE")
+  sessionVersion    Int                     @default(1)
+  settings          Json?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  deletedAt         DateTime?
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  language          String                  @default("tr")
+  accounts          Account[]
+  collections       Collection[]            @relation("OwnedCollections")
+  exams             Exam[]
+  examAttempts      ExamAttempt[]
+  itemProgress      ItemProgress[]
+  itemSessions      ItemSession[]
+  learningSessions  LearningSession[]
+  learningJourneys  LearningJourney[]       @relation("CreatedJourneys")
+  createdModules    Module[]                @relation("CreatedModules")
+  modules           Module[]                @relation("OwnedModules")
+  notes             Note[]
+  pdfAssets         PDFAsset[]
+  paymentMethods    PaymentMethod[]
+  sm2Progress       SM2Progress[]
+  sessions          Session[]
+  solvedQuestions   SolvedQuestion[]
+  subscription      Subscription?
+  collectionLibrary UserCollectionLibrary[]
+  contentAccess     UserContentAccess[]
+  journeyLibrary    UserJourneyLibrary[]
+  moduleLibrary     UserModuleLibrary[]
+  questionOverrides UserQuestionOverride[]
+  userRetention     UserRetention[]
+  weaknessReports   WeaknessReport[]
+  mobileRefreshTokens MobileRefreshToken[]
+
+  @@index([email])
+  @@index([handle])
+}
+
+model MobileRefreshToken {
+  id               String            @id @default(uuid())
+  userId           String
+  tokenHash        String            @unique
+  expiresAt        DateTime
+  createdAt        DateTime          @default(now())
+  revokedAt        DateTime?
+  replacedByTokenId String?
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedByToken  MobileRefreshToken? @relation("MobileRefreshTokenRotation", fields: [replacedByTokenId], references: [id])
+  replacedTokens   MobileRefreshToken[] @relation("MobileRefreshTokenRotation")
+
+  @@index([userId, expiresAt])
+}
+
+model ApiRateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+
+
+model Plan {
+  id                String         @id @default(uuid())
+  name              String         @unique
+  displayName       String
+  priceMonthly      Int?
+  priceYearly       Int?
+  features          Json
+  isActive          Boolean        @default(true)
+  subscriptions     Subscription[]
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  planId               String
+  status               String
+  billingCycle         String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  invoices             Invoice[]
+  plan                 Plan      @relation(fields: [planId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id              String       @id @default(uuid())
+  subscriptionId  String
+  amountDue       Int
+  amountPaid      Int?
+  status          String
+  stripeInvoiceId String?      @unique
+  createdAt       DateTime     @default(now())
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PaymentMethod {
+  id                    String  @id @default(uuid())
+  userId                String
+  stripePaymentMethodId String  @unique
+  type                  String
+  last4                 String?
+  user                  User    @relation(fields: [userId], references: [id])
+}
+
+model Module {
+  id              String              @id @default(uuid())
+  title           String
+  description     String?
+  type            String
+  status          String              @default("DRAFT")
+  isForkable      Boolean             @default(true)
+  ownerId         String
+  creatorId       String
+  sourceModuleId  String?
+  generationStep  String?
+  createdAt       DateTime            @default(now())
+  category        String?
+  subCategory     String?
+  archivedAt      DateTime?
+  isVerified      Boolean             @default(false)
+  visibility      Visibility          @default(PRIVATE)
+  collectionItems CollectionItem[]
+  items           Item[]
+  sessions        LearningSession[]
+  creator         User                @relation("CreatedModules", fields: [creatorId], references: [id])
+  owner           User                @relation("OwnedModules", fields: [ownerId], references: [id])
+  sourceModule    Module?             @relation("ModuleForks", fields: [sourceModuleId], references: [id])
+  forks           Module[]            @relation("ModuleForks")
+  notes           Note[]
+  userLibrary     UserModuleLibrary[]
+}
+
+model Item {
+  id                String                 @id @default(uuid())
+  moduleId          String
+  type              String
+  content           Json
+  contentHash       String
+  order             Int
+  sourceItemId      String?
+  module            Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  itemProgress      ItemProgress[]
+  itemSessions      ItemSession[]
+  notes             Note[]
+  sm2Progress       SM2Progress[]
+  questionOverrides UserQuestionOverride[]
+}
+
+model PDFAsset {
+  id        String   @id @default(uuid())
+  userId    String
+  fileName  String
+  s3Key     String
+  pageCount Int
+  status    String
+  ocrUsed   Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Exam {
+  id             String        @id @default(uuid())
+  userId         String
+  title          String
+  sourceModuleId String?
+  questions      Json
+  timeLimit      Int
+  createdAt      DateTime      @default(now())
+  user           User          @relation(fields: [userId], references: [id])
+  attempts       ExamAttempt[]
+}
+
+model ExamAttempt {
+  id          String    @id @default(uuid())
+  userId      String
+  examId      String
+  score       Int
+  maxScore    Int
+  answers     Json
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  exam        Exam      @relation(fields: [examId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model WeaknessReport {
+  id              String   @id @default(uuid())
+  userId          String
+  analysisDate    DateTime @default(now())
+  weakConcepts    Json
+  suggestedAction String
+  targetItemIds   Json
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Collection {
+  id          String                  @id @default(uuid())
+  title       String
+  description String?
+  category    String?
+  subCategory String?
+  isVerified  Boolean                 @default(false)
+  ownerId     String
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  visibility  Visibility              @default(PRIVATE)
+  owner       User                    @relation("OwnedCollections", fields: [ownerId], references: [id])
+  items       CollectionItem[]
+  userLibrary UserCollectionLibrary[]
+}
+
+model CollectionItem {
+  collectionId String
+  moduleId     String
+  order        Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  module       Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, moduleId])
+}
+
+model ItemProgress {
+  userId         String
+  itemId         String
+  contentHash    String
+  correctCount   Int      @default(0)
+  wrongCount     Int      @default(0)
+  strengthScore  Float    @default(0.0)
+  lastResult     String?
+  lastReviewedAt DateTime @default(now())
+  aiMetadata     Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  item           Item     @relation(fields: [itemId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@id([userId, itemId])
+}
+
+model SM2Progress {
+  userId       String
+  itemId       String
+  repetition   Int      @default(0)
+  interval     Int      @default(1)
+  easeFactor   Float    @default(2.5)
+  nextReviewAt DateTime
+  isRetired    Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+  item         Item     @relation(fields: [itemId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@id([userId, itemId])
+}
+
+model UserModuleLibrary {
+  userId            String
+  moduleId          String
+  role              String
+  lastInteractionAt DateTime @default(now())
+  module            Module   @relation(fields: [moduleId], references: [id])
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@id([userId, moduleId])
+}
+
+model UserCollectionLibrary {
+  userId            String
+  collectionId      String
+  role              String
+  lastInteractionAt DateTime   @default(now())
+  collection        Collection @relation(fields: [collectionId], references: [id])
+  user              User       @relation(fields: [userId], references: [id])
+
+  @@id([userId, collectionId])
+}
+
+model UserContentAccess {
+  userId       String
+  resourceId   String
+  resourceType String
+  accessLevel  String
+  grantedAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@id([userId, resourceId])
+}
+
+model LearningSession {
+  id           String        @id @default(uuid())
+  userId       String
+  moduleId     String
+  startedAt    DateTime      @default(now())
+  itemSessions ItemSession[]
+  module       Module        @relation(fields: [moduleId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+}
+
+model ItemSession {
+  id         String          @id @default(uuid())
+  sessionId  String
+  userId     String
+  itemId     String
+  result     String
+  durationMs Int
+  createdAt  DateTime        @default(now())
+  item       Item            @relation(fields: [itemId], references: [id])
+  session    LearningSession @relation(fields: [sessionId], references: [id])
+  user       User            @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model UserQuestionOverride {
+  userId     String
+  questionId String
+  action     String
+  item       Item   @relation(fields: [questionId], references: [id])
+  user       User   @relation(fields: [userId], references: [id])
+
+  @@id([userId, questionId])
+}
+
+model DailyMetrics {
+  id         String   @id
+  date       DateTime @unique
+  totalUsers Int
+}
+
+model UserRetention {
+  userId      String
+  cohortMonth DateTime
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@id([userId, cohortMonth])
+}
+
+model Note {
+  id               String          @id @default(uuid())
+  userId           String
+  moduleId         String?
+  itemId           String?
+  solvedQuestionId String?
+  title            String?
+  content          String
+  visibility       Visibility      @default(PRIVATE)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  item             Item?           @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  module           Module?         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  solvedQuestion   SolvedQuestion? @relation(fields: [solvedQuestionId], references: [id], onDelete: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([moduleId])
+  @@index([itemId])
+  @@index([solvedQuestionId])
+}
+
+model SolvedQuestion {
+  id           String   @id @default(uuid())
+  userId       String
+  imageUrl     String
+  questionText String
+  solution     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  notes        Note[]
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+model SystemLog {
+  id          String   @id @default(uuid())
+  requestId   String?  // Correlation ID
+  level       LogLevel @default(INFO)
+  environment String   // "development" | "production"
+  service     String?  // "api", "ai", "auth", "client"
+  message     String   @db.Text
+  stack       String?  @db.Text
+  source      String   // "CLIENT" | "SERVER"
+  url         String?  // Hata anındaki URL
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?    // Ekstra veri (Sanitized)
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  @@index([level])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([requestId])
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+}
+
+model LearningJourney {
+  id              String               @id @default(uuid())
+  userId          String
+  title           String
+  topic           String
+  depth           String               @default("standard")
+  status          String               @default("DRAFT") // DRAFT, GENERATING, ACTIVE, COMPLETED
+  syllabus        Json?                
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  user            User                 @relation("CreatedJourneys", fields: [userId], references: [id], onDelete: Cascade)
+  slides          LearningSlide[]
+  userLibrary     UserJourneyLibrary[]
+}
+
+model LearningSlide {
+  id               String            @id @default(uuid())
+  learningJourneyId String
+  order            Int
+  title            String
+  content          String            @db.Text
+  peekingQuestion  Json?
+  createdAt        DateTime          @default(now())
+  journey          LearningJourney   @relation(fields: [learningJourneyId], references: [id], onDelete: Cascade)
+
+  @@index([learningJourneyId])
+}
+
+model UserJourneyLibrary {
+  userId            String
+  journeyId         String
+  role              String // "OWNER"
+  lastInteractionAt DateTime @default(now())
+  journey           LearningJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, journeyId])
+}

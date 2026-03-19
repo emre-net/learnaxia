@@ -1,0 +1,31 @@
+﻿env: load .env
+env: export EXPO_ROUTER_APP_ROOT EXPO_PUBLIC_API_URL
+Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+React Compiler enabled
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+node.exe : Skipping dependency val
+idation in offline mode
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.
+exe" "C:\Program Files\nodejs/node
+_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Skipping depend..  
+  .in offline mode:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+ÔÇ║ Opening exp://127.0.0.1:8081 on Pixel_7a
+Skipping Expo Go version validatio
+n in offline mode
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Android apps\mobile\node_modules\expo-router\entry.js ÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæ  0.0% (0/1)
+Android apps\mobile\node_modules\expo-router\entry.js ÔûôÔûôÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæ 16.0% (117/306)
+Android apps\mobile\node_modules\expo-router\entry.js ÔûôÔûôÔûôÔûôÔûôÔûôÔûôÔûôÔûæÔûæÔûæÔûæÔûæÔûæÔûæÔûæ 53.7% (493/673)
+

@@ -1,0 +1,166 @@
+"use client";
+
+import { useNotes } from "@/hooks/use-notes";
+import { NoteEditor } from "./note-editor";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { Edit2, Trash2, FileText } from "lucide-react";
+import { useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { LibraryCard } from "@/components/shared/library-card";
+import { TypeIcon } from "@/components/shared/type-icon";
+
+interface NoteListProps {
+    moduleId?: string;
+    itemId?: string;
+}
+
+export function NoteList({ moduleId, itemId }: NoteListProps) {
+    const { notes, isLoading, deleteNote } = useNotes({ moduleId, itemId });
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+
+    if (isLoading) {
+        return <div className="text-center py-4 text-muted-foreground">Loading notes...</div>;
+    }
+
+    if (!notes || notes.length === 0) {
+        return <div className="text-center py-8 text-muted-foreground">No notes yet.</div>;
+    }
+
+    return (
+        <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+            <div className="space-y-4">
+                {notes.map((note) => (
+                    <div key={note.id}>
+                        {editingNoteId === note.id ? (
+                            <NoteEditor
+                                existingNote={note}
+                                onSaved={() => setEditingNoteId(null)}
+                                onClose={() => setEditingNoteId(null)}
+                            />
+                        ) : (
+                            <LibraryCard
+                                viewMode="grid"
+                                typeIcon={<TypeIcon type="NOTE" size="md" />}
+                                title={note.title || "İsimsiz Not"}
+                                description={
+                                    (() => {
+                                        try {
+                                            const parsed = JSON.parse(note.content);
+                                            if (Array.isArray(parsed)) {
+                                                const textPreview = parsed
+                                                    .map((block: any) => {
+                                                        if (block.content && Array.isArray(block.content)) {
+                                                            return block.content.map((c: any) => c.text || "").join("");
+                                                        }
+                                                        return "";
+                                                    })
+                                                    .filter(Boolean)
+                                                    .join(" ")
+                                                    .substring(0, 150);
+                                                return <p className="text-sm text-muted-foreground line-clamp-3">{textPreview || "..."}</p>;
+                                            }
+                                        } catch (e) {
+                                            // Fallback for legacy raw text or HTML
+                                            return (
+                                                <div
+                                                    className="prose prose-sm dark:prose-invert max-w-none line-clamp-3 text-muted-foreground"
+                                                    dangerouslySetInnerHTML={{ __html: note.content }}
+                                                />
+                                            );
+                                        }
+                                        return null;
+                                    })()
+                                }
+                                metadata={[
+                                    <span key="date" className="text-xs text-muted-foreground whitespace-nowrap">
+                                        {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })} güncellendi
+                                    </span>,
+                                    note.module && !moduleId ? (
+                                        <span key="module" className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-2 truncate">
+                                            Modül: {note.module.title}
+                                        </span>
+                                    ) : null
+                                ]}
+                                metrics={[
+                                    {
+                                        icon: <FileText className="h-4.5 w-4.5" />,
+                                        count: (() => {
+                                            try {
+                                                const parsed = JSON.parse(note.content);
+                                                if (Array.isArray(parsed)) {
+                                                    let totalLength = 0;
+                                                    parsed.forEach((block: any) => {
+                                                        if (block.content && Array.isArray(block.content)) {
+                                                            block.content.forEach((c: any) => {
+                                                                if (c.text) totalLength += c.text.length;
+                                                            });
+                                                        }
+                                                    });
+                                                    return totalLength;
+                                                }
+                                            } catch (e) { }
+                                            return note.content.replace(/<[^>]*>?/gm, '').length;
+                                        })(),
+                                        label: "Karakter"
+                                    }
+                                ]}
+                                shareType="note"
+                                shareId={note.id}
+                                shareTitle={note.title || "İsimsiz Not"}
+                                actionButton={
+                                    <div className="flex gap-2 w-full justify-end">
+                                        <Link href={`/dashboard/notes/${note.id}`} className="flex-1 xs:flex-none">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full h-10 rounded-xl px-4 border-primary/20 text-primary hover:bg-primary/5"
+                                            >
+                                                <Edit2 className="h-4 w-4 mr-2" />
+                                                Düzenle
+                                            </Button>
+                                        </Link>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 flex-1 xs:flex-none border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive">
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Sil
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="rounded-[2rem]">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Notu Sil?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Bu işlem geri alınamaz. Notunuz tamamen silinecektir.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="rounded-xl">İptal</AlertDialogCancel>
+                                                    <AlertDialogAction className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteNote(note.id)}>
+                                                        Sil
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                }
+                            />
+                        )}
+                    </div>
+                ))}
+            </div>
+        </ScrollArea>
+    );
+}

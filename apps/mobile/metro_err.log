@@ -1,0 +1,16 @@
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "shared-workspace-lockfile". This will stop working in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
+Error: Error loading Metro config at: C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile\metro.config.cjs
+NativeWind only supports Tailwind CSS v3
+Error: NativeWind only supports Tailwind CSS v3
+    at tailwindConfig (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\nativewind\src\metro\tailwind\index.ts:20:11)
+    at withNativeWind (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\nativewind\src\metro\index.ts:45:39)
+    at Object.<anonymous> (C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile\metro.config.cjs:29:18)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:336:3)

@@ -1,0 +1,86 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // Externalize packages that crash Turbopack (DOMMatrix, canvas etc.)
+  serverExternalPackages: ['pdf-parse', 'officeparser'],
+
+  // Transpile shared monorepo packages
+  transpilePackages: ['@learnaxia/shared'],
+
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+  },
+
+  // Compression
+  compress: true,
+
+  // Power bundle optimization
+  experimental: {
+    scrollRestoration: true,
+  },
+
+  output: 'standalone',
+  outputFileTracingRoot: require('path').join(__dirname, '../../'),
+
+  // Security & Performance headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            // Allow camera on same-origin pages (needed for photo-upload/capture flows).
+            value: 'camera=(self), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        // Cache static assets aggressively
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache fonts
+        source: '/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+
+  // Redirects for trailing slashes
+  trailingSlash: false,
+
+  // Production source maps off for smaller bundles
+  productionBrowserSourceMaps: false,
+};
+
+export default nextConfig;

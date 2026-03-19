@@ -1,0 +1,179 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useStudyStore } from "@/stores/study-store";
+import { useSettingsStore } from "@/stores/settings-store";
+import { getStudyDictionary } from "@/lib/i18n/dictionaries";
+import { ArrowRight, Check, RotateCcw } from "lucide-react";
+import { useEffect, useCallback } from "react";
+import { playStudySound } from "@/lib/audio";
+
+export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
+    const {
+        items,
+        currentIndex,
+        mode,
+        isFlipped,
+        setIsFlipped,
+        selectedOption,
+        feedback,
+        setFeedback,
+        correctCount,
+        setCorrectCount,
+        wrongCount,
+        setWrongCount
+    } = useStudyStore();
+
+    const { language } = useSettingsStore();
+    const dict = getStudyDictionary(language);
+
+    const currentItem = items[currentIndex];
+
+    const handleNextItem = useCallback(() => {
+        onNext({
+            itemId: currentItem.id,
+            result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG',
+            quality: feedback === 'CORRECT' ? 5 : 1
+        });
+    }, [currentItem.id, feedback, onNext]);
+
+    const handleRate = useCallback((quality: number) => {
+        // Quality: 0-1 (Wrong/Hard), 2-3 (Good/Ok), 4-5 (Easy/Perfect)
+        // Map to: "AGAIN", "HARD", "GOOD", "EASY"
+        let result = "GOOD";
+        if (quality <= 1) result = "AGAIN";
+        else if (quality <= 3) result = "HARD";
+        else if (quality >= 5) result = "EASY";
+
+        const isCorrect = quality > 1;
+        if (isCorrect) setCorrectCount(correctCount + 1);
+        else setWrongCount(wrongCount + 1);
+
+        onNext({ itemId: currentItem.id, result, quality });
+    }, [correctCount, currentItem.id, onNext, setCorrectCount, setWrongCount, wrongCount]);
+
+    const handleShowAnswer = useCallback(() => {
+        setFeedback('WRONG');
+        playStudySound('FAILURE');
+        setWrongCount(wrongCount + 1);
+    }, [setFeedback, setWrongCount, wrongCount]);
+
+    const handleQuizStep = useCallback(() => {
+        if (!feedback) {
+            handleShowAnswer();
+        } else {
+            handleNextItem();
+        }
+    }, [feedback, handleNextItem, handleShowAnswer]);
+
+    // Handle Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // QUIZ / MC / GAP: Next Question or Show Answer
+            if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+                if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+                    e.preventDefault();
+                    handleQuizStep();
+                    return;
+                }
+                if (feedback && (e.code === 'ArrowRight' || e.code === 'Space')) {
+                    e.preventDefault();
+                    handleNextItem();
+                    return;
+                }
+                // No need to return here, let it fall through if needed
+            }
+
+            // FLASHCARD: Flip & Vote
+            if (mode !== 'QUIZ' && currentItem.type === 'FLASHCARD') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (!isFlipped) setIsFlipped(true);
+                } else if (isFlipped) {
+                    switch (e.code) {
+                        case 'ArrowLeft': handleRate(1); break; // Again
+                        case 'ArrowDown': handleRate(2); break; // Hard
+                        case 'ArrowUp': handleRate(4); break;   // Good 
+                        case 'ArrowRight': handleRate(5); break; // Easy
+                        case 'Digit1': handleRate(1); break;
+                        case 'Digit2': handleRate(2); break;
+                        case 'Digit3': handleRate(4); break;
+                        case 'Digit4': handleRate(5); break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem, handleNextItem, handleQuizStep]);
+
+    if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+        const isLastItem = currentIndex === items.length - 1;
+
+        return (
+            <div className="flex gap-4 mt-8 w-full max-w-md">
+                {!feedback ? (
+                    <Button
+                        variant="outline"
+                        className="w-full text-lg h-12 border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-all"
+                        size="lg"
+                        onClick={handleShowAnswer}
+                    >
+                        <RotateCcw className="mr-2 h-5 w-5 opacity-50" />
+                        {dict.showAnswer || "Cevabı Gör"}
+                    </Button>
+                ) : (
+                    <Button
+                        className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700 text-white" : "w-full text-lg h-12"}
+                        size="lg"
+                        onClick={handleNextItem}
+                    >
+                        {isLastItem ? (
+                            <>{dict.finishSession || "Bitir"} <Check className="ml-2 h-5 w-5" /></>
+                        ) : (
+                            <>{dict.nextQuestion || "Sıradaki"} <ArrowRight className="ml-2 h-5 w-5" /></>
+                        )}
+                    </Button>
+                )}
+            </div>
+        );
+    }
+
+    // Flashcard Controls
+    if (!isFlipped) {
+        return (
+            <div className="mt-8 text-muted-foreground text-sm">
+                {dict.flipInstruction}
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
+            <div className="grid grid-cols-4 gap-4">
+                <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
+                    <RotateCcw className="h-5 w-5" />
+                    <span>{dict.rate.again}</span>
+                    <span className="text-xs opacity-70">{dict.rate.againTime}</span>
+                </Button>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
+                    <span className="text-lg font-bold">{dict.rate.hard}</span>
+                    <span className="text-xs opacity-70">{dict.rate.hardTime}</span>
+                </Button>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
+                    <span className="text-lg font-bold">{dict.rate.good}</span>
+                    <span className="text-xs opacity-70">{dict.rate.goodTime}</span>
+                </Button>
+                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
+                    <Check className="h-5 w-5" />
+                    <span>{dict.rate.easy}</span>
+                    <span className="text-xs opacity-70">{dict.rate.easyTime}</span>
+                </Button>
+            </div>
+            <div className="text-center text-xs text-muted-foreground mt-2">
+                {dict.keyboardHint}
+            </div>
+        </div>
+    );
+}

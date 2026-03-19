@@ -1,0 +1,12 @@
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "shared-workspace-lockfile". This will stop working in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
+  --non-interactive is not supported, use $CI=1 instead
+env: load .env
+env: export EXPO_ROUTER_APP_ROOT EXPO_PUBLIC_API_URL
+Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+› Port 8081 is being used by another process
+Input is required, but 'npx expo' is in non-interactive mode.
+Required input:
+> Use port 8083 instead?
+› Skipping dev server

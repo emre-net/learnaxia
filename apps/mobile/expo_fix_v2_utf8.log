@@ -1,0 +1,27 @@
+﻿env: load .env
+env: export EXPO_ROUTER_APP_ROOT EXPO_PUBLIC_API_URL
+Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+React Compiler enabled
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+node.exe : Skipping dependency
+ validation in offline mode
+At line:1 char:1
++ & "C:\Program Files\nodejs/n
+ode.exe" "C:\Program Files\nod
+ejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (Skipping   
+  depend...in offline mode:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+ÔÇ║ Opening exp://127.0.0.1:8081 on Pixel_7a
+Skipping Expo Go version valid
+ation in offline mode
+

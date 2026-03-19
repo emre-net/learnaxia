@@ -1,0 +1,54 @@
+﻿node.exe : npm warn Unknown project config "public-hoist-pattern". This will stop wo
+rking in the next major version of npm.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...version of npm.:Stri 
+   ng) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm warn Unknown project config "shared-workspace-lockfile". This will stop working 
+in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the ne
+xt major version of npm.
+
+> learnaxia-mobile@1.0.0 start
+> expo start
+
+2026-03-17T19:22:43.508Z expo:telemetry Switching strategy from detached to instant
+2026-03-17T19:22:43.771Z expo:telemetry Recording 1 event(s)
+2026-03-17T19:22:43.796Z expo:env Loaded environment variables from: C:\Users\Emre\.
+gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile\.env
+2026-03-17T19:22:43.797Z expo:env C:\Users\Emre\.gemini\antigravity\scratch\learnaxi
+ty\learnaxia\apps\mobile\.env.development does not exist, skipping this env file
+2026-03-17T19:22:43.797Z expo:env C:\Users\Emre\.gemini\antigravity\scratch\learnaxi
+ty\learnaxia\apps\mobile\.env.local does not exist, skipping this env file
+2026-03-17T19:22:43.797Z expo:env C:\Users\Emre\.gemini\antigravity\scratch\learnaxi
+ty\learnaxia\apps\mobile\.env.development.local does not exist, skipping this env fi
+le
+env: load .env
+env: export EXPO_ROUTER_APP_ROOT EXPO_PUBLIC_API_URL
+Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+2026-03-17T19:22:44.140Z expo:prebuild-config:expo-splash-screen:ios config: {
+  image: './assets/images/splash-icon.png',
+  imageWidth: 200,
+  resizeMode: 'contain',
+  backgroundColor: '#020617',
+  dark: { backgroundColor: '#020617' }
+}
+2026-03-17T19:22:44.201Z expo:utils:getRunningProcess No pid found for port: 8081. E
+rror: Error: spawnSync lsof ENOENT
+ÔÇ║ Port 8081 is being used by another process
+Input is required, but 'npx expo' is in non-interactive mode.
+Required input:
+> Use port 8082 instead?
+ÔÇ║ Skipping dev server
+npm error Lifecycle script `start` failed with error:
+npm error code 1
+npm error path C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\m
+obile
+npm error workspace learnaxia-mobile@1.0.0
+npm error location C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\ap
+ps\mobile
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c expo start

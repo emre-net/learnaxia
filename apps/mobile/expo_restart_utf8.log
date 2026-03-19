@@ -1,0 +1,82 @@
+﻿Starting project at C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile
+React Compiler enabled
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+node.exe : TypeError: fetch fa
+iled
+At line:1 char:1
++ & "C:\Program Files\nodejs/n
+ode.exe" "C:\Program Files\nod
+ejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (TypeError  
+  : fetch failed:String) []   
+ , RemoteException
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+TypeError: fetch failed
+    at node:internal/deps/undi
+ci/undici:15845:13
+    at processTicksAndRejectio
+ns (node:internal/process/task
+_queues:103:5)
+    at fetchWithCredentials (C
+:\Users\Emre\.gemini\antigravi
+ty\scratch\learnaxity\learnaxi
+a\node_modules\expo\node_modul
+es\@expo\cli\src\api\rest\clie
+nt.ts:98:24)
+    at cachedFetch (C:\Users\E
+mre\.gemini\antigravity\scratc
+h\learnaxity\learnaxia\node_mo
+dules\expo\node_modules\@expo\
+cli\src\api\rest\cache\wrapFet
+chWithCache.ts:26:24)
+    at getNativeModuleVersions
+Async (C:\Users\Emre\.gemini\a
+ntigravity\scratch\learnaxity\
+learnaxia\node_modules\expo\no
+de_modules\@expo\cli\src\api\g
+etNativeModuleVersions.ts:39:2
+0)
+    at getVersionedNativeModul
+esAsync (C:\Users\Emre\.gemini
+\antigravity\scratch\learnaxit
+y\learnaxia\node_modules\expo\
+node_modules\@expo\cli\src\sta
+rt\doctor\dependencies\bundled
+NativeModules.ts:33:14)
+    at getCombinedKnownVersion
+sAsync (C:\Users\Emre\.gemini\
+antigravity\scratch\learnaxity
+\learnaxia\node_modules\expo\n
+ode_modules\@expo\cli\src\star
+t\doctor\dependencies\getVersi
+onedPackages.ts:58:7)
+    at getVersionedDependencie
+sAsync (C:\Users\Emre\.gemini\
+antigravity\scratch\learnaxity
+\learnaxia\node_modules\expo\n
+ode_modules\@expo\cli\src\star
+t\doctor\dependencies\validate
+DependenciesVersions.ts:100:33
+)
+    at validateDependenciesVer
+sionsAsync (C:\Users\Emre\.gem
+ini\antigravity\scratch\learna
+xity\learnaxia\node_modules\ex
+po\node_modules\@expo\cli\src\
+start\doctor\dependencies\vali
+dateDependenciesVersions.ts:49
+:25)
+    at startAsync (C:\Users\Em
+re\.gemini\antigravity\scratch
+\learnaxity\learnaxia\node_mod
+ules\expo\node_modules\@expo\c
+li\src\start\startAsync.ts:110
+:5)
+
