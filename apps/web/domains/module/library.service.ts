@@ -12,7 +12,7 @@ export class LibraryService {
         const existingLibraryModuleIds = (await prisma.userModuleLibrary.findMany({
             where: { userId },
             select: { moduleId: true }
-        })).map((e: { moduleId: string }) => e.moduleId);
+        })).map(e => e.moduleId);
 
         const missingOwnedModules = await prisma.module.findMany({
             where: {
@@ -24,7 +24,7 @@ export class LibraryService {
 
         if (missingOwnedModules.length > 0) {
             await prisma.userModuleLibrary.createMany({
-                data: missingOwnedModules.map((m: { id: string, createdAt: Date }) => ({
+                data: missingOwnedModules.map(m => ({
                     userId,
                     moduleId: m.id,
                     role: 'OWNER',
@@ -101,7 +101,7 @@ export class LibraryService {
             solvedMap[mid] = (solvedMap[mid] || 0) + 1;
         });
 
-        const items = libraryEntries.map((entry: any) => ({
+        const items = libraryEntries.map(entry => ({
             ...entry,
             solvedCount: solvedMap[entry.moduleId] || 0
         }));

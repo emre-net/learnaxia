@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         const { journeyId, topic, depth, language, item } = GenerateSlideSchema.parse(body);
 
         // Verify ownership
-        const userLibrary = await (prisma as any).userJourneyLibrary.findFirst({
+        const userLibrary = await prisma.userJourneyLibrary.findFirst({
             where: {
                 userId: session.user.id,
                 journeyId: journeyId,
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         }
 
         // Check if slide already exists (idempotency)
-        const existingSlide = await (prisma as any).learningSlide.findFirst({
+        const existingSlide = await prisma.learningSlide.findFirst({
             where: {
                 learningJourneyId: journeyId,
                 order: item.order
@@ -61,13 +61,13 @@ export async function POST(req: Request) {
             language
         );
 
-        const newSlide = await (prisma as any).learningSlide.create({
+        const newSlide = await prisma.learningSlide.create({
             data: {
                 learningJourneyId: journeyId,
                 order: item.order,
                 title: slideResult.title,
                 content: slideResult.content,
-                ...(slideResult.peekingQuestion ? { peekingQuestion: slideResult.peekingQuestion as any } : {})
+                ...(slideResult.peekingQuestion ? { peekingQuestion: slideResult.peekingQuestion } : {})
             }
         });
 

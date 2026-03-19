@@ -6,6 +6,7 @@ import { SignJWT } from 'jose';
 import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 
 const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+const JWT_EXPIRY_DAYS = 1; // 1 day for access token (security best practice)
 const JWT_SECRET = new TextEncoder().encode(secret || 'fallback_secret_for_development');
 
 export async function POST(req: Request) {
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    const token = await new SignJWT({
+    const accessToken = await new SignJWT({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -46,14 +47,14 @@ export async function POST(req: Request) {
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime('30d')
+      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`) // Shorter expiration for security
       .sign(JWT_SECRET);
 
     // Provide a SECURE refresh token mechanism
     const refreshToken = await MobileRefreshService.generate(user.id);
 
     return NextResponse.json({
-      accessToken: token,
+      accessToken,
       refreshToken,
       user: {
         id: user.id,

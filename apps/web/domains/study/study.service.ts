@@ -18,9 +18,9 @@ export class StudyService {
         // 2. Permissive Access Check
         // Rule: Access allowed if Public OR Owner OR Linked Access (Private but has valid ID)
         // Since we are fetching by unique ID here, having the ID is proof of linked access.
-        const isPublic = (dbModule as any).visibility === 'PUBLIC';
+        const isPublic = dbModule.visibility === 'PUBLIC';
         const isOwner = dbModule.ownerId === userId;
-        const isPrivateLinked = (dbModule as any).visibility === 'PRIVATE';
+        const isPrivateLinked = dbModule.visibility === 'PRIVATE';
 
         let hasAccess = isPublic || isOwner || isPrivateLinked;
 
@@ -31,17 +31,17 @@ export class StudyService {
         // 3. Fetch User Progress (Parallel)
         const [itemProgresses, sm2Progresses] = await Promise.all([
             prisma.itemProgress.findMany({
-                where: { userId, itemId: { in: (dbModule as any).items.map((i: any) => i.id) } }
+                where: { userId, itemId: { in: dbModule.items.map(i => i.id) } }
             }),
             prisma.sM2Progress.findMany({
-                where: { userId, itemId: { in: (dbModule as any).items.map((i: any) => i.id) } }
+                where: { userId, itemId: { in: dbModule.items.map(i => i.id) } }
             })
         ]);
 
         // 4. Merge & Filter Logic
-        let items = (dbModule as any).items.map((item: any) => {
-            const progress = itemProgresses.find((p: any) => p.itemId === item.id);
-            const sm2 = sm2Progresses.find((p: any) => p.itemId === item.id);
+        let items = dbModule.items.map(item => {
+            const progress = itemProgresses.find(p => p.itemId === item.id);
+            const sm2 = sm2Progresses.find(p => p.itemId === item.id);
 
             // Normalize Type & Content
             let type: any = item.type;
@@ -90,21 +90,26 @@ export class StudyService {
         if (mode === 'WRONG_ONLY') {
             // Handbook Rule: "Item changed -> no longer wrong".
             // Filter: lastResult == WRONG AND item.hash == progress.hash
-            items = items.filter((i: any) => {
-                const progress = itemProgresses.find((p: any) => p.itemId === i.id);
+            items = items.filter(i => {
+                const progress = itemProgresses.find(p => p.itemId === i.id);
                 return i.lastResult === 'WRONG' && progress?.contentHash === i.hash;
             });
         } else if (mode === 'SM2') {
             // SM-2 Filter: Due items only (or new)
             // Due: nextReviewAt <= NOW
             const now = new Date();
-            items = items.filter((i: any) => {
-                if (!i.nextReviewAt) return true; // New items are due
+            items = items.filter(i => {
+                // Include if:
+                // 1. No SM2 record (new item)
+                // 2. Due for review
+                // 3. Retired items excluded
+                if (!i.nextReviewAt) return true; // New
+                if (i.isRetired) return false;
                 return new Date(i.nextReviewAt) <= now;
             });
         } else if (mode === 'AI_SMART') {
             // Smart Order: Prioritize WRONG > New > Review
-            items = items.sort((a: any, b: any) => {
+            items = items.sort((a, b) => {
                 const scoreA = (a.lastResult === 'WRONG' ? 100 : 0) + (a.interval === 0 ? 50 : 0);
                 const scoreB = (b.lastResult === 'WRONG' ? 100 : 0) + (b.interval === 0 ? 50 : 0);
                 return scoreB - scoreA;

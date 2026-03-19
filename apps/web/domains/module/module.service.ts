@@ -30,7 +30,7 @@ export class ModuleService {
      * Creates a new module with transactional integrity.
      */
     static async create(userId: string, dto: CreateModuleDto) {
-        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        return await prisma.$transaction(async (tx) => {
             const createdModule = await tx.module.create({
                 data: {
                     title: dto.title,

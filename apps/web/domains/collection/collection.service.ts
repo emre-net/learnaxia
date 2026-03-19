@@ -5,8 +5,8 @@ import { Prisma } from "@prisma/client";
 export class CollectionService {
 
     static async create(userId: string, data: { title: string; description?: string; isPublic?: boolean; category?: string; subCategory?: string }) {
-        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            const collection = await (tx as any).collection.create({
+        return await prisma.$transaction(async (tx) => {
+            const collection = await tx.collection.create({
                 data: {
                     title: data.title,
                     description: data.description ?? null,
@@ -58,7 +58,14 @@ export class CollectionService {
             where: {
                 userId,
                 ...(filters?.role && filters.role !== 'all' && { role: filters.role === 'created' ? 'OWNER' : 'SAVED' }),
-                ...(hasFilters && { collection: collectionWhere })
+                ...(hasFilters && filters?.search && { 
+                    collection: {
+                        OR: [
+                            { title: { contains: filters.search, mode: 'insensitive' } },
+                            { description: { contains: filters.search, mode: 'insensitive' } }
+                        ]
+                    }
+                })
             }
         });
 
@@ -66,7 +73,14 @@ export class CollectionService {
             where: {
                 userId,
                 ...(filters?.role && filters.role !== 'all' && { role: filters.role === 'created' ? 'OWNER' : 'SAVED' }),
-                ...(hasFilters && { collection: collectionWhere })
+                ...(hasFilters && filters?.search && { 
+                    collection: {
+                        OR: [
+                            { title: { contains: filters.search, mode: 'insensitive' } },
+                            { description: { contains: filters.search, mode: 'insensitive' } }
+                        ]
+                    }
+                })
             },
             include: {
                 collection: {
@@ -95,7 +109,7 @@ export class CollectionService {
                     include: {
                         module: {
                             select: { id: true, title: true, type: true, status: true, visibility: true, items: { select: { id: true } } }
-                        } as any
+                        }
                     },
                     orderBy: { order: 'asc' }
                 },
@@ -106,12 +120,12 @@ export class CollectionService {
         if (!collection) throw new Error("Collection not found");
 
         // Access Rule: PUBLIC or OWNER or linked access (PRIVATE but has ID)
-        if ((collection as any).visibility === 'PRIVATE' && collection.ownerId !== userId) {
+        if (collection.visibility === 'PRIVATE' && collection.ownerId !== userId) {
             // Implicit access via Link is allowed for PRIVATE collections
         }
 
         // Extract modules from items
-        const modules = (collection as any).items.map((item: any) => item.module);
+        const modules = collection.items.map(item => item.module);
 
         return {
             ...collection,
@@ -130,9 +144,9 @@ export class CollectionService {
         }
 
         // Transaction to update details and items
-        return await prisma.$transaction(async (tx: any) => {
+        return await prisma.$transaction(async (tx) => {
             // Update basic details
-            await (tx as any).collection.update({
+            await tx.collection.update({
                 where: { id: collectionId },
                 data: {
                     title: data.title,
