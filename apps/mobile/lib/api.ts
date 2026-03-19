@@ -5,7 +5,9 @@ import { Platform } from 'react-native';
 // For Android emulator, localhost is 10.0.2.2.
 // For iOS Simulator, localhost is localhost.
 // Replace with your production URL when deploying.
-export const API_BASE_URL = __DEV__
+const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+
+export const API_BASE_URL = isDev
     ? (Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api')
     : 'https://learnaxia.com/api';
 

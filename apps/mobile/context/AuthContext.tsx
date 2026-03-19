@@ -43,7 +43,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         const res = await api.get('/mobile/user/profile');
                         setUser(res.data);
                     } catch (error) {
-                        await logout();
+                        // Token invalid, clear it
+                        await clearAuthToken();
+                        setUser(null);
                     }
                 }
             } catch (error) {
