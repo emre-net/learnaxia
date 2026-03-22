@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import api from '../../lib/api';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-
-const { width } = Dimensions.get('window');
-
-import { StudyModule, ModuleItem } from '@learnaxia/shared';
+import { StudyModule } from '@learnaxia/shared';
+import api from '../../lib/api';
 
 export default function StudyScreen() {
     const { id } = useLocalSearchParams();

@@ -1,13 +1,14 @@
-
+import 'react-native-reanimated';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
-import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import './global.css';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -19,13 +20,9 @@ LogBox.ignoreLogs([
   'Network Error',
 ]);
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
 export const unstable_settings = {
   anchor: '(tabs)',
 };
-
-import { AuthProvider, useAuth } from '../context/AuthContext';
 
 function InitialRoot() {
   const { isLoading } = useAuth();

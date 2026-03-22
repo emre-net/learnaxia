@@ -60,7 +60,7 @@ const features = [
 
 export function FeaturesSection() {
     return (
-        <section id="features" className="py-24 bg-slate-950/50 border-t border-slate-900 overflow-hidden">
+        <section id="features" className="py-16 bg-slate-950/50 border-t border-slate-900 overflow-hidden">
             <div className="container mx-auto px-4 md:px-6 relative">
                 {/* Decorative background glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />

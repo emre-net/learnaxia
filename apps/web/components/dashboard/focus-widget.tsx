@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTimer, TimerMode } from "@/hooks/use-timer";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/i18n";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function FocusWidget() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'POMODORO' | 'STOPWATCH'>('POMODORO');
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pomodoroDuration, setPomodoroDuration] = useState(25 * 60);
@@ -76,10 +78,10 @@ export function FocusWidget() {
                     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-[200px]">
                         <TabsList className="grid w-full grid-cols-2 bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-md">
                             <TabsTrigger value="POMODORO" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-                                <Hourglass className="w-3 h-3 mr-1.5" /> Pomodoro
+                                <Hourglass className="w-3 h-3 mr-1.5" /> {t('dashboard.focus.pomodoro')}
                             </TabsTrigger>
                             <TabsTrigger value="STOPWATCH" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-                                <Timer className="w-3 h-3 mr-1.5" /> Sayaç
+                                <Timer className="w-3 h-3 mr-1.5" /> {t('dashboard.focus.stopwatch')}
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -109,7 +111,7 @@ export function FocusWidget() {
                     </div>
 
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
-                        {activeTab === 'POMODORO' ? (timer.isRunning ? 'Odaklanma Seansı' : 'Mola / Hazır') : 'Serbest Çalışma'}
+                        {activeTab === 'POMODORO' ? (timer.isRunning ? t('dashboard.focus.modePomodoro') : t('dashboard.focus.statusReady')) : t('dashboard.focus.modeStopwatch')}
                     </span>
                 </div>
 
@@ -147,20 +149,20 @@ export function FocusWidget() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
-                            <DropdownMenuLabel>Zamanlayıcı Ayarları</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => changePomodoroDuration(15)}>
-                                15 Dakika (Kısa Odak)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => changePomodoroDuration(25)}>
-                                25 Dakika (Klasik Pomodoro)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => changePomodoroDuration(45)}>
-                                45 Dakika (Uzun Odak)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => changePomodoroDuration(60)}>
-                                60 Dakika (Derin Çalışma)
-                            </DropdownMenuItem>
+                        <DropdownMenuLabel>{t('dashboard.focus.settingsTitle')}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => changePomodoroDuration(15)}>
+                            {t('dashboard.focus.preset15')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changePomodoroDuration(25)}>
+                            {t('dashboard.focus.preset25')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changePomodoroDuration(45)}>
+                            {t('dashboard.focus.preset45')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => changePomodoroDuration(60)}>
+                            {t('dashboard.focus.preset60')}
+                        </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

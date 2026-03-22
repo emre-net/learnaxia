@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, BookOpen, Clock, ShieldCheck } from "lucide-react";
+import { Activity, BookOpen, Clock, ShieldCheck, TrendingUp, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -12,6 +12,8 @@ import { useTranslation } from "@/lib/i18n/i18n";
 interface DashboardStats {
     totalStudyMinutes: number;
     modulesStarted: number;
+    totalSolved: number;
+    averageAccuracy: number;
 }
 
 import { FocusWidget } from "@/components/dashboard/focus-widget";
@@ -26,6 +28,8 @@ export default function DashboardPage() {
     const [stats, setStats] = useState<DashboardStats>({
         totalStudyMinutes: 0,
         modulesStarted: 0,
+        totalSolved: 0,
+        averageAccuracy: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -38,6 +42,8 @@ export default function DashboardPage() {
                 setStats({
                     totalStudyMinutes: analytics?.stats?.totalStudyMinutes || 0,
                     modulesStarted: analytics?.stats?.modulesStarted || 0,
+                    totalSolved: analytics?.stats?.totalSolved || 0,
+                    averageAccuracy: analytics?.stats?.averageAccuracy || 0,
                 });
             } catch (error) {
                 console.error("Dashboard stats fetch error:", error);
@@ -76,7 +82,7 @@ export default function DashboardPage() {
 
                 {/* Stats Area */}
                 <div className="xl:col-span-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10">
+                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-emerald-500/20 transition-all">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{t('settings.duration')}</CardTitle>
                             <Clock className="h-4 w-4 text-emerald-500" />
@@ -86,7 +92,7 @@ export default function DashboardPage() {
                             <p className="text-xs text-muted-foreground mt-1">Platformda geçirdiğin süre</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10">
+                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-blue-500/20 transition-all">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{t('dashboard.modules')}</CardTitle>
                             <BookOpen className="h-4 w-4 text-blue-500" />
@@ -94,6 +100,26 @@ export default function DashboardPage() {
                         <CardContent>
                             <div className="text-2xl font-bold">{loading ? "..." : stats.modulesStarted}</div>
                             <p className="text-xs text-muted-foreground mt-1">İlerleme kaydettiğin setler</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-purple-500/20 transition-all">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Başarı Oranı</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-purple-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{loading ? "..." : `%${stats.averageAccuracy}`}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Genel doğruluk yüzden</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-amber-500/20 transition-all">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Toplam Çözüm</CardTitle>
+                            <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{loading ? "..." : stats.totalSolved}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Çözülen toplam soru sayısı</p>
                         </CardContent>
                     </Card>
                 </div>

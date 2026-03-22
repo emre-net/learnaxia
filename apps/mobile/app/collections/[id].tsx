@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    SafeAreaView, RefreshControl, Dimensions, Image
+    SafeAreaView, RefreshControl,
 } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,8 +9,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Theme as SharedTheme } from '@learnaxia/shared';
 import api from '@/lib/api';
-
-const { width } = Dimensions.get('window');
 
 type ModuleData = {
     id: string;

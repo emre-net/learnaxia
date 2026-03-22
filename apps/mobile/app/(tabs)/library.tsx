@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    SafeAreaView, RefreshControl, TextInput, Dimensions
+    SafeAreaView, RefreshControl, TextInput,
 } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
+import { Theme as SharedTheme, t } from '@learnaxia/shared';
 import api from '../../lib/api';
 
-const { width } = Dimensions.get('window');
+const currentLang = 'tr'; // Default to Turkish for now
 
 type ModuleData = {
     id: string;
@@ -88,9 +88,9 @@ export default function LibraryScreen() {
     const currentData = activeTab === 'modules' ? filteredModules : activeTab === 'collections' ? filteredCollections : filteredNotes;
 
     const tabs: { id: TabType; label: string; icon: string; count: number }[] = [
-        { id: 'modules', label: 'Modüller', icon: 'menu-book', count: modules.length },
-        { id: 'collections', label: 'Koleksiyonlar', icon: 'folder-special', count: collections.length },
-        { id: 'notes', label: 'Notlar', icon: 'edit-note', count: notes.length },
+        { id: 'modules', label: t('library.tabs.modules', currentLang), icon: 'menu-book', count: modules.length },
+        { id: 'collections', label: t('library.tabs.collections', currentLang), icon: 'folder-special', count: collections.length },
+        { id: 'notes', label: t('library.tabs.notes', currentLang), icon: 'edit-note', count: notes.length },
     ];
 
     if (loading) {
@@ -109,7 +109,7 @@ export default function LibraryScreen() {
             <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-500/20">
                     <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-wider">
-                        {item.type === 'MC' ? 'Çoktan Seçmeli' : item.type === 'FLASHCARD' ? 'Kart' : item.type || 'Module'}
+                        {item.type === 'MC' ? t('library.types.mc', currentLang) : item.type === 'FLASHCARD' ? t('library.types.flashcard', currentLang) : item.type || t('library.types.module', currentLang)}
                     </Text>
                 </View>
                 <Text className="text-slate-600 text-[10px] font-bold">
@@ -131,11 +131,11 @@ export default function LibraryScreen() {
                 <View className="flex-row items-center">
                     <IconSymbol name="doc.text.fill" size={14} color={SharedTheme.colors.primary} />
                     <Text className="text-slate-400 text-xs ml-2 font-bold uppercase tracking-tighter">
-                        {item._count?.items || 0} ITEMS
+                        {item._count?.items || 0} {t('library.items', currentLang)}
                     </Text>
                 </View>
                 <View className="bg-indigo-600 px-5 py-2 rounded-full">
-                    <Text className="text-white text-xs font-bold">Çalış</Text>
+                    <Text className="text-white text-xs font-bold">{t('study.moduleActions.study', currentLang)}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -148,7 +148,7 @@ export default function LibraryScreen() {
         >
             <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20">
-                    <Text className="text-purple-400 text-[10px] font-bold uppercase tracking-wider">Koleksiyon</Text>
+                    <Text className="text-purple-400 text-[10px] font-bold uppercase tracking-wider">{t('library.types.collection', currentLang)}</Text>
                 </View>
                 <Text className="text-slate-600 text-[10px] font-bold">
                     {new Date(item.createdAt).toLocaleDateString('tr-TR')}
@@ -168,7 +168,7 @@ export default function LibraryScreen() {
             <View className="flex-row items-center pt-4 border-t border-slate-800/50">
                 <MaterialIcons name="layers" size={14} color={SharedTheme.colors.brandPurple} />
                 <Text className="text-slate-400 text-xs ml-2 font-bold uppercase tracking-tighter">
-                    {item._count?.items || 0} modül
+                    {item._count?.items || 0} {t('library.types.module', currentLang).toLowerCase()}
                 </Text>
             </View>
         </TouchableOpacity>
@@ -181,7 +181,7 @@ export default function LibraryScreen() {
         >
             <View className="flex-row items-center justify-between mb-3">
                 <View className="bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
-                    <Text className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Not</Text>
+                    <Text className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">{t('library.types.note', currentLang)}</Text>
                 </View>
                 <Text className="text-slate-600 text-[10px] font-bold">
                     {new Date(item.updatedAt).toLocaleDateString('tr-TR')}
@@ -211,8 +211,8 @@ export default function LibraryScreen() {
             {/* Header */}
             <View className="px-6 pt-10 pb-4 flex-row justify-between items-center">
                 <View>
-                    <Text className="text-3xl font-bold text-white mb-1 tracking-tight">Kütüphane</Text>
-                    <Text className="text-slate-500 font-medium">Öğrenme modüllerin ve koleksiyonların</Text>
+                    <Text className="text-3xl font-bold text-white mb-1 tracking-tight">{t('library.title', currentLang)}</Text>
+                    <Text className="text-slate-500 font-medium">{t('library.subtitle', currentLang)}</Text>
                 </View>
                 {activeTab === 'notes' && (
                     <TouchableOpacity
@@ -228,9 +228,9 @@ export default function LibraryScreen() {
             <View className="px-6 mb-3">
                 <View className="flex-row items-center bg-slate-900 rounded-2xl border border-slate-800 px-4 py-3">
                     <MaterialIcons name="search" size={20} color="#64748b" />
-                    <TextInput
-                        className="flex-1 text-white ml-3 text-base"
-                        placeholder="Kütüphanede ara..."
+                        <TextInput
+                            className="flex-1 text-white ml-3 text-base"
+                            placeholder={t('library.searchPlaceholder', currentLang)}
                         placeholderTextColor="#475569"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -296,16 +296,16 @@ export default function LibraryScreen() {
                             />
                         </View>
                         <Text className="text-white text-lg font-bold mb-2">
-                            {searchQuery ? 'Sonuç Bulunamadı' : activeTab === 'modules' ? 'Modül Yok' : activeTab === 'collections' ? 'Koleksiyon Yok' : 'Not Yok'}
+                            {searchQuery ? t('library.empty.noResults', currentLang) : activeTab === 'modules' ? t('library.empty.noModules', currentLang) : activeTab === 'collections' ? t('library.empty.noCollections', currentLang) : t('library.empty.noNotes', currentLang)}
                         </Text>
                         <Text className="text-slate-500 text-center leading-5 font-medium">
                             {searchQuery
-                                ? `"${searchQuery}" aramasına uygun ${activeTab === 'modules' ? 'modül' : activeTab === 'collections' ? 'koleksiyon' : 'not'} bulunamadı.`
+                                ? t('library.empty.noResults', currentLang) // Simplified for now since we don't have query-based desc in dict
                                 : activeTab === 'modules'
-                                    ? 'Web üzerinden yeni modüller ekleyerek kütüphaneni canlandırabilirsin.'
+                                    ? t('library.empty.noModulesDesc', currentLang)
                                     : activeTab === 'collections'
-                                        ? 'Henüz koleksiyon oluşturmadın. Web üzerinden koleksiyon oluşturabilirsin.'
-                                        : 'Henüz not oluşturmadın. Sağ üstteki + butonuna basarak modern blok editörüyle dilediğini yaz!'}
+                                        ? t('library.empty.noCollectionsDesc', currentLang)
+                                        : t('library.empty.noNotesDesc', currentLang)}
                         </Text>
                     </View>
                 }

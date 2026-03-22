@@ -1,14 +1,9 @@
 @echo off
-subst K: /d >nul 2>&1
-subst K: "c:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia"
-if errorlevel 1 (
-    echo [ERROR] Failed to subst K: drive
-    exit /b 1
-)
-K:
+echo [INFO] Moving to mobile android directory...
 cd apps\mobile\android
+set NODE_ENV=production
 echo [INFO] Starting Gradle Build...
-call gradlew.bat assembleDebug --stacktrace --info
+call gradlew.bat clean assembleRelease --stacktrace -Dorg.gradle.internal.http.connectionTimeout=600000 -Dorg.gradle.internal.http.socketTimeout=600000
 if errorlevel 1 (
     echo [ERROR] Gradle build failed with exit code %errorlevel%
     exit /b %errorlevel%

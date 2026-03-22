@@ -3,6 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "lib": ["ES2020"],
+    "types": ["jest"],
     "paths": {
       "@/*": [
         "./*"
@@ -13,5 +15,10 @@
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tmp_expo_project",
+    "dist"
   ]
 }

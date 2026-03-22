@@ -55,6 +55,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon-new.png",
+  },
 };
 
 export default async function RootLayout({

@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     try {
                         const res = await api.get('/mobile/user/profile');
                         setUser(res.data);
-                    } catch (error) {
+                    } catch {
                         // Token invalid, clear it
                         await clearAuthToken();
                         setUser(null);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else if (user && inAuthGroup) {
             router.replace('/(tabs)');
         }
-    }, [user, segments, isLoading]);
+    }, [user, segments, isLoading, router]);
 
     const login = async (email: string, password?: string) => {
         try {

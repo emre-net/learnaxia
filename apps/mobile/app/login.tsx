@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-
-const { width, height } = Dimensions.get('window');
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { t, Language } from '@learnaxia/shared';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -15,6 +14,7 @@ export default function LoginScreen() {
     // Assuming we want a way to toggle to register UI if it is ever added, keeping `isLogin` state
     const [isLogin, setIsLogin] = useState(true);
     const { login } = useAuth();
+    const currentLang = 'tr' as Language;
 
     const handleSubmit = async () => {
         if (!email) return;
@@ -24,15 +24,15 @@ export default function LoginScreen() {
                 await login(email.trim(), password.trim());
             } else {
                 // Register logic would go here
-                Alert.alert('Bilgi', 'Kayıt işlemi web üzerinden veya yakında eklenecek.');
+                Alert.alert(t('auth.info', currentLang), t('auth.registerInfo', currentLang));
             }
         } catch (error) {
-            let message = 'Giriş yapılamadı. Lütfen bilgilerini kontrol et.';
+            let message = t('auth.loginErrorMessage', currentLang);
             if (error && typeof error === 'object' && 'response' in error) {
                 const axiosError = error as { response?: { data?: { message?: string } } };
                 message = axiosError.response?.data?.message || message;
             }
-            Alert.alert('Giriş Hatası', message);
+            Alert.alert(t('auth.loginErrorTitle', currentLang), message);
         } finally {
             setLoading(false);
         }
@@ -41,9 +41,10 @@ export default function LoginScreen() {
     return (
         <View className="flex-1 bg-[#020813]">
             {/* Vibrant glow effects */}
-            <View className="absolute top-[-15%] left-[-20%] w-[80%] h-[60%] bg-blue-600/25 rounded-full" style={{ filter: 'blur(90px)' }} />
-            <View className="absolute top-[-10%] right-[-20%] w-[70%] h-[50%] bg-purple-600/25 rounded-full" style={{ filter: 'blur(90px)' }} />
-            <View className="absolute bottom-[-10%] right-[10%] w-[60%] h-[50%] bg-cyan-500/20 rounded-full" style={{ filter: 'blur(90px)' }} />
+            {/* RN Android does not support CSS `filter`; it can crash the renderer after splash. */}
+            <View className="absolute top-[-15%] left-[-20%] w-[80%] h-[60%] bg-blue-600/25 rounded-full" />
+            <View className="absolute top-[-10%] right-[-20%] w-[70%] h-[50%] bg-purple-600/25 rounded-full" />
+            <View className="absolute bottom-[-10%] right-[10%] w-[60%] h-[50%] bg-cyan-500/20 rounded-full" />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -77,14 +78,14 @@ export default function LoginScreen() {
                                 style={{ shadowColor: '#fff', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }}
                             >
                                 <Ionicons name="logo-google" size={20} color="#18181B" className="mr-3" />
-                                <Text className="text-[#18181B] text-base font-bold ml-1">Google ile Devam Et</Text>
+                                <Text className="text-[#18181B] text-base font-bold ml-1">{t('auth.googleLogin', currentLang)}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Divider */}
                         <View className="flex-row items-center py-2 mb-6">
                             <View className="flex-1 h-[1px] bg-white/5" />
-                            <Text className="px-4 text-xs font-medium text-[#64748B]">veya E-Posta ile</Text>
+                            <Text className="px-4 text-xs font-medium text-[#64748B]">{t('auth.emailOr', currentLang)}</Text>
                             <View className="flex-1 h-[1px] bg-white/5" />
                         </View>
 
@@ -97,7 +98,7 @@ export default function LoginScreen() {
                                     </View>
                                     <TextInput
                                         className="h-[52px] bg-[#0A1128]/90 border border-indigo-500/40 text-white rounded-2xl pl-12 pr-4 text-[15px]"
-                                        placeholder="Kullanıcı Adı"
+                                        placeholder={t('auth.usernamePlaceholder', currentLang)}
                                         placeholderTextColor="#64748B"
                                         editable={!loading}
                                     />
@@ -110,7 +111,7 @@ export default function LoginScreen() {
                                 </View>
                                 <TextInput
                                     className="h-[52px] bg-[#0A1128]/90 border border-indigo-500/40 text-white rounded-2xl pl-12 pr-4 text-[15px]"
-                                    placeholder="E-posta adresi"
+                                    placeholder={t('auth.emailPlaceholder', currentLang)}
                                     placeholderTextColor="#64748B"
                                     value={email}
                                     onChangeText={setEmail}
@@ -126,7 +127,7 @@ export default function LoginScreen() {
                                 </View>
                                 <TextInput
                                     className="h-[52px] bg-[#0A1128]/90 border border-indigo-500/40 text-white rounded-2xl pl-12 pr-12 text-[15px]"
-                                    placeholder={isLogin ? "Parola" : "Parola (En az 6 karakter)"}
+                                    placeholder={isLogin ? t('auth.passwordPlaceholder', currentLang) : t('auth.passwordMin', currentLang)}
                                     placeholderTextColor="#64748B"
                                     secureTextEntry
                                     value={password}
@@ -141,7 +142,7 @@ export default function LoginScreen() {
                             {isLogin && (
                                 <View className="items-end mt-2 mb-1">
                                     <TouchableOpacity>
-                                        <Text className="text-xs font-medium text-[#64748B]">Şifremi unuttum?</Text>
+                                        <Text className="text-xs font-medium text-[#64748B]">{t('auth.forgotPassword', currentLang)}</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
@@ -162,18 +163,18 @@ export default function LoginScreen() {
                                         <BrandLoader size={24} showBlur={false} className="mr-2" />
                                     ) : null}
                                     <Text className="text-white font-bold text-base tracking-wide">
-                                        {isLogin ? "Giriş Yap" : "Hesabı Oluştur"}
+                                        {isLogin ? t('auth.loginButton', currentLang) : t('auth.createButton', currentLang)}
                                     </Text>
                                 </LinearGradient>
                             </TouchableOpacity>
 
                             <View className="flex-row items-center justify-center mt-5">
                                 <Text className="text-[13px] font-medium text-[#64748B]">
-                                    {isLogin ? "Hesabın yok mu? " : "Zaten hesabın var mı? "}
+                                    {isLogin ? t('auth.noAccount', currentLang) : t('auth.alreadyHaveAccount', currentLang)}
                                 </Text>
                                 <TouchableOpacity onPress={() => setIsLogin(!isLogin)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                                     <Text className="text-[13px] text-[#00D2FF] font-bold">
-                                        {isLogin ? "Kaydol" : "Giriş Yap"}
+                                        {isLogin ? t('auth.signUp', currentLang) : t('auth.loginAction', currentLang)}
                                     </Text>
                                 </TouchableOpacity>
                             </View>

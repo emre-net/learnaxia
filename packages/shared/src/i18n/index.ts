@@ -7,11 +7,11 @@ import { getDictionary, Language } from './dictionaries';
 export const t = (key: string, lang: Language, params?: Record<string, string | number>) => {
     const dict = getDictionary(lang);
     const keys = key.split('.');
-    let value: any = dict;
+    let value: unknown = dict;
 
     for (const k of keys) {
-        if (value && typeof value === 'object' && k in value) {
-            value = value[k];
+        if (value && typeof value === "object" && k in value) {
+            value = (value as Record<string, unknown>)[k];
         } else {
             console.warn(`[i18n] Key not found: ${key} in ${lang}`);
             return key;

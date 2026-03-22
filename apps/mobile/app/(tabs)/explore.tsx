@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  SafeAreaView, RefreshControl, TextInput, Dimensions
+  SafeAreaView, RefreshControl, TextInput,
 } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
+import { Theme as SharedTheme, t } from '@learnaxia/shared';
 import api from '@/lib/api';
 
-const { width } = Dimensions.get('window');
+const currentLang = 'tr'; // Default to Turkish for now
 
 type DiscoverItem = {
   id: string;
@@ -66,13 +65,13 @@ export default function ExploreScreen() {
   }, [fetchDiscover]);
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'MODULE', label: 'Modüller', icon: 'menu-book' },
-    { id: 'COLLECTION', label: 'Koleksiyonlar', icon: 'folder-special' },
+    { id: 'MODULE', label: t('library.tabs.modules', currentLang), icon: 'menu-book' },
+    { id: 'COLLECTION', label: t('library.tabs.collections', currentLang), icon: 'folder-special' },
   ];
 
   const renderItem = ({ item }: { item: DiscoverItem }) => (
     <TouchableOpacity
-      className="bg-slate-900 rounded-3xl p-5 mb-4 border border-slate-800 active:bg-slate-800"
+      style={{ backgroundColor: '#0f172a', borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: '#1e293b' }}
       onPress={() => {
         if (activeTab === 'MODULE') {
           router.push(`/study/${item.id}` as any);
@@ -81,35 +80,35 @@ export default function ExploreScreen() {
         }
       }}
     >
-      <View className="flex-row items-center justify-between mb-3">
-        <View className="bg-indigo-500/10 px-3 py-1 rounded-lg border border-indigo-500/20">
-          <Text className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
-            {activeTab === 'MODULE' ? 'Modül' : 'Koleksiyon'}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <View style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.2)' }}>
+          <Text style={{ color: '#818cf8', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
+            {activeTab === 'MODULE' ? t('library.types.module', currentLang) : t('library.types.collection', currentLang)}
           </Text>
         </View>
         {item.owner?.handle && (
-          <Text className="text-slate-600 text-[10px] font-bold">@{item.owner.handle}</Text>
+          <Text style={{ color: '#475569', fontSize: 10, fontWeight: 'bold' }}>@{item.owner.handle}</Text>
         )}
       </View>
 
-      <Text className="text-lg font-bold text-white mb-1.5 tracking-tight" numberOfLines={2}>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white', marginBottom: 6, letterSpacing: -0.5 }} numberOfLines={2}>
         {item.title}
       </Text>
 
       {item.description && (
-        <Text className="text-slate-500 text-sm mb-4 leading-5" numberOfLines={2}>
+        <Text style={{ color: '#64748b', fontSize: 14, marginBottom: 16, lineHeight: 20 }} numberOfLines={2}>
           {item.description}
         </Text>
       )}
 
-      <View className="flex-row items-center justify-between mt-auto pt-3 border-t border-slate-800/50">
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(30, 41, 59, 0.5)' }}>
         <View className="flex-row items-center">
           <MaterialIcons name="layers" size={14} color={SharedTheme.colors.primary} />
-          <Text className="text-slate-400 text-xs ml-1.5 font-bold">{item._count?.items || 0} içerik</Text>
+          <Text style={{ color: '#94a3b8', fontSize: 12, marginLeft: 6, fontWeight: 'bold' }}>{item._count?.items || 0} {t('library.items', currentLang).toLowerCase()}</Text>
         </View>
         <View className="flex-row items-center">
           <MaterialIcons name="schedule" size={12} color="#64748b" />
-          <Text className="text-slate-600 text-[10px] ml-1 font-medium">
+          <Text style={{ color: '#64748b', fontSize: 10, marginLeft: 4, fontWeight: '500' }}>
             {new Date(item.createdAt).toLocaleDateString('tr-TR')}
           </Text>
         </View>
@@ -118,20 +117,20 @@ export default function ExploreScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: SharedTheme.colors.background }}>
       {/* Header */}
-      <View className="px-6 pt-10 pb-4">
-        <Text className="text-3xl font-bold text-white mb-1 tracking-tight">Keşfet</Text>
-        <Text className="text-slate-500 font-medium">Topluluktan en yeni üretimler</Text>
+      <View style={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 16 }}>
+        <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white', marginBottom: 4, letterSpacing: -0.5 }}>{t('discover.title', currentLang)}</Text>
+        <Text style={{ color: '#64748b', fontWeight: '500' }}>{t('discover.subtitle', currentLang)}</Text>
       </View>
 
       {/* Search Bar */}
-      <View className="px-6 mb-4">
-        <View className="flex-row items-center bg-slate-900 rounded-2xl border border-slate-800 px-4 py-3">
+      <View style={{ paddingHorizontal: 24, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f172a', borderRadius: 16, borderWidth: 1, borderColor: '#1e293b', paddingHorizontal: 16, paddingVertical: 12 }}>
           <MaterialIcons name="search" size={20} color="#64748b" />
           <TextInput
-            className="flex-1 text-white ml-3 text-base"
-            placeholder="İçeriklerde ara..."
+            style={{ flex: 1, color: 'white', marginLeft: 12, fontSize: 16 }}
+            placeholder={t('discover.searchPlaceholder', currentLang)}
             placeholderTextColor="#475569"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -146,14 +145,14 @@ export default function ExploreScreen() {
       </View>
 
       {/* Tab Bar */}
-      <View className="flex-row px-6 mb-4">
+      <View style={{ flexDirection: 'row', paddingHorizontal: 24, marginBottom: 16 }}>
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            className={`flex-row items-center mr-3 px-5 py-2.5 rounded-xl border ${activeTab === tab.id
-              ? 'bg-indigo-600/20 border-indigo-500/30'
-              : 'bg-slate-900/50 border-slate-800'
-              }`}
+            style={[
+              { flexDirection: 'row', alignItems: 'center', marginRight: 12, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
+              activeTab === tab.id ? { backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: 'rgba(99, 102, 241, 0.3)' } : { backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: '#1e293b' }
+            ]}
             onPress={() => setActiveTab(tab.id)}
           >
             <MaterialIcons
@@ -161,20 +160,20 @@ export default function ExploreScreen() {
               size={16}
               color={activeTab === tab.id ? '#818cf8' : '#64748b'}
             />
-            <Text className={`ml-2 text-sm font-bold ${activeTab === tab.id ? 'text-indigo-400' : 'text-slate-500'}`}>
+            <Text style={[{ marginLeft: 8, fontSize: 14, fontWeight: 'bold' }, activeTab === tab.id ? { color: '#818cf8' } : { color: '#64748b' }]}>
               {tab.label}
             </Text>
           </TouchableOpacity>
         ))}
-        <View className="flex-1" />
-        <View className="justify-center">
-          <Text className="text-slate-600 text-xs font-bold">{total} sonuç</Text>
+        <View style={{ flex: 1 }} />
+        <View style={{ justifyContent: 'center' }}>
+          <Text style={{ color: '#475569', fontSize: 12, fontWeight: 'bold' }}>{t('discover.totalResults', currentLang, { count: total })}</Text>
         </View>
       </View>
 
       {/* Content List */}
       {loading ? (
-        <View className="flex-1 justify-center items-center">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <BrandLoader size="lg" />
         </View>
       ) : (
@@ -187,15 +186,15 @@ export default function ExploreScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />
           }
           ListEmptyComponent={
-            <View className="items-center mt-16 px-10">
-              <View className="w-20 h-20 bg-slate-900 rounded-full items-center justify-center mb-6 border border-slate-800">
+            <View style={{ alignItems: 'center', marginTop: 64, paddingHorizontal: 40 }}>
+              <View style={{ width: 80, height: 80, backgroundColor: '#0f172a', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 1, borderColor: '#1e293b' }}>
                 <MaterialIcons name="explore" size={32} color="#475569" />
               </View>
-              <Text className="text-white text-lg font-bold mb-2">Henüz İçerik Yok</Text>
-              <Text className="text-slate-500 text-center leading-5 font-medium">
+              <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>{t('discover.emptyTitle', currentLang)}</Text>
+              <Text style={{ color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' }}>
                 {searchQuery
-                  ? `"${searchQuery}" için sonuç bulunamadı. Farklı bir arama deneyin.`
-                  : 'Topluluk üretimleri burada görünecek.'}
+                  ? t('discover.emptyNoResults', currentLang, { query: searchQuery })
+                  : t('discover.emptyDesc', currentLang)}
               </Text>
             </View>
           }

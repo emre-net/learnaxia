@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const nextConfig: NextConfig = {
   // Externalize packages that crash Turbopack (DOMMatrix, canvas etc.)
@@ -22,7 +26,7 @@ const nextConfig: NextConfig = {
   },
 
   output: 'standalone',
-  outputFileTracingRoot: require('path').join(__dirname, '../../'),
+  outputFileTracingRoot: monorepoRoot,
 
   // Security & Performance headers
   async headers() {

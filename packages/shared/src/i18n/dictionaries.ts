@@ -60,6 +60,56 @@ const en = {
             gap: "Gap Fill"
         }
     },
+    auth: {
+        googleLogin: "Continue with Google",
+        emailOr: "or with Email",
+        usernamePlaceholder: "Username",
+        emailPlaceholder: "Email address",
+        passwordPlaceholder: "Password",
+        passwordMin: "Password (Min 6 characters)",
+        forgotPassword: "Forgot password?",
+        loginButton: "Log In",
+        createButton: "Create Account",
+        noAccount: "Don't have an account? ",
+        alreadyHaveAccount: "Already have an account? ",
+        signUp: "Sign Up",
+        loginAction: "Log In",
+        registerInfo: "Registration is available via web or coming soon.",
+        loginErrorTitle: "Login Error",
+        loginErrorMessage: "Could not log in. Please check your credentials.",
+        info: "Information"
+    },
+    create: {
+        title: "Create New Content",
+        subtitle: "What would you like to learn today?",
+        scanDoc: {
+            title: "Scan Document",
+            desc: "Take a photo of your books or notes to study."
+        },
+        uploadPdf: {
+            title: "Upload PDF",
+            desc: "Automatically generate content from existing PDF files."
+        },
+        enterTopic: {
+            title: "Enter Topic",
+            desc: "Tell AI what you want to learn."
+        },
+        modal: {
+            title: "Set Topic",
+            desc: "Write the topic you want to learn, and we'll prepare a custom syllabus for you.",
+            placeholder: "e.g., History of Roman Empire",
+            button: "Start Journey",
+            generating: "Preparing...",
+            invalidTopic: "Invalid Topic",
+            minChars: "Please enter a topic with at least 3 characters.",
+            syllabusError: "Could not generate syllabus.",
+            journeyError: "Could not start journey.",
+            cameraPermission: "Permission Required",
+            cameraPermissionDesc: "We need camera permission to scan documents.",
+            ocrInfo: "Photo Taken. OCR (Text Recognition) feature will be added soon.",
+            pdfInfo: "PDF Selected. PDF upload and analysis feature will be added soon."
+        }
+    },
     solvePhoto: {
         title: "Solve from Photo",
         description: "Solve any educational question by taking a photo.",
@@ -79,6 +129,9 @@ const en = {
         }
     },
     library: {
+        title: "Library",
+        subtitle: "Your learning modules and collections",
+        searchPlaceholder: "Search in library...",
         header: {
             title: "Library",
             description: "Manage your learning modules and collections."
@@ -89,6 +142,23 @@ const en = {
             learnings: "Learnings",
             aiSolutions: "AI Solutions",
             notes: "Notes"
+        },
+        types: {
+            mc: "Multiple Choice",
+            flashcard: "Flashcard",
+            module: "Module",
+            collection: "Collection",
+            note: "Note"
+        },
+        items: "Items",
+        empty: {
+            noResults: "No Results Found",
+            noModules: "No Modules",
+            noCollections: "No Collections",
+            noNotes: "No Notes",
+            noModulesDesc: "You can bring your library to life by adding new modules via the web.",
+            noCollectionsDesc: "You haven't created a collection yet. You can create one via the web.",
+            noNotesDesc: "You haven't created any notes yet. Press the + button at the top right to write anything with the modern block editor!"
         },
         modulesTab: {
             all: "All",
@@ -300,12 +370,26 @@ const en = {
             moduleDesc: "Remind me daily about unfinished studies."
         }
     },
+    profile: {
+        title: "Profile",
+        stats: {
+            studyTime: "Study Time",
+            modules: "Modules",
+            collections: "Collections"
+        },
+        settings: {
+            title: "Account Settings",
+            language: "Language",
+            notifications: "Notifications",
+            about: "About",
+            logout: "Log Out"
+        }
+    },
     dashboard: {
         greeting: "Welcome, {name}!",
         totalDue: "Total Due",
         startSession: "Start Session",
         mixAll: "Mix All",
-        modules: "Modules",
         dailyReview: {
             completedTitle: "Daily Reviews Completed! 🎉",
             completedDesc: "Your memory is safe. There are no pending cards for today. You can write a new note or generate a new module instead.",
@@ -314,7 +398,32 @@ const en = {
             dueCards: "cards",
             dueSuffix: "due today.",
             studyJustThis: "Study Just This"
+        },
+        stats: {
+            studyTime: "Study Time",
+            modules: "Modules",
+            accuracy: "Accuracy",
+            solved: "Solved",
+            minutesUnit: "min"
+        },
+        focus: {
+            pomodoro: "Pomodoro",
+            stopwatch: "Stopwatch",
+            modePomodoro: "Focus Session",
+            modeStopwatch: "Free Study",
+            statusReady: "Ready / Break",
+            settingsTitle: "Timer Settings",
+            preset15: "15 Minutes (Short Focus)",
         }
+    },
+    discover: {
+        title: "Explore",
+        subtitle: "Latest creations from the community",
+        searchPlaceholder: "Search in content...",
+        totalResults: "{count} results",
+        emptyTitle: "No Content Yet",
+        emptyNoResults: "No results found for \"{query}\". Try a different search.",
+        emptyDesc: "Community creations will appear here."
     },
     common: {
         cancel: "Cancel",
@@ -332,7 +441,12 @@ const en = {
         noDescription: "No description provided.",
         itemsCount: "{count} Items",
         byAuthor: "by @{author}",
-        optional: "optional"
+        optional: "optional",
+        filters: "Filters",
+        reset: "Reset",
+        noResults: "No results found",
+        searchResults: "Search results for \"{query}\"",
+        user: "User"
     },
     admin: {
         dashboard: {
@@ -480,6 +594,56 @@ const tr = {
             gap: "Boşluk Doldurma"
         }
     },
+    auth: {
+        googleLogin: "Google ile Devam Et",
+        emailOr: "veya E-Posta ile",
+        usernamePlaceholder: "Kullanıcı Adı",
+        emailPlaceholder: "E-posta adresi",
+        passwordPlaceholder: "Parola",
+        passwordMin: "Parola (En az 6 karakter)",
+        forgotPassword: "Şifremi unuttum?",
+        loginButton: "Giriş Yap",
+        createButton: "Hesabı Oluştur",
+        noAccount: "Hesabın yok mu? ",
+        alreadyHaveAccount: "Zaten hesabın var mı? ",
+        signUp: "Kaydol",
+        loginAction: "Giriş Yap",
+        registerInfo: "Kayıt işlemi web üzerinden veya yakında eklenecek.",
+        loginErrorTitle: "Giriş Hatası",
+        loginErrorMessage: "Giriş yapılamadı. Lütfen bilgilerini kontrol et.",
+        info: "Bilgi"
+    },
+    create: {
+        title: "Yeni İçerik Oluştur",
+        subtitle: "Bugün ne öğrenmek istersin?",
+        scanDoc: {
+            title: "Belge Tara",
+            desc: "Kitap veya notlarının fotoğrafını çekerek çalış."
+        },
+        uploadPdf: {
+            title: "PDF Yükle",
+            desc: "Mevcut PDF dosyalarından otomatik içerik üret."
+        },
+        enterTopic: {
+            title: "Konu Gir",
+            desc: "Yapay zekaya ne öğrenmek istediğini söyle."
+        },
+        modal: {
+            title: "Konu Belirle",
+            desc: "Öğrenmek istediğin konuyu yaz, senin için özel bir müfredat hazırlayalım.",
+            placeholder: "Örn: Roma İmparatorluğu Tarihi",
+            button: "Yolculuğu Başlat",
+            generating: "Hazırlanıyor...",
+            invalidTopic: "Geçersiz Konu",
+            minChars: "Lütfen en az 3 karakterli bir konu girin.",
+            syllabusError: "Müfredat oluşturulamadı.",
+            journeyError: "Yolculuk başlatılamadı.",
+            cameraPermission: "İzin Gerekli",
+            cameraPermissionDesc: "Belgeleri taramak için kamera iznine ihtiyacımız var.",
+            ocrInfo: "Fotoğraf Çekildi. OCR (Metin Tanıma) özelliği yakında eklenecektir.",
+            pdfInfo: "PDF Seçildi. PDF yükleme ve analiz özelliği yakında eklenecektir."
+        }
+    },
     solvePhoto: {
         title: "Fotoğraftan Soru Çöz",
         description: "Fotoğrafını çekerek herhangi bir soruyu AI ile anında çözün.",
@@ -499,6 +663,9 @@ const tr = {
         }
     },
     library: {
+        title: "Kütüphane",
+        subtitle: "Öğrenme modüllerin ve koleksiyonların",
+        searchPlaceholder: "Kütüphanede ara...",
         header: {
             title: "Kitaplık",
             description: "Öğrenme modüllerini ve koleksiyonlarını yönet."
@@ -509,6 +676,23 @@ const tr = {
             learnings: "Öğrenmeler",
             aiSolutions: "AI Çözümleri",
             notes: "Notlar"
+        },
+        types: {
+            mc: "Çoktan Seçmeli",
+            flashcard: "Flashcard",
+            module: "Modül",
+            collection: "Koleksiyon",
+            note: "Not"
+        },
+        items: "Öğe",
+        empty: {
+            noResults: "Sonuç Bulunamadı",
+            noModules: "Modül Yok",
+            noCollections: "Koleksiyon Yok",
+            noNotes: "Not Yok",
+            noModulesDesc: "Web üzerinden yeni modüller ekleyerek kütüphaneni canlandırabilirsin.",
+            noCollectionsDesc: "Henüz koleksiyon oluşturmadın. Web üzerinden koleksiyon oluşturabilirsin.",
+            noNotesDesc: "Henüz not oluşturmadın. Sağ üstteki + butonuna basarak modern blok editörüyle dilediğini yaz!"
         },
         modulesTab: {
             all: "Tümü",
@@ -720,6 +904,21 @@ const tr = {
             moduleDesc: "Yarım kalan çalışmaları günlük olarak hatırlat."
         }
     },
+    profile: {
+        title: "Profil",
+        stats: {
+            studyTime: "Çalışma Süresi",
+            modules: "Modüller",
+            collections: "Koleksiyonlar"
+        },
+        settings: {
+            title: "Hesap Ayarları",
+            language: "Dil",
+            notifications: "Bildirimler",
+            about: "Hakkında",
+            logout: "Çıkış Yap"
+        }
+    },
     dashboard: {
         greeting: "Hoşgeldin, {name}!",
         totalDue: "Toplam Bekleyen",
@@ -734,7 +933,32 @@ const tr = {
             dueCards: "kart",
             dueSuffix: "var.",
             studyJustThis: "Sadece Bunu Çalış"
+        },
+        stats: {
+            studyTime: "Süre",
+            modules: "Modüller",
+            accuracy: "Başarı",
+            solved: "Çözüm",
+            minutesUnit: "dk"
+        },
+        focus: {
+            pomodoro: "Pomodoro",
+            stopwatch: "Sayaç",
+            modePomodoro: "Odaklanma Seansı",
+            modeStopwatch: "Serbest Çalışma",
+            statusReady: "Mola / Hazır",
+            settingsTitle: "Zamanlayıcı Ayarları",
+            preset15: "15 Dakika (Kısa Odak)",
         }
+    },
+    discover: {
+        title: "Keşfet",
+        subtitle: "Topluluktan en yeni üretimler",
+        searchPlaceholder: "İçeriklerde ara...",
+        totalResults: "{count} sonuç",
+        emptyTitle: "Henüz İçerik Yok",
+        emptyNoResults: "\"{query}\" için sonuç bulunamadı. Farklı bir arama deneyin.",
+        emptyDesc: "Topluluk üretimleri burada görünecek."
     },
     common: {
         cancel: "Vazgeç",
@@ -752,7 +976,12 @@ const tr = {
         noDescription: "Açıklama girilmemiş.",
         itemsCount: "{count} Öğe",
         byAuthor: "yazar: @{author}",
-        optional: "opsiyonel"
+        optional: "opsiyonel",
+        filters: "Filtreler",
+        reset: "Sıfırla",
+        noResults: "Sonuç bulunamadı",
+        searchResults: "\"{query}\" araması için sonuçlar",
+        user: "Kullanıcı"
     },
     admin: {
         dashboard: {

@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, AppState } from 'react-native';
-import { BrandLoader } from '@/components/ui/brand-loader';
-import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { t } from '@learnaxia/shared';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import api from '@/lib/api';
+
+const currentLang = 'tr'; // Default to Turkish for now
 
 interface DueModule {
     module: {
@@ -75,8 +78,8 @@ export function DailyReviewWidget() {
                     <View className="w-16 h-16 rounded-full bg-emerald-500/20 items-center justify-center mb-4">
                         <MaterialIcons name="psychology" size={32} color="#10B981" />
                     </View>
-                    <Text className="text-xl font-bold text-white mb-2 text-center tracking-tight">Harika iş çıkardın!</Text>
-                    <Text className="text-slate-400 text-sm text-center">Bugün için planlanmış tüm tekrarlarını tamamladın.</Text>
+                    <Text className="text-xl font-bold text-white mb-2 text-center tracking-tight">{t('dashboard.dailyReview.completedTitle', currentLang)}</Text>
+                    <Text className="text-slate-400 text-sm text-center">{t('dashboard.dailyReview.completedDesc', currentLang)}</Text>
                 </View>
             </View>
         );
@@ -103,14 +106,14 @@ export function DailyReviewWidget() {
                     <View>
                         <View className="flex-row items-center mb-1">
                             <MaterialIcons name="psychology" size={24} color="#3B82F6" />
-                            <Text className="text-xl font-bold text-white ml-2">Günlük Tekrar</Text>
+                            <Text className="text-xl font-bold text-white ml-2">{t('dashboard.dailyReview.title', currentLang)}</Text>
                         </View>
                         <View className="flex-row items-center">
-                            <Text className="text-slate-400 text-xs">Bugün bekleyen </Text>
+                            <Text className="text-slate-400 text-xs">{t('dashboard.dailyReview.duePrefix', currentLang)} </Text>
                             <View className="bg-blue-500/20 border border-blue-500/30 px-2 py-0.5 rounded-md ml-1">
-                                <Text className="text-blue-400 text-[10px] font-bold">{data?.totalDue || 0} Kart</Text>
+                                <Text className="text-blue-400 text-[10px] font-bold">{data?.totalDue || 0} {t('dashboard.dailyReview.dueCards', currentLang)}</Text>
                             </View>
-                            <Text className="text-slate-400 text-xs ml-1"> var</Text>
+                            <Text className="text-slate-400 text-xs ml-1"> {t('dashboard.dailyReview.dueSuffix', currentLang)}</Text>
                         </View>
                     </View>
                 </View>
@@ -136,7 +139,7 @@ export function DailyReviewWidget() {
                                 onPress={() => router.push(`/study/${m.module.id}?mode=SM2` as any)}
                             >
                                 <MaterialIcons name="play-arrow" size={14} color="white" />
-                                <Text className="text-white text-[10px] font-bold ml-1">Çalış</Text>
+                                <Text className="text-white text-[10px] font-bold ml-1">{t('study.moduleActions.study', currentLang)}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -147,7 +150,7 @@ export function DailyReviewWidget() {
                     className="w-full mt-2 border border-blue-500/30 py-3 rounded-xl flex-row items-center justify-center bg-blue-900/20"
                     onPress={() => router.push('/study/daily' as any)}
                 >
-                    <Text className="text-blue-400 font-bold text-sm">Hepsini Karışık Çalış</Text>
+                    <Text className="text-blue-400 font-bold text-sm">{t('dashboard.mixAll', currentLang)}</Text>
                     <MaterialIcons name="arrow-forward" size={16} color="#60A5FA" style={{ marginLeft: 8 }} />
                 </TouchableOpacity>
             </View>

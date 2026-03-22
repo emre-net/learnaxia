@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
@@ -80,8 +81,8 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="space-y-4 py-4 flex flex-col h-full">
                 <div className="px-4 py-2">
                     <div className="flex items-center pl-2 mb-10">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
-                            <BrainCircuit className="h-6 w-6 text-white" />
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20 overflow-hidden">
+                            <Image src="/logo.png" alt="Learnaxia Logo" width={28} height={28} className="h-7 w-7 object-contain" />
                         </div>
                         <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                             Learnaxia
@@ -104,12 +105,17 @@ export function Sidebar({ className }: SidebarProps) {
                                 {/* Shimmer Effect */}
                                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
 
-                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm z-10 transition-transform group-hover:scale-110">
-                                    <PlusCircle className="h-5 w-5 text-white" />
+                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm z-10 transition-all duration-500 group-hover:scale-110 group-hover:bg-white/20 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-white/5">
+                                    <motion.div
+                                        animate={isHoveringAtölye ? { rotate: 90, scale: 1.1 } : { rotate: 0, scale: 1 }}
+                                        transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                                    >
+                                        <PlusCircle className="h-5 w-5 text-white shadow-sm" />
+                                    </motion.div>
                                 </div>
                                 <div className="flex flex-col z-10">
-                                    <span className="text-sm font-semibold text-white tracking-wide">{t('sidebar.workshop')}</span>
-                                    <span className="text-[10px] text-white/70 font-medium">{t('sidebar.buildSystem')}</span>
+                                    <span className="text-sm font-semibold text-white tracking-wide group-hover:text-white transition-colors">{t('sidebar.workshop')}</span>
+                                    <span className="text-[10px] text-white/70 font-medium group-hover:text-white/90 transition-colors">{t('sidebar.buildSystem')}</span>
                                 </div>
                             </div>
                         </Link>

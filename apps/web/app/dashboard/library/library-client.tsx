@@ -4,8 +4,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingsStore } from "@/stores/settings-store";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
+import { getDictionary } from "@/lib/i18n/dictionaries"; // Still needed for some components or fallback
 
 // Sub-components
 import { LibraryHeader } from "./library-header";
@@ -31,7 +31,7 @@ export function LibraryClient() {
     const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
     const [activeTab, setActiveTab] = useState("modules");
 
-    const { language } = useSettingsStore();
+    const { t, language } = useTranslation();
     const dictionary = getDictionary(language);
 
     const { data: aiSolutions, isLoading: isLoadingSolutions } = useQuery<SolvedQuestion[]>({
@@ -46,18 +46,18 @@ export function LibraryClient() {
     return (
         <div className="space-y-6">
             <LibraryHeader
-                title={dictionary.library.header.title}
-                description={dictionary.library.header.description}
+                title={t('library.header.title')}
+                description={t('library.header.description')}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <div className="flex flex-col gap-4">
                     <TabsList className="w-full flex justify-start sm:justify-center lg:justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap h-auto p-1 pb-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
-                        <TabsTrigger value="modules" className="flex-shrink-0">{dictionary.library.tabs.modules}</TabsTrigger>
-                        <TabsTrigger value="collections" className="flex-shrink-0">{dictionary.library.tabs.collections}</TabsTrigger>
-                        <TabsTrigger value="notes" className="flex-shrink-0">{dictionary.library.tabs.notes}</TabsTrigger>
-                        <TabsTrigger value="learnings" className="flex-shrink-0">{dictionary.library.tabs.learnings}</TabsTrigger>
-                        <TabsTrigger value="ai-solutions" className="flex-shrink-0">{dictionary.library.tabs.aiSolutions}</TabsTrigger>
+                        <TabsTrigger value="modules" className="flex-shrink-0">{t('library.tabs.modules')}</TabsTrigger>
+                        <TabsTrigger value="collections" className="flex-shrink-0">{t('library.tabs.collections')}</TabsTrigger>
+                        <TabsTrigger value="notes" className="flex-shrink-0">{t('library.tabs.notes')}</TabsTrigger>
+                        <TabsTrigger value="learnings" className="flex-shrink-0">{t('library.tabs.learnings')}</TabsTrigger>
+                        <TabsTrigger value="ai-solutions" className="flex-shrink-0">{t('library.tabs.aiSolutions')}</TabsTrigger>
                     </TabsList>
 
                     <LibraryFilters

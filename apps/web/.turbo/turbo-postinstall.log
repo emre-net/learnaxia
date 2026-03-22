@@ -1,26 +1,13 @@
-npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
-npm warn Unknown project config "shared-workspace-lockfile". This will stop working in the next major version of npm.
-npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
 
 > web@0.1.2 postinstall
-> prisma generate
+> npx prisma@5.22.0 generate
 
 Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 492ms
+✔ Generated Prisma Client (v5.22.0) to .\..\..\node_modules\@prisma\client in 301ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
 
-┌─────────────────────────────────────────────────────────┐
-│  Update available 5.22.0 -> 7.5.0                       │
-│                                                         │
-│  This is a major update - please follow the guide at    │
-│  https://pris.ly/d/major-version-upgrade                │
-│                                                         │
-│  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
-│    npm i @prisma/client@latest                          │
-└─────────────────────────────────────────────────────────┘

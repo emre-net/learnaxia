@@ -72,7 +72,7 @@ apiClient.interceptors.response.use(
                     // Retry the original request
                     return apiClient(originalRequest);
                 }
-            } catch (refreshError) {
+            } catch {
                 // Refresh failed, user needs to login again
                 await clearAuthToken();
                 // Here you could dispatch an event to force logout in the UI

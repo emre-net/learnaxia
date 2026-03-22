@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, SafeAreaView, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
+import { t } from '@learnaxia/shared';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const currentLang = 'tr'; // Default to Turkish for now
 
 export function FocusWidget() {
     const [activeTab, setActiveTab] = useState<'POMODORO' | 'STOPWATCH'>('POMODORO');
@@ -79,7 +81,7 @@ export function FocusWidget() {
                             className={`flex-1 py-1.5 items-center rounded-md ${activeTab === 'POMODORO' ? 'bg-slate-700' : ''}`}
                         >
                             <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
-                                <MaterialIcons name="hourglass-top" size={10} color="white" /> Pomodoro
+                                <MaterialIcons name="hourglass-top" size={10} color="white" /> {t('dashboard.focus.pomodoro', currentLang)}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -87,7 +89,7 @@ export function FocusWidget() {
                             className={`flex-1 py-1.5 items-center rounded-md ${activeTab === 'STOPWATCH' ? 'bg-slate-700' : ''}`}
                         >
                             <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
-                                <MaterialIcons name="timer" size={10} color="white" /> Sayaç
+                                <MaterialIcons name="timer" size={10} color="white" /> {t('dashboard.focus.stopwatch', currentLang)}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -105,7 +107,7 @@ export function FocusWidget() {
                         {formatTime(seconds)}
                     </Text>
                     <Text className="text-sm font-medium text-slate-400 mt-2">
-                        {activeTab === 'POMODORO' ? (isRunning ? 'Odaklanma Seansı' : 'Mola / Hazır') : 'Serbest Çalışma'}
+                        {activeTab === 'POMODORO' ? (isRunning ? t('dashboard.focus.modePomodoro', currentLang) : t('dashboard.focus.statusReady', currentLang)) : t('dashboard.focus.modeStopwatch', currentLang)}
                     </Text>
                 </View>
 
@@ -154,19 +156,18 @@ export function FocusWidget() {
                     onPressOut={() => setShowSettings(false)}
                 >
                     <View className="bg-slate-800 rounded-2xl p-6 w-[80%] border border-slate-700">
-                        <Text className="text-white text-lg font-bold mb-4 text-center">Zamanlayıcı Ayarları</Text>
-
+                        <Text className="text-white text-lg font-bold mb-4 text-center">{t('dashboard.focus.settingsTitle', currentLang)}</Text>
                         <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(15)}>
-                            <Text className="text-slate-300 text-center text-base">15 Dakika (Kısa Odak)</Text>
+                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset15', currentLang)}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(25)}>
-                            <Text className="text-slate-300 text-center text-base">25 Dakika (Klasik Pomodoro)</Text>
+                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset25', currentLang)}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(45)}>
-                            <Text className="text-slate-300 text-center text-base">45 Dakika (Uzun Odak)</Text>
+                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset45', currentLang)}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity className="py-3 pb-1" onPress={() => changePomodoroDuration(60)}>
-                            <Text className="text-slate-300 text-center text-base">60 Dakika (Derin Çalışma)</Text>
+                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset60', currentLang)}</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
@@ -189,7 +190,7 @@ export function FocusWidget() {
                         </TouchableOpacity>
 
                         <Text className="text-slate-400 text-lg font-medium mb-10 uppercase tracking-widest">
-                            {activeTab === 'POMODORO' ? 'Odaklanma Seansı' : 'Serbest Çalışma'}
+                            {activeTab === 'POMODORO' ? t('dashboard.focus.modePomodoro', currentLang) : t('dashboard.focus.modeStopwatch', currentLang)}
                         </Text>
 
                         <Text className={`font-black tracking-tighter tabular-nums ${isRunning

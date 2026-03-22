@@ -116,6 +116,7 @@ export async function GET(req: Request) {
                 totalStudyMinutes: Math.round((totalDuration._sum.durationMs || 0) / 60000),
                 modulesStarted: activeModulesCount,
                 totalSolved,
+                averageAccuracy: globalAccuracy
             },
             dailyActivity,
             moduleStats

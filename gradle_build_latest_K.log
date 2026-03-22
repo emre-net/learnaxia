@@ -1,0 +1,421 @@
+Initialized native services in: C:\Users\Emre\.gradle\native
+Initialized jansi services in: C:\Users\Emre\.gradle\native
+Found daemon DaemonInfo{pid=18168, address=[cda95780-4885-40db-8748-04f94e723a43 port:14048, addresses:[/127.0.0.1]], state=Idle, lastBusy=1774009950371, context=DefaultDaemonContext[uid=c7e985d1-9f38-4310-9712-f1c595304e38,javaHome=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot,javaVersion=17,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\Emre\.gradle\daemon,pid=18168,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=512m,-Xmx2048m,-Dfile.encoding=UTF-8,-Duser.country=TR,-Duser.language=tr,-Duser.variant]} however its context does not match the desired criteria.
+At least one daemon option is different.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot (no JDK specified, using current Java home), daemonOpts=[-XX:MaxMetaspaceSize=512m, -Xmx2048m, -Dfile.encoding=windows-1254, -Duser.country=TR, -Duser.language=tr, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=c7e985d1-9f38-4310-9712-f1c595304e38,javaHome=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot,javaVersion=17,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\Emre\.gradle\daemon,pid=18168,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=512m,-Xmx2048m,-Dfile.encoding=UTF-8,-Duser.country=TR,-Duser.language=tr,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 11208). The daemon log file: C:\Users\Emre\.gradle\daemon\8.14.3\daemon-11208.out.log
+Starting 6th build in daemon [uptime: 1 hrs 0 mins 55.765 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB, non-heap usage: 10% of 512 MiB]
+Using 12 worker leases.
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\fileHashes\fileHashes.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\buildOutputCleanup\outputFiles.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\fileHashes\resourceHashesCache.bin
+Now considering [K:\apps\mobile\android] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Invalidating in-memory cache of C:\Users\Emre\.gradle\caches\journal-1\file-access.bin
+Invalidating in-memory cache of C:\Users\Emre\.gradle\caches\8.14.3\fileHashes\fileHashes.bin
+Invalidating in-memory cache of C:\Users\Emre\.gradle\caches\8.14.3\fileHashes\resourceHashesCache.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\checksums\md5-checksums.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\checksums\sha1-checksums.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\checksums\sha256-checksums.bin
+Invalidating in-memory cache of K:\apps\mobile\android\.gradle\8.14.3\checksums\sha512-checksums.bin
+Now considering [K:\node_modules\@react-native\gradle-plugin, K:\apps\mobile\android] as hierarchies to watch
+Invalidating in-memory cache of K:\node_modules\@react-native\gradle-plugin\.gradle\buildOutputCleanup\outputFiles.bin
+Resolved plugin [id: 'org.gradle.toolchains.foojay-resolver-convention', version: '0.5.0']
+
+> Configure project :gradle-plugin
+Evaluating project ':gradle-plugin' using build file 'K:\node_modules\@react-native\gradle-plugin\build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.25', apply: false]
+Resolved plugin [id: 'java-gradle-plugin']
+
+> Configure project :gradle-plugin:react-native-gradle-plugin
+Evaluating project ':gradle-plugin:react-native-gradle-plugin' using build file 'K:\node_modules\@react-native\gradle-plugin\react-native-gradle-plugin\build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.25']
+Resolved plugin [id: 'java-gradle-plugin']
+Using Kotlin Gradle Plugin gradle82 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+
+> Configure project :gradle-plugin:settings-plugin
+Evaluating project ':gradle-plugin:settings-plugin' using build file 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.25']
+Resolved plugin [id: 'java-gradle-plugin']
+Using Kotlin Gradle Plugin gradle82 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+
+> Configure project :gradle-plugin:shared
+Evaluating project ':gradle-plugin:shared' using build file 'K:\node_modules\@react-native\gradle-plugin\shared\build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.25']
+Using Kotlin Gradle Plugin gradle82 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+
+> Configure project :gradle-plugin:shared-testutil
+Evaluating project ':gradle-plugin:shared-testutil' using build file 'K:\node_modules\@react-native\gradle-plugin\shared-testutil\build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.25']
+Using Kotlin Gradle Plugin gradle82 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+Resolved plugin [id: 'com.facebook.react.settings']
+Starting process 'command 'C:\Program Files (x86)\Java\jre1.8.0_461\bin\java.exe''. Working directory: C:\Users\Emre\.gradle\.tmp\tmp-jvm17271305474171734027probe Command: C:\Program Files (x86)\Java\jre1.8.0_461\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files (x86)\Java\jre1.8.0_461\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files (x86)\Java\jre1.8.0_461': {JAVA_HOME=C:\Program Files (x86)\Java\jre1.8.0_461, JAVA_VERSION=1.8.0_461, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=1.8.0_461-b11, VM_NAME=Java HotSpot(TM) Client VM, VM_VERSION=25.461-b11, VM_VENDOR=Oracle Corporation, OS_ARCH=x86}
+Resolve mutations for :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker,5,main]) started.
+Resolve mutations for :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 11,5,main]) started.
+:gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker,5,main]) started.
+:gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 11,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors
+Caching disabled for task ':gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors' because:
+  Build cache is disabled
+Task ':gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors' is not up-to-date because:
+  Task has not declared any outputs despite executing actions.
+
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors
+Caching disabled for task ':gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors' because:
+  Build cache is disabled
+Task ':gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors' is not up-to-date because:
+  Task has not declared any outputs despite executing actions.
+Resolve mutations for :gradle-plugin:settings-plugin:pluginDescriptors (Thread[Execution worker,5,main]) started.
+Resolve mutations for :gradle-plugin:shared:compileKotlin (Thread[Execution worker Thread 11,5,main]) started.
+:gradle-plugin:settings-plugin:pluginDescriptors (Thread[Execution worker,5,main]) started.
+:gradle-plugin:shared:compileKotlin (Thread[Execution worker Thread 10,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:pluginDescriptors
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\pluginDescriptors
+Caching disabled for task ':gradle-plugin:settings-plugin:pluginDescriptors' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle-plugin:settings-plugin:pluginDescriptors' is not up-to-date because:
+  Output property 'outputDirectory' file K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\pluginDescriptors has been removed.
+  Output property 'outputDirectory' file C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@react-native\gradle-plugin\settings-plugin\build\pluginDescriptors\com.facebook.react.settings.properties has been removed.
+Resolve mutations for :gradle-plugin:settings-plugin:processResources (Thread[Execution worker,5,main]) started.
+:gradle-plugin:settings-plugin:processResources (Thread[Execution worker Thread 11,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:processResources
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\resources\main
+Caching disabled for task ':gradle-plugin:settings-plugin:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle-plugin:settings-plugin:processResources' is not up-to-date because:
+  Value of input property 'rootSpec$1.filteringCharset' has changed for task ':gradle-plugin:settings-plugin:processResources'
+  Value of input property 'rootSpec$2.filteringCharset' has changed for task ':gradle-plugin:settings-plugin:processResources'
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\resources', not found
+
+> Task :gradle-plugin:shared:compileKotlin
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\shared\build\classes\kotlin\main
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\cacheable
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\classpath-snapshot
+Caching disabled for task ':gradle-plugin:shared:compileKotlin' because:
+  Build cache is disabled
+Task ':gradle-plugin:shared:compileKotlin' is not up-to-date because:
+  Output property 'classpathSnapshotProperties.classpathSnapshotDir' file K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\classpath-snapshot has been removed.
+  Output property 'classpathSnapshotProperties.classpathSnapshotDir' file C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin has been removed.
+  Output property 'destinationDirectory' file K:\node_modules\@react-native\gradle-plugin\shared\build\classes\kotlin\main has been removed.
+  and more...
+The input changes require a full rebuild for incremental task ':gradle-plugin:shared:compileKotlin'.
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\src\main\java', not found
+Kotlin source files: K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingAndroidProjectJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingConfigJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingDependenciesJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingDependenciesPlatformAndroidJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingDependenciesPlatformJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelAutolinkingProjectJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelCodegenConfig.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelCodegenConfigAndroid.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\model\ModelPackageJson.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\utils\JsonUtils.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\utils\KotlinStdlibCompatUtils.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\utils\Os.kt, K:\node_modules\@react-native\gradle-plugin\shared\src\main\kotlin\com\facebook\react\utils\TaskUtils.kt
+Java source files: 
+Script source files: 
+Script file extensions: 
+Using Kotlin/JVM incremental compilation
+[KOTLIN] Kotlin compilation 'jdkHome' argument: C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot
+
+Resolve mutations for :gradle-plugin:shared:processResources (Thread[included builds,5,main]) started.
+:gradle-plugin:shared:processResources (Thread[included builds,5,main]) started.
+
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+Skipping task ':gradle-plugin:shared:processResources' as it has no source files and no previous output files.
+
+> Task :gradle-plugin:shared:compileKotlin
+i: found daemon on port 17158 (267467 ms old), trying to connect
+i: connected to the daemon
+Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0], kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=NotAvailableForNonIncrementalRun, workingDir=K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\local-state\build-history.bin, useModuleDetection=false), usePreciseJavaTracking=true, outputFiles=[K:\node_modules\@react-native\gradle-plugin\shared\build\classes\kotlin\main, K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\cacheable, K:\node_modules\@react-native\gradle-plugin\shared\build\kotlin\compileKotlin\local-state])
+Resolve mutations for :gradle-plugin:shared:compileJava (Thread[Execution worker Thread 10,5,main]) started.
+:gradle-plugin:shared:compileJava (Thread[Execution worker Thread 10,5,main]) started.
+
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+Skipping task ':gradle-plugin:shared:compileJava' as it has no source files and no previous output files.
+Resolve mutations for :gradle-plugin:shared:classes (Thread[Execution worker Thread 10,5,main]) started.
+:gradle-plugin:shared:classes (Thread[Execution worker Thread 10,5,main]) started.
+
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+Skipping task ':gradle-plugin:shared:classes' as it has no actions.
+Resolve mutations for :gradle-plugin:shared:jar (Thread[Execution worker Thread 10,5,main]) started.
+:gradle-plugin:shared:jar (Thread[Execution worker Thread 10,5,main]) started.
+
+> Task :gradle-plugin:shared:jar
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\shared\build\libs\shared.jar
+Caching disabled for task ':gradle-plugin:shared:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle-plugin:shared:jar' is not up-to-date because:
+  Value of input property 'rootSpec$1.filteringCharset' has changed for task ':gradle-plugin:shared:jar'
+  Value of input property 'rootSpec$2$1.filteringCharset' has changed for task ':gradle-plugin:shared:jar'
+  Value of input property 'rootSpec$2.filteringCharset' has changed for task ':gradle-plugin:shared:jar'
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\build\classes\java\main', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\shared\build\resources\main', not found
+work action resolve shared.jar (project :gradle-plugin:shared) (Thread[Execution worker Thread 10,5,main]) started.
+Resolve mutations for :gradle-plugin:settings-plugin:compileKotlin (Thread[included builds,5,main]) started.
+:gradle-plugin:settings-plugin:compileKotlin (Thread[included builds,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:compileKotlin
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\classes\kotlin\main
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\classpath-snapshot
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\cacheable
+Caching disabled for ClasspathEntrySnapshotTransform: K:\node_modules\@react-native\gradle-plugin\shared\build\libs\shared.jar because:
+  Build cache is disabled
+Caching disabled for task ':gradle-plugin:settings-plugin:compileKotlin' because:
+  Build cache is disabled
+Task ':gradle-plugin:settings-plugin:compileKotlin' is not up-to-date because:
+  Output property 'classpathSnapshotProperties.classpathSnapshotDir' file K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\classpath-snapshot has been removed.
+  Output property 'classpathSnapshotProperties.classpathSnapshotDir' file C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin has been removed.
+  Output property 'destinationDirectory' file K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\classes\kotlin\main has been removed.
+  and more...
+The input changes require a full rebuild for incremental task ':gradle-plugin:settings-plugin:compileKotlin'.
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\java', not found
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\java', not found
+Kotlin source files: K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\kotlin\com\facebook\react\ReactSettingsExtension.kt, K:\node_modules\@react-native\gradle-plugin\settings-plugin\src\main\kotlin\com\facebook\react\ReactSettingsPlugin.kt
+Java source files: 
+Script source files: 
+Script file extensions: 
+Using Kotlin/JVM incremental compilation
+[KOTLIN] Kotlin compilation 'jdkHome' argument: C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot
+i: found daemon on port 17158 (280630 ms old), trying to connect
+i: connected to the daemon
+Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0], kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=NotAvailableForNonIncrementalRun, workingDir=K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\local-state\build-history.bin, useModuleDetection=false), usePreciseJavaTracking=true, outputFiles=[K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\classes\kotlin\main, K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\cacheable, K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\kotlin\compileKotlin\local-state])
+Resolve mutations for :gradle-plugin:settings-plugin:compileJava (Thread[Execution worker Thread 10,5,main]) started.
+:gradle-plugin:settings-plugin:compileJava (Thread[included builds,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+Skipping task ':gradle-plugin:settings-plugin:compileJava' as it has no source files and no previous output files.
+Resolve mutations for :gradle-plugin:settings-plugin:classes (Thread[included builds,5,main]) started.
+:gradle-plugin:settings-plugin:classes (Thread[included builds,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:classes
+Skipping task ':gradle-plugin:settings-plugin:classes' as it has no actions.
+Resolve mutations for :gradle-plugin:settings-plugin:jar (Thread[included builds,5,main]) started.
+:gradle-plugin:settings-plugin:jar (Thread[included builds,5,main]) started.
+
+> Task :gradle-plugin:settings-plugin:jar
+Deleting stale output file: K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\libs\settings-plugin.jar
+Caching disabled for task ':gradle-plugin:settings-plugin:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle-plugin:settings-plugin:jar' is not up-to-date because:
+  Value of input property 'rootSpec$1.filteringCharset' has changed for task ':gradle-plugin:settings-plugin:jar'
+  Value of input property 'rootSpec$2$1.filteringCharset' has changed for task ':gradle-plugin:settings-plugin:jar'
+  Value of input property 'rootSpec$2.filteringCharset' has changed for task ':gradle-plugin:settings-plugin:jar'
+file or directory 'K:\node_modules\@react-native\gradle-plugin\settings-plugin\build\classes\java\main', not found
+
+[Incubating] Problems report is available at: file:///K:/apps/mobile/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file 'K:\apps\mobile\android\settings.gradle' line: 22
+
+* What went wrong:
+A problem occurred evaluating settings 'android'.
+> Could not get unknown property 'expoAutolinking' for settings 'android' of type org.gradle.initialization.DefaultSettings.
+
+* Try:
+> Run with --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+* Exception is:
+org.gradle.api.GradleScriptException: A problem occurred evaluating settings 'android'.
+	at org.gradle.groovy.scripts.internal.DefaultScriptRunnerFactory$ScriptRunnerImpl.run(DefaultScriptRunnerFactory.java:93)
+	at org.gradle.configuration.DefaultScriptPluginFactory$ScriptPluginImpl.lambda$apply$1(DefaultScriptPluginFactory.java:141)
+	at org.gradle.configuration.DefaultScriptTarget.addConfiguration(DefaultScriptTarget.java:74)
+	at org.gradle.configuration.DefaultScriptPluginFactory$ScriptPluginImpl.apply(DefaultScriptPluginFactory.java:144)
+	at org.gradle.configuration.BuildOperationScriptPlugin$1.run(BuildOperationScriptPlugin.java:68)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+	at org.gradle.configuration.BuildOperationScriptPlugin.lambda$apply$0(BuildOperationScriptPlugin.java:65)
+	at org.gradle.internal.code.DefaultUserCodeApplicationContext.apply(DefaultUserCodeApplicationContext.java:44)
+	at org.gradle.configuration.BuildOperationScriptPlugin.apply(BuildOperationScriptPlugin.java:65)
+	at org.gradle.initialization.ScriptEvaluatingSettingsProcessor.applySettingsScript(ScriptEvaluatingSettingsProcessor.java:75)
+	at org.gradle.initialization.ScriptEvaluatingSettingsProcessor.process(ScriptEvaluatingSettingsProcessor.java:68)
+	at org.gradle.initialization.SettingsEvaluatedCallbackFiringSettingsProcessor.process(SettingsEvaluatedCallbackFiringSettingsProcessor.java:34)
+	at org.gradle.initialization.RootBuildCacheControllerSettingsProcessor.process(RootBuildCacheControllerSettingsProcessor.java:47)
+	at org.gradle.initialization.BuildOperationSettingsProcessor$2.call(BuildOperationSettingsProcessor.java:49)
+	at org.gradle.initialization.BuildOperationSettingsProcessor$2.call(BuildOperationSettingsProcessor.java:46)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.initialization.BuildOperationSettingsProcessor.process(BuildOperationSettingsProcessor.java:46)
+	at org.gradle.initialization.DefaultSettingsLoader.findSettingsAndLoadIfAppropriate(DefaultSettingsLoader.java:183)
+	at org.gradle.initialization.DefaultSettingsLoader.findAndLoadSettings(DefaultSettingsLoader.java:86)
+	at org.gradle.initialization.SettingsAttachingSettingsLoader.findAndLoadSettings(SettingsAttachingSettingsLoader.java:33)
+	at org.gradle.internal.composite.CommandLineIncludedBuildSettingsLoader.findAndLoadSettings(CommandLineIncludedBuildSettingsLoader.java:35)
+	at org.gradle.internal.composite.ChildBuildRegisteringSettingsLoader.findAndLoadSettings(ChildBuildRegisteringSettingsLoader.java:44)
+	at org.gradle.internal.composite.CompositeBuildSettingsLoader.findAndLoadSettings(CompositeBuildSettingsLoader.java:35)
+	at org.gradle.initialization.InitScriptHandlingSettingsLoader.findAndLoadSettings(InitScriptHandlingSettingsLoader.java:33)
+	at org.gradle.api.internal.initialization.CacheConfigurationsHandlingSettingsLoader.findAndLoadSettings(CacheConfigurationsHandlingSettingsLoader.java:36)
+	at org.gradle.initialization.GradlePropertiesHandlingSettingsLoader.findAndLoadSettings(GradlePropertiesHandlingSettingsLoader.java:38)
+	at org.gradle.initialization.DefaultSettingsPreparer.prepareSettings(DefaultSettingsPreparer.java:31)
+	at org.gradle.initialization.BuildOperationFiringSettingsPreparer$LoadBuild.doLoadBuild(BuildOperationFiringSettingsPreparer.java:71)
+	at org.gradle.initialization.BuildOperationFiringSettingsPreparer$LoadBuild.run(BuildOperationFiringSettingsPreparer.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+	at org.gradle.initialization.BuildOperationFiringSettingsPreparer.prepareSettings(BuildOperationFiringSettingsPreparer.java:54)
+	at org.gradle.initialization.VintageBuildModelController.lambda$prepareSettings$1(VintageBuildModelController.java:80)
+	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
+	at org.gradle.internal.model.StateTransitionController.lambda$transitionIfNotPreviously$11(StateTransitionController.java:213)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:36)
+	at org.gradle.internal.model.StateTransitionController.transitionIfNotPreviously(StateTransitionController.java:209)
+	at org.gradle.initialization.VintageBuildModelController.prepareSettings(VintageBuildModelController.java:80)
+	at org.gradle.initialization.VintageBuildModelController.prepareToScheduleTasks(VintageBuildModelController.java:70)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$prepareToScheduleTasks$6(DefaultBuildLifecycleController.java:175)
+	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
+	at org.gradle.internal.model.StateTransitionController.lambda$maybeTransition$9(StateTransitionController.java:190)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:36)
+	at org.gradle.internal.model.StateTransitionController.maybeTransition(StateTransitionController.java:186)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.prepareToScheduleTasks(DefaultBuildLifecycleController.java:173)
+	at org.gradle.internal.buildtree.DefaultBuildTreeWorkPreparer.scheduleRequestedTasks(DefaultBuildTreeWorkPreparer.java:36)
+	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:36)
+	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:35)
+	at org.gradle.composite.internal.DefaultIncludedBuildTaskGraph.withNewWorkGraph(DefaultIncludedBuildTaskGraph.java:112)
+	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController.scheduleAndRunRequestedTasks(VintageBuildTreeWorkController.kt:35)
+	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$scheduleAndRunTasks$1(DefaultBuildTreeLifecycleController.java:77)
+	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$runBuild$4(DefaultBuildTreeLifecycleController.java:120)
+	at org.gradle.internal.model.StateTransitionController.lambda$transition$6(StateTransitionController.java:169)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$transition$7(StateTransitionController.java:169)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:46)
+	at org.gradle.internal.model.StateTransitionController.transition(StateTransitionController.java:169)
+	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.runBuild(DefaultBuildTreeLifecycleController.java:117)
+	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:77)
+	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:72)
+	at org.gradle.tooling.internal.provider.ExecuteBuildActionRunner.run(ExecuteBuildActionRunner.java:31)
+	at org.gradle.launcher.exec.ChainingBuildActionRunner.run(ChainingBuildActionRunner.java:35)
+	at org.gradle.internal.buildtree.ProblemReportingBuildActionRunner.run(ProblemReportingBuildActionRunner.java:49)
+	at org.gradle.launcher.exec.BuildOutcomeReportingBuildActionRunner.run(BuildOutcomeReportingBuildActionRunner.java:71)
+	at org.gradle.tooling.internal.provider.FileSystemWatchingBuildActionRunner.run(FileSystemWatchingBuildActionRunner.java:135)
+	at org.gradle.launcher.exec.BuildCompletionNotifyingBuildActionRunner.run(BuildCompletionNotifyingBuildActionRunner.java:41)
+	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.lambda$execute$0(RootBuildLifecycleBuildActionExecutor.java:54)
+	at org.gradle.composite.internal.DefaultRootBuildState.run(DefaultRootBuildState.java:130)
+	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.execute(RootBuildLifecycleBuildActionExecutor.java:54)
+	at org.gradle.internal.buildtree.InitDeprecationLoggingActionExecutor.execute(InitDeprecationLoggingActionExecutor.java:62)
+	at org.gradle.internal.buildtree.InitProblems.execute(InitProblems.java:36)
+	at org.gradle.internal.buildtree.DefaultBuildTreeContext.execute(DefaultBuildTreeContext.java:40)
+	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.lambda$execute$0(BuildTreeLifecycleBuildActionExecutor.java:71)
+	at org.gradle.internal.buildtree.BuildTreeState.run(BuildTreeState.java:60)
+	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.execute(BuildTreeLifecycleBuildActionExecutor.java:71)
+	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:67)
+	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:63)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor.execute(RunAsBuildOperationBuildActionExecutor.java:63)
+	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.lambda$execute$0(RunAsWorkerThreadBuildActionExecutor.java:36)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.execute(RunAsWorkerThreadBuildActionExecutor.java:36)
+	at org.gradle.tooling.internal.provider.continuous.ContinuousBuildActionExecutor.execute(ContinuousBuildActionExecutor.java:110)
+	at org.gradle.tooling.internal.provider.SubscribableBuildActionExecutor.execute(SubscribableBuildActionExecutor.java:64)
+	at org.gradle.internal.session.DefaultBuildSessionContext.execute(DefaultBuildSessionContext.java:46)
+	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:92)
+	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:80)
+	at org.gradle.internal.session.BuildSessionState.run(BuildSessionState.java:73)
+	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:62)
+	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:41)
+	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:64)
+	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:32)
+	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:51)
+	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:39)
+	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:47)
+	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:31)
+	at org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:70)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.WatchForDisconnection.execute(WatchForDisconnection.java:39)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.ResetDeprecationLogger.execute(ResetDeprecationLogger.java:29)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon.execute(RequestStopIfSingleUsedDaemon.java:35)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.lambda$execute$0(ForwardClientInput.java:40)
+	at org.gradle.internal.daemon.clientinput.ClientInputForwarder.forwardInput(ClientInputForwarder.java:80)
+	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.execute(ForwardClientInput.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.LogAndCheckHealth.execute(LogAndCheckHealth.java:64)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.LogToClient.doBuild(LogToClient.java:63)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment.doBuild(EstablishBuildEnvironment.java:84)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy$1.run(StartBuildOrRespondWithBusy.java:52)
+	at org.gradle.launcher.daemon.server.DaemonStateCoordinator.lambda$runCommand$0(DaemonStateCoordinator.java:321)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+Caused by: groovy.lang.MissingPropertyException: Could not get unknown property 'expoAutolinking' for settings 'android' of type org.gradle.initialization.DefaultSettings.
+	at org.gradle.internal.metaobject.AbstractDynamicObject.getMissingProperty(AbstractDynamicObject.java:85)
+	at org.gradle.groovy.scripts.BasicScript$ScriptDynamicObject.getMissingProperty(BasicScript.java:160)
+	at org.gradle.internal.metaobject.AbstractDynamicObject.getProperty(AbstractDynamicObject.java:62)
+	at org.gradle.api.internal.project.DefaultDynamicLookupRoutine.property(DefaultDynamicLookupRoutine.java:31)
+	at org.gradle.groovy.scripts.BasicScript.getProperty(BasicScript.java:69)
+	at settings_2akfh6su9j9a3njefcujcfdci$_run_closure1.doCall$original(K:\apps\mobile\android\settings.gradle:22)
+	at settings_2akfh6su9j9a3njefcujcfdci$_run_closure1.doCall(K:\apps\mobile\android\settings.gradle)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at jdk.proxy1/jdk.proxy1.$Proxy125.execute(Unknown Source)
+	at org.gradle.internal.extensibility.ExtensionsStorage$ExtensionHolder.configure(ExtensionsStorage.java:177)
+	at org.gradle.internal.extensibility.ExtensionsStorage.configureExtension(ExtensionsStorage.java:70)
+	at org.gradle.internal.extensibility.DefaultConvention.configure(DefaultConvention.java:202)
+	at org.gradle.internal.extensibility.DefaultConvention.configure(DefaultConvention.java:197)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at settings_2akfh6su9j9a3njefcujcfdci.run(K:\apps\mobile\android\settings.gradle:18)
+	at org.gradle.groovy.scripts.internal.DefaultScriptRunnerFactory$ScriptRunnerImpl.run(DefaultScriptRunnerFactory.java:91)
+	... 148 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 56s
+8 actionable tasks: 8 executed
+Watched directory hierarchies: [K:\node_modules\@react-native\gradle-plugin]

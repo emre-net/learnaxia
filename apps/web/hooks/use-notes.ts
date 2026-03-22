@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    type UseMutateFunction,
+} from "@tanstack/react-query";
 import { logger } from "@/lib/logger";
 type Note = {
     id: string;
@@ -63,7 +68,19 @@ async function deleteNote(id: string) {
     return res.json();
 }
 
-export function useNotes(filters?: { moduleId?: string; itemId?: string }) {
+export type UseNotesReturn = {
+    notes: Note[] | undefined;
+    isLoading: boolean;
+    error: Error | null;
+    createNote: UseMutateFunction<unknown, Error, CreateNoteDto, unknown>;
+    updateNote: UseMutateFunction<unknown, Error, UpdateNoteDto, unknown>;
+    deleteNote: UseMutateFunction<unknown, Error, string, unknown>;
+    isCreating: boolean;
+    isUpdating: boolean;
+    isDeleting: boolean;
+};
+
+export function useNotes(filters?: { moduleId?: string; itemId?: string }): UseNotesReturn {
     const queryClient = useQueryClient();
 
     const query = useQuery<Note[]>({

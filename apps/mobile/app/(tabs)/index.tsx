@@ -4,10 +4,11 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
+import * as Haptics from 'expo-haptics';
+import { Theme as SharedTheme, t, Language } from '@learnaxia/shared';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
-
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { FocusWidget } from '@/components/dashboard/focus-widget';
 import { DailyReviewWidget } from '@/components/dashboard/daily-review-widget';
 
@@ -23,6 +24,8 @@ interface DashboardStats {
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const currentLang = 'tr' as Language;
+  
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -71,14 +74,22 @@ export default function HomeScreen() {
   }, [fetchDashboardData]);
 
   const statCards = [
-    { label: 'Süre', value: stats ? `${stats.totalStudyMinutes} dk` : '0 dk', icon: 'schedule', color: SharedTheme.colors.brandEmerald },
-    { label: 'Setler', value: stats ? stats.modulesStarted.toString() : '0', icon: 'menu-book', color: SharedTheme.colors.brandBlue },
-    { label: 'Başarı', value: stats ? `%${stats.averageAccuracy}` : '%0', icon: 'track-changes', color: SharedTheme.colors.primary },
-    { label: 'Çözüm', value: stats ? stats.totalSolved.toString() : '0', icon: 'psychology', color: '#A855F7' },
+    { label: t('dashboard.stats.studyTime', currentLang), value: stats ? `${stats.totalStudyMinutes} ${t('dashboard.stats.minutesUnit', currentLang)}` : `0 ${t('dashboard.stats.minutesUnit', currentLang)}`, icon: 'schedule', color: SharedTheme.colors.brandEmerald },
+    { label: t('dashboard.stats.modules', currentLang), value: stats ? stats.modulesStarted.toString() : '0', icon: 'menu-book', color: SharedTheme.colors.brandBlue },
+    { label: t('dashboard.stats.accuracy', currentLang), value: stats ? `%${stats.averageAccuracy}` : '%0', icon: 'track-changes', color: SharedTheme.colors.primary },
+    { label: t('dashboard.stats.solved', currentLang), value: stats ? stats.totalSolved.toString() : '0', icon: 'psychology', color: '#A855F7' },
   ];
 
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-ocean-bg justify-center items-center">
+        <BrandLoader size="lg" label={t('common.loading', currentLang)} />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+    <SafeAreaView className="flex-1 bg-ocean-bg">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -90,12 +101,15 @@ export default function HomeScreen() {
         <View className="px-6 pt-10 pb-6 flex-row justify-between items-center">
           <View>
             <Text className="text-white text-3xl font-bold tracking-tight">
-              Merhaba, {user?.name?.split(' ')[0] || user?.handle || 'Kullanıcı'}
+              {t('dashboard.greeting', currentLang, { name: user?.name?.split(' ')[0] || user?.handle || t('common.user', currentLang) })}
             </Text>
           </View>
           <TouchableOpacity
-            className="w-12 h-12 rounded-full bg-slate-900 items-center justify-center border border-slate-800 shadow-xl"
-            onPress={() => router.push('/profile')}
+            className="w-12 h-12 rounded-[20px] bg-ocean-panel items-center justify-center border border-ocean-border shadow-lg"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/profile');
+            }}
           >
             <IconSymbol name="person.fill" size={24} color="#3B82F6" />
           </TouchableOpacity>
@@ -111,26 +125,56 @@ export default function HomeScreen() {
           <FocusWidget />
         </View>
 
-        {/* Quick Stats Grid */}
-        <View className="px-6 flex-row flex-wrap justify-between mt-2 mb-8">
-          {statCards.map((stat, i) => {
-            const isLastOdd = statCards.length % 2 !== 0 && i === statCards.length - 1;
-            return (
-              <View
-                key={i}
-                className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800 mb-4"
-                style={{ width: isLastOdd ? width - 48 : (width - 60) / 2 }}
-              >
-                <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-slate-200 text-xs font-medium">{stat.label}</Text>
-                  <MaterialIcons name={stat.icon as any} size={16} color={stat.color} />
-                </View>
-                <Text className="text-2xl font-bold text-white">
-                  {stat.value}
-                </Text>
+        {/* Quick Stats Grid - Premium Bento Style */}
+        <View className="px-6 mb-8 mt-2">
+          {/* Top block */}
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+            className="w-full bg-ocean-panel rounded-3xl p-5 mb-4 border border-ocean-border shadow-lg overflow-hidden flex-row items-center justify-between"
+          >
+            <View>
+              <View className="flex-row items-center mb-2">
+                 <MaterialIcons name="schedule" size={18} color="#34D399" />
+                 <Text className="text-slate-300 text-sm font-medium ml-2">{t('dashboard.stats.studyTime', currentLang)}</Text>
               </View>
-            );
-          })}
+              <Text className="text-3xl font-extrabold text-white">
+                {stats ? stats.totalStudyMinutes : '0'} <Text className="text-lg font-medium text-slate-400">{t('dashboard.stats.minutesUnit', currentLang)}</Text>
+              </Text>
+            </View>
+            <View className="h-12 w-12 rounded-full bg-[#34D399]/20 items-center justify-center">
+              <MaterialIcons name="timer" size={24} color="#34D399" />
+            </View>
+          </TouchableOpacity>
+
+          {/* Bottom row */}
+          <View className="flex-row justify-between">
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+              className="bg-ocean-panel rounded-3xl p-5 border border-ocean-border shadow-lg"
+              style={{ width: (width - 60) / 2 }}
+            >
+               <View className="h-10 w-10 rounded-[16px] bg-blue-500/20 items-center justify-center mb-3">
+                 <MaterialIcons name="menu-book" size={20} color="#60A5FA" />
+               </View>
+               <Text className="text-2xl font-bold text-white mb-1">{stats ? stats.modulesStarted : '0'}</Text>
+               <Text className="text-slate-400 text-xs font-medium">{t('dashboard.stats.modules', currentLang)}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+              className="bg-ocean-panel rounded-3xl p-5 border border-ocean-border shadow-lg"
+              style={{ width: (width - 60) / 2 }}
+            >
+               <View className="h-10 w-10 rounded-[16px] bg-purple-500/20 items-center justify-center mb-3">
+                 <MaterialIcons name="track-changes" size={20} color="#C084FC" />
+               </View>
+               <Text className="text-2xl font-bold text-white mb-1">{stats ? `%${stats.averageAccuracy}` : '%0'}</Text>
+               <Text className="text-slate-400 text-xs font-medium">{t('dashboard.stats.accuracy', currentLang)}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
       </ScrollView>

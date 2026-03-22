@@ -1,0 +1,47 @@
+node : C:\Users\Emre\.gemini\antig
+ravity\scratch\learnaxity\learnaxi
+a\node_modules\@react-native-commu
+nity\cli-config\build\loadConfig.j
+s:73
+At line:1 char:1
++ node -e "console.log(JSON.string
+ify(require('@react-native-communi
+ty/ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (C:\Users\Emre\...  
+  .oadConfig.js:73:String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+  projectRoot = (0, _cliTools().fi
+ndProjectRoot)(),
+  ^
+
+TypeError: Cannot read properties 
+of undefined (reading 'projectRoot
+')
+    at Object.loadConfig (C:\Users
+\Emre\.gemini\antigravity\scratch\
+learnaxity\learnaxia\node_modules\
+@react-native-community\cli-config
+\build\loadConfig.js:73:3)
+    at [eval]:1:67
+    at runScriptInThisContext (nod
+e:internal/vm:219:10)
+    at node:internal/process/execu
+tion:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:in
+ternal/process/execution:449:60)
+    at evalFunction (node:internal
+/process/execution:283:30)
+    at evalTypeScript (node:intern
+al/process/execution:295:3)
+    at node:internal/main/eval_str
+ing:71:3
+
+Node.js v24.11.1

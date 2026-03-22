@@ -58,6 +58,8 @@ export function BrandLoader({
       -1,
       true
     );
+    // Shared values are stable; effect intentionally runs once on mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reanimated mount-only
   }, []);
 
   const animatedRingStyle = useAnimatedStyle(() => ({

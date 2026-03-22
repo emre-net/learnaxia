@@ -1,0 +1,40 @@
+--------- beginning of main
+03-22 18:23:38.388  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:39.388  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:40.162  4555 16009 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: 520919
+03-22 18:23:40.388  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:40.600  4555 16009 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: -520919
+03-22 18:23:41.041  1049  1049 E android.hardware.health@2.1-service-samsung: Could not open /sys/class/power_supply/battery/lrp
+03-22 18:23:41.073  1816  1816 E PocketModeEvent: PocketModeSetting is off 
+--------- beginning of system
+03-22 18:23:41.100  4987  4987 E SDHMS:SDHMS_UTIL_IO: e = /sys/class/power_supply/battery/chg_type: open failed: ENOENT (No such file or directory)
+03-22 18:23:41.100  2403  4624 E SecPowerUI.Notification: no saved value, so we do nothing !!
+03-22 18:23:41.380   950   950 E audit   : type=1400 audit(1774193021.375:15819): avc:  denied  { ioctl } for  pid=3250 comm="highpool[213]" path="/data/data/com.google.android.gms/databases/phenotype.db" dev="dm-52" ino=7098 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A525F_12_0001 audit_filtered
+03-22 18:23:41.389  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:42.389  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:43.389  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:43.545  1816  1963 E Watchdog: !@Sync: 259 heap: 173 / 178 FD: 1330 [2026-03-22 18:23:43.544]
+03-22 18:23:44.390  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:45.390  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:45.776  4555 15963 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: 701227
+03-22 18:23:46.067  4555 16009 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: -698807
+03-22 18:23:46.390  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:47.391  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:48.391  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:48.405   950   950 E audit   : type=1400 audit(1774193028.399:15820): avc:  denied  { ioctl } for  pid=3250 comm="binder:3250_10" path="/data/data/com.google.android.gms/databases/phenotype.db" dev="dm-52" ino=7098 ioctlcmd=0xf522 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:privapp_data_file:s0:c512,c768 tclass=file permissive=0 SEPF_SM-A525F_12_0001 audit_filtered
+03-22 18:23:49.392  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:49.662  4555  9773 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: 515919
+03-22 18:23:50.272  4555 16009 E IdleQueuePayloadBasedServiceLayer: Request empty, but still some servings left: -515919
+03-22 18:23:50.393  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:51.122  1049  1049 E android.hardware.health@2.1-service-samsung: Could not open /sys/class/power_supply/battery/lrp
+03-22 18:23:51.137  1816  1816 E PocketModeEvent: PocketModeSetting is off 
+03-22 18:23:51.156  2403  4643 E SecPowerUI.Notification: no saved value, so we do nothing !!
+03-22 18:23:51.393  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:52.393  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:53.394  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:54.395  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:55.149  1816  2458 E KernelCpuUidFullTimeReader: Negative delta from freq time for uid: 90000, delta: -176
+03-22 18:23:55.150  1816  2458 E KernelCpuUidFullTimeReader: Negative delta from freq time for uid: 90001, delta: -10
+03-22 18:23:55.396  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:56.396  1454  8321 E bauth_FPBAuthService: skip cleanup here 2
+03-22 18:23:57.396  1454  8321 E bauth_FPBAuthService: skip cleanup here 2

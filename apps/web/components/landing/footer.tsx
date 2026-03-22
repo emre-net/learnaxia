@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrainCircuit } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
     return (
@@ -7,7 +7,7 @@ export function Footer() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <BrainCircuit className="h-6 w-6 text-primary" />
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={24} height={24} className="h-6 w-6 object-contain" />
                         <span className="font-bold text-lg">Learnaxia</span>
                     </div>
 
@@ -23,10 +23,6 @@ export function Footer() {
                         <p className="text-xs text-muted-foreground">
                             © {new Date().getFullYear()} Learnaxia. Tüm hakları saklıdır.
                         </p>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-500 uppercase tracking-tighter">
-                            <span className="h-1 w-1 rounded-full bg-blue-500 animate-pulse" />
-                            Developed by a solo engineer
-                        </div>
                     </div>
                 </div>
             </div>

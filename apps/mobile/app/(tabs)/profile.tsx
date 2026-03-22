@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, SafeAreaView, RefreshControl } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
+import { Theme as SharedTheme, t, Language } from '@learnaxia/shared';
 import api from '@/lib/api';
 
 export default function ProfileScreen() {
     const { user, logout } = useAuth();
+    const currentLang = 'tr' as Language;
     const [profileData, setProfileData] = useState<any>(null);
     const [analyticsData, setAnalyticsData] = useState<any>(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -37,9 +37,9 @@ export default function ProfileScreen() {
     }, [fetchProfile]);
 
     const statItems = [
-        { label: 'Modüller', value: profileData?.stats?.modules || 0, icon: 'menu-book', color: SharedTheme.colors.brandBlue },
-        { label: 'Koleksiyonlar', value: profileData?.stats?.collections || 0, icon: 'folder-special', color: SharedTheme.colors.brandPurple },
-        { label: 'Çalışma Süresi', value: `${analyticsData?.totalStudyMinutes || 0} dk`, icon: 'schedule', color: SharedTheme.colors.brandEmerald },
+        { label: t('profile.stats.modules', currentLang), value: profileData?.stats?.modules || 0, icon: 'menu-book', color: SharedTheme.colors.brandBlue },
+        { label: t('profile.stats.collections', currentLang), value: profileData?.stats?.collections || 0, icon: 'folder-special', color: SharedTheme.colors.brandPurple },
+        { label: t('profile.stats.studyTime', currentLang), value: `${analyticsData?.totalStudyMinutes || 0} ${t('dashboard.stats.minutesUnit', currentLang)}`, icon: 'schedule', color: SharedTheme.colors.brandEmerald },
     ];
 
     return (
@@ -52,7 +52,7 @@ export default function ProfileScreen() {
             >
                 {/* Header */}
                 <View className="px-6 pt-10 pb-2">
-                    <Text className="text-3xl font-bold text-white tracking-tight">Profil</Text>
+                    <Text className="text-3xl font-bold text-white tracking-tight">{t('profile.title', currentLang)}</Text>
                 </View>
 
                 {/* Profile Card */}
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
                         </View>
                         <View className="ml-4 flex-1">
                             <Text className="text-xl font-bold text-white">
-                                {user?.name || user?.handle || 'Kullanıcı'}
+                                {user?.name || user?.handle || t('common.user', currentLang)}
                             </Text>
                             <Text className="text-slate-500 text-sm mt-0.5">{user?.email || ''}</Text>
                             {user?.handle && (
@@ -100,17 +100,17 @@ export default function ProfileScreen() {
 
                 {/* Settings Section */}
                 <View className="px-6 mt-4">
-                    <Text className="text-white font-bold text-lg mb-3">Hesap Ayarları</Text>
+                    <Text className="text-white font-bold text-lg mb-3">{t('profile.settings.title', currentLang)}</Text>
 
                     <TouchableOpacity className="flex-row items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-3">
                         <View className="flex-row items-center">
                             <View className="w-10 h-10 rounded-xl bg-slate-800 items-center justify-center mr-4">
                                 <MaterialIcons name="language" size={20} color="#D1D5DB" />
                             </View>
-                            <Text className="text-white text-base font-medium">Dil</Text>
+                            <Text className="text-white text-base font-medium">{t('profile.settings.language', currentLang)}</Text>
                         </View>
                         <View className="flex-row items-center">
-                            <Text className="text-slate-500 mr-2">Türkçe</Text>
+                            <Text className="text-slate-500 mr-2">{currentLang === 'tr' ? 'Türkçe' : 'English'}</Text>
                             <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
                         </View>
                     </TouchableOpacity>
@@ -120,7 +120,7 @@ export default function ProfileScreen() {
                             <View className="w-10 h-10 rounded-xl bg-slate-800 items-center justify-center mr-4">
                                 <MaterialIcons name="notifications" size={20} color="#D1D5DB" />
                             </View>
-                            <Text className="text-white text-base font-medium">Bildirimler</Text>
+                            <Text className="text-white text-base font-medium">{t('profile.settings.notifications', currentLang)}</Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
                     </TouchableOpacity>
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
                             <View className="w-10 h-10 rounded-xl bg-slate-800 items-center justify-center mr-4">
                                 <MaterialIcons name="info-outline" size={20} color="#D1D5DB" />
                             </View>
-                            <Text className="text-white text-base font-medium">Hakkında</Text>
+                            <Text className="text-white text-base font-medium">{t('profile.settings.about', currentLang)}</Text>
                         </View>
                         <View className="flex-row items-center">
                             <Text className="text-slate-600 mr-2 text-xs">v1.0.0</Text>
@@ -148,7 +148,7 @@ export default function ProfileScreen() {
                     >
                         <View className="flex-row items-center">
                             <MaterialIcons name="logout" size={20} color="#ef4444" />
-                            <Text className="text-red-500 font-bold text-base ml-2">Çıkış Yap</Text>
+                            <Text className="text-red-500 font-bold text-base ml-2">{t('profile.settings.logout', currentLang)}</Text>
                         </View>
                     </TouchableOpacity>
                 </View>

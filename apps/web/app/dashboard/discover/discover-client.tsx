@@ -15,7 +15,7 @@ import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { LibraryCard } from "@/components/shared/library-card";
 import { Separator } from "@/components/ui/separator";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { useTranslation } from "@/lib/i18n/i18n";
 import { useSettingsStore } from "@/stores/settings-store";
 import {
     Sheet,
@@ -42,6 +42,14 @@ function useDebounceValue<T>(value: T, delay: number): T {
     return debouncedValue;
 }
 
+const MODULE_TYPE_IDS = [
+    { id: null, key: 'study.moduleTypes.all' },
+    { id: "FLASHCARD", key: 'study.moduleTypes.flashcard' },
+    { id: "MC", key: 'study.moduleTypes.mc' },
+    { id: "TRUE_FALSE", key: 'study.moduleTypes.true_false' },
+    { id: "GAP", key: 'study.moduleTypes.gap' }
+];
+
 export function DiscoverClient() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
@@ -52,9 +60,7 @@ export function DiscoverClient() {
     const [limit] = useState(12);
     const [page, setPage] = useState(0);
 
-    const { language } = useSettingsStore();
-    const dictionary = getDictionary(language);
-    const studyDict = dictionary.study;
+    const { t } = useTranslation();
 
     const debouncedSearch = useDebounceValue(searchQuery, 300);
 
@@ -112,7 +118,7 @@ export function DiscoverClient() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="font-bold flex items-center gap-2 text-lg">
-                    <Filter className="h-5 w-5 text-primary" /> Filtreler
+                    <Filter className="h-5 w-5 text-primary" /> {t('common.filters')}
                 </div>
                 {(selectedCategory || searchQuery || selectedModuleType) && (
                     <Button
@@ -126,7 +132,7 @@ export function DiscoverClient() {
                             setSearchQuery("");
                         }}
                     >
-                        <X className="h-3 w-3 mr-1" /> Sıfırla
+                        <X className="h-3 w-3 mr-1" /> {t('common.reset')}
                     </Button>
                 )}
             </div>
@@ -136,7 +142,7 @@ export function DiscoverClient() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                     type="search"
-                    placeholder="İçeriklerde ara..."
+                    placeholder={t('discover.searchPlaceholder')}
                     className="pl-10 bg-muted/30 border-none focus-visible:ring-1"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,15 +153,9 @@ export function DiscoverClient() {
 
             {activeTab === "modules" && (
                 <div className="space-y-3">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{studyDict?.moduleTypes?.title || "Modül Tipi"}</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('study.moduleTypes.title')}</h3>
                     <div className="grid grid-cols-1 gap-1">
-                        {[
-                            { id: null, label: studyDict?.moduleTypes?.all || "Tümü" },
-                            { id: "FLASHCARD", label: studyDict?.moduleTypes?.flashcard || "Kartlar" },
-                            { id: "MC", label: studyDict?.moduleTypes?.mc || "Çoktan Seçmeli" },
-                            { id: "TRUE_FALSE", label: studyDict?.moduleTypes?.true_false || "Doğru / Yanlış" },
-                            { id: "GAP", label: studyDict?.moduleTypes?.gap || "Boşluk Doldurma" }
-                        ].map((type) => (
+                        {MODULE_TYPE_IDS.map((type) => (
                             <Button
                                 key={type.id || 'all'}
                                 variant={selectedModuleType === type.id ? "secondary" : "ghost"}
@@ -163,7 +163,7 @@ export function DiscoverClient() {
                                 className={`w-full justify-start font-medium transition-all ${selectedModuleType === type.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`}
                                 onClick={() => setSelectedModuleType(type.id)}
                             >
-                                {type.label}
+                                {t(type.key as any)}
                             </Button>
                         ))}
                     </div>
@@ -172,7 +172,7 @@ export function DiscoverClient() {
             )}
 
             <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">Kategoriler</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('library.tabs.collections')}</h3>
                 <ScrollArea className="h-[calc(100vh-350px)] pr-4">
                     <div className="space-y-1">
                         {Object.keys(CATEGORIES).map(cat => (
@@ -194,7 +194,7 @@ export function DiscoverClient() {
                                             className="w-full justify-start text-xs h-8"
                                             onClick={() => setSelectedSubCategory(null)}
                                         >
-                                            Tümü
+                                            {t('study.moduleTypes.all')}
                                         </Button>
                                         {CATEGORIES[cat].map(sub => (
                                             <Button
@@ -230,11 +230,11 @@ export function DiscoverClient() {
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Keşfet</h1>
+                                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('discover.title')}</h1>
                                 <p className="text-muted-foreground mt-1 text-lg">
                                     {selectedCategory
                                         ? `${selectedCategory} ${selectedSubCategory ? `> ${selectedSubCategory}` : ''}`
-                                        : "Topluluk Atölyesi'nden en yeni üretimler"}
+                                        : t('discover.subtitle')}
                                 </p>
                             </div>
 
@@ -258,7 +258,7 @@ export function DiscoverClient() {
 
                         {searchQuery && (
                             <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-lg px-4 py-2 w-fit">
-                                <span className="text-sm font-medium">"{searchQuery}" araması için sonuçlar</span>
+                                <span className="text-sm font-medium">{t('common.searchResults', { query: searchQuery })}</span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -274,13 +274,13 @@ export function DiscoverClient() {
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                             <TabsList className="inline-flex h-auto w-full sm:w-auto items-center justify-start sm:justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground overflow-x-auto whitespace-nowrap scrollbar-hide">
-                                <TabsTrigger value="modules" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Modüller</TabsTrigger>
-                                <TabsTrigger value="collections" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Koleksiyonlar</TabsTrigger>
-                                <TabsTrigger value="notes" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notlar</TabsTrigger>
+                                <TabsTrigger value="modules" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.modules')}</TabsTrigger>
+                                <TabsTrigger value="collections" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.collections')}</TabsTrigger>
+                                <TabsTrigger value="notes" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.notes')}</TabsTrigger>
                             </TabsList>
 
                             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap">
-                                <span className="text-foreground font-bold">{total}</span> içerik bulundu
+                                <span className="text-foreground font-bold">{t('discover.totalResults', { count: total })}</span>
                             </div>
                         </div>
 
@@ -296,9 +296,9 @@ export function DiscoverClient() {
                                     <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-6">
                                         <Search className="h-8 w-8 text-muted-foreground text-opacity-30" />
                                     </div>
-                                    <h3 className="text-xl font-bold mb-2">Henüz Bir Şey Bulunmuyor</h3>
+                                    <h3 className="text-xl font-bold mb-2">{t('discover.emptyTitle')}</h3>
                                     <p className="text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
-                                        Seçtiğiniz kriterlere uygun içerik şu an mevcut değil. Filtreleri değiştirerek tekrar deneyebilirsiniz.
+                                        {searchQuery ? t('discover.emptyNoResults', { query: searchQuery }) : t('discover.emptyDesc')}
                                     </p>
                                     <Button variant="outline" className="rounded-xl px-8" onClick={() => {
                                         setSelectedCategory(null);
@@ -371,7 +371,7 @@ export function DiscoverClient() {
                                     {isFetchingNextPage ? (
                                         <div className="flex items-center gap-2 text-muted-foreground font-medium">
                                             <BrandLoader size="sm" />
-                                            Daha fazla yükleniyor...
+                                            {t('library.modulesTab.loadingMore')}
                                         </div>
                                     ) : (
                                         <div className="h-8"></div>

@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useScroll, motion, useMotionValueEvent } from "framer-motion";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -20,17 +21,14 @@ export function Navbar() {
         <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/80 backdrop-blur-md border-b py-3" : "bg-transparent py-6"}`}>
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
                 <Link className="flex items-center justify-center gap-2" href="/">
-                    <BrainCircuit className="h-6 w-6 text-primary" />
+                    <Image src="/logo.png" alt="Learnaxia Logo" width={32} height={32} className="h-8 w-8 object-contain" />
                     <span className="font-bold text-xl">Learnaxia</span>
                 </Link>
 
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex gap-6 items-center">
-                    <Link className="text-sm font-medium hover:text-primary transition-colors" href="#features">
+                    <Link className="text-sm font-medium hover:text-primary transition-colors" href="/#features">
                         Özellikler
-                    </Link>
-                    <Link className="text-sm font-medium hover:text-primary transition-colors" href="/#pricing">
-                        Fiyatlandırma
                     </Link>
                     <Button variant="ghost" asChild className="ml-4">
                         <Link href="/login">Giriş Yap</Link>

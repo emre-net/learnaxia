@@ -22,5 +22,5 @@ export interface LearningSlide {
     order: number;
     title: string;
     content: string;
-    peekingQuestion?: any;
+    peekingQuestion?: unknown;
 }

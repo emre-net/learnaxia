@@ -4,7 +4,6 @@ import { BrandLoader } from '@/components/ui/brand-loader';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme } from '@learnaxia/shared';
 import api from '@/lib/api';
 
 interface Note {

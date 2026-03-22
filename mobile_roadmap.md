@@ -1,4 +1,7 @@
-## Learnaxia – Web + Mobile Monorepo Roadmap
+ecTransact(Binder.java:1418)
+PS C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile> $p = Get-NetTCPConnection -LocalPort 8081 -ErrorAction SilentlyContinue; if($p) { Stop-Process -Id $p.OwningProcess -Force; echo "8081 portu temizlendi." }
+8081 portu temizlendi.
+PS C:\Users\Emre\.gemini\antigravity\scratch\learnaxity\learnaxia\apps\mobile> ## Learnaxia – Web + Mobile Monorepo Roadmap
 
 Bu doküman, mevcut Learnaxia Next.js uygulamasını bir **web + mobil ekosisteme** dönüştürmek için izlenecek teknik yol haritasını tanımlar. Hedefler:
 
@@ -361,7 +364,6 @@ Bu ayrımı net bir tablo halinde bu dosyada tut; böylece scope creep’i engel
 - Hangi metrikler gösterilecek:
   - Son 7 gün çalışma süresi toplamı.
   - Toplam çözülen soru sayısı.
-  - Aktif streak (kaç gündür üst üste çalıştı).
 - Web’deki `app/dashboard/analytics` mantığını referans alarak:
   - Hangi endpoint’lerden bu metrikleri alacağını (veya almayı planladığını) not et.
   - Mobilde gösterimi:
