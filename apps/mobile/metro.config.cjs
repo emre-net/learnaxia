@@ -37,8 +37,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 };
 
 const finalConfig = withNativeWind(config, { 
-    input: './app/global.css',
-    inlineRequires: true 
+    input: './app/global.css'
 });
 
 module.exports = finalConfig;
