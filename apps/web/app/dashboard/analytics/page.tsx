@@ -14,27 +14,40 @@ export default function AnalyticsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
         const fetchData = async () => {
             try {
-                const res = await fetch("/api/analytics");
+                const res = await fetch("/api/analytics", { signal: controller.signal });
                 if (!res.ok) throw new Error("Failed to load analytics");
                 const json = await res.json();
                 setData(json);
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error);
-                toast({ title: "Error", description: "Could not load analytics data.", variant: "destructive" });
+                const message = error.name === 'AbortError' ? "Bağlantı zaman aşımına uğradı." : "Analiz verileri yüklenemedi.";
+                toast({ title: "Hata", description: message, variant: "destructive" });
+                setData({ stats: { totalStudyMinutes: 0, modulesStarted: 0 }, dailyActivity: [], moduleStats: [] }); // Fallback empty data
             } finally {
+                clearTimeout(timeoutId);
                 setLoading(false);
             }
         };
         fetchData();
+        return () => {
+            controller.abort();
+            clearTimeout(timeoutId);
+        };
     }, [toast]);
 
     if (loading) {
-        return <div className="flex h-full items-center justify-center p-8"><BrandLoader size="lg" /></div>;
+        return (
+            <div className="flex flex-col h-[70vh] items-center justify-center p-8 gap-4">
+                <BrandLoader size="lg" />
+                <p className="text-sm text-muted-foreground animate-pulse">Veriler hazırlanıyor...</p>
+            </div>
+        );
     }
-
-    if (!data) return null;
 
     return (
         <div className="space-y-6">

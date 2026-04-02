@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    SafeAreaView, RefreshControl, TextInput,
+    RefreshControl, TextInput,
 } from 'react-native';
+import { Screen } from '@/components/ui/screen';
+import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -95,24 +97,35 @@ export default function LibraryScreen() {
 
     if (loading) {
         return (
-            <View className="flex-1 bg-slate-950 justify-center items-center" style={{ backgroundColor: SharedTheme.colors.background }}>
+            <Screen className="bg-ocean-bg justify-center items-center">
                 <BrandLoader size="lg" />
-            </View>
+            </Screen>
         );
     }
 
     const renderModuleItem = ({ item }: { item: ModuleData }) => (
         <TouchableOpacity
-            className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
+            activeOpacity={0.8}
+            className="bg-ocean-panel rounded-3xl p-6 mb-4 border border-ocean-border"
+            style={{ 
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8
+            }}
             onPress={() => router.push(`/study/${item.id}`)}
         >
             <View className="flex-row items-center justify-between mb-3">
-                <View className="bg-blue-500/10 px-3 py-1 rounded-lg border border-blue-500/20">
+                <View 
+                    className="px-3 py-1 rounded-lg border"
+                    style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}
+                >
                     <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-wider">
                         {item.type === 'MC' ? t('library.types.mc', currentLang) : item.type === 'FLASHCARD' ? t('library.types.flashcard', currentLang) : item.type || t('library.types.module', currentLang)}
                     </Text>
                 </View>
-                <Text className="text-slate-600 text-[10px] font-bold">
+                <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-bold">
                     {new Date(item.createdAt).toLocaleDateString('tr-TR')}
                 </Text>
             </View>
@@ -122,19 +135,22 @@ export default function LibraryScreen() {
             </Text>
 
             {item.description && (
-                <Text className="text-slate-500 text-sm mb-4 leading-5" numberOfLines={2}>
+                <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-sm mb-4 leading-5" numberOfLines={2}>
                     {item.description}
                 </Text>
             )}
 
-            <View className="flex-row items-center justify-between mt-auto pt-4 border-t border-slate-800/50">
+            <View 
+                className="flex-row items-center justify-between mt-auto pt-4 border-t"
+                style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+            >
                 <View className="flex-row items-center">
-                    <IconSymbol name="doc.text.fill" size={14} color={SharedTheme.colors.primary} />
-                    <Text className="text-slate-400 text-xs ml-2 font-bold uppercase tracking-tighter">
+                    <IconSymbol name="doc.text.fill" size={14} color="#3B82F6" />
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-xs ml-2 font-bold uppercase tracking-tighter">
                         {item._count?.items || 0} {t('library.items', currentLang)}
                     </Text>
                 </View>
-                <View className="bg-indigo-600 px-5 py-2 rounded-full">
+                <View className="bg-blue-600 px-5 py-2 rounded-full">
                     <Text className="text-white text-xs font-bold">{t('study.moduleActions.study', currentLang)}</Text>
                 </View>
             </View>
@@ -143,14 +159,25 @@ export default function LibraryScreen() {
 
     const renderCollectionItem = ({ item }: { item: CollectionData }) => (
         <TouchableOpacity
-            className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
+            activeOpacity={0.8}
+            className="bg-ocean-panel rounded-3xl p-6 mb-4 border border-ocean-border"
+            style={{ 
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8
+            }}
             onPress={() => router.push(`/collections/${item.id}` as any)}
         >
             <View className="flex-row items-center justify-between mb-3">
-                <View className="bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/20">
+                <View 
+                    className="px-3 py-1 rounded-lg border"
+                    style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderColor: 'rgba(168, 85, 247, 0.2)' }}
+                >
                     <Text className="text-purple-400 text-[10px] font-bold uppercase tracking-wider">{t('library.types.collection', currentLang)}</Text>
                 </View>
-                <Text className="text-slate-600 text-[10px] font-bold">
+                <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-bold">
                     {new Date(item.createdAt).toLocaleDateString('tr-TR')}
                 </Text>
             </View>
@@ -160,14 +187,17 @@ export default function LibraryScreen() {
             </Text>
 
             {item.description && (
-                <Text className="text-slate-500 text-sm mb-4 leading-5" numberOfLines={2}>
+                <Text className="text-white/40 text-sm mb-4 leading-5" numberOfLines={2}>
                     {item.description}
                 </Text>
             )}
 
-            <View className="flex-row items-center pt-4 border-t border-slate-800/50">
-                <MaterialIcons name="layers" size={14} color={SharedTheme.colors.brandPurple} />
-                <Text className="text-slate-400 text-xs ml-2 font-bold uppercase tracking-tighter">
+            <View 
+                className="flex-row items-center pt-4 border-t"
+                style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+            >
+                <MaterialIcons name="layers" size={14} color="#A855F7" />
+                <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-xs ml-2 font-bold uppercase tracking-tighter">
                     {item._count?.items || 0} {t('library.types.module', currentLang).toLowerCase()}
                 </Text>
             </View>
@@ -176,14 +206,25 @@ export default function LibraryScreen() {
 
     const renderNoteItem = ({ item }: { item: NoteData }) => (
         <TouchableOpacity
-            className="bg-slate-900 rounded-3xl p-6 mb-4 border border-slate-800 active:bg-slate-800 shadow-sm"
+            activeOpacity={0.8}
+            className="bg-ocean-panel rounded-3xl p-6 mb-4 border border-ocean-border"
+            style={{ 
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8
+            }}
             onPress={() => router.push(`/notes/${item.id}`)}
         >
             <View className="flex-row items-center justify-between mb-3">
-                <View className="bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
+                <View 
+                    className="px-3 py-1 rounded-lg border"
+                    style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.2)' }}
+                >
                     <Text className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">{t('library.types.note', currentLang)}</Text>
                 </View>
-                <Text className="text-slate-600 text-[10px] font-bold">
+                <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-bold">
                     {new Date(item.updatedAt).toLocaleDateString('tr-TR')}
                 </Text>
             </View>
@@ -192,10 +233,13 @@ export default function LibraryScreen() {
                 {item.title || "İsimsiz Not"}
             </Text>
 
-            <View className="flex-row items-center justify-between mt-auto pt-4 border-t border-slate-800/50">
+            <View 
+                className="flex-row items-center justify-between mt-auto pt-4 border-t"
+                style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+            >
                 <View className="flex-row items-center">
-                    <MaterialIcons name="edit-note" size={16} color={SharedTheme.colors.brandEmerald} />
-                    <Text className="text-slate-400 text-xs ml-1.5 font-bold uppercase tracking-tighter">
+                    <MaterialIcons name="edit-note" size={16} color="#10B981" />
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-xs ml-1.5 font-bold uppercase tracking-tighter">
                         BLOKLAR
                     </Text>
                 </View>
@@ -207,12 +251,12 @@ export default function LibraryScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+        <Screen className="bg-ocean-bg" tabScreen>
             {/* Header */}
             <View className="px-6 pt-10 pb-4 flex-row justify-between items-center">
                 <View>
                     <Text className="text-3xl font-bold text-white mb-1 tracking-tight">{t('library.title', currentLang)}</Text>
-                    <Text className="text-slate-500 font-medium">{t('library.subtitle', currentLang)}</Text>
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="font-medium">{t('library.subtitle', currentLang)}</Text>
                 </View>
                 {activeTab === 'notes' && (
                     <TouchableOpacity
@@ -226,19 +270,19 @@ export default function LibraryScreen() {
 
             {/* Search Bar */}
             <View className="px-6 mb-3">
-                <View className="flex-row items-center bg-slate-900 rounded-2xl border border-slate-800 px-4 py-3">
-                    <MaterialIcons name="search" size={20} color="#64748b" />
+                <View className="flex-row items-center bg-ocean-panel rounded-2xl border border-ocean-border px-4 py-3">
+                    <MaterialIcons name="search" size={20} color="rgba(255,255,255,0.3)" />
                         <TextInput
                             className="flex-1 text-white ml-3 text-base"
                             placeholder={t('library.searchPlaceholder', currentLang)}
-                        placeholderTextColor="#475569"
+                        placeholderTextColor="rgba(255,255,255,0.2)"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         returnKeyType="search"
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <MaterialIcons name="close" size={20} color="#64748b" />
+                            <MaterialIcons name="close" size={20} color="rgba(255,255,255,0.3)" />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -249,22 +293,32 @@ export default function LibraryScreen() {
                 {tabs.map((tab) => (
                     <TouchableOpacity
                         key={tab.id}
-                        className={`flex-row items-center mr-3 px-4 py-2.5 rounded-xl border ${activeTab === tab.id
-                            ? 'bg-indigo-600/20 border-indigo-500/30'
-                            : 'bg-slate-900/50 border-slate-800'
-                            }`}
+                        className={`flex-row items-center mr-3 px-4 py-2.5 rounded-xl border`}
+                        style={{ 
+                          backgroundColor: activeTab === tab.id ? 'rgba(37, 99, 235, 0.2)' : 'rgba(15, 23, 42, 1)',
+                          borderColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.3)' : 'rgba(30, 41, 59, 1)'
+                        }}
                         onPress={() => setActiveTab(tab.id)}
                     >
                         <MaterialIcons
                             name={tab.icon as any}
                             size={16}
-                            color={activeTab === tab.id ? '#818cf8' : '#64748b'}
+                            color={activeTab === tab.id ? '#00D2FF' : 'rgba(255,255,255,0.3)'}
                         />
-                        <Text className={`ml-2 text-sm font-bold ${activeTab === tab.id ? 'text-indigo-400' : 'text-slate-500'}`}>
+                        <Text 
+                            className="ml-2 text-sm font-bold"
+                            style={{ color: activeTab === tab.id ? '#60A5FA' : 'rgba(255, 255, 255, 0.3)' }}
+                        >
                             {tab.label}
                         </Text>
-                        <View className={`ml-2 px-1.5 py-0.5 rounded-md ${activeTab === tab.id ? 'bg-indigo-600/30' : 'bg-slate-800'}`}>
-                            <Text className={`text-[10px] font-bold ${activeTab === tab.id ? 'text-indigo-300' : 'text-slate-600'}`}>
+                        <View 
+                            className="ml-2 px-1.5 py-0.5 rounded-md"
+                            style={{ backgroundColor: activeTab === tab.id ? 'rgba(37, 99, 235, 0.3)' : 'rgba(255, 255, 255, 0.05)' }}
+                        >
+                            <Text 
+                                className="text-[10px] font-bold"
+                                style={{ color: activeTab === tab.id ? 'rgba(147, 197, 253, 1)' : 'rgba(255, 255, 255, 0.1)' }}
+                            >
                                 {tab.count}
                             </Text>
                         </View>
@@ -285,7 +339,7 @@ export default function LibraryScreen() {
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />
                 }
-                contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 8, paddingBottom: 100 }}
+                contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 8, paddingBottom: TAB_SCREEN_CONTENT_BOTTOM }}
                 ListEmptyComponent={
                     <View className="items-center mt-16 px-10">
                         <View className="w-20 h-20 bg-slate-900 rounded-full items-center justify-center mb-6 border border-slate-800">
@@ -310,6 +364,6 @@ export default function LibraryScreen() {
                     </View>
                 }
             />
-        </SafeAreaView>
+        </Screen>
     );
 }

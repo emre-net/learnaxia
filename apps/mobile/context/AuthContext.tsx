@@ -1,21 +1,15 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import api, { getAuthToken, setAuthToken, clearAuthToken } from '../lib/api';
-
-type User = {
-    id: string;
-    name: string | null;
-    email: string | null;
-    image: string | null;
-    handle?: string | null;
-};
+import { UserProfile } from '@learnaxia/shared';
 
 interface AuthContextType {
-    user: User | null;
+    user: UserProfile | null;
     isLoading: boolean;
     login: (email: string, password?: string) => Promise<void>;
     register: (name: string, email: string, password?: string) => Promise<void>;
     logout: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,29 +18,39 @@ const AuthContext = createContext<AuthContextType>({
     login: async () => { },
     register: async () => { },
     logout: async () => { },
+    refreshProfile: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const segments = useSegments();
     const router = useRouter();
+
+    const logout = useCallback(async () => {
+        await clearAuthToken();
+        setUser(null);
+        router.replace('/login');
+    }, [router]);
+
+    const refreshProfile = useCallback(async () => {
+        try {
+            const res = await api.get('/mobile/user/profile');
+            setUser(res.data);
+        } catch (error) {
+            console.error('[AuthContext] refreshProfile error:', error);
+            await logout();
+        }
+    }, [logout]);
 
     useEffect(() => {
         const loadUser = async () => {
             try {
                 const token = await getAuthToken();
                 if (token) {
-                    try {
-                        const res = await api.get('/mobile/user/profile');
-                        setUser(res.data);
-                    } catch {
-                        // Token invalid, clear it
-                        await clearAuthToken();
-                        setUser(null);
-                    }
+                    await refreshProfile();
                 }
             } catch (error) {
                 console.error('[AuthContext] loadUser error:', error);
@@ -55,12 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         };
         loadUser();
-    }, []);
+    }, [refreshProfile]);
 
     useEffect(() => {
         if (isLoading) return;
 
-        const inAuthGroup = segments[0] === 'login';
+        const inAuthGroup = segments[0] === 'login' || segments[0] === 'register';
 
         if (!user && !inAuthGroup) {
             router.replace('/login');
@@ -78,12 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
             router.replace('/(tabs)');
         } catch (error) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { message?: string } } };
-                console.error('Login error', axiosError.response?.data || axiosError);
-            } else {
-                console.error('Login error', error);
-            }
+            console.error('Login error', error);
             throw error;
         }
     };
@@ -97,24 +96,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
             router.replace('/(tabs)');
         } catch (error) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { message?: string } } };
-                console.error('Register error', axiosError.response?.data || axiosError);
-            } else {
-                console.error('Register error', error);
-            }
+            console.error('Register error', error);
             throw error;
         }
     };
 
-    const logout = async () => {
-        await clearAuthToken();
-        setUser(null);
-        router.replace('/login');
-    };
-
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );

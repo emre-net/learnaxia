@@ -949,6 +949,9 @@ const tr = {
             statusReady: "Mola / Hazır",
             settingsTitle: "Zamanlayıcı Ayarları",
             preset15: "15 Dakika (Kısa Odak)",
+            preset25: "25 Dakika (Pomodoro)",
+            preset45: "45 Dakika (Yoğun Çalışma)",
+            preset60: "60 Dakika (Derin Odak)"
         }
     },
     discover: {

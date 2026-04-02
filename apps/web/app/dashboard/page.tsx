@@ -34,9 +34,12 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
         async function fetchStats() {
             try {
-                const analyticsRes = await fetch("/api/analytics");
+                const analyticsRes = await fetch("/api/analytics", { signal: controller.signal });
                 const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
 
                 setStats({
@@ -45,13 +48,19 @@ export default function DashboardPage() {
                     totalSolved: analytics?.stats?.totalSolved || 0,
                     averageAccuracy: analytics?.stats?.averageAccuracy || 0,
                 });
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Dashboard stats fetch error:", error);
+                // stats are already initialized to 0, so no action needed on error
             } finally {
+                clearTimeout(timeoutId);
                 setLoading(false);
             }
         }
         fetchStats();
+        return () => {
+            controller.abort();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     return (

@@ -5,13 +5,27 @@ import { MobileLoginSchema } from '@/lib/validations/mobile-auth';
 import { SignJWT } from 'jose';
 import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 
+import { checkRateLimit } from "@/lib/rate-limit";
+
 const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
-const JWT_EXPIRY_DAYS = 1; // 1 day for access token (security best practice)
-const JWT_SECRET = new TextEncoder().encode(secret || 'fallback_secret_for_development');
+
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+}
+
+const JWT_EXPIRY_DAYS = 1; 
+const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
   try {
-    const json = await req.json();
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    
+    let json;
+    try {
+        json = await req.json();
+    } catch (e) {
+        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+    }
     const validatedData = MobileLoginSchema.safeParse(json);
 
     if (!validatedData.success) {
@@ -23,7 +37,28 @@ export async function POST(req: Request) {
 
     const { email, password } = validatedData.data;
 
-    console.log(`[Mobile Login] Attempt for: ${email}`);
+    // 0. Rate Limiting (Hardened)
+    // Limit by IP
+    const ipLimit = await checkRateLimit({
+        key: `login-ip:${ip}`,
+        limit: 20,
+        windowMs: 15 * 60 * 1000 // 15 mins
+    });
+
+    // Limit by Email (more strict)
+    const emailLimit = await checkRateLimit({
+        key: `login-email:${email}`,
+        limit: 5,
+        windowMs: 15 * 60 * 1000 // 15 mins
+    });
+
+    if (!ipLimit.allowed || !emailLimit.allowed) {
+        return NextResponse.json({ 
+            message: 'Çok fazla giriş denemesi yaptınız. Lütfen 15 dakika bekleyin.' 
+        }, { status: 429 });
+    }
+
+    console.log(`[Mobile Login] Attempt for: ${email} from ${ip}`);
 
     const user = await prisma.user.findUnique({
       where: { email },

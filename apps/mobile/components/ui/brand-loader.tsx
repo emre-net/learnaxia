@@ -132,13 +132,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderWidth: 2,
     borderColor: 'transparent',
-    borderTopColor: '#3b82f6',
-    borderRightColor: '#a855f7',
+    borderTopColor: '#00D2FF',
+    borderRightColor: '#3b82f6',
   },
   glow: {
     position: 'absolute',
-    backgroundColor: '#3b82f6',
-    opacity: 0.15,
+    backgroundColor: '#00D2FF',
+    opacity: 0.1,
   },
   logoContainer: {
     alignItems: 'center',
@@ -146,9 +146,10 @@ const styles = StyleSheet.create({
   },
   label: {
     marginTop: 16,
-    color: '#94a3b8',
-    fontSize: 14,
-    fontWeight: '500',
-    letterSpacing: 0.5,
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
 });

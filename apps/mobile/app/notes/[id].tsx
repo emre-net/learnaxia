@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 
 interface Note {
     id?: string;
@@ -110,14 +111,14 @@ export default function NoteEditorScreen() {
 
     if (isLoading) {
         return (
-            <SafeAreaView className="flex-1 items-center justify-center bg-[#04101A]">
+            <Screen className="items-center justify-center bg-[#04101A]">
                 <BrandLoader size={80} label="Not Yükleniyor..." />
-            </SafeAreaView>
+            </Screen>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-[#04101A]">
+        <Screen className="bg-[#04101A]">
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 className="flex-1"
@@ -152,7 +153,7 @@ export default function NoteEditorScreen() {
                 <View className="flex-1">
                     <WebView
                         ref={webViewRef}
-                        source={{ uri: 'http://10.0.2.2:3000/mobile-editor' }} // Android Emulator to Host localhost
+                        source={{ uri: API_BASE_URL.replace('/api', '/mobile-editor') }} // Dynamic: works on emulator + physical device
                         className="flex-1 bg-[#04101A]"
                         onMessage={handleMessage}
                         javaScriptEnabled={true}
@@ -163,6 +164,6 @@ export default function NoteEditorScreen() {
                     />
                 </View>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </Screen>
     );
 }

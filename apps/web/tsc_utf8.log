@@ -1,3 +1,0 @@
-﻿app/api/mobile/notes/[id]/route.ts(51,78): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
-app/api/mobile/notes/route.ts(57,78): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
-app/mobile-editor/page.tsx(50,13): error TS18048: 'window.ReactNativeWebView' is possibly 'undefined'.

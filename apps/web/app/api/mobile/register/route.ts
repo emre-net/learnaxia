@@ -1,15 +1,42 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { MobileRegisterSchema } from '@/lib/validations/mobile-auth';
+import { MobileRegisterSchema } from '@learnaxia/shared';
 import { SignJWT } from 'jose';
 
+import { checkRateLimit } from "@/lib/rate-limit";
+
 const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
-const JWT_SECRET = new TextEncoder().encode(secret || 'fallback_secret_for_development');
+
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+}
+
+const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
   try {
-    const json = await req.json();
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+
+    // 0. Rate Limiting for account creation
+    const ipLimit = await checkRateLimit({
+        key: `register-ip:${ip}`,
+        limit: 3, // 3 registrations per hour per IP
+        windowMs: 60 * 60 * 1000
+    });
+
+    if (!ipLimit.allowed) {
+        return NextResponse.json({ 
+            message: 'Çok fazla hesap oluşturdunuz. Lütfen 1 saat bekleyin.' 
+        }, { status: 429 });
+    }
+
+    let json;
+    try {
+        json = await req.json();
+    } catch (e) {
+        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+    }
     const validatedData = MobileRegisterSchema.safeParse(json);
 
     if (!validatedData.success) {

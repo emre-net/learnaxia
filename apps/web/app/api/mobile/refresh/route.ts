@@ -4,12 +4,24 @@ import { SignJWT } from 'jose';
 import prisma from '@/lib/prisma';
 
 const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
-const JWT_EXPIRY_DAYS = 1; // 1 day for access token (security best practice)
-const JWT_SECRET = new TextEncoder().encode(secret || 'fallback_secret_for_development');
+
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+}
+
+const JWT_EXPIRY_DAYS = 1; 
+const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
   try {
-    const { refreshToken: oldRefreshToken } = await req.json();
+    let json;
+    try {
+        json = await req.json();
+    } catch (e) {
+        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+    }
+
+    const { refreshToken: oldRefreshToken } = json;
 
     if (!oldRefreshToken) {
       return NextResponse.json({ message: 'Refresh token is required' }, { status: 400 });

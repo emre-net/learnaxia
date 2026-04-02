@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    SafeAreaView, RefreshControl,
+    RefreshControl,
 } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -55,20 +56,20 @@ export default function CollectionDetailScreen() {
 
     if (loading) {
         return (
-            <View className="flex-1 bg-slate-950 justify-center items-center" style={{ backgroundColor: SharedTheme.colors.background }}>
+            <Screen className="bg-slate-950 justify-center items-center" style={{ backgroundColor: SharedTheme.colors.background }}>
                 <BrandLoader size="lg" />
-            </View>
+            </Screen>
         );
     }
 
     if (!collection) {
         return (
-            <SafeAreaView className="flex-1 bg-slate-950 items-center justify-center" style={{ backgroundColor: SharedTheme.colors.background }}>
+            <Screen className="bg-slate-950 items-center justify-center" style={{ backgroundColor: SharedTheme.colors.background }}>
                 <Text className="text-white text-lg font-bold">Koleksiyon bulunamadı.</Text>
                 <TouchableOpacity onPress={() => router.back()} className="mt-4 bg-indigo-600 px-6 py-3 rounded-xl">
                     <Text className="text-white font-bold">Geri Dön</Text>
                 </TouchableOpacity>
-            </SafeAreaView>
+            </Screen>
         );
     }
 
@@ -95,7 +96,7 @@ export default function CollectionDetailScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
+        <Screen className="bg-slate-950" style={{ backgroundColor: SharedTheme.colors.background }}>
             {/* Custom Header */}
             <View className="px-6 pt-10 pb-4 flex-row items-center">
                 <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-2">
@@ -123,7 +124,7 @@ export default function CollectionDetailScreen() {
                         )}
                         <View className="flex-row items-center bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
                             <View className="w-10 h-10 rounded-full bg-indigo-500 items-center justify-center mr-3">
-                                <Text className="text-white font-bold">{collection.owner.handle[0].toUpperCase()}</Text>
+                                <Text className="text-white font-bold">{collection.owner?.handle?.[0]?.toUpperCase() || '?'}</Text>
                             </View>
                             <View>
                                 <Text className="text-slate-500 text-xs font-bold uppercase tracking-widest">Sahibi</Text>
@@ -142,6 +143,6 @@ export default function CollectionDetailScreen() {
                     </View>
                 }
             />
-        </SafeAreaView>
+        </Screen>
     );
 }

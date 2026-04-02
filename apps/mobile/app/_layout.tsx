@@ -2,16 +2,11 @@ import 'react-native-reanimated';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox } from 'react-native';
+import { LogBox, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
 import './global.css';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../context/AuthContext';
-
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
 
 // Suppress non-critical API error banners from showing in the UI
 LogBox.ignoreLogs([
@@ -21,41 +16,42 @@ LogBox.ignoreLogs([
 ]);
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: '(tabs)',
 };
 
-function InitialRoot() {
-  const { isLoading } = useAuth();
-  const colorScheme = useColorScheme();
-
-  useEffect(() => {
-    if (!isLoading) {
-      // Small delay to ensure everything is painted before hiding splash
-      const timer = setTimeout(() => {
-        SplashScreen.hideAsync().catch(() => { });
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
-        <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create', headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
-}
 
 export default function RootLayout() {
+  // FORCE_BOOT_DEBUG: Set to true to bypass the entire app (Auth, Navigation, Tabs)
+  // and render ONLY a basic native View/Text. This isolates native crashes from JS logic errors.
+  const FORCE_BOOT_DEBUG = false; 
+
+  if (FORCE_BOOT_DEBUG) {
+    // ... skipping debug rendering ...
+  }
+
+  const colorScheme = useColorScheme();
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <InitialRoot />
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade',
+              contentStyle: { backgroundColor: '#050B18' }
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
+            <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create' }} />
+            <Stack.Screen name="study/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="collections" options={{ animation: 'slide_from_right' }} />
+          </Stack>
+          <StatusBar style="light" />
+        </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
 }
+

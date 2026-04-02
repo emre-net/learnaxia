@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { MaterialIcons } from '@expo/vector-icons';
 import { t } from '@learnaxia/shared';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -66,47 +67,69 @@ export function FocusWidget() {
         : (isRunning ? ['rgba(59, 130, 246, 0.2)', 'transparent'] : ['rgba(100, 116, 139, 0.2)', 'transparent']);
 
     return (
-        <View className="relative overflow-hidden rounded-3xl border border-slate-700 w-full" style={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}>
+        <View 
+            className="relative overflow-hidden rounded-[32px] border border-ocean-border w-full bg-ocean-panel"
+            style={{ 
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.3,
+              shadowRadius: 20
+            }}
+        >
             <LinearGradient
                 colors={bgColors as any}
-                className="absolute -top-10 -right-10 w-48 h-48 rounded-full"
+                style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, borderRadius: 120, opacity: 0.5 }}
             />
 
             <View className="p-6 z-10">
                 {/* Header & Mode Switcher */}
                 <View className="flex-row justify-between items-center mb-6">
-                    <View className="flex-row bg-slate-800/80 rounded-lg p-1 w-full max-w-[200px]">
+                    <View 
+                        className="flex-row rounded-2xl p-1.5 w-full max-w-[220px]"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                    >
                         <TouchableOpacity
                             onPress={() => handleTabChange('POMODORO')}
-                            className={`flex-1 py-1.5 items-center rounded-md ${activeTab === 'POMODORO' ? 'bg-slate-700' : ''}`}
+                            className={`flex-1 py-2 items-center rounded-xl ${activeTab === 'POMODORO' ? 'bg-blue-600/20' : ''}`}
                         >
-                            <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
-                                <MaterialIcons name="hourglass-top" size={10} color="white" /> {t('dashboard.focus.pomodoro', currentLang)}
+                            <Text 
+                                style={{ color: activeTab === 'POMODORO' ? '#60A5FA' : 'rgba(255, 255, 255, 0.3)' }}
+                                className="text-[10px] font-black uppercase tracking-widest"
+                            >
+                                <MaterialIcons name="hourglass-top" size={12} color={activeTab === 'POMODORO' ? '#60A5FA' : 'rgba(255,255,255,0.2)'} /> {t('dashboard.focus.pomodoro', currentLang)}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => handleTabChange('STOPWATCH')}
-                            className={`flex-1 py-1.5 items-center rounded-md ${activeTab === 'STOPWATCH' ? 'bg-slate-700' : ''}`}
+                            className={`flex-1 py-2 items-center rounded-xl ${activeTab === 'STOPWATCH' ? 'bg-blue-600/20' : ''}`}
                         >
-                            <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
-                                <MaterialIcons name="timer" size={10} color="white" /> {t('dashboard.focus.stopwatch', currentLang)}
+                            <Text 
+                                style={{ color: activeTab === 'STOPWATCH' ? '#60A5FA' : 'rgba(255, 255, 255, 0.3)' }}
+                                className="text-[10px] font-black uppercase tracking-widest"
+                            >
+                                <MaterialIcons name="timer" size={12} color={activeTab === 'STOPWATCH' ? '#60A5FA' : 'rgba(255,255,255,0.2)'} /> {t('dashboard.focus.stopwatch', currentLang)}
                             </Text>
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity onPress={() => setIsFullscreen(true)}>
-                        <MaterialIcons name="fullscreen" size={24} color="#94A3B8" />
+                    <TouchableOpacity 
+                        onPress={() => setIsFullscreen(true)} 
+                        className="w-10 h-10 rounded-xl items-center justify-center border"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
+                    >
+                        <MaterialIcons name="fullscreen" size={20} color="rgba(255,255,255,0.3)" />
                     </TouchableOpacity>
                 </View>
 
                 {/* Main Timer Display */}
                 <View className="items-center justify-center py-4">
-                    <Text className={`text-6xl font-black tracking-tighter tabular-nums ${isRunning
-                        ? (activeTab === 'POMODORO' ? 'text-rose-400' : 'text-blue-400')
-                        : 'text-slate-100'
-                        }`}>
+                    <Text 
+                        className="text-7xl font-black tracking-tighter tabular-nums"
+                        style={{ color: isRunning ? (activeTab === 'POMODORO' ? '#FB7185' : '#60A5FA') : 'rgba(255, 255, 255, 0.8)' }}
+                    >
                         {formatTime(seconds)}
                     </Text>
-                    <Text className="text-sm font-medium text-slate-400 mt-2">
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-xs font-black mt-2 uppercase tracking-[4px]">
                         {activeTab === 'POMODORO' ? (isRunning ? t('dashboard.focus.modePomodoro', currentLang) : t('dashboard.focus.statusReady', currentLang)) : t('dashboard.focus.modeStopwatch', currentLang)}
                     </Text>
                 </View>
@@ -114,31 +137,43 @@ export function FocusWidget() {
                 {/* Controls */}
                 <View className="flex-row justify-center items-center gap-6 mt-4">
                     <TouchableOpacity
+                        activeOpacity={0.7}
                         onPress={handleReset}
-                        className="w-12 h-12 rounded-full border border-slate-600 items-center justify-center bg-slate-800 hover:bg-slate-700"
+                        className="w-14 h-14 rounded-2xl border items-center justify-center"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
                     >
-                        <MaterialIcons name="refresh" size={22} color="#D1D5DB" />
+                        <MaterialIcons name="refresh" size={24} color="rgba(255,255,255,0.4)" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={() => setIsRunning(!isRunning)}
-                        className={`w-16 h-16 rounded-full items-center justify-center shadow-lg ${isRunning
-                            ? 'bg-slate-100'
+                        className={`w-20 h-20 rounded-3xl items-center justify-center ${isRunning
+                            ? 'bg-white'
                             : (activeTab === 'POMODORO' ? 'bg-rose-600' : 'bg-blue-600')
                             }`}
+                        style={{ 
+                          elevation: 10,
+                          shadowColor: isRunning ? '#fff' : '#000',
+                          shadowOffset: { width: 0, height: 10 },
+                          shadowOpacity: 0.3,
+                          shadowRadius: 20
+                        }}
                     >
                         <MaterialIcons
                             name={isRunning ? "pause" : "play-arrow"}
-                            size={32}
-                            color={isRunning ? "#0f172a" : "#ffffff"}
+                            size={40}
+                            color={isRunning ? "#050B18" : "#ffffff"}
                         />
                     </TouchableOpacity>
 
                     <TouchableOpacity
+                        activeOpacity={0.7}
                         onPress={() => setShowSettings(true)}
-                        className="w-12 h-12 rounded-full border border-slate-600 items-center justify-center bg-slate-800 hover:bg-slate-700"
+                        className="w-14 h-14 rounded-2xl border items-center justify-center"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
                     >
-                        <MaterialIcons name="tune" size={22} color="#D1D5DB" />
+                        <MaterialIcons name="tune" size={24} color="rgba(255,255,255,0.4)" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -151,23 +186,28 @@ export function FocusWidget() {
                 onRequestClose={() => setShowSettings(false)}
             >
                 <TouchableOpacity
-                    style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}
+                    style={{ flex: 1, backgroundColor: 'rgba(5, 11, 24, 0.9)' }}
                     activeOpacity={1}
                     onPressOut={() => setShowSettings(false)}
                 >
-                    <View className="bg-slate-800 rounded-2xl p-6 w-[80%] border border-slate-700">
-                        <Text className="text-white text-lg font-bold mb-4 text-center">{t('dashboard.focus.settingsTitle', currentLang)}</Text>
-                        <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(15)}>
-                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset15', currentLang)}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(25)}>
-                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset25', currentLang)}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity className="py-3 border-b border-slate-700" onPress={() => changePomodoroDuration(45)}>
-                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset45', currentLang)}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity className="py-3 pb-1" onPress={() => changePomodoroDuration(60)}>
-                            <Text className="text-slate-300 text-center text-base">{t('dashboard.focus.preset60', currentLang)}</Text>
+                    <View 
+                        className="bg-ocean-panel rounded-[32px] p-8 w-[85%] border border-ocean-border"
+                        style={{ 
+                          elevation: 12,
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 15 },
+                          shadowOpacity: 0.4,
+                          shadowRadius: 30
+                        }}
+                    >
+                        <Text className="text-white text-xl font-black mb-6 text-center tracking-tight">{t('dashboard.focus.settingsTitle', currentLang)}</Text>
+                        {[15, 25, 45, 60].map((mins) => (
+                            <TouchableOpacity key={mins} className="py-4 border-b border-white/5" onPress={() => changePomodoroDuration(mins)}>
+                                <Text style={{ color: 'rgba(255, 255, 255, 0.6)' }} className="text-center text-base font-bold">{mins} DAKİKA</Text>
+                            </TouchableOpacity>
+                        ))}
+                        <TouchableOpacity className="mt-4 py-2" onPress={() => setShowSettings(false)}>
+                            <Text className="text-blue-400 text-center font-black uppercase tracking-widest">KAPAT</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
@@ -180,7 +220,7 @@ export function FocusWidget() {
                 visible={isFullscreen}
                 onRequestClose={() => setIsFullscreen(false)}
             >
-                <SafeAreaView className="flex-1 bg-slate-950">
+                <Screen className="bg-slate-950">
                     <View className="flex-1 items-center justify-center px-8">
                         <TouchableOpacity
                             className="absolute top-12 right-6 p-2 rounded-full bg-slate-800"
@@ -232,7 +272,7 @@ export function FocusWidget() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </SafeAreaView>
+                </Screen>
             </Modal>
         </View>
     );

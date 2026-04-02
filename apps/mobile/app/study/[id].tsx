@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, StyleSheet, StatusBar } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { StudyModule } from '@learnaxia/shared';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn, FadeInDown, FadeOut, Layout, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { Theme as SharedTheme, t, Language } from '@learnaxia/shared';
 import api from '../../lib/api';
+
+const { width } = Dimensions.get('window');
 
 export default function StudyScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const [studyModule, setStudyModule] = useState<StudyModule | null>(null);
+    const currentLang = 'tr' as Language;
+    
+    const [studyModule, setStudyModule] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
 
@@ -21,7 +28,7 @@ export default function StudyScreen() {
                 const response = await api.get(`/mobile/study/${id}`);
                 setStudyModule(response.data.module);
             } catch (error) {
-                console.error('Failed to fetch module', error);
+                console.error('[StudyScreen] Failed to fetch module:', error);
             } finally {
                 setLoading(false);
             }
@@ -29,22 +36,48 @@ export default function StudyScreen() {
         if (id) fetchModule();
     }, [id]);
 
+    const handleFlip = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setShowAnswer(!showAnswer);
+    }, [showAnswer]);
+
+    const nextCard = useCallback(() => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        if (currentIndex < studyModule.items.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            setShowAnswer(false);
+        } else {
+            router.back();
+        }
+    }, [currentIndex, studyModule, router]);
+
+    const prevCard = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setShowAnswer(false);
+        }
+    }, [currentIndex]);
+
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-neutral-900 justify-center items-center">
-                <BrandLoader size={80} label="İçerik Hazırlanıyor..." />
-            </SafeAreaView>
+            <Screen className="bg-ocean-bg justify-center items-center">
+                <BrandLoader size="lg" label={t('common.loading', currentLang)} />
+            </Screen>
         );
     }
 
-    if (!studyModule || studyModule.items.length === 0) {
+    if (!studyModule || !studyModule.items || studyModule.items.length === 0) {
         return (
-            <SafeAreaView className="flex-1 bg-neutral-900 justify-center items-center px-6">
-                <Text className="text-white text-xl text-center mb-4">Module not found or empty.</Text>
-                <TouchableOpacity onPress={() => router.back()} className="px-6 py-3 bg-neutral-800 rounded-xl">
-                    <Text className="text-white">Go Back</Text>
+            <Screen className="bg-ocean-bg justify-center items-center px-6">
+                <Text className="text-white text-xl text-center mb-6 font-bold tracking-tight">Modül içeriği bulunamadı.</Text>
+                <TouchableOpacity 
+                    onPress={() => router.back()} 
+                    className="px-8 py-4 bg-ocean-panel rounded-2xl border border-ocean-border"
+                >
+                    <Text className="text-white font-bold">Geri Dön</Text>
                 </TouchableOpacity>
-            </SafeAreaView>
+            </Screen>
         );
     }
 
@@ -52,127 +85,200 @@ export default function StudyScreen() {
     const isFlashcard = currentItem.type === 'FLASHCARD' || currentItem.type === 'question';
     const progress = ((currentIndex + 1) / studyModule.items.length) * 100;
 
-    const nextCard = () => {
-        if (currentIndex < studyModule.items.length - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setShowAnswer(false);
-        } else {
-            // Completed module
-            router.back();
-        }
-    };
-
-    const prevCard = () => {
-        if (currentIndex > 0) {
-            setCurrentIndex(prev => prev - 1);
-            setShowAnswer(false);
-        }
-    };
-
     return (
-        <SafeAreaView className="flex-1 bg-neutral-900">
+        <Screen className="bg-ocean-bg">
+            <StatusBar barStyle="light-content" />
+            
             {/* Header */}
             <View className="flex-row items-center justify-between px-6 pt-6 pb-4">
-                <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-                    <IconSymbol name="xmark" size={24} color="#D1D5DB" />
-                </TouchableOpacity>
-                <Text className="text-white font-semibold text-base flex-1 text-center" numberOfLines={1}>
-                    {studyModule.title}
-                </Text>
-                <TouchableOpacity className="p-2 -mr-2">
-                    <IconSymbol name="ellipsis.circle" size={24} color="#D1D5DB" />
-                </TouchableOpacity>
-            </View>
-
-            {/* Progress Bar */}
-            <View className="px-6 mb-6">
-                <View className="h-1.5 w-full bg-neutral-800 rounded-full overflow-hidden">
-                    <View
-                        className="h-full bg-indigo-500 rounded-full"
-                        style={{ width: `${progress}%` }}
-                    />
-                </View>
-                <Text className="text-gray-400 text-xs mt-2 text-center">
-                    {currentIndex + 1} of {studyModule.items.length} completed
-                </Text>
-            </View>
-
-            {/* Card Container */}
-            <View className="flex-1 px-6 justify-center">
-                <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => isFlashcard ? setShowAnswer(!showAnswer) : null}
-                    className={`w-full min-h-[400px] bg-neutral-800 rounded-3xl p-8 justify-center items-center shadow-lg border ${showAnswer ? 'border-indigo-500/30' : 'border-neutral-700'}`}
+                <TouchableOpacity 
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        router.back();
+                    }} 
+                    className="w-11 h-11 rounded-xl bg-ocean-panel items-center justify-center border border-ocean-border"
                 >
-                    {isFlashcard ? (
-                        <View className="w-full flex-1 justify-center items-center">
-                            {!showAnswer ? (
-                                <>
-                                    <Text className="text-gray-300 font-medium mb-4 uppercase tracking-widest text-xs">Question</Text>
-                                    <Text className="text-white text-2xl font-bold text-center leading-9">
-                                        {currentItem.content.question || 'Missing question'}
+                    <MaterialIcons name="close" size={24} color="white" />
+                </TouchableOpacity>
+                
+                <View className="flex-1 px-4">
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-[10px] font-black uppercase tracking-[4px] text-center mb-1">
+                        {studyModule.title}
+                    </Text>
+                    <View className="flex-row items-center justify-center">
+                        <View className="h-1 w-20 bg-ocean-border rounded-full overflow-hidden mr-2">
+                            <View 
+                                className="h-full bg-brand-blue" 
+                                style={{ width: `${progress}%` }} 
+                            />
+                        </View>
+                        <Text className="text-white/60 text-[10px] font-bold">
+                            {currentIndex + 1} / {studyModule.items.length}
+                        </Text>
+                    </View>
+                </View>
+
+                <TouchableOpacity className="w-11 h-11 rounded-xl bg-ocean-panel items-center justify-center border border-ocean-border opacity-50">
+                    <MaterialIcons name="more-vert" size={24} color="white" />
+                </TouchableOpacity>
+            </View>
+
+            {/* Background Glow */}
+            <View 
+                className="absolute top-[20%] left-[-20%] w-[100%] h-[50%] rounded-full opacity-10" 
+                style={{ backgroundColor: showAnswer ? '#A855F7' : '#00D2FF', transform: [{ scale: 1.2 }] }} 
+            />
+
+            {/* Main Content Area */}
+            <View className="flex-1 px-6 justify-center">
+                <Animated.View 
+                    key={currentIndex}
+                    entering={SlideInRight.duration(400)}
+                    exiting={SlideOutLeft.duration(400)}
+                    layout={Layout.springify()}
+                    className="w-full"
+                >
+                    <TouchableOpacity
+                        activeOpacity={0.95}
+                        onPress={() => isFlashcard ? handleFlip() : null}
+                        className="w-full min-h-[440px] rounded-[40px] overflow-hidden border border-ocean-border p-8 justify-center items-center"
+                        style={{ 
+                            backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                            elevation: 10,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 20 },
+                            shadowOpacity: 0.4,
+                            shadowRadius: 30
+                        }}
+                    >
+                        <LinearGradient
+                            colors={['rgba(255, 255, 255, 0.03)', 'transparent']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={StyleSheet.absoluteFill}
+                        />
+
+                        {isFlashcard ? (
+                            <Animated.View 
+                                key={showAnswer ? 'answer' : 'question'}
+                                entering={FadeIn.duration(300)}
+                                className="w-full flex-1 justify-center items-center"
+                            >
+                                <View 
+                                    className="px-4 py-1.5 rounded-full mb-8 border"
+                                    style={{ 
+                                        backgroundColor: showAnswer ? 'rgba(168, 85, 247, 0.1)' : 'rgba(0, 210, 255, 0.1)',
+                                        borderColor: showAnswer ? 'rgba(168, 85, 247, 0.2)' : 'rgba(0, 210, 255, 0.2)'
+                                    }}
+                                >
+                                    <Text className="font-black text-[10px] uppercase tracking-[4px]" style={{ color: showAnswer ? '#A855F7' : '#00D2FF' }}>
+                                        {showAnswer ? 'CEVAP' : 'SORU'}
                                     </Text>
-                                    <Text className="text-gray-500 mt-10 text-sm">Tap to flip</Text>
-                                </>
-                            ) : (
-                                <>
-                                    <Text className="text-indigo-400 font-medium mb-4 uppercase tracking-widest text-xs">Answer</Text>
-                                    <Text className="text-white text-xl text-center leading-8">
-                                        {currentItem.content.answer || currentItem.content.content || 'Missing answer'}
-                                    </Text>
-                                </>
-                            )}
+                                </View>
+                                
+                                <Text 
+                                    className="text-white text-3xl font-black text-center tracking-tighter leading-[42px]"
+                                    style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 10, textShadowOffset: { width: 0, height: 4 } }}
+                                >
+                                    {showAnswer 
+                                        ? (currentItem.content.answer || currentItem.content.content) 
+                                        : (currentItem.content.question || 'Soru eksik')}
+                                </Text>
+
+                                <View className="mt-12 flex-row items-center opacity-40">
+                                    <MaterialIcons name="touch-app" size={16} color="white" />
+                                    <Text className="text-white text-xs font-bold ml-2 uppercase tracking-widest">Çevirmek İçin Dokun</Text>
+                                </View>
+                            </Animated.View>
+                        ) : (
+                            <ScrollView 
+                                className="w-full flex-1" 
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingVertical: 20 }}
+                            >
+                                <View className="px-4 py-1.5 rounded-full mb-6 border bg-brand-emerald/10 border-brand-emerald/20 self-start">
+                                    <Text className="text-brand-emerald font-black text-[10px] uppercase tracking-[4px]">NOT</Text>
+                                </View>
+                                <Text className="text-white text-2xl font-bold leading-10 tracking-tight">
+                                    {currentItem.content.content || 'İçerik eksik'}
+                                </Text>
+                            </ScrollView>
+                        )}
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+
+            {/* Bottom Controls */}
+            <View className="px-6 pb-12 pt-6">
+                <View className="flex-row items-center justify-between">
+                    <TouchableOpacity
+                        onPress={prevCard}
+                        disabled={currentIndex === 0}
+                        className={`w-16 h-16 rounded-[24px] items-center justify-center border ${currentIndex === 0 ? 'bg-ocean-bg border-ocean-border opacity-30' : 'bg-ocean-panel border-ocean-border'}`}
+                    >
+                        <MaterialIcons name="arrow-back" size={28} color="white" />
+                    </TouchableOpacity>
+
+                    {isFlashcard && showAnswer ? (
+                        <View className="flex-row items-center space-x-6 gap-4">
+                            <TouchableOpacity 
+                                onPress={nextCard} 
+                                className="w-20 h-20 rounded-[30px] bg-red-500/10 border border-red-500/20 items-center justify-center"
+                            >
+                                <MaterialIcons name="close" size={32} color="#EF4444" />
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                onPress={nextCard} 
+                                className="w-24 h-24 rounded-[36px] bg-brand-emerald/10 border border-brand-emerald/20 items-center justify-center"
+                                style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', borderColor: 'rgba(52, 211, 153, 0.3)' }}
+                            >
+                                <MaterialIcons name="done-all" size={40} color="#34D399" />
+                            </TouchableOpacity>
                         </View>
                     ) : (
-                        <ScrollView className="w-full flex-1" showsVerticalScrollIndicator={false}>
-                            <Text className="text-gray-300 font-medium mb-4 uppercase tracking-widest text-xs">Note</Text>
-                            <Text className="text-white text-lg leading-8">
-                                {currentItem.content.content || 'Missing content'}
+                        <TouchableOpacity
+                            onPress={nextCard}
+                            activeOpacity={0.8}
+                            className="bg-brand-blue px-10 h-16 rounded-[24px] flex-row items-center justify-center"
+                            style={{ 
+                                elevation: 8,
+                                shadowColor: '#3B82F6',
+                                shadowOffset: { width: 0, height: 10 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 20
+                            }}
+                        >
+                            <Text className="text-white font-black uppercase tracking-widest mr-2">
+                                {currentIndex === studyModule.items.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
                             </Text>
-                        </ScrollView>
+                            <MaterialIcons name="arrow-forward" size={24} color="white" />
+                        </TouchableOpacity>
                     )}
-                </TouchableOpacity>
-            </View>
 
-            {/* Footer Controls */}
-            <View className="flex-row items-center justify-between px-6 pb-10 pt-6">
-                <TouchableOpacity
-                    onPress={prevCard}
-                    disabled={currentIndex === 0}
-                    className={`w-14 h-14 rounded-full items-center justify-center border ${currentIndex === 0 ? 'border-neutral-800 bg-neutral-900' : 'border-neutral-700 bg-neutral-800'}`}
-                >
-                    <IconSymbol name="chevron.left" size={20} color={currentIndex === 0 ? '#4B5563' : '#D1D5DB'} />
-                </TouchableOpacity>
-
-                {isFlashcard && showAnswer && (
-                    <View className="flex-row space-x-4">
-                        <TouchableOpacity onPress={nextCard} className="w-14 h-14 rounded-full bg-red-500/20 border border-red-500/30 items-center justify-center">
-                            <IconSymbol name="xmark" size={24} color="#EF4444" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={nextCard} className="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30 items-center justify-center">
-                            <IconSymbol name="checkmark" size={24} color="#22C55E" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {!isFlashcard && (
-                    <TouchableOpacity onPress={nextCard} className="bg-indigo-600 px-8 py-4 rounded-full">
-                        <Text className="text-white font-bold text-base">Next Items</Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                             // Bookmark or star functionality
+                        }}
+                        className="w-16 h-16 rounded-[24px] bg-ocean-panel border border-ocean-border items-center justify-center"
+                    >
+                        <MaterialIcons name="star-outline" size={28} color="white" />
                     </TouchableOpacity>
-                )}
-
-                {isFlashcard && !showAnswer && (
-                    <View className="w-14 h-14" /> /* Spacer if not showing action buttons */
-                )}
-
-                <TouchableOpacity
-                    onPress={nextCard}
-                    className="w-14 h-14 rounded-full items-center justify-center border border-neutral-700 bg-neutral-800"
-                >
-                    <IconSymbol name="chevron.right" size={20} color="#D1D5DB" />
-                </TouchableOpacity>
+                </View>
             </View>
-
-        </SafeAreaView>
+        </Screen>
     );
 }
+
+const styles = StyleSheet.create({
+    glow: {
+        position: 'absolute',
+        width: width * 1.5,
+        height: width * 1.5,
+        borderRadius: width,
+        top: -width * 0.5,
+        left: -width * 0.25,
+        opacity: 0.1,
+    }
+});

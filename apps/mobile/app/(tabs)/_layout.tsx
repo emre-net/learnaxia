@@ -19,14 +19,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#818cf8', // Indigo-400
-        tabBarInactiveTintColor: '#475569', // Slate-600
+        tabBarActiveTintColor: '#00D2FF', // Ocean Cyan
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.3)',
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: () => (
-          <View style={styles.tabBarBackground}>
-            <View style={styles.tabBarTopBorder} />
-          </View>
+          <View style={styles.tabBarBackground} />
         ),
         tabBarStyle: {
           position: 'absolute',
@@ -40,10 +38,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '700',
-          letterSpacing: 0.3,
-          marginTop: 2,
-        },
-        tabBarIconStyle: {
+          letterSpacing: 0.5,
           marginTop: 2,
         },
       }}>
@@ -52,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: 'Ana Sayfa',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
+            <View className={focused ? "bg-blue-500/10 p-2 rounded-xl" : "p-2"}>
               <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
             </View>
           ),
@@ -63,7 +58,7 @@ export default function TabLayout() {
         options={{
           title: 'Kütüphane',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
+            <View className={focused ? "bg-blue-500/10 p-2 rounded-xl" : "p-2"}>
               <Ionicons name={focused ? 'library' : 'library-outline'} size={22} color={color} />
             </View>
           ),
@@ -74,7 +69,7 @@ export default function TabLayout() {
         options={{
           title: 'Keşfet',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
+            <View className={focused ? "bg-blue-500/10 p-2 rounded-xl" : "p-2"}>
               <Ionicons name={focused ? 'compass' : 'compass-outline'} size={22} color={color} />
             </View>
           ),
@@ -85,7 +80,7 @@ export default function TabLayout() {
         options={{
           title: 'Profil',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : undefined}>
+            <View className={focused ? "bg-blue-500/10 p-2 rounded-xl" : "p-2"}>
               <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={24} color={color} />
             </View>
           ),
@@ -98,22 +93,8 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBarBackground: {
     ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(2, 6, 23, 0.92)',
-  },
-  tabBarTopBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 24,
-    right: 24,
-    height: 1,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    borderRadius: 1,
-  },
-  activeIconContainer: {
-    backgroundColor: 'rgba(99, 102, 241, 0.12)',
-    borderRadius: 12,
-    padding: 6,
-    marginTop: -2,
+    backgroundColor: 'rgba(11, 15, 25, 0.95)', // ocean-bg equivalent
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
 });

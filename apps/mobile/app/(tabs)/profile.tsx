@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView, SafeAreaView, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
+import { Screen } from '@/components/ui/screen';
+import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Theme as SharedTheme, t, Language } from '@learnaxia/shared';
@@ -43,9 +45,9 @@ export default function ProfileScreen() {
     ];
 
     return (
-        <SafeAreaView className="flex-1" style={{ backgroundColor: SharedTheme.colors.background }}>
+        <Screen tabScreen style={{ backgroundColor: SharedTheme.colors.background }}>
             <ScrollView
-                contentContainerStyle={{ paddingBottom: 100 }}
+                contentContainerStyle={{ paddingBottom: TAB_SCREEN_CONTENT_BOTTOM }}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />
                 }
@@ -58,7 +60,16 @@ export default function ProfileScreen() {
                 {/* Profile Card */}
                 <View className="mx-6 mt-4 bg-slate-900 rounded-3xl p-6 border border-slate-800">
                     <View className="flex-row items-center">
-                        <View className="w-16 h-16 rounded-2xl bg-indigo-600 items-center justify-center shadow-xl shadow-indigo-500/20">
+                        <View 
+                            className="w-16 h-16 rounded-2xl bg-indigo-600 items-center justify-center"
+                            style={{ 
+                              elevation: 10,
+                              shadowColor: 'rgba(99, 102, 241, 0.2)',
+                              shadowOffset: { width: 0, height: 10 },
+                              shadowOpacity: 1,
+                              shadowRadius: 20
+                            }}
+                        >
                             {user?.image ? (
                                 <Image source={{ uri: user.image }} className="w-16 h-16 rounded-2xl" />
                             ) : (
@@ -86,8 +97,13 @@ export default function ProfileScreen() {
                     {statItems.map((stat, i) => (
                         <View
                             key={i}
-                            className="bg-slate-900/50 rounded-2xl p-4 border border-slate-800 mb-3"
-                            style={{ width: '48%', marginRight: i % 2 === 0 ? '4%' : 0 }}
+                            className="rounded-2xl p-4 border mb-3"
+                            style={{ 
+                                width: '48%', 
+                                marginRight: i % 2 === 0 ? '4%' : 0,
+                                backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                                borderColor: 'rgba(30, 41, 59, 1)'
+                            }}
                         >
                             <View className="flex-row items-center justify-between mb-2">
                                 <Text className="text-slate-400 text-xs font-medium">{stat.label}</Text>
@@ -143,7 +159,8 @@ export default function ProfileScreen() {
                 <View className="px-6 mt-6">
                     <TouchableOpacity
                         activeOpacity={0.7}
-                        className="bg-red-500/10 border border-red-500/20 py-4 rounded-2xl items-center"
+                        className="py-4 rounded-2xl items-center border"
+                        style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
                         onPress={logout}
                     >
                         <View className="flex-row items-center">
@@ -153,6 +170,6 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </Screen>
     );
 }

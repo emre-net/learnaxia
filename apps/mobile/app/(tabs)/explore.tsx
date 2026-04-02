@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  SafeAreaView, RefreshControl, TextInput,
+  RefreshControl, TextInput,
 } from 'react-native';
+import { Screen } from '@/components/ui/screen';
+import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Theme as SharedTheme, t } from '@learnaxia/shared';
+import { t } from '@learnaxia/shared';
 import api from '@/lib/api';
 
 const currentLang = 'tr'; // Default to Turkish for now
@@ -71,7 +73,15 @@ export default function ExploreScreen() {
 
   const renderItem = ({ item }: { item: DiscoverItem }) => (
     <TouchableOpacity
-      style={{ backgroundColor: '#0f172a', borderRadius: 24, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: '#1e293b' }}
+      activeOpacity={0.8}
+      className="bg-ocean-panel rounded-[32px] p-6 mb-4 border border-ocean-border"
+      style={{ 
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
+      }}
       onPress={() => {
         if (activeTab === 'MODULE') {
           router.push(`/study/${item.id}` as any);
@@ -80,35 +90,43 @@ export default function ExploreScreen() {
         }
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <View style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.2)' }}>
-          <Text style={{ color: '#818cf8', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
+      <View className="flex-row items-center justify-between mb-3">
+        <View 
+          className="px-3 py-1 rounded-lg border"
+          style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}
+        >
+          <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">
             {activeTab === 'MODULE' ? t('library.types.module', currentLang) : t('library.types.collection', currentLang)}
           </Text>
         </View>
         {item.owner?.handle && (
-          <Text style={{ color: '#475569', fontSize: 10, fontWeight: 'bold' }}>@{item.owner.handle}</Text>
+          <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-bold tracking-tight">@{item.owner.handle}</Text>
         )}
       </View>
 
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white', marginBottom: 6, letterSpacing: -0.5 }} numberOfLines={2}>
+      <Text className="text-xl font-bold text-white mb-2 tracking-tight" numberOfLines={2}>
         {item.title}
       </Text>
 
       {item.description && (
-        <Text style={{ color: '#64748b', fontSize: 14, marginBottom: 16, lineHeight: 20 }} numberOfLines={2}>
+        <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-sm mb-4 leading-5" numberOfLines={2}>
           {item.description}
         </Text>
       )}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(30, 41, 59, 0.5)' }}>
+      <View 
+        className="flex-row items-center justify-between mt-auto pt-4 border-t"
+        style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+      >
         <View className="flex-row items-center">
-          <MaterialIcons name="layers" size={14} color={SharedTheme.colors.primary} />
-          <Text style={{ color: '#94a3b8', fontSize: 12, marginLeft: 6, fontWeight: 'bold' }}>{item._count?.items || 0} {t('library.items', currentLang).toLowerCase()}</Text>
+          <MaterialIcons name="layers" size={14} color="#00D2FF" />
+          <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-xs ml-2 font-bold uppercase tracking-tighter">
+            {item._count?.items || 0} {t('library.items', currentLang).toLowerCase()}
+          </Text>
         </View>
         <View className="flex-row items-center">
-          <MaterialIcons name="schedule" size={12} color="#64748b" />
-          <Text style={{ color: '#64748b', fontSize: 10, marginLeft: 4, fontWeight: '500' }}>
+          <MaterialIcons name="schedule" size={12} color="rgba(255,255,255,0.2)" />
+          <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] ml-1.5 font-bold">
             {new Date(item.createdAt).toLocaleDateString('tr-TR')}
           </Text>
         </View>
@@ -117,63 +135,67 @@ export default function ExploreScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: SharedTheme.colors.background }}>
+    <Screen className="bg-ocean-bg" tabScreen>
       {/* Header */}
-      <View style={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 16 }}>
-        <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white', marginBottom: 4, letterSpacing: -0.5 }}>{t('discover.title', currentLang)}</Text>
-        <Text style={{ color: '#64748b', fontWeight: '500' }}>{t('discover.subtitle', currentLang)}</Text>
+      <View className="px-6 pt-10 pb-4">
+        <Text className="text-3xl font-bold text-white tracking-tight">{t('discover.title', currentLang)}</Text>
+        <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="font-medium">{t('discover.subtitle', currentLang)}</Text>
       </View>
 
       {/* Search Bar */}
-      <View style={{ paddingHorizontal: 24, marginBottom: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#0f172a', borderRadius: 16, borderWidth: 1, borderColor: '#1e293b', paddingHorizontal: 16, paddingVertical: 12 }}>
-          <MaterialIcons name="search" size={20} color="#64748b" />
+      <View className="px-6 mb-3">
+        <View className="flex-row items-center bg-ocean-panel rounded-2xl border border-ocean-border px-4 py-3">
+          <MaterialIcons name="search" size={20} color="rgba(255,255,255,0.3)" />
           <TextInput
-            style={{ flex: 1, color: 'white', marginLeft: 12, fontSize: 16 }}
+            className="flex-1 text-white ml-3 text-base"
             placeholder={t('discover.searchPlaceholder', currentLang)}
-            placeholderTextColor="#475569"
+            placeholderTextColor="rgba(255,255,255,0.2)"
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <MaterialIcons name="close" size={20} color="#64748b" />
+              <MaterialIcons name="close" size={20} color="rgba(255,255,255,0.3)" />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {/* Tab Bar */}
-      <View style={{ flexDirection: 'row', paddingHorizontal: 24, marginBottom: 16 }}>
+      <View className="flex-row px-6 mb-4 items-center">
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[
-              { flexDirection: 'row', alignItems: 'center', marginRight: 12, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
-              activeTab === tab.id ? { backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: 'rgba(99, 102, 241, 0.3)' } : { backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: '#1e293b' }
-            ]}
+            className={`flex-row items-center mr-3 px-4 py-2.5 rounded-xl border`}
+            style={{ 
+              backgroundColor: activeTab === tab.id ? 'rgba(37, 99, 235, 0.2)' : 'rgba(15, 23, 42, 1)',
+              borderColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.3)' : 'rgba(30, 41, 59, 1)'
+            }}
             onPress={() => setActiveTab(tab.id)}
           >
             <MaterialIcons
               name={tab.icon as any}
               size={16}
-              color={activeTab === tab.id ? '#818cf8' : '#64748b'}
+              color={activeTab === tab.id ? '#00D2FF' : 'rgba(255,255,255,0.3)'}
             />
-            <Text style={[{ marginLeft: 8, fontSize: 14, fontWeight: 'bold' }, activeTab === tab.id ? { color: '#818cf8' } : { color: '#64748b' }]}>
+            <Text 
+              className="ml-2 text-sm font-bold"
+              style={{ color: activeTab === tab.id ? '#60A5FA' : 'rgba(255, 255, 255, 0.3)' }}
+            >
               {tab.label}
             </Text>
           </TouchableOpacity>
         ))}
-        <View style={{ flex: 1 }} />
-        <View style={{ justifyContent: 'center' }}>
-          <Text style={{ color: '#475569', fontSize: 12, fontWeight: 'bold' }}>{t('discover.totalResults', currentLang, { count: total })}</Text>
-        </View>
+        <View className="flex-1" />
+        <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-black tracking-widest uppercase">
+          {total} SONUÇ
+        </Text>
       </View>
 
       {/* Content List */}
       {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View className="flex-1 justify-center items-center">
           <BrandLoader size="lg" />
         </View>
       ) : (
@@ -181,17 +203,27 @@ export default function ExploreScreen() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: TAB_SCREEN_CONTENT_BOTTOM }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />
           }
           ListEmptyComponent={
-            <View style={{ alignItems: 'center', marginTop: 64, paddingHorizontal: 40 }}>
-              <View style={{ width: 80, height: 80, backgroundColor: '#0f172a', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 1, borderColor: '#1e293b' }}>
-                <MaterialIcons name="explore" size={32} color="#475569" />
+            <View className="items-center mt-16 px-10">
+              <View 
+                className="w-20 h-20 bg-ocean-panel rounded-full items-center justify-center mb-6 border"
+                style={{ 
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  borderColor: 'rgba(255, 255, 255, 0.05)'
+                }}
+              >
+                <MaterialIcons name="explore" size={32} color="rgba(255,255,255,0.1)" />
               </View>
-              <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>{t('discover.emptyTitle', currentLang)}</Text>
-              <Text style={{ color: '#64748b', textAlign: 'center', lineHeight: 20, fontWeight: '500' }}>
+              <Text className="text-white text-lg font-bold mb-2 tracking-tight">{t('discover.emptyTitle', currentLang)}</Text>
+              <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-center leading-5 font-medium">
                 {searchQuery
                   ? t('discover.emptyNoResults', currentLang, { query: searchQuery })
                   : t('discover.emptyDesc', currentLang)}
@@ -200,6 +232,6 @@ export default function ExploreScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </Screen>
   );
 }

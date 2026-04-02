@@ -8,8 +8,8 @@ import type {
     ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 2
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
     id: string
@@ -58,6 +58,9 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+// Simple deduplication cache
+const activeMessages = new Set<string>();
+
 const addToRemoveQueue = (toastId: string) => {
     if (toastTimeouts.has(toastId)) {
         return
@@ -86,15 +89,13 @@ export const reducer = (state: State, action: Action): State => {
             return {
                 ...state,
                 toasts: state.toasts.map((t) =>
-                    t.id === action.toast.id ? { ...t, ...action.toast } : t
+                    t.id === (action.toast as any).id ? { ...t, ...action.toast } : t
                 ),
             }
 
         case "DISMISS_TOAST": {
             const { toastId } = action
 
-            // ! Side effects ! - This could be extracted into a dismissToast() action,
-            // but I'll keep it here for simplicity
             if (toastId) {
                 addToRemoveQueue(toastId)
             } else {
@@ -117,10 +118,16 @@ export const reducer = (state: State, action: Action): State => {
         }
         case "REMOVE_TOAST":
             if (action.toastId === undefined) {
+                activeMessages.clear();
                 return {
                     ...state,
                     toasts: [],
                 }
+            }
+            // Find the toast to clear its message from deduplication
+            const toastToRemove = state.toasts.find(t => t.id === action.toastId);
+            if (toastToRemove?.title) {
+                activeMessages.delete(String(toastToRemove.title));
             }
             return {
                 ...state,
@@ -145,13 +152,29 @@ type Toast = Omit<ToasterToast, "id">
 function toast({ ...props }: Toast) {
     const id = genId()
 
+    // DEDUPLICATION: Prevent showing the same toast message within a short window
+    const messageKey = String(props.title || props.description || "");
+    if (activeMessages.has(messageKey)) {
+        return {
+            id,
+            dismiss: () => { },
+            update: () => { }
+        }
+    }
+    
+    activeMessages.add(messageKey);
+    // Cleanup key after some time
+    setTimeout(() => activeMessages.delete(messageKey), 3000);
+
     const update = (props: ToasterToast) =>
         dispatch({
             type: "UPDATE_TOAST",
             toast: { ...props, id },
         })
-    const dismiss = () =>
+    const dismiss = () => {
+        activeMessages.delete(messageKey);
         dispatch({ type: "DISMISS_TOAST", toastId: id })
+    }
 
     dispatch({
         type: "ADD_TOAST",

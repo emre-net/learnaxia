@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -88,7 +89,7 @@ export default function CreateScreen() {
 
     if (showCamera) {
         return (
-            <SafeAreaView className="flex-1 bg-black">
+            <Screen className="bg-black">
                 <CameraView style={{ flex: 1 }} facing="back">
                     <View className="flex-1 justify-between p-6">
                         <TouchableOpacity
@@ -111,12 +112,12 @@ export default function CreateScreen() {
                         </View>
                     </View>
                 </CameraView>
-            </SafeAreaView>
+            </Screen>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-neutral-900">
+        <Screen className="bg-neutral-900">
             {/* Header */}
             <View className="flex-row items-center justify-between px-6 pt-6 pb-4">
                 <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
@@ -229,6 +230,6 @@ export default function CreateScreen() {
                 </View>
             </Modal>
 
-        </SafeAreaView>
+        </Screen>
     );
 }
