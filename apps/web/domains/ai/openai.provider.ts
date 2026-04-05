@@ -76,7 +76,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: isExtraction ? `Extract from this content:\n\n${topic}` : `Generate content for topic: ${topic}` }
@@ -139,7 +139,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review these generated items:\n\n${JSON.stringify(currentItems, null, 2)}` }
@@ -245,7 +245,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: `Generate a study note for: ${topic}` }
@@ -278,7 +278,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this note:\n\n${currentNote}` }
@@ -415,7 +415,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: `Generate the slide for topic: ${topic}` }
@@ -449,7 +449,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this slide:\n\n${JSON.stringify(currentSlide, null, 2)}` }
@@ -534,7 +534,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: systemPrompt },
                         {
@@ -565,7 +565,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
+                    model: "llama-3.1-8b-instant",
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this syllabus:\n\n${JSON.stringify(currentSyllabus, null, 2)}` }
@@ -617,7 +617,7 @@ export class OpenAIAIProvider implements AIProvider {
 
         try {
             const response = await this.client.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
+                model: "llama-3.1-8b-instant",
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: `Topic input to validate: "${topic}"` }
