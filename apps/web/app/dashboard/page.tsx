@@ -91,40 +91,40 @@ export default function DashboardPage() {
 
                 {/* Stats Area */}
                 <div className="xl:col-span-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-emerald-500/20 transition-all">
+                    <Card className="glass group hover:sea-glow transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{t('settings.duration')}</CardTitle>
-                            <Clock className="h-4 w-4 text-emerald-500" />
+                            <Clock className="h-4 w-4 text-emerald-500 group-hover:scale-125 transition-transform" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{loading ? "..." : `${stats.totalStudyMinutes} dk`}</div>
                             <p className="text-xs text-muted-foreground mt-1">Platformda geçirdiğin süre</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-blue-500/20 transition-all">
+                    <Card className="glass group hover:sea-glow transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{t('dashboard.modules')}</CardTitle>
-                            <BookOpen className="h-4 w-4 text-blue-500" />
+                            <BookOpen className="h-4 w-4 text-blue-500 group-hover:scale-125 transition-transform" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{loading ? "..." : stats.modulesStarted}</div>
                             <p className="text-xs text-muted-foreground mt-1">İlerleme kaydettiğin setler</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-purple-500/20 transition-all">
+                    <Card className="glass group hover:sea-glow transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Başarı Oranı</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-purple-500" />
+                            <TrendingUp className="h-4 w-4 text-purple-500 group-hover:scale-125 transition-transform" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{loading ? "..." : `%${stats.averageAccuracy}`}</div>
                             <p className="text-xs text-muted-foreground mt-1">Genel doğruluk yüzden</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-white/20 dark:border-white/10 group hover:border-amber-500/20 transition-all">
+                    <Card className="glass group hover:sea-glow transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Toplam Çözüm</CardTitle>
-                            <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                            <CheckCircle2 className="h-4 w-4 text-amber-500 group-hover:scale-125 transition-transform" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{loading ? "..." : stats.totalSolved}</div>

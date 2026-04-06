@@ -58,20 +58,20 @@ export default function AnalyticsPage() {
 
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-                <Card>
+                <Card className="glass group hover:sea-glow transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Study Time</CardTitle>
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Clock className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{data.stats.totalStudyMinutes}m</div>
                         <p className="text-xs text-muted-foreground">Lifetime total time spent learning.</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="glass group hover:sea-glow transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Modules Started</CardTitle>
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <BookOpen className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{data.stats.modulesStarted}</div>

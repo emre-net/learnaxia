@@ -38,51 +38,56 @@ const nextAuth = NextAuth({
         ...authConfig.providers,
         Credentials({
             async authorize(credentials) {
-                const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
-                    .safeParse(credentials);
+                try {
+                    const parsedCredentials = z
+                        .object({ email: z.string().email(), password: z.string().min(6) })
+                        .safeParse(credentials);
 
-                if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
+                    if (parsedCredentials.success) {
+                        const { email, password } = parsedCredentials.data;
 
-                    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-                        // Ensure the admin user exists in the database to allow FK relations
-                        let adminUser = await prisma.user.findUnique({ where: { email } });
+                        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+                            // Ensure the admin user exists in the database to allow FK relations
+                            let adminUser = await prisma.user.findUnique({ where: { email } });
 
-                        if (!adminUser) {
-                            adminUser = await prisma.user.create({
-                                data: {
-                                    email,
-                                    name: "Admin",
-                                    role: "ADMIN",
-                                    handle: "admin",
-                                    emailVerified: new Date(),
-                                }
-                            });
-                        } else if (adminUser.role !== 'ADMIN') {
-                            // Ensure the existing user with this email has ADMIN role
-                            adminUser = await prisma.user.update({
-                                where: { id: adminUser.id },
-                                data: { role: 'ADMIN' }
-                            });
+                            if (!adminUser) {
+                                adminUser = await prisma.user.create({
+                                    data: {
+                                        email,
+                                        name: "Admin",
+                                        role: "ADMIN",
+                                        handle: "admin",
+                                        emailVerified: new Date(),
+                                    }
+                                });
+                            } else if (adminUser.role !== 'ADMIN') {
+                                // Ensure the existing user with this email has ADMIN role
+                                adminUser = await prisma.user.update({
+                                    where: { id: adminUser.id },
+                                    data: { role: 'ADMIN' }
+                                });
+                            }
+
+                            return {
+                                id: adminUser.id,
+                                email: adminUser.email,
+                                name: adminUser.name,
+                                role: "ADMIN"
+                            };
                         }
 
-                        return {
-                            id: adminUser.id,
-                            email: adminUser.email,
-                            name: adminUser.name,
-                            role: "ADMIN"
-                        };
+                        const user = await prisma.user.findUnique({ where: { email } });
+                        if (!user || !user.password) return null;
+                        if (!user.emailVerified) return null;
+
+                        const passwordsMatch = await bcrypt.compare(password, user.password);
+                        if (passwordsMatch) return user;
                     }
-
-                    const user = await prisma.user.findUnique({ where: { email } });
-                    if (!user || !user.password) return null;
-                    if (!user.emailVerified) return null;
-
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
-                    if (passwordsMatch) return user;
+                    return null;
+                } catch (error) {
+                    console.error("[Auth] Authorize error (likely DB issue):", error);
+                    return null;
                 }
-                return null;
             },
         }),
     ],
