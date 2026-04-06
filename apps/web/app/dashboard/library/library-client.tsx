@@ -52,7 +52,7 @@ export function LibraryClient() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <div className="flex flex-col gap-4">
-                    <TabsList className="w-full flex justify-start sm:justify-center lg:justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap h-auto p-1 pb-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
+                    <TabsList className="w-full flex justify-start sm:justify-center lg:justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap h-auto p-1 pb-2 no-scrollbar">
                         <TabsTrigger value="modules" className="flex-shrink-0">{t('library.tabs.modules')}</TabsTrigger>
                         <TabsTrigger value="collections" className="flex-shrink-0">{t('library.tabs.collections')}</TabsTrigger>
                         <TabsTrigger value="notes" className="flex-shrink-0">{t('library.tabs.notes')}</TabsTrigger>
