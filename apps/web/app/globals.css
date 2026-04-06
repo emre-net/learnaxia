@@ -130,6 +130,17 @@
   .sea-glow {
     @apply shadow-[0_0_20px_rgba(30,144,255,0.3)] dark:shadow-[0_0_30px_rgba(30,144,255,0.1)];
   }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 }
 
 body {

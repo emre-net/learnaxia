@@ -8,10 +8,10 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 export function HeroSection() {
     return (
-        <section className="relative overflow-hidden pt-32 pb-8 md:pt-48 md:pb-16">
-            {/* Background Gradients */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-purple-500/20 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-1/2 h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <section className="relative overflow-hidden pt-16 pb-8 md:pt-48 md:pb-16 flex flex-col items-center">
+            {/* Background Gradients - Optimized for contrast */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-primary/20 blur-[100px] rounded-full pointer-events-none opacity-50 dark:opacity-30" />
+            <div className="absolute bottom-0 right-0 w-1/2 h-[500px] bg-secondary/10 blur-[120px] rounded-full pointer-events-none" />
 
             <div className="container mx-auto px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
                 <motion.div
@@ -28,7 +28,7 @@ export function HeroSection() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
-                    className="text-4xl font-black tracking-tight lg:text-8xl mb-6 bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400 bg-clip-text text-transparent pb-2 leading-tight"
+                    className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tight mb-6 bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400 bg-clip-text text-transparent pb-3 leading-[1.1]"
                 >
                     Öğrenme Yolculuğunuzu <br className="hidden md:block" /> Yapay Zeka ile Kişiselleştirin.
                 </motion.h1>

@@ -3,39 +3,41 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { useTranslation } from "@/lib/i18n/i18n"
 import {
     LayoutDashboard,
     Library,
     Compass,
-    User
+    User,
+    Sparkles
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 export function MobileBottomNav() {
     const pathname = usePathname()
-    const { t } = useTranslation()
 
     const routes = [
         {
-            label: "Home", // Will use translations if available, or just keep icon
             icon: LayoutDashboard,
             href: "/dashboard",
             active: pathname === "/dashboard",
         },
         {
-            label: "Library",
             icon: Library,
             href: "/dashboard/library",
-            active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules") || pathname.startsWith("/dashboard/collections"),
+            active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules"),
         },
         {
-            label: "Explore",
+            icon: Sparkles, // Central AI Action
+            href: "/dashboard/create/ai-notes",
+            active: pathname === "/dashboard/create/ai-notes",
+            primary: true
+        },
+        {
             icon: Compass,
             href: "/dashboard/discover",
             active: pathname === "/dashboard/discover",
         },
         {
-            label: "Profile",
             icon: User,
             href: "/dashboard/settings",
             active: pathname === "/dashboard/settings",
@@ -43,37 +45,51 @@ export function MobileBottomNav() {
     ]
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-md border-t border-indigo-500/15 pb-[env(safe-area-inset-bottom)]">
-            <div className="flex items-center justify-around h-16 px-2">
-                {routes.map((route) => {
+        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
+            <nav className="glass rounded-[2.5rem] px-4 py-3 sea-glow flex items-center justify-between border-white/10 shadow-2xl shadow-primary/10">
+                {routes.map((route, i) => {
                     const isActive = route.active
+                    const Icon = route.icon
+
+                    if (route.primary) {
+                        return (
+                            <Link
+                                key={route.href}
+                                href={route.href}
+                                className="relative flex items-center justify-center -top-8 w-14 h-14 rounded-full bg-gradient-to-tr from-primary via-secondary to-accent shadow-xl shadow-primary/40 border-4 border-background group active:scale-90 transition-transform"
+                            >
+                                <Icon className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
+                            </Link>
+                        )
+                    }
+
                     return (
                         <Link
                             key={route.href}
                             href={route.href}
-                            className="flex flex-col items-center justify-center w-full h-full relative"
+                            className="flex flex-col items-center justify-center py-1 px-3 relative group active:scale-95 transition-all"
                         >
-                            {/* Active Tab Highlight Background */}
                             {isActive && (
-                                <div className="absolute inset-0 m-auto w-12 h-12 bg-indigo-500/10 rounded-xl -z-10" />
+                                <motion.div 
+                                    layoutId="nav-active"
+                                    className="absolute inset-0 bg-primary/10 dark:bg-primary/20 rounded-2xl -z-10"
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
+                                />
                             )}
-
-                            <route.icon
+                            <Icon
                                 className={cn(
-                                    "h-6 w-6 transition-all duration-200",
-                                    isActive ? "text-indigo-400" : "text-slate-500"
+                                    "h-6 w-6 transition-colors duration-200",
+                                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                                 )}
                                 strokeWidth={isActive ? 2.5 : 2}
                             />
-
-                            {/* Active Tab Indicator Dot (Optional addition for flair) */}
                             {isActive && (
-                                <div className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400" />
+                                <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary" />
                             )}
                         </Link>
                     )
                 })}
-            </div>
+            </nav>
         </div>
     )
 }

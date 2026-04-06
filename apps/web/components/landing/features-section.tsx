@@ -60,12 +60,12 @@ const features = [
 
 export function FeaturesSection() {
     return (
-        <section id="features" className="py-16 bg-slate-950/50 border-t border-slate-900 overflow-hidden">
+        <section id="features" className="py-8 md:py-20 bg-slate-950/50 border-t border-slate-900 overflow-hidden">
             <div className="container mx-auto px-4 md:px-6 relative">
                 {/* Decorative background glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
 
-                <div className="text-center mb-20 relative z-10">
+                <div className="text-center mb-10 md:mb-20 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -74,10 +74,10 @@ export function FeaturesSection() {
                     >
                         <Sparkles className="h-3 w-3" /> Akıllı Atölye Ekosistemi
                     </motion.div>
-                    <h2 className="text-4xl font-black tracking-tighter md:text-6xl mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                    <h2 className="text-3xl font-black tracking-tighter md:text-6xl mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
                         Öğrenmenin En Verimli Hali
                     </h2>
-                    <p className="text-slate-400 md:text-xl max-w-[800px] mx-auto leading-relaxed font-medium">
+                    <p className="text-slate-400 text-sm md:text-xl max-w-[800px] mx-auto leading-relaxed font-medium">
                         Learnaxia, karmaşık konuları parçalara böler, yapay zeka ile analiz eder ve
                         bilimsel yöntemlerle kalıcı hafızanıza aktarmanıza yardımcı olur.
                     </p>
@@ -91,7 +91,7 @@ export function FeaturesSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
                             viewport={{ once: true }}
-                            className="bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-800 hover:border-slate-700/50 hover:bg-slate-900/60 transition-all group relative overflow-hidden active:scale-[0.98]"
+                            className="bg-slate-900/40 backdrop-blur-sm rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-slate-800 hover:border-slate-700/50 hover:bg-slate-900/60 transition-all group relative overflow-hidden active:scale-[0.98]"
                         >
                             <div className={`absolute -bottom-4 -right-4 p-3 opacity-5 group-hover:opacity-10 transition-opacity`}>
                                 <feature.icon className={`h-32 w-32 ${feature.color}`} />

@@ -160,8 +160,8 @@ export function AuthForm() {
                         <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t border-indigo-500/30" />
                         </div>
-                        <div className="relative flex justify-center text-xs font-medium">
-                            <span className="bg-[#0A1128] px-4 text-cyan-200/60 border border-indigo-500/30 rounded-full py-1">
+                        <div className="relative flex justify-center text-xs font-semibold">
+                            <span className="bg-[#0A1128] px-4 text-cyan-100/80 border border-indigo-500/40 rounded-full py-1.5 shadow-sm">
                                 veya E-Posta ile
                             </span>
                         </div>
@@ -181,7 +181,7 @@ export function AuthForm() {
                                                         <span className="text-lg font-bold">@</span>
                                                     </div>
                                                     <Input
-                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="E-posta adresi"
                                                         {...field} disabled={isLoading}
                                                     />
@@ -206,7 +206,7 @@ export function AuthForm() {
                                                     </div>
                                                     <Input
                                                         type="password"
-                                                        className="pl-12 pr-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        className="pl-12 pr-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Parola"
                                                         {...field} disabled={isLoading}
                                                     />
@@ -224,7 +224,7 @@ export function AuthForm() {
                                 />
 
                                 <div className="flex justify-end pb-1">
-                                    <span className="text-xs font-medium text-[#64748B] cursor-pointer hover:text-white transition-colors">Şifremi unuttum?</span>
+                                    <span className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30">Şifremi unuttum?</span>
                                 </div>
 
                                 <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
@@ -254,7 +254,7 @@ export function AuthForm() {
                                                         </svg>
                                                     </div>
                                                     <Input
-                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Kullanıcı Adı"
                                                         {...field} disabled={isLoading}
                                                     />
@@ -275,7 +275,7 @@ export function AuthForm() {
                                                         <span className="text-lg font-bold">@</span>
                                                     </div>
                                                     <Input
-                                                        className="pl-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="E-posta adresi"
                                                         {...field} disabled={isLoading}
                                                     />
@@ -300,7 +300,7 @@ export function AuthForm() {
                                                     </div>
                                                     <Input
                                                         type="password"
-                                                        className="pl-12 pr-12 h-[52px] bg-[#0F172A]/80 border-white/5 text-white placeholder:text-[#475569] rounded-2xl focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 focus:bg-[#0F172A] transition-all"
+                                                        className="pl-12 pr-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Parola (En az 6 karakter)"
                                                         {...field} disabled={isLoading}
                                                     />
