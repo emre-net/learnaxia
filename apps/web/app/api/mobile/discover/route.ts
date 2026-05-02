@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getMobileUser } from '@/lib/auth/mobile-jwt';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: Request) {
     try {
@@ -12,23 +13,23 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type") || "MODULE";
         const search = searchParams.get("search");
-        const limit = parseInt(searchParams.get("limit") || "20");
-        const offset = parseInt(searchParams.get("offset") || "0");
+        const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
+        const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
         if (type === "COLLECTION") {
-            const where = {
+            const where: Prisma.CollectionWhereInput = {
                 visibility: 'PUBLIC',
                 ...(search && {
                     OR: [
-                        { title: { contains: search, mode: "insensitive" } },
-                        { description: { contains: search, mode: "insensitive" } }
+                        { title: { contains: search, mode: 'insensitive' as const } },
+                        { description: { contains: search, mode: 'insensitive' as const } }
                     ]
                 })
             };
 
             const [collections, total] = await Promise.all([
                 prisma.collection.findMany({
-                    where: where as any,
+                    where,
                     include: {
                         owner: { select: { handle: true, image: true, id: true, name: true } },
                         _count: { select: { items: true } }
@@ -37,27 +38,27 @@ export async function GET(req: Request) {
                     skip: offset,
                     orderBy: { createdAt: "desc" }
                 }),
-                prisma.collection.count({ where: where as any })
+                prisma.collection.count({ where })
             ]);
 
             return NextResponse.json({ items: collections, total, type: "COLLECTION" });
         } else {
             // MODULES (default)
-            const where = {
+            const where: Prisma.ModuleWhereInput = {
                 visibility: 'PUBLIC',
                 isForkable: true,
                 status: "ACTIVE",
                 ...(search && {
                     OR: [
-                        { title: { contains: search, mode: "insensitive" } },
-                        { description: { contains: search, mode: "insensitive" } }
+                        { title: { contains: search, mode: 'insensitive' as const } },
+                        { description: { contains: search, mode: 'insensitive' as const } }
                     ]
                 })
             };
 
             const [modules, total] = await Promise.all([
                 prisma.module.findMany({
-                    where: where as any,
+                    where,
                     include: {
                         owner: { select: { handle: true, image: true, id: true, name: true } },
                         _count: { select: { items: true } }
@@ -66,7 +67,7 @@ export async function GET(req: Request) {
                     skip: offset,
                     orderBy: { createdAt: "desc" }
                 }),
-                prisma.module.count({ where: where as any })
+                prisma.module.count({ where })
             ]);
 
             return NextResponse.json({ items: modules, total, type: "MODULE" });

@@ -13,8 +13,8 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# next.js (global pattern for all workspaces)
+**/.next/
 /out/
 
 # production
@@ -52,9 +52,15 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 
-apps/web/.next/
-apps/web/.turbo/
+# turbo
+.turbo/
+
+# android/ios build outputs
+android/.gradle/
+android/app/build/
+ios/Pods/
+
+# debug artifacts
 logcat*.txt
 screencap*.png
-
-.turbo/
+allfiles.txt

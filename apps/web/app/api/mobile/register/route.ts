@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { MobileRegisterSchema } from '@learnaxia/shared';
 import { SignJWT } from 'jose';
+import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -12,6 +13,7 @@ if (!secret && process.env.NODE_ENV === 'production') {
   throw new Error('MOBILE_JWT_SECRET is missing in production environment');
 }
 
+const JWT_EXPIRY_DAYS = 1;
 const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
@@ -66,7 +68,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const token = await new SignJWT({
+    const accessToken = await new SignJWT({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -74,17 +76,14 @@ export async function POST(req: Request) {
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime('30d')
+      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
       .sign(JWT_SECRET);
 
-    const refreshToken = await new SignJWT({ id: user.id })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('90d')
-      .sign(JWT_SECRET);
+    // Use secure refresh token with rotation & revocation support
+    const refreshToken = await MobileRefreshService.generate(user.id);
 
     return NextResponse.json({
-      accessToken: token,
+      accessToken,
       refreshToken,
       user: {
         id: user.id,

@@ -243,14 +243,18 @@ export default function LoginScreen() {
                                 <View style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }} className="flex-1 h-[1px]" />
                             </View>
 
-                            {/* Google Sign In */}
+                            {/* Google Sign In — Coming Soon */}
                             <TouchableOpacity
-                                activeOpacity={0.7}
+                                activeOpacity={1}
+                                disabled
                                 className="h-14 rounded-2xl flex-row items-center justify-center border"
-                                style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                                style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', borderColor: 'rgba(255, 255, 255, 0.06)', opacity: 0.5 }}
                             >
-                                <Ionicons name="logo-google" size={18} color="white" />
-                                <Text style={{ color: 'rgba(255, 255, 255, 0.9)' }} className="text-[15px] font-semibold ml-3">Google ile devam et</Text>
+                                <Ionicons name="logo-google" size={18} color="rgba(255,255,255,0.4)" />
+                                <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-[15px] font-semibold ml-3">Google ile devam et</Text>
+                                <View className="ml-2 px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}>
+                                    <Text className="text-[9px] font-bold text-blue-400 uppercase">Yakında</Text>
+                                </View>
                             </TouchableOpacity>
 
                             {/* Footer Toggle */}

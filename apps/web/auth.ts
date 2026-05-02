@@ -15,20 +15,10 @@ const nextAuth = NextAuth({
     adapter: PrismaAdapter(prisma),
     session: { strategy: "database" },
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.role = (user as any).role || 'USER';
-            }
-            return token;
-        },
-        async session({ session, token, user }) {
+        async session({ session, user }) {
             if (user && session.user) {
                 session.user.id = user.id;
                 (session.user as any).role = (user as any).role;
-            } else if (token && session.user) {
-                session.user.id = token.id as string;
-                (session.user as any).role = token.role;
             }
             return session;
         },

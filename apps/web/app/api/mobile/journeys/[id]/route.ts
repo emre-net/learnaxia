@@ -15,8 +15,14 @@ export async function GET(req: Request, { params }: RouteParams) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const journey = await prisma.learningJourney.findUnique({
-            where: { id },
+        const journey = await prisma.learningJourney.findFirst({
+            where: {
+                id,
+                OR: [
+                    { userId: user.id },
+                    { userLibrary: { some: { userId: user.id } } }
+                ]
+            },
             include: {
                 slides: {
                     orderBy: { order: 'asc' }

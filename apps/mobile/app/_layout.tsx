@@ -2,11 +2,11 @@ import 'react-native-reanimated';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox, Text, View } from 'react-native';
+import { LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './global.css';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
 
 // Suppress non-critical API error banners from showing in the UI
 LogBox.ignoreLogs([
@@ -21,18 +21,6 @@ export const unstable_settings = {
 
 
 export default function RootLayout() {
-  // FORCE_BOOT_DEBUG: Set to true to bypass the entire app (Auth, Navigation, Tabs)
-  // and render ONLY a basic native View/Text. This isolates native crashes from JS logic errors.
-  const FORCE_BOOT_DEBUG = false; 
-
-  if (FORCE_BOOT_DEBUG) {
-    return (
-      <View style={{ flex: 1, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>BOOT DEBUG ACTIVE</Text>
-      </View>
-    );
-  }
-
   const colorScheme = useColorScheme();
 
   return (
