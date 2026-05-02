@@ -4,6 +4,8 @@ import { Screen } from '@/components/ui/screen';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { useAuth } from '../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { Theme as SharedTheme, t, Language } from '@learnaxia/shared';
 import api from '@/lib/api';
 
@@ -92,6 +94,38 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
+                {/* Premium Upgrade Card */}
+                <TouchableOpacity 
+                    activeOpacity={0.9}
+                    onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)}
+                    className="mx-6 mt-6 rounded-[32px] overflow-hidden"
+                    style={{ 
+                      elevation: 8,
+                      shadowColor: '#8B5CF6',
+                      shadowOffset: { width: 0, height: 10 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 20
+                    }}
+                >
+                    <LinearGradient
+                        colors={['#8B5CF6', '#6366F1']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        className="p-6 flex-row items-center justify-between"
+                    >
+                        <View className="flex-row items-center">
+                            <View className="w-12 h-12 rounded-2xl bg-white/20 items-center justify-center mr-4">
+                                <MaterialIcons name="auto-awesome" size={24} color="white" />
+                            </View>
+                            <View>
+                                <Text className="text-white font-black text-lg tracking-tight">Premium'a Geç</Text>
+                                <Text className="text-white/70 text-xs font-medium">Sınırsız AI ve Vision özelliklerini aç</Text>
+                            </View>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={28} color="white" />
+                    </LinearGradient>
+                </TouchableOpacity>
+
                 {/* Stats Grid */}
                 <View className="flex-row flex-wrap px-6 mt-4">
                     {statItems.map((stat, i) => (
@@ -137,6 +171,16 @@ export default function ProfileScreen() {
                                 <MaterialIcons name="notifications" size={20} color="#D1D5DB" />
                             </View>
                             <Text className="text-white text-base font-medium">{t('profile.settings.notifications', currentLang)}</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity className="flex-row items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-3">
+                        <View className="flex-row items-center">
+                            <View className="w-10 h-10 rounded-xl bg-slate-800 items-center justify-center mr-4">
+                                <MaterialIcons name="credit-card" size={20} color="#D1D5DB" />
+                            </View>
+                            <Text className="text-white text-base font-medium">Abonelik ve Ödemeler</Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
                     </TouchableOpacity>

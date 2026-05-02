@@ -8,7 +8,9 @@ import { BrainCircuit, CheckCircle2, XCircle } from "lucide-react";
 import { BrandLoader } from "@/components/ui/brand-loader";
 import Link from "next/link";
 
-export default function VerifyPage() {
+import { Suspense } from "react";
+
+function VerifyContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -39,6 +41,36 @@ export default function VerifyPage() {
     }, [token]);
 
     return (
+        <CardContent className="space-y-6">
+            {status === "loading" && (
+                <div className="flex flex-col items-center gap-3">
+                    <BrandLoader size="lg" label="Doğrulanıyor..." />
+                </div>
+            )}
+            {status === "success" && (
+                <div className="flex flex-col items-center gap-3">
+                    <CheckCircle2 className="h-10 w-10 text-green-500" />
+                    <p className="text-green-500 font-medium">{message}</p>
+                    <Button asChild className="mt-4">
+                        <Link href="/login">Giriş Yap</Link>
+                    </Button>
+                </div>
+            )}
+            {status === "error" && (
+                <div className="flex flex-col items-center gap-3">
+                    <XCircle className="h-10 w-10 text-red-500" />
+                    <p className="text-red-500 font-medium">{message}</p>
+                    <Button variant="outline" asChild className="mt-4">
+                        <Link href="/login">Giriş Sayfasına Dön</Link>
+                    </Button>
+                </div>
+            )}
+        </CardContent>
+    );
+}
+
+export default function VerifyPage() {
+    return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
             <Card className="w-full max-w-md text-center">
                 <CardHeader>
@@ -50,31 +82,9 @@ export default function VerifyPage() {
                     <CardTitle className="text-2xl">E-posta Doğrulama</CardTitle>
                     <CardDescription>Learnaxia hesabınızı doğruluyoruz.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    {status === "loading" && (
-                        <div className="flex flex-col items-center gap-3">
-                            <BrandLoader size="lg" label="Doğrulanıyor..." />
-                        </div>
-                    )}
-                    {status === "success" && (
-                        <div className="flex flex-col items-center gap-3">
-                            <CheckCircle2 className="h-10 w-10 text-green-500" />
-                            <p className="text-green-500 font-medium">{message}</p>
-                            <Button asChild className="mt-4">
-                                <Link href="/login">Giriş Yap</Link>
-                            </Button>
-                        </div>
-                    )}
-                    {status === "error" && (
-                        <div className="flex flex-col items-center gap-3">
-                            <XCircle className="h-10 w-10 text-red-500" />
-                            <p className="text-red-500 font-medium">{message}</p>
-                            <Button variant="outline" asChild className="mt-4">
-                                <Link href="/login">Giriş Sayfasına Dön</Link>
-                            </Button>
-                        </div>
-                    )}
-                </CardContent>
+                <Suspense fallback={<CardContent className="flex justify-center"><BrandLoader size="lg" label="Yükleniyor..." /></CardContent>}>
+                    <VerifyContent />
+                </Suspense>
             </Card>
         </div>
     );

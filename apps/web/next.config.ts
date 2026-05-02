@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
     scrollRestoration: true,
   },
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
 

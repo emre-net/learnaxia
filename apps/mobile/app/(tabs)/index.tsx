@@ -29,6 +29,7 @@ export default function HomeScreen() {
   const currentLang = 'tr' as Language;
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -44,6 +45,8 @@ export default function HomeScreen() {
         totalSolved: data.totalSolved || 0,
         averageAccuracy: data.averageAccuracy || 0,
       });
+
+      setSuggestions(analyticsRes.data?.suggestions || []);
     } catch (error) {
       console.error('[HomeScreen] Error fetching dashboard data:', error);
       setStats({
@@ -143,7 +146,12 @@ export default function HomeScreen() {
 
         {/* Quick Stats Grid - Premium Bento Style */}
         <View className="px-6 mb-8 mt-4">
-          <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="font-bold text-[10px] uppercase tracking-[4px] ml-1 mb-4">GÜNLÜK İSTATİSTİKLER</Text>
+          <View className="flex-row items-center justify-between mb-4">
+            <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="font-bold text-[10px] uppercase tracking-[4px] ml-1">GÜNLÜK İSTATİSTİKLER</Text>
+            <TouchableOpacity onPress={() => router.push('/analytics' as any)}>
+              <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">DETAYLAR</Text>
+            </TouchableOpacity>
+          </View>
           
           {/* Top block */}
           <TouchableOpacity 
@@ -242,6 +250,56 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Continue Study Suggestions */}
+        {suggestions.length > 0 && (
+          <View className="px-6 mb-12">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="font-bold text-[10px] uppercase tracking-[4px] ml-1">ÇALIŞMAYA DEVAM ET</Text>
+              <TouchableOpacity onPress={() => router.push('/library' as any)}>
+                <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">TÜMÜ</Text>
+              </TouchableOpacity>
+            </View>
+
+            {suggestions.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                activeOpacity={0.8}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push(`/study/${item.id}`);
+                }}
+                className="w-full bg-ocean-panel rounded-[28px] p-5 mb-4 border border-ocean-border flex-row items-center"
+                style={{ 
+                  elevation: 4,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 10
+                }}
+              >
+                <View 
+                  className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
+                  style={{ backgroundColor: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1 }}
+                >
+                  <MaterialIcons name="menu-book" size={24} color="#60A5FA" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-white font-bold text-lg mb-1 tracking-tight" numberOfLines={1}>{item.title}</Text>
+                  <View className="flex-row items-center">
+                    <MaterialIcons name="check-circle" size={12} color="rgba(255,255,255,0.2)" />
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-[10px] font-bold ml-1.5 mt-0.5 uppercase tracking-tighter">
+                      {item.itemCount} İÇERİK • SON ETKİLEŞİM {new Date(item.lastInteractionAt).toLocaleDateString('tr-TR')}
+                    </Text>
+                  </View>
+                </View>
+                <View className="w-10 h-10 rounded-full bg-blue-600/10 items-center justify-center">
+                  <MaterialIcons name="chevron-right" size={24} color="#60A5FA" />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
       </ScrollView>
     </Screen>

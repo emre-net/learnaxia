@@ -2,6 +2,7 @@ export interface UserProfile {
     id: string;
     name: string | null;
     email: string | null;
+    handle: string | null;
     image: string | null;
     language: string;
     role: string;

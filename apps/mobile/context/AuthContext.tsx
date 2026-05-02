@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import api, { getAuthToken, setAuthToken, clearAuthToken } from '../lib/api';
 import { UserProfile } from '@learnaxia/shared';
 
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const segments = useSegments();
     const router = useRouter();
+    const rootNavigationState = useRootNavigationState();
 
     const logout = useCallback(async () => {
         await clearAuthToken();
@@ -62,7 +63,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [refreshProfile]);
 
     useEffect(() => {
-        if (isLoading) return;
+        // Wait until navigation is fully mounted and user data is loaded
+        if (!rootNavigationState?.key || isLoading) return;
 
         const inAuthGroup = segments[0] === 'login' || segments[0] === 'register';
 
@@ -71,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else if (user && inAuthGroup) {
             router.replace('/(tabs)');
         }
-    }, [user, segments, isLoading, router]);
+    }, [user, segments, isLoading, rootNavigationState?.key, router]);
 
     const login = async (email: string, password?: string) => {
         try {

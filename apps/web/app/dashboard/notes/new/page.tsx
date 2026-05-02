@@ -1,4 +1,4 @@
-import { NoteEditor } from "@/components/notes/note-editor";
+import { NoteEditorDynamic } from "@/components/notes/note-editor-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -15,7 +15,7 @@ export default function NewNotePage() {
                 </Link>
             </div>
             <div className="flex-1 overflow-hidden">
-                <NoteEditor />
+                <NoteEditorDynamic />
             </div>
         </div>
     );

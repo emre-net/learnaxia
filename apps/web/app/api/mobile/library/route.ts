@@ -45,13 +45,28 @@ export async function GET(req: Request) {
             where: {
                 userId: user.id
             },
-            orderBy: { updatedAt: 'desc' } // or createdAt
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        // Get user's learning journeys
+        const journeys = await prisma.learningJourney.findMany({
+            where: {
+                OR: [
+                    { userId: user.id },
+                    { userLibrary: { some: { userId: user.id } } }
+                ]
+            },
+            include: {
+                _count: { select: { slides: true } }
+            },
+            orderBy: { createdAt: 'desc' }
         });
 
         return NextResponse.json({
             modules,
             collections,
-            notes
+            notes,
+            journeys
         });
     } catch (error) {
         console.error('Mobile Library Error:', error);

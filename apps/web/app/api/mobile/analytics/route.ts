@@ -105,6 +105,19 @@ export async function GET(req: Request) {
         });
 
 
+        const suggestions = await prisma.userModuleLibrary.findMany({
+            where: { userId },
+            include: {
+                module: {
+                    include: {
+                        _count: { select: { items: true } }
+                    }
+                }
+            },
+            orderBy: { lastInteractionAt: 'desc' },
+            take: 3
+        });
+
         return NextResponse.json({
             stats: {
                 totalStudyMinutes: Math.round((totalDuration._sum.durationMs || 0) / 60000),
@@ -112,6 +125,12 @@ export async function GET(req: Request) {
                 totalSolved,
                 averageAccuracy: globalAccuracy
             },
+            suggestions: suggestions.map(s => ({
+                id: s.module.id,
+                title: s.module.title,
+                itemCount: s.module._count.items,
+                lastInteractionAt: s.lastInteractionAt
+            })),
             dailyActivity,
             moduleStats
         });

@@ -21,25 +21,28 @@
   },
   "dependencies": {
     "expo": "~52.0.49",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-native": "0.76.9",
-    "react-native-safe-area-context": "^5.7.0"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.76.9"
+  },
+  "overrides": {
+    "learnaxia-mobile": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    },
+    "next": "^15.2.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react-server-dom-webpack": "^19.0.2"
   },
   "devDependencies": {
     "@babel/plugin-transform-template-literals": "^7.25.9",
-    "@types/react": "18.3.12",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.27",
-    "next": "15.1.11",
+    "next": "^15.2.0",
     "patch-package": "^8.0.1",
     "tailwindcss": "^4.1.0",
     "turbo": "^2.8.20"
-  },
-  "overrides": {
-    "next": "^15.2.0",
-    "react-server-dom-webpack": "^19.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
   }
 }

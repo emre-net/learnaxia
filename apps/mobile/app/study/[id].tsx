@@ -18,22 +18,33 @@ export default function StudyScreen() {
     const currentLang = 'tr' as Language;
     
     const [studyModule, setStudyModule] = useState<any>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
+    const [startTime, setStartTime] = useState<number>(Date.now());
 
     useEffect(() => {
-        const fetchModule = async () => {
+        const initStudy = async () => {
             try {
-                const response = await api.get(`/mobile/study/${id}`);
-                setStudyModule(response.data.module);
+                // 1. Fetch Module
+                const moduleRes = await api.get(`/mobile/study/${id}`);
+                setStudyModule(moduleRes.data.module);
+
+                // 2. Start Session
+                const sessionRes = await api.post('/mobile/study/start', { 
+                    moduleId: id,
+                    mode: 'NORMAL'
+                });
+                setSessionId(sessionRes.data.sessionId);
+                setStartTime(Date.now());
             } catch (error) {
-                console.error('[StudyScreen] Failed to fetch module:', error);
+                console.error('[StudyScreen] Failed to initialize study:', error);
             } finally {
                 setLoading(false);
             }
         };
-        if (id) fetchModule();
+        if (id) initStudy();
     }, [id]);
 
     const handleFlip = useCallback(() => {
@@ -41,15 +52,30 @@ export default function StudyScreen() {
         setShowAnswer(!showAnswer);
     }, [showAnswer]);
 
-    const nextCard = useCallback(() => {
+    const nextCard = useCallback(async (quality: number = 3) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        if (currentIndex < studyModule.items.length - 1) {
+        
+        // Log locally if we have a session
+        if (sessionId && studyModule?.items?.[currentIndex]) {
+            const itemId = studyModule.items[currentIndex].id;
+            const durationMs = Date.now() - startTime;
+            
+            api.post('/mobile/study/log', {
+                sessionId,
+                itemId,
+                quality,
+                durationMs
+            }).catch(err => console.error('[StudyScreen] Failed to log result:', err));
+        }
+
+        if (currentIndex < (studyModule?.items?.length || 0) - 1) {
             setCurrentIndex(prev => prev + 1);
             setShowAnswer(false);
+            setStartTime(Date.now());
         } else {
             router.back();
         }
-    }, [currentIndex, studyModule, router]);
+    }, [currentIndex, studyModule, router, sessionId, startTime]);
 
     const prevCard = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -222,14 +248,14 @@ export default function StudyScreen() {
                     {isFlashcard && showAnswer ? (
                         <View className="flex-row items-center space-x-6 gap-4">
                             <TouchableOpacity 
-                                onPress={nextCard} 
+                                onPress={() => nextCard(1)} 
                                 className="w-20 h-20 rounded-[30px] bg-red-500/10 border border-red-500/20 items-center justify-center"
                             >
                                 <MaterialIcons name="close" size={32} color="#EF4444" />
                             </TouchableOpacity>
                             
                             <TouchableOpacity 
-                                onPress={nextCard} 
+                                onPress={() => nextCard(5)} 
                                 className="w-24 h-24 rounded-[36px] bg-brand-emerald/10 border border-brand-emerald/20 items-center justify-center"
                                 style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', borderColor: 'rgba(52, 211, 153, 0.3)' }}
                             >
@@ -238,7 +264,7 @@ export default function StudyScreen() {
                         </View>
                     ) : (
                         <TouchableOpacity
-                            onPress={nextCard}
+                            onPress={() => nextCard(3)}
                             activeOpacity={0.8}
                             className="bg-brand-blue px-10 h-16 rounded-[24px] flex-row items-center justify-center"
                             style={{ 

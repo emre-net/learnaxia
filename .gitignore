@@ -51,3 +51,10 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+apps/web/.next/
+apps/web/.turbo/
+logcat*.txt
+screencap*.png
+
+.turbo/

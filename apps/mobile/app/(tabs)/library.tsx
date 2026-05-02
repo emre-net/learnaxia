@@ -40,12 +40,13 @@ type NoteData = {
     updatedAt: string;
 };
 
-type TabType = 'modules' | 'collections' | 'notes';
+type TabType = 'modules' | 'collections' | 'notes' | 'journeys';
 
 export default function LibraryScreen() {
     const [modules, setModules] = useState<ModuleData[]>([]);
     const [collections, setCollections] = useState<CollectionData[]>([]);
     const [notes, setNotes] = useState<NoteData[]>([]);
+    const [journeys, setJourneys] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('modules');
@@ -58,6 +59,7 @@ export default function LibraryScreen() {
             setModules(response.data.modules || []);
             setCollections(response.data.collections || []);
             setNotes(response.data.notes || []);
+            setJourneys(response.data.journeys || []);
         } catch (error) {
             console.error('Failed to fetch library', error);
         } finally {
@@ -87,12 +89,23 @@ export default function LibraryScreen() {
         !searchQuery || (n.title && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
-    const currentData = activeTab === 'modules' ? filteredModules : activeTab === 'collections' ? filteredCollections : filteredNotes;
+    const filteredJourneys = journeys.filter(j =>
+        !searchQuery || j.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-    const tabs: { id: TabType; label: string; icon: string; count: number }[] = [
+    const currentData = activeTab === 'modules' 
+        ? filteredModules 
+        : activeTab === 'collections' 
+            ? filteredCollections 
+            : activeTab === 'notes' 
+                ? filteredNotes 
+                : filteredJourneys;
+
+    const tabs: { id: any; label: string; icon: string; count: number }[] = [
         { id: 'modules', label: t('library.tabs.modules', currentLang), icon: 'menu-book', count: modules.length },
         { id: 'collections', label: t('library.tabs.collections', currentLang), icon: 'folder-special', count: collections.length },
         { id: 'notes', label: t('library.tabs.notes', currentLang), icon: 'edit-note', count: notes.length },
+        { id: 'journeys', label: 'Yolculuklar', icon: 'auto-awesome', count: journeys.length },
     ];
 
     if (loading) {
@@ -250,6 +263,56 @@ export default function LibraryScreen() {
         </TouchableOpacity>
     );
 
+    const renderJourneyItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            className="bg-ocean-panel rounded-3xl p-6 mb-4 border border-ocean-border"
+            style={{ 
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8
+            }}
+            onPress={() => router.push(`/journey/${item.id}`)}
+        >
+            <View className="flex-row items-center justify-between mb-3">
+                <View 
+                    className="px-3 py-1 rounded-lg border"
+                    style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.2)' }}
+                >
+                    <Text className="text-blue-400 text-[10px] font-bold uppercase tracking-wider">Yolculuk</Text>
+                </View>
+                <Text style={{ color: 'rgba(255, 255, 255, 0.2)' }} className="text-[10px] font-bold">
+                    {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+                </Text>
+            </View>
+
+            <Text className="text-xl font-bold text-white mb-2 tracking-tight" numberOfLines={2}>
+                {item.title}
+            </Text>
+
+            <Text style={{ color: 'rgba(255, 255, 255, 0.4)' }} className="text-sm mb-4 leading-5" numberOfLines={1}>
+                Konu: {item.topic}
+            </Text>
+
+            <View 
+                className="flex-row items-center justify-between mt-auto pt-4 border-t"
+                style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
+            >
+                <View className="flex-row items-center">
+                    <MaterialIcons name="auto-awesome" size={14} color="#00D2FF" />
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.3)' }} className="text-xs ml-2 font-bold uppercase tracking-tighter">
+                        {item._count?.slides || 0} SLAYT
+                    </Text>
+                </View>
+                <View className="bg-blue-600 px-5 py-2 rounded-full">
+                    <Text className="text-white text-xs font-bold">Devam Et</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+
     return (
         <Screen className="bg-ocean-bg" tabScreen>
             {/* Header */}
@@ -334,7 +397,9 @@ export default function LibraryScreen() {
                     ? (renderModuleItem as any) 
                     : activeTab === 'collections' 
                         ? (renderCollectionItem as any) 
-                        : (renderNoteItem as any)
+                        : activeTab === 'notes'
+                            ? (renderNoteItem as any)
+                            : (renderJourneyItem as any)
                 }
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={SharedTheme.colors.primary} />

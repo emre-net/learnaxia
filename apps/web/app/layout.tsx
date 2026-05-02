@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import SessionProvider from "@/components/providers/session-provider"
-import { auth } from "@/auth"
+
 import { ReactQueryProvider } from "@/components/providers/query-provider"
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -60,18 +60,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let session = null;
-  try {
-    session = await auth();
-  } catch (err) {
-    console.error("[RootLayout] Auth session fetch failed:", err);
-  }
-
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
@@ -85,7 +78,7 @@ export default async function RootLayout({
           // fontSans.variable
         )}
       >
-        <SessionProvider session={session}>
+        <SessionProvider>
           <ReactQueryProvider>
             <ThemeProvider
               attribute="class"

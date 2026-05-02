@@ -26,7 +26,11 @@ export default function RootLayout() {
   const FORCE_BOOT_DEBUG = false; 
 
   if (FORCE_BOOT_DEBUG) {
-    // ... skipping debug rendering ...
+    return (
+      <View style={{ flex: 1, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>BOOT DEBUG ACTIVE</Text>
+      </View>
+    );
   }
 
   const colorScheme = useColorScheme();
@@ -46,6 +50,9 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
             <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create' }} />
             <Stack.Screen name="study/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="journey/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="collections" options={{ animation: 'slide_from_right' }} />
           </Stack>
           <StatusBar style="light" />

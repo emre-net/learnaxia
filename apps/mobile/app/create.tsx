@@ -8,14 +8,19 @@ import * as DocumentPicker from 'expo-document-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '@/lib/api';
 import { t, Language } from '@learnaxia/shared';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CreateScreen() {
     const router = useRouter();
     const [cameraPermission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [showTopicModal, setShowTopicModal] = useState(false);
+    const [showSolutionModal, setShowSolutionModal] = useState(false);
     const [topic, setTopic] = useState('');
+    const [visionResult, setVisionResult] = useState<{ questionText: string, solution: string } | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const cameraRef = React.useRef<CameraView>(null);
     const currentLang = 'tr' as Language;
 
     const handleDocumentPick = async () => {
@@ -76,6 +81,41 @@ export default function CreateScreen() {
         }
     };
 
+    const takePhoto = async () => {
+        if (!cameraRef.current || isGenerating) return;
+
+        setIsGenerating(true);
+        try {
+            const photo = await cameraRef.current.takePictureAsync({
+                quality: 0.7,
+                base64: true,
+            });
+
+            if (photo) {
+                const formData = new FormData();
+                // @ts-ignore
+                formData.append('file', {
+                    uri: photo.uri,
+                    type: 'image/jpeg',
+                    name: 'photo.jpg',
+                });
+
+                const response = await api.post('/mobile/ai/solve-photo', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                setVisionResult(response.data);
+                setShowCamera(false);
+                setShowSolutionModal(true);
+            }
+        } catch (error) {
+            console.error('Vision Error:', error);
+            Alert.alert(t('common.error', currentLang), 'Fotoğraf analiz edilemedi.');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const openCamera = async () => {
         if (!cameraPermission?.granted) {
             const { granted } = await requestPermission();
@@ -90,24 +130,34 @@ export default function CreateScreen() {
     if (showCamera) {
         return (
             <Screen className="bg-black">
-                <CameraView style={{ flex: 1 }} facing="back">
+                <CameraView 
+                    style={{ flex: 1 }} 
+                    facing="back" 
+                    ref={cameraRef}
+                >
                     <View className="flex-1 justify-between p-6">
-                        <TouchableOpacity
-                            onPress={() => setShowCamera(false)}
-                            className="w-12 h-12 rounded-full bg-black/50 items-center justify-center mt-10"
-                        >
-                            <IconSymbol name="xmark" size={24} color="white" />
-                        </TouchableOpacity>
-
-                        <View className="items-center mb-10">
+                        <View className="flex-row justify-between items-center mt-10">
                             <TouchableOpacity
-                                onPress={() => {
-                                    setShowCamera(false);
-                                    Alert.alert(t('create.modal.ocrInfo', currentLang).split('.')[0], t('create.modal.ocrInfo', currentLang));
-                                }}
+                                onPress={() => setShowCamera(false)}
+                                className="w-12 h-12 rounded-full bg-black/50 items-center justify-center"
+                            >
+                                <IconSymbol name="xmark" size={24} color="white" />
+                            </TouchableOpacity>
+                            <Text className="text-white font-bold text-lg">Soruyu Çerçeveye Alın</Text>
+                            <View className="w-12" />
+                        </View>
+
+                        <View className="items-center mb-16">
+                            <TouchableOpacity
+                                onPress={takePhoto}
+                                disabled={isGenerating}
                                 className="w-20 h-20 rounded-full bg-white/20 items-center justify-center border-4 border-white"
                             >
-                                <View className="w-16 h-16 rounded-full bg-white" />
+                                {isGenerating ? (
+                                    <BrandLoader size={30} showBlur={false} />
+                                ) : (
+                                    <View className="w-16 h-16 rounded-full bg-white" />
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -225,6 +275,47 @@ export default function CreateScreen() {
                                     <Text className="text-white font-bold text-lg">{t('create.modal.button', currentLang)}</Text>
                                 </>
                             )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Solution Modal */}
+            <Modal
+                visible={showSolutionModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowSolutionModal(false)}
+            >
+                <View className="flex-1 justify-end bg-black/60">
+                    <View className="bg-neutral-900 rounded-t-[40px] p-8 max-h-[85%] border-t border-white/10">
+                        <View className="flex-row justify-between items-center mb-6">
+                            <View className="flex-row items-center">
+                                <MaterialIcons name="auto-awesome" size={24} color="#00D2FF" />
+                                <Text className="text-2xl font-bold text-white ml-2">Çözüm Hazır</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => setShowSolutionModal(false)}>
+                                <IconSymbol name="xmark.circle.fill" size={28} color="#4B5563" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView className="mb-8" showsVerticalScrollIndicator={false}>
+                            <View className="bg-neutral-800/50 rounded-2xl p-5 mb-6 border border-neutral-700">
+                                <Text className="text-blue-400 font-bold text-xs mb-2 uppercase tracking-widest">Soru Metni</Text>
+                                <Text className="text-white/80 text-base leading-6">{visionResult?.questionText}</Text>
+                            </View>
+
+                            <View className="bg-indigo-600/10 rounded-2xl p-6 border border-indigo-500/20">
+                                <Text className="text-indigo-400 font-bold text-xs mb-3 uppercase tracking-widest">Yapay Zeka Çözümü</Text>
+                                <Text className="text-white text-lg leading-7 font-medium">{visionResult?.solution}</Text>
+                            </View>
+                        </ScrollView>
+
+                        <TouchableOpacity 
+                            onPress={() => setShowSolutionModal(false)}
+                            className="w-full h-16 rounded-2xl bg-indigo-600 items-center justify-center"
+                        >
+                            <Text className="text-white font-bold text-lg">Anladım</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

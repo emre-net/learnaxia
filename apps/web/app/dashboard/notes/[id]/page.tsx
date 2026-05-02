@@ -1,4 +1,4 @@
-import { NoteEditor } from "@/components/notes/note-editor";
+import { NoteEditorDynamic } from "@/components/notes/note-editor-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import prisma from "@/lib/prisma";
@@ -37,7 +37,7 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
                 </Link>
             </div>
             <div className="flex-1 overflow-hidden">
-                <NoteEditor existingNote={safeNote} />
+                <NoteEditorDynamic existingNote={safeNote} />
             </div>
         </div>
     );
