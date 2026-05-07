@@ -12,8 +12,6 @@ import api from '../../lib/api';
 export default function JourneyPlayerScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
-    const currentLang = 'tr' as Language;
-    
     const [journey, setJourney] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
