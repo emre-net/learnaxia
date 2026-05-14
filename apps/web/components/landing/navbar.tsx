@@ -20,9 +20,11 @@ export function Navbar() {
     return (
         <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/80 backdrop-blur-md border-b py-3" : "bg-transparent py-6"}`}>
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-                <Link className="flex items-center justify-center gap-2" href="/">
-                    <Image src="/logo.png" alt="Learnaxia Logo" width={32} height={32} className="h-8 w-8 object-contain" />
-                    <span className="font-bold text-xl">Learnaxia</span>
+                <Link className="flex items-center justify-center gap-2 overflow-hidden" href="/">
+                    <Image src="/logo.png" alt="Learnaxia Logo" width={48} height={48} className="h-10 w-10 object-contain shrink-0 drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" />
+                    <span className="text-xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase truncate">
+                        Learnaxia
+                    </span>
                 </Link>
 
                 {/* Desktop Nav */}

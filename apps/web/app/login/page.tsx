@@ -56,9 +56,9 @@ export default function LoginPage() {
             <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative overflow-y-auto">
                 <div className="w-full max-w-[440px] space-y-8">
                     {/* Mobile Logo Only */}
-                    <div className="md:hidden flex flex-col items-center justify-center space-y-4 mb-8">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={64} height={64} className="w-16 h-16 object-contain" />
-                        <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    <div className="md:hidden flex flex-col items-center justify-center space-y-4 mb-8 overflow-hidden">
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={64} height={64} className="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)] shrink-0" />
+                        <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase truncate">
                             LEARNAXIA
                         </h1>
                     </div>
