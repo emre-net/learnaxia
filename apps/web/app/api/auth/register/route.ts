@@ -68,6 +68,7 @@ export async function POST(req: Request) {
         await prisma.user.create({
             data: {
                 email,
+                name: username, // Added name so it appears correctly
                 password: hashedPassword,
                 handle: username,
                 image: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,

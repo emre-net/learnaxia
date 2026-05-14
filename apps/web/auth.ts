@@ -19,6 +19,9 @@ const nextAuth = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = (user as any).role;
+                if (user.email) token.email = user.email;
+                if (user.name) token.name = user.name;
+                if ((user as any).handle) token.handle = (user as any).handle;
             }
             return token;
         },
@@ -26,9 +29,13 @@ const nextAuth = NextAuth({
             if (user && session.user) {
                 session.user.id = user.id;
                 (session.user as any).role = (user as any).role;
+                if ((user as any).handle) (session.user as any).handle = (user as any).handle;
             } else if (token && session.user) {
                 session.user.id = token.id as string;
                 (session.user as any).role = token.role;
+                if (token.handle) (session.user as any).handle = token.handle;
+                if (token.email) session.user.email = token.email;
+                if (token.name) session.user.name = token.name;
             }
             return session;
         },

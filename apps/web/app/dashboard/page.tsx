@@ -23,7 +23,7 @@ export default function DashboardPage() {
     const { data: session } = useSession();
     const { t } = useTranslation();
     const isAdmin = (session?.user as any)?.role === "ADMIN";
-    const userName = session?.user?.name || session?.user?.email?.split('@')[0] || "Kullanıcı";
+    const userName = (session?.user as any)?.handle || session?.user?.name || session?.user?.email?.split('@')[0] || "Kullanıcı";
 
     const [stats, setStats] = useState<DashboardStats>({
         totalStudyMinutes: 0,
