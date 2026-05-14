@@ -147,7 +147,10 @@ export async function auth(): Promise<Session | null> {
         const cookieArray = cookieStore.getAll();
         if (cookieArray.length > 0) {
             const cookieHeader = cookieArray.map(c => `${c.name}=${c.value}`).join('; ');
-            const baseUrl = process.env.AUTH_URL || `http://localhost:${process.env.PORT || 3000}`;
+            const h = await headers();
+            const host = h.get("host") || "localhost:3000";
+            const protocol = h.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+            const baseUrl = `${protocol}://${host}`;
             const res = await fetch(`${baseUrl}/api/auth/session`, {
                 headers: { cookie: cookieHeader },
                 cache: 'no-store'

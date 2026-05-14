@@ -331,7 +331,6 @@ export function AuthForm() {
                             </form>
                         </Form>
                     )}
-                </div>
             </div>
         </div>
     )
