@@ -73,7 +73,7 @@ export function Sidebar({ className }: SidebarProps) {
     const aiShortcuts = [
         { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: t('sidebar.aiModule'), href: "/dashboard/create/ai" },
         { icon: Cpu, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: t('sidebar.aiNote'), href: "/dashboard/create/ai-notes" },
-        { icon: Camera, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50", label: t('sidebar.solvePhoto'), href: "/dashboard/create/solve-photo" },
+        { icon: Camera, color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/50", label: t('sidebar.solvePhoto'), href: "/dashboard/create/solve-photo" },
     ]
 
     return (
@@ -81,9 +81,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="space-y-4 py-4 flex flex-col h-full">
                 <div className="px-4 py-2">
                     <div className="flex items-center pl-2 mb-10">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20 overflow-hidden">
-                            <Image src="/logo.png" alt="Learnaxia Logo" width={28} height={28} className="h-7 w-7 object-contain" />
-                        </div>
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={40} height={40} className="h-10 w-10 object-contain mr-3" />
                         <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                             Learnaxia
                         </h2>
