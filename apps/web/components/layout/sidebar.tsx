@@ -81,7 +81,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="space-y-4 py-4 flex flex-col h-full">
                 <div className="px-4 py-2">
                     <div className="flex items-center pl-2 mb-10">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={40} height={40} className="h-10 w-10 object-contain mr-3" />
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={64} height={64} className="h-16 w-16 object-contain mr-2" />
                         <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                             Learnaxia
                         </h2>

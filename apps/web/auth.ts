@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma"
 import { authConfig } from "./auth.config"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
-import { headers } from "next/headers"
+import { headers, cookies } from "next/headers"
 import { extractBearerToken, verifyMobileAccessToken } from "@/lib/auth/mobile-jwt"
 import type { Session } from "next-auth"
 
@@ -134,8 +134,34 @@ export const signIn = rawSignIn as any;
 export const signOut = rawSignOut as any;
 
 export async function auth(): Promise<Session | null> {
-    const session = await (nextAuth.auth as any)()
-    if (session?.user?.id) return session
+    try {
+        const session = await (nextAuth.auth as any)()
+        if (session?.user?.id) return session
+    } catch (e) {
+        console.error("[Auth] nextAuth.auth() failed:", e)
+    }
+
+    // Workaround for NextAuth v5 server component bug behind Railway proxies
+    try {
+        const cookieStore = await cookies();
+        const cookieArray = cookieStore.getAll();
+        if (cookieArray.length > 0) {
+            const cookieHeader = cookieArray.map(c => `${c.name}=${c.value}`).join('; ');
+            const baseUrl = process.env.AUTH_URL || `http://localhost:${process.env.PORT || 3000}`;
+            const res = await fetch(`${baseUrl}/api/auth/session`, {
+                headers: { cookie: cookieHeader },
+                cache: 'no-store'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && Object.keys(data).length > 0 && data.user && data.user.id) {
+                    return data as Session;
+                }
+            }
+        }
+    } catch (e) {
+        console.error("[Auth] Workaround API fetch failed:", e)
+    }
 
     // Fallback for mobile clients using Authorization: Bearer <accessToken>
     // Works when route handlers call auth() without relying on NextAuth cookies.
