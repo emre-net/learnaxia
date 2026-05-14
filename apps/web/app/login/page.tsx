@@ -22,8 +22,8 @@ export default function LoginPage() {
 
                 <div className="relative z-10">
                     <Link href="/" className="flex items-center gap-3">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={48} height={48} className="w-12 h-12 object-contain" />
-                        <span className="text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]" />
+                        <span className="text-4xl font-black tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase">
                             LEARNAXIA
                         </span>
                     </Link>

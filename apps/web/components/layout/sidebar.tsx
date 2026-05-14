@@ -80,9 +80,9 @@ export function Sidebar({ className }: SidebarProps) {
         <div className={cn("pb-12 h-full bg-gradient-to-b from-slate-900 to-black text-white border-r border-slate-800", className)}>
             <div className="space-y-4 py-4 flex flex-col h-full">
                 <div className="px-4 py-2">
-                    <div className="flex items-center pl-2 mb-10">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={64} height={64} className="h-16 w-16 object-contain mr-2" />
-                        <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                    <div className="flex items-center pl-1 mb-10">
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={80} height={80} className="h-20 w-20 object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]" />
+                        <h2 className="text-3xl font-black tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 ml-2 drop-shadow-sm uppercase">
                             Learnaxia
                         </h2>
                     </div>

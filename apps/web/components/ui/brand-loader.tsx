@@ -1,71 +1,54 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface BrandLoaderProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   label?: string;
-  showBlur?: boolean;
 }
 
-export function BrandLoader({ className, size = "md", label, showBlur = true }: BrandLoaderProps) {
+export function BrandLoader({ className, size = "md", label }: BrandLoaderProps) {
   const sizeClasses = {
-    sm: "w-8 h-8",
+    sm: "w-6 h-6",
     md: "w-12 h-12",
-    lg: "w-16 h-16",
-    xl: "w-24 h-24",
+    lg: "w-20 h-20",
+    xl: "w-32 h-32",
   };
 
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-4", className)}>
-      <div className={cn("relative", sizeClasses[size])}>
-        {/* Animated Background Ring */}
-        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-500 border-r-purple-500 animate-[spin_1.5s_linear_infinite]" />
+    <div className={cn("flex flex-col items-center justify-center gap-3", className)}>
+      <div className={cn("relative drop-shadow-xl", sizeClasses[size])}>
+        {/* Faded/Grayscale Background Logo */}
+        <div className="absolute inset-0 opacity-20 dark:opacity-30">
+          <Image src="/logo.png" alt="Loading Background" fill className="object-contain" priority />
+        </div>
         
-        {/* Pulsing Core */}
-        {showBlur && (
-          <div className="absolute inset-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full filter blur-[2px] animate-pulse opacity-20" />
-        )}
-        
-        {/* Learnaxia Logo Shape (Stylized 'L') */}
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="absolute inset-0 w-full h-full p-2.5 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-        >
-          <path
-            d="M8 4V16C8 18 9 20 12 20H18"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="animate-[draw_2s_ease-in-out_infinite]"
+        {/* Sweeping Foreground Logo */}
+        <div className="absolute inset-0 animate-[sweep_2s_ease-in-out_infinite]">
+          <Image 
+            src="/logo.png" 
+            alt="Loading Foreground" 
+            fill 
+            className="object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.6)]" 
+            priority
           />
-          <path
-            d="M14 6L16 4L14 2"
-            stroke="#10b981"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="animate-pulse"
-          />
-        </svg>
+        </div>
       </div>
       
       {label && (
-        <p className="text-slate-400 text-sm font-medium animate-pulse tracking-wide">
+        <p className="text-blue-400 text-xs font-bold animate-pulse tracking-[0.2em] uppercase">
           {label}
         </p>
       )}
 
       <style jsx global>{`
-        @keyframes draw {
-          0% { stroke-dasharray: 0 100; stroke-dashoffset: 0; }
-          50% { stroke-dasharray: 100 0; stroke-dashoffset: 0; }
-          100% { stroke-dasharray: 0 100; stroke-dashoffset: -100; }
+        @keyframes sweep {
+          0% { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+          50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          100% { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
         }
       `}</style>
     </div>
