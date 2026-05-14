@@ -172,23 +172,23 @@ export default function AtölyePage() {
             {/* Extra Tools Section */}
             <div className="mt-8 border-t border-slate-800 pt-8">
                 <div className="flex items-center gap-3 mb-6">
-                    <Camera className="h-5 w-5 text-emerald-400" />
+                    <Camera className="h-5 w-5 text-cyan-400" />
                     <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
                         Hızlı Araçlar
                     </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
                     <Link href="/dashboard/create/solve-photo">
-                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-emerald-900/40 border border-emerald-500/20 hover:bg-emerald-900/60 transition-all cursor-pointer">
-                            <div className="p-3 bg-emerald-500/30 rounded-xl text-emerald-300 group-hover:scale-110 transition-transform">
+                        <div className="group flex items-center gap-4 p-5 rounded-2xl bg-cyan-900/30 border border-cyan-500/20 hover:bg-cyan-900/50 hover:border-cyan-500/40 transition-all cursor-pointer">
+                            <div className="p-3 bg-cyan-500/20 rounded-xl text-cyan-300 group-hover:scale-110 transition-transform">
                                 <Camera className="h-6 w-6" />
                             </div>
                             <div>
                                 <h3 className="text-white font-bold">Fotoğraftan Soru Çöz</h3>
                                 <p className="text-xs text-slate-300 mt-1">Kitaplardan soru çekin, AI anında çözsün.</p>
                             </div>
-                            <div className="ml-auto p-2 rounded-full bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ArrowRight className="h-4 w-4 text-emerald-300" />
+                            <div className="ml-auto p-2 rounded-full bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight className="h-4 w-4 text-cyan-300" />
                             </div>
                         </div>
                     </Link>

@@ -119,7 +119,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
                 </div>
                 <div className="flex flex-col items-center">
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{t('settings.duration')}</span>
-                    <span className="text-xl font-black text-emerald-500">
+                    <span className="text-xl font-black text-cyan-400">
                         {analyticsData?.stats ? (
                             (analyticsData.stats.totalStudyMinutes ?? 0) > 60
                                 ? `${Math.floor((analyticsData.stats.totalStudyMinutes ?? 0) / 60)}s`

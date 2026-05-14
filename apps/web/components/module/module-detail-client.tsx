@@ -170,7 +170,7 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                             <div className="flex flex-wrap items-center gap-2">
                                 <VisibilityBadge visibility={module.status === 'DRAFT' ? 'DRAFT' : module.visibility} />
                                 {module.isInLibrary && !isOwner && (
-                                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/20 font-bold uppercase text-[10px] tracking-wider px-2.5 py-1 rounded-full">
+                                    <Badge variant="secondary" className="bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/10 dark:text-cyan-400 dark:border-cyan-900/20 font-bold uppercase text-[10px] tracking-wider px-2.5 py-1 rounded-full">
                                         Kütüphanenizde
                                     </Badge>
                                 )}

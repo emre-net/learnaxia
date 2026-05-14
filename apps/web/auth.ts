@@ -142,28 +142,31 @@ export async function auth(): Promise<Session | null> {
     }
 
     // Workaround for NextAuth v5 server component bug behind Railway proxies
+    // Instead of making a fetch request, directly check the database using the session cookie
     try {
         const cookieStore = await cookies();
-        const cookieArray = cookieStore.getAll();
-        if (cookieArray.length > 0) {
-            const cookieHeader = cookieArray.map(c => `${c.name}=${c.value}`).join('; ');
-            const h = await headers();
-            const host = h.get("host") || "localhost:3000";
-            const protocol = h.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-            const baseUrl = `${protocol}://${host}`;
-            const res = await fetch(`${baseUrl}/api/auth/session`, {
-                headers: { cookie: cookieHeader },
-                cache: 'no-store'
+        const sessionToken = cookieStore.get("next-auth.session-token")?.value || cookieStore.get("__Secure-next-auth.session-token")?.value;
+        
+        if (sessionToken) {
+            const dbSession = await prisma.session.findUnique({
+                where: { sessionToken },
+                include: { user: true }
             });
-            if (res.ok) {
-                const data = await res.json();
-                if (data && Object.keys(data).length > 0 && data.user && data.user.id) {
-                    return data as Session;
-                }
+            if (dbSession?.user) {
+                return {
+                    user: { 
+                        id: dbSession.user.id, 
+                        name: dbSession.user.name, 
+                        email: dbSession.user.email, 
+                        image: dbSession.user.image,
+                        role: dbSession.user.role 
+                    },
+                    expires: dbSession.expires.toISOString()
+                } as Session;
             }
         }
     } catch (e) {
-        console.error("[Auth] Workaround API fetch failed:", e)
+        console.error("[Auth] Direct DB fallback failed:", e)
     }
 
     // Fallback for mobile clients using Authorization: Bearer <accessToken>

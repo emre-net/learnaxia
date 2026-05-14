@@ -101,8 +101,8 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                                     transition={{ delay: 0.2 }}
                                     className="bg-background/40 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-2xl flex items-center gap-4 min-w-[140px]"
                                 >
-                                    <div className="bg-emerald-500/20 p-2 rounded-lg">
-                                        <Clock className="h-6 w-6 text-emerald-500" />
+                                    <div className="bg-cyan-500/20 p-2 rounded-lg">
+                                        <Clock className="h-6 w-6 text-cyan-400" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{t('settings.duration')}</span>
