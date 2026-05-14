@@ -291,7 +291,7 @@ export default function CreateLearningPlanPage() {
                                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
                                         {isLoading ? (
                                             <span className="flex items-center gap-2 relative z-10">
-                                                <BrandLoader size="sm" showBlur={false} /> Sihir Gerçekleşiyor...
+                                                <BrandLoader size="sm"  /> Sihir Gerçekleşiyor...
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2 relative z-10">

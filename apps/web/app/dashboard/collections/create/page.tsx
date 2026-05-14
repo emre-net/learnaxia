@@ -134,7 +134,7 @@ export default function CreateCollectionPage() {
                         <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <BrandLoader size="sm" className="mr-2" showBlur={false} />
+                                    <BrandLoader size="sm" className="mr-2"  />
                                     Oluşturuluyor...
                                 </>
                             ) : (

@@ -445,7 +445,7 @@ export default function NewCollectionPage() {
                         >
                             {isSubmitting ? (
                                 <>
-                                    <BrandLoader size="sm" className="mr-2" showBlur={false} /> Oluşturuluyor...
+                                    <BrandLoader size="sm" className="mr-2"  /> Oluşturuluyor...
                                 </>
                             ) : (
                                 <>

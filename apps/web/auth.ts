@@ -179,7 +179,7 @@ export async function auth(): Promise<Session | null> {
     }
 
     const bearer = extractBearerToken(authorizationHeader)
-    if (!bearer) return session
+    if (!bearer) return null
 
     try {
         const payload = await verifyMobileAccessToken(bearer)
@@ -201,6 +201,6 @@ export async function auth(): Promise<Session | null> {
             expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         } as any
     } catch {
-        return session
+        return null
     }
 }

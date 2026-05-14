@@ -97,7 +97,7 @@ export default function ManualNotePage() {
                         disabled={isSaving || content.length === 0}
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 px-6 rounded-xl transition-all hover:scale-105 active:scale-95 h-11"
                     >
-                        {isSaving ? <BrandLoader size="sm" className="mr-2" showBlur={false} /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? <BrandLoader size="sm" className="mr-2"  /> : <Save className="mr-2 h-4 w-4" />}
                         {t("creation.manualNote.saveNote") || "Notu Kaydet"}
                     </Button>
                 </div>
@@ -140,7 +140,7 @@ export default function ManualNotePage() {
                                     size="sm"
                                     className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg h-8"
                                 >
-                                    {isSaving ? <BrandLoader size="sm" className="mr-2" showBlur={false} /> : <Save className="mr-2 h-3 w-3" />}
+                                    {isSaving ? <BrandLoader size="sm" className="mr-2"  /> : <Save className="mr-2 h-3 w-3" />}
                                     Kaydet
                                 </Button>
                         </div>
