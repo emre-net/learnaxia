@@ -24,7 +24,7 @@ export function SystemPreferences({
     const { t } = useTranslation();
 
     return (
-        <Card>
+        <Card className="glass">
             <CardHeader>
                 <CardTitle>{t('settings.preferences.title')}</CardTitle>
                 <CardDescription>{t('settings.preferences.description')}</CardDescription>

@@ -19,7 +19,7 @@ interface AccountSectionProps {
 export function AccountSection({ user }: AccountSectionProps) {
     return (
         <div className="space-y-6">
-            <Card>
+            <Card className="glass">
                 <CardHeader>
                     <CardTitle>Profil Bilgileri</CardTitle>
                     <CardDescription>İsim, kullanıcı adı ve hesap resminizi yönetin.</CardDescription>
@@ -47,7 +47,7 @@ export function AccountSection({ user }: AccountSectionProps) {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass">
                 <CardHeader>
                     <CardTitle>Güvenlik</CardTitle>
                     <CardDescription>Şifrenizi buradan güncelleyebilirsiniz.</CardDescription>

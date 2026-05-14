@@ -128,9 +128,9 @@ export function AuthForm() {
                         </Alert>
                     )}
                     {success && (
-                        <Alert className="bg-emerald-500/10 border border-emerald-500/30 py-2.5 px-3 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                            <AlertDescription className="text-emerald-400 text-xs ml-2 font-medium">{success}</AlertDescription>
+                        <Alert className="bg-cyan-500/10 border border-cyan-500/30 py-2.5 px-3 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                            <CheckCircle2 className="h-4 w-4 text-cyan-400" />
+                            <AlertDescription className="text-cyan-400 text-xs ml-2 font-medium">{success}</AlertDescription>
                         </Alert>
                     )}
 

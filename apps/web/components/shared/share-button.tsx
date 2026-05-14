@@ -160,7 +160,7 @@ export function ShareButton({ type, id, title }: ShareButtonProps) {
                                 <Button
                                     type="button"
                                     size="sm"
-                                    className={`rounded-lg transition-all duration-300 px-4 font-bold shadow-md ${isCopied ? 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/20' : 'bg-primary hover:bg-primary/90 shadow-primary/20'}`}
+                                    className={`rounded-lg transition-all duration-300 px-4 font-bold shadow-md ${isCopied ? 'bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-500/20' : 'bg-primary hover:bg-primary/90 shadow-primary/20'}`}
                                 >
                                     {isCopied ? (
                                         <><Check className="h-4 w-4 mr-1.5" /> Kopyalandı</>

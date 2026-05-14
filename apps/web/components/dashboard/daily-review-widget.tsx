@@ -51,7 +51,7 @@ export function DailyReviewWidget() {
 
     if (loading) {
         return (
-            <Card className="border-blue-500/20 shadow-lg shadow-blue-500/5 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-blue-900/10 dark:to-purple-900/10">
+            <Card className="glass border-blue-500/20 sea-glow">
                 <CardContent className="flex items-center justify-center p-12">
                     <BrandLoader size="lg" />
                 </CardContent>
@@ -66,21 +66,22 @@ export function DailyReviewWidget() {
     // Success State - No reviews pending!
     if (data.totalDue === 0) {
         return (
-            <Card className="border-green-500/20 shadow-lg shadow-green-500/5 bg-gradient-to-br from-green-500/5 to-emerald-500/5 dark:from-green-900/10 dark:to-emerald-900/10">
-                <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-3">
-                    <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mb-2">
-                        <BrainCircuit className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <Card className="glass border-cyan-500/20 sea-glow overflow-hidden">
+                <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-3 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 pointer-events-none" />
+                    <div className="w-16 h-16 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center mb-2 z-10">
+                        <BrainCircuit className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
                     </div>
-                    <h3 className="text-xl font-bold tracking-tight">{t('dashboard.dailyReview.completedTitle')}</h3>
-                    <p className="text-muted-foreground text-sm max-w-sm">{t('dashboard.dailyReview.completedDesc')}</p>
+                    <h3 className="text-xl font-bold tracking-tight z-10">{t('dashboard.dailyReview.completedTitle')}</h3>
+                    <p className="text-muted-foreground text-sm max-w-sm z-10">{t('dashboard.dailyReview.completedDesc')}</p>
                 </CardContent>
             </Card>
         );
     }
 
     return (
-        <Card className="border-blue-500/20 shadow-lg shadow-blue-500/5 bg-gradient-to-br from-blue-500/5 via-background to-purple-500/5 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500" />
+        <Card className="glass border-blue-500/20 sea-glow relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500" />
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>

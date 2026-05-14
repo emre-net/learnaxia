@@ -31,8 +31,8 @@ export function TypeIcon({ type, className = "", size = 'md' }: TypeIconProps) {
         },
         "GAP": {
             icon: Brain,
-            color: "text-emerald-600 dark:text-emerald-400",
-            bg: "bg-emerald-50 dark:bg-emerald-900/20",
+            color: "text-cyan-600 dark:text-cyan-400",
+            bg: "bg-cyan-50 dark:bg-cyan-900/20",
             label: "Boşluk Doldurma"
         },
         "TRUE_FALSE": {
