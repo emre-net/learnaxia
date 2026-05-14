@@ -118,7 +118,7 @@ export default function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{loading ? "..." : `%${stats.averageAccuracy}`}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Genel doğruluk yüzden</p>
+                            <p className="text-xs text-muted-foreground mt-1">Genel doğruluk oranınız</p>
                         </CardContent>
                     </Card>
                     <Card className="glass group hover:sea-glow transition-all duration-300">
