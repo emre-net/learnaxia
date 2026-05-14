@@ -114,13 +114,14 @@ export function AuthForm() {
     }
 
     return (
-        <Card className="w-full relative group">
-            {/* Highly vibrant multi-color glowing border effect behind the card */}
-            <div className="absolute -inset-[2px] bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 rounded-[30px] blur-md opacity-75 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
-
-            <div className="relative w-full h-full bg-[#0A1128]/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] rounded-[28px] overflow-hidden">
-                <div className="px-8 py-10 space-y-6">
-                    {error && (
+        <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-2 text-center mb-8">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">Hoş Geldiniz</h2>
+                <p className="text-sm text-muted-foreground">Devam etmek için hesabınıza giriş yapın veya yeni bir hesap oluşturun.</p>
+            </div>
+            
+            <div className="space-y-6">
+                {error && (
                         <Alert variant="destructive" className="bg-red-500/10 border border-red-500/30 py-2.5 px-3 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.1)]">
                             <AlertCircle className="h-4 w-4 text-red-400" />
                             <AlertDescription className="text-red-400 text-xs ml-2 font-medium">{error}</AlertDescription>
@@ -332,6 +333,6 @@ export function AuthForm() {
                     )}
                 </div>
             </div>
-        </Card>
+        </div>
     )
 }
