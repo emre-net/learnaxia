@@ -145,21 +145,27 @@ export async function auth(): Promise<Session | null> {
     // Instead of making a fetch request, directly check the database using the session cookie
     try {
         const cookieStore = await cookies();
-        const sessionToken = cookieStore.get("next-auth.session-token")?.value || cookieStore.get("__Secure-next-auth.session-token")?.value;
+        // NextAuth v5 uses "authjs.session-token", v4 uses "next-auth.session-token"
+        // Secure variants use "__Secure-" prefix
+        const sessionToken = 
+            cookieStore.get("authjs.session-token")?.value ||
+            cookieStore.get("__Secure-authjs.session-token")?.value ||
+            cookieStore.get("next-auth.session-token")?.value ||
+            cookieStore.get("__Secure-next-auth.session-token")?.value;
         
         if (sessionToken) {
             const dbSession = await prisma.session.findUnique({
                 where: { sessionToken },
                 include: { user: true }
             });
-            if (dbSession?.user) {
+            if (dbSession?.user && dbSession.expires > new Date()) {
                 return {
                     user: { 
                         id: dbSession.user.id, 
                         name: dbSession.user.name, 
                         email: dbSession.user.email, 
                         image: dbSession.user.image,
-                        role: dbSession.user.role 
+                        role: (dbSession.user as any).role 
                     },
                     expires: dbSession.expires.toISOString()
                 } as Session;

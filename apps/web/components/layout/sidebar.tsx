@@ -80,11 +80,11 @@ export function Sidebar({ className }: SidebarProps) {
         <div className={cn("pb-12 h-full bg-gradient-to-b from-slate-900 to-black text-white border-r border-slate-800", className)}>
             <div className="space-y-4 py-4 flex flex-col h-full">
                 <div className="px-4 py-2">
-                    <div className="flex items-center pl-1 mb-10">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={80} height={80} className="h-20 w-20 object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]" />
-                        <h2 className="text-3xl font-black tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 ml-2 drop-shadow-sm uppercase">
+                    <div className="flex items-center pl-1 mb-8 overflow-hidden">
+                        <Image src="/logo.png" alt="Learnaxia Logo" width={48} height={48} className="h-12 w-12 object-contain shrink-0 drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" />
+                        <span className="text-lg font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 ml-2 uppercase truncate">
                             Learnaxia
-                        </h2>
+                        </span>
                     </div>
 
                     {/* Atölye — Featured CTA with Branching Shortcuts */}
@@ -192,7 +192,7 @@ export function Sidebar({ className }: SidebarProps) {
                                 key={route.href}
                                 variant="ghost"
                                 className={cn(
-                                    "w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200",
+                                    "w-full justify-start text-slate-400 hover:text-white hover:bg-blue-900/30 transition-all duration-200",
                                     route.active && "bg-slate-800 text-white border-l-4 border-blue-500 rounded-l-none pl-3 shadow-md shadow-black/20"
                                 )}
                                 asChild

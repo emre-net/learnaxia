@@ -73,7 +73,7 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 174 75% 46%; /* Tropical Teal */
+    --accent: 221 83% 53%; /* Deep Blue (matches primary, used for ghost hover) */
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84% 60%;
@@ -106,8 +106,8 @@
     --muted: 217 32% 12%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 174 75% 46%; /* Neon Teal */
-    --accent-foreground: 222 47% 4%;
+    --accent: 224 76% 20%; /* Deep Navy (for dark mode ghost hover) */
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
