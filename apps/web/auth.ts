@@ -142,18 +142,53 @@ export async function auth(): Promise<Session | null> {
     }
 
     // Workaround for NextAuth v5 server component bug behind Railway proxies
-    // Instead of making a fetch request, directly check the database using the session cookie
+    // Instead of making a fetch request, directly check the database or decode JWT using the session cookie
     try {
         const cookieStore = await cookies();
-        // NextAuth v5 uses "authjs.session-token", v4 uses "next-auth.session-token"
-        // Secure variants use "__Secure-" prefix
-        const sessionToken = 
-            cookieStore.get("authjs.session-token")?.value ||
-            cookieStore.get("__Secure-authjs.session-token")?.value ||
-            cookieStore.get("next-auth.session-token")?.value ||
-            cookieStore.get("__Secure-next-auth.session-token")?.value;
+        let sessionToken = cookieStore.get("authjs.session-token")?.value;
+        let salt = "authjs.session-token";
+        
+        if (!sessionToken) {
+            sessionToken = cookieStore.get("__Secure-authjs.session-token")?.value;
+            salt = "__Secure-authjs.session-token";
+        }
+        if (!sessionToken) {
+            sessionToken = cookieStore.get("next-auth.session-token")?.value;
+            salt = "next-auth.session-token";
+        }
+        if (!sessionToken) {
+            sessionToken = cookieStore.get("__Secure-next-auth.session-token")?.value;
+            salt = "__Secure-next-auth.session-token";
+        }
         
         if (sessionToken) {
+            // First, try decoding as JWT (since NextAuth forces JWT when Credentials provider is used)
+            try {
+                const { decode } = await import("next-auth/jwt");
+                const decoded = await decode({
+                    token: sessionToken,
+                    salt: salt,
+                    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "dummy-secret-for-startup-avoiding-crash",
+                });
+                
+                if (decoded && decoded.id) {
+                    return {
+                        user: {
+                            id: decoded.id as string,
+                            name: decoded.name as string | undefined,
+                            email: decoded.email as string | undefined,
+                            image: (decoded.picture || decoded.image) as string | undefined,
+                            role: decoded.role as string,
+                        },
+                        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    } as Session;
+                }
+            } catch (err) {
+                // If decoding fails, it might be a database session token (UUID), proceed to DB lookup
+                console.log("[Auth] JWT decode failed, attempting DB lookup");
+            }
+
+            // DB fallback
             const dbSession = await prisma.session.findUnique({
                 where: { sessionToken },
                 include: { user: true }

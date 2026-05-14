@@ -60,11 +60,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Import dynamically or normally. Since we need it inside an async function we can just import at top, but we already have auth inside @/auth
+  const { auth } = await import("@/auth");
+  const session = await auth();
+
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
@@ -75,10 +79,9 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased"
-          // fontSans.variable
         )}
       >
-        <SessionProvider>
+        <SessionProvider session={session}>
           <ReactQueryProvider>
             <ThemeProvider
               attribute="class"
