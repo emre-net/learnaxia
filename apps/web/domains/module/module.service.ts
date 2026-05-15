@@ -123,7 +123,7 @@ export class ModuleService {
         const isInLibrary = dbModule._count.userLibrary > 0;
         const visibility = (dbModule as any).visibility;
 
-        if (visibility === 'PUBLIC' || dbModule.ownerId === userId || visibility === 'PRIVATE') {
+        if (visibility === 'PUBLIC' || dbModule.ownerId === userId || isInLibrary) {
             return { ...dbModule, isInLibrary };
         }
 
