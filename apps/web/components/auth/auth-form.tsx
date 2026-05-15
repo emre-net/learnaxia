@@ -181,7 +181,7 @@ export function AuthForm() {
                     </div>
 
                     {activeTab === "login" ? (
-                        <Form {...loginForm}>
+                        <Form key="login-form" {...loginForm}>
                             <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
                                 <FormField
                                     control={loginForm.control}
@@ -256,7 +256,7 @@ export function AuthForm() {
                             </form>
                         </Form>
                     ) : (
-                        <Form {...registerForm}>
+                        <Form key="register-form" {...registerForm}>
                             <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-5">
                                 <FormField
                                     control={registerForm.control}
