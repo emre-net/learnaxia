@@ -5,10 +5,11 @@ import { useStudyStore } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { getStudyDictionary } from "@/lib/i18n/dictionaries";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { playStudySound } from "@/lib/audio";
 
 export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
+    const [isProcessing, setIsProcessing] = useState(false);
     const {
         items,
         currentIndex,
@@ -30,14 +31,18 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     const currentItem = items[currentIndex];
 
     const handleNextItem = useCallback(() => {
+        if (isProcessing) return;
+        setIsProcessing(true);
         onNext({
             itemId: currentItem.id,
             result: feedback === 'CORRECT' ? 'CORRECT' : 'WRONG',
             quality: feedback === 'CORRECT' ? 5 : 1
         });
-    }, [currentItem.id, feedback, onNext]);
+    }, [currentItem.id, feedback, onNext, isProcessing]);
 
     const handleRate = useCallback((quality: number) => {
+        if (isProcessing) return;
+        setIsProcessing(true);
         // Quality: 0-1 (Wrong/Hard), 2-3 (Good/Ok), 4-5 (Easy/Perfect)
         // Map to: "AGAIN", "HARD", "GOOD", "EASY"
         let result = "GOOD";
@@ -50,7 +55,12 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         else setWrongCount(wrongCount + 1);
 
         onNext({ itemId: currentItem.id, result, quality });
-    }, [correctCount, currentItem.id, onNext, setCorrectCount, setWrongCount, wrongCount]);
+    }, [correctCount, currentItem.id, onNext, setCorrectCount, setWrongCount, wrongCount, isProcessing]);
+
+    // Reset processing state when item changes
+    useEffect(() => {
+        setIsProcessing(false);
+    }, [currentItem.id]);
 
     const handleShowAnswer = useCallback(() => {
         setFeedback('WRONG');
@@ -125,6 +135,7 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
                     </Button>
                 ) : (
                     <Button
+                        disabled={isProcessing}
                         className={isLastItem ? "w-full text-lg h-12 bg-green-600 hover:bg-green-700 text-white" : "w-full text-lg h-12"}
                         size="lg"
                         onClick={handleNextItem}
@@ -152,20 +163,20 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     return (
         <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-4 gap-4">
-                <Button variant="destructive" className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
+                <Button variant="destructive" disabled={isProcessing} className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
                     <RotateCcw className="h-5 w-5" />
                     <span>{dict.rate.again}</span>
                     <span className="text-xs opacity-70">{dict.rate.againTime}</span>
                 </Button>
-                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
+                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
                     <span className="text-lg font-bold">{dict.rate.hard}</span>
                     <span className="text-xs opacity-70">{dict.rate.hardTime}</span>
                 </Button>
-                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
+                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
                     <span className="text-lg font-bold">{dict.rate.good}</span>
                     <span className="text-xs opacity-70">{dict.rate.goodTime}</span>
                 </Button>
-                <Button variant="secondary" className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
+                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
                     <Check className="h-5 w-5" />
                     <span>{dict.rate.easy}</span>
                     <span className="text-xs opacity-70">{dict.rate.easyTime}</span>
