@@ -13,7 +13,7 @@ import type { Session } from "next-auth"
 const nextAuth = NextAuth({
     ...authConfig,
     adapter: PrismaAdapter(prisma),
-    session: { strategy: "database" },
+    session: { strategy: "jwt" },
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
