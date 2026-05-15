@@ -8,6 +8,7 @@ import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { BrandLoader } from "@/components/ui/brand-loader"
+import { useToast } from "@/components/ui/use-toast"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -40,6 +41,8 @@ export function AuthForm() {
     const [success, setSuccess] = React.useState<string | null>(null)
     const searchParams = useSearchParams()
     const router = useRouter()
+    const { toast } = useToast()
+    const [isResetting, setIsResetting] = React.useState(false)
     
     // Read the tab parameter from the URL, or default to login
     const initialTab = searchParams.get("tab") === "register" ? "register" : "login"
@@ -124,6 +127,43 @@ export function AuthForm() {
         setIsLoading(true)
         await signIn("google", { callbackUrl: "/dashboard" })
     }
+
+    const handleForgotPassword = async () => {
+        const email = loginForm.getValues("email");
+        if (!email || !email.includes("@")) {
+            toast({
+                title: "E-posta gerekli",
+                description: "Lütfen yukarıdaki E-Posta alanına geçerli bir adres yazın ve tekrar tıklayın.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsResetting(true);
+        try {
+            const res = await fetch("/api/auth/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Hata oluştu.");
+
+            toast({
+                title: "Bağlantı Gönderildi!",
+                description: "E-posta adresinizi kontrol edin. Gelen kutunuza (veya spam klasörüne) bir sıfırlama bağlantısı gönderildi.",
+            });
+        } catch (error: any) {
+            toast({
+                title: "İşlem Başarısız",
+                description: error.message,
+                variant: "destructive"
+            });
+        } finally {
+            setIsResetting(false);
+        }
+    };
 
     return (
         <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -240,8 +280,8 @@ export function AuthForm() {
                                 <div className="flex justify-end pb-1">
                                     <span 
                                         className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30"
-                                        onClick={() => alert("Şifre sıfırlama özelliği yakında eklenecektir.")}
-                                    >Şifremi unuttum?</span>
+                                        onClick={handleForgotPassword}
+                                    >{isResetting ? "Gönderiliyor..." : "Şifremi unuttum?"}</span>
                                 </div>
 
                                 <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
