@@ -142,79 +142,12 @@ export const signOut = rawSignOut as any;
 
 export async function auth(): Promise<Session | null> {
     try {
-        const session = await (nextAuth.auth as any)()
-        if (session?.user?.id) return session
+        const session = await rawAuth() as Session | null;
+        if (session?.user) {
+            return session;
+        }
     } catch (e) {
         console.error("[Auth] nextAuth.auth() failed:", e)
-    }
-
-    // Workaround for NextAuth v5 server component bug behind Railway proxies
-    // Instead of making a fetch request, directly check the database or decode JWT using the session cookie
-    try {
-        const cookieStore = await cookies();
-        let sessionToken = cookieStore.get("authjs.session-token")?.value;
-        let salt = "authjs.session-token";
-        
-        if (!sessionToken) {
-            sessionToken = cookieStore.get("__Secure-authjs.session-token")?.value;
-            salt = "__Secure-authjs.session-token";
-        }
-        if (!sessionToken) {
-            sessionToken = cookieStore.get("next-auth.session-token")?.value;
-            salt = "next-auth.session-token";
-        }
-        if (!sessionToken) {
-            sessionToken = cookieStore.get("__Secure-next-auth.session-token")?.value;
-            salt = "__Secure-next-auth.session-token";
-        }
-        
-        if (sessionToken) {
-            // First, try decoding as JWT (since NextAuth forces JWT when Credentials provider is used)
-            try {
-                const { decode } = await import("next-auth/jwt");
-                const decoded = await decode({
-                    token: sessionToken,
-                    salt: salt,
-                    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "dummy-secret-for-startup-avoiding-crash",
-                });
-                
-                if (decoded && decoded.id) {
-                    return {
-                        user: {
-                            id: decoded.id as string,
-                            name: decoded.name as string | undefined,
-                            email: decoded.email as string | undefined,
-                            image: (decoded.picture || decoded.image) as string | undefined,
-                            role: decoded.role as string,
-                        },
-                        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                    } as Session;
-                }
-            } catch (err) {
-                // If decoding fails, it might be a database session token (UUID), proceed to DB lookup
-                console.log("[Auth] JWT decode failed, attempting DB lookup");
-            }
-
-            // DB fallback
-            const dbSession = await prisma.session.findUnique({
-                where: { sessionToken },
-                include: { user: true }
-            });
-            if (dbSession?.user && dbSession.expires > new Date()) {
-                return {
-                    user: { 
-                        id: dbSession.user.id, 
-                        name: dbSession.user.name, 
-                        email: dbSession.user.email, 
-                        image: dbSession.user.image,
-                        role: (dbSession.user as any).role 
-                    },
-                    expires: dbSession.expires.toISOString()
-                } as Session;
-            }
-        }
-    } catch (e) {
-        console.error("[Auth] Direct DB fallback failed:", e)
     }
 
     // Fallback for mobile clients using Authorization: Bearer <accessToken>
