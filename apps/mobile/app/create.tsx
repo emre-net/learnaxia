@@ -5,6 +5,7 @@ import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '@/lib/api';
 import { t, Language } from '@learnaxia/shared';
@@ -116,6 +117,48 @@ export default function CreateScreen() {
         }
     };
 
+    const pickFromGallery = async () => {
+        if (isGenerating) return;
+        
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 0.7, // Compress the image to prevent OOM
+                base64: true,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                setIsGenerating(true);
+                const asset = result.assets[0];
+                
+                // If it's a huge image, warn or just rely on the quality: 0.7 compression.
+                if (asset.fileSize && asset.fileSize > 20 * 1024 * 1024) {
+                    Alert.alert("Uyarı", "Seçilen resim boyutu çok büyük olduğu için sıkıştırılarak yüklenecek.");
+                }
+
+                const formData = new FormData();
+                // @ts-ignore
+                formData.append('file', {
+                    uri: asset.uri,
+                    type: 'image/jpeg',
+                    name: 'gallery.jpg',
+                });
+
+                const response = await api.post('/mobile/ai/solve-photo', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                setVisionResult(response.data);
+                setShowSolutionModal(true);
+            }
+        } catch (error) {
+            console.error('Gallery Vision Error:', error);
+            Alert.alert(t('common.error', currentLang), 'Galeri fotoğrafı analiz edilemedi.');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const openCamera = async () => {
         if (!cameraPermission?.granted) {
             const { granted } = await requestPermission();
@@ -210,6 +253,19 @@ export default function CreateScreen() {
                         <View className="flex-1">
                             <Text className="text-white text-xl font-bold mb-1">{t('create.uploadPdf.title', currentLang)}</Text>
                             <Text className="text-gray-400 text-sm">{t('create.uploadPdf.desc', currentLang)}</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={pickFromGallery}
+                        className="w-full bg-teal-600/20 border border-teal-500/30 rounded-3xl p-6 items-center flex-row mb-4"
+                    >
+                        <View className="w-16 h-16 rounded-full bg-teal-500/20 items-center justify-center mr-4">
+                            <IconSymbol name="photo.fill" size={32} color="#2DD4BF" />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-white text-xl font-bold mb-1">Galeriden Seç</Text>
+                            <Text className="text-gray-400 text-sm">Fotoğraf yükleyerek çözüm üret</Text>
                         </View>
                     </TouchableOpacity>
 
