@@ -36,7 +36,7 @@ export function Navbar() {
                         <Link href="/login">Giriş Yap</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/login">Kayıt Ol</Link>
+                        <Link href="/login?tab=register">Kayıt Ol</Link>
                     </Button>
                 </nav>
 
@@ -61,7 +61,7 @@ export function Navbar() {
                                     <Link href="/login" onClick={() => setIsOpen(false)}>Giriş Yap</Link>
                                 </Button>
                                 <Button asChild className="w-full">
-                                    <Link href="/login" onClick={() => setIsOpen(false)}>Kayıt Ol</Link>
+                                    <Link href="/login?tab=register" onClick={() => setIsOpen(false)}>Kayıt Ol</Link>
                                 </Button>
                             </div>
                         </SheetContent>

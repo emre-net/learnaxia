@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { BrandLoader } from "@/components/ui/brand-loader"
 
@@ -38,8 +38,20 @@ export function AuthForm() {
     const [isLoading, setIsLoading] = React.useState<boolean>(false)
     const [error, setError] = React.useState<string | null>(null)
     const [success, setSuccess] = React.useState<string | null>(null)
-    const [activeTab, setActiveTab] = React.useState<"login" | "register">("login")
+    const searchParams = useSearchParams()
     const router = useRouter()
+    
+    // Read the tab parameter from the URL, or default to login
+    const initialTab = searchParams.get("tab") === "register" ? "register" : "login"
+    const [activeTab, setActiveTab] = React.useState<"login" | "register">(initialTab)
+
+    // Sync tab state when URL changes
+    React.useEffect(() => {
+        const tab = searchParams.get("tab")
+        if (tab === "register" || tab === "login") {
+            setActiveTab(tab)
+        }
+    }, [searchParams])
 
     const loginForm = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -182,6 +194,7 @@ export function AuthForm() {
                                                         <span className="text-lg font-bold">@</span>
                                                     </div>
                                                     <Input
+                                                        type="email"
                                                         className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="E-posta adresi"
                                                         {...field} disabled={isLoading}
@@ -255,6 +268,7 @@ export function AuthForm() {
                                                         </svg>
                                                     </div>
                                                     <Input
+                                                        type="text"
                                                         className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Kullanıcı Adı"
                                                         {...field} disabled={isLoading}
@@ -276,6 +290,7 @@ export function AuthForm() {
                                                         <span className="text-lg font-bold">@</span>
                                                     </div>
                                                     <Input
+                                                        type="email"
                                                         className="pl-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="E-posta adresi"
                                                         {...field} disabled={isLoading}
