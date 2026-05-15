@@ -42,8 +42,10 @@ export async function GET(req: Request) {
         }
 
         const { searchParams } = new URL(req.url);
-        const limit = parseInt(searchParams.get("limit") || "12", 10);
-        const offset = parseInt(searchParams.get("offset") || "0", 10);
+        let limit = parseInt(searchParams.get("limit") || "12", 10);
+        let offset = parseInt(searchParams.get("offset") || "0", 10);
+        if (isNaN(limit) || limit < 1 || limit > 100) limit = 12;
+        if (isNaN(offset) || offset < 0) offset = 0;
         const search = searchParams.get("search") || undefined;
         const category = searchParams.get("category") || undefined;
         const role = searchParams.get("role") || "all";

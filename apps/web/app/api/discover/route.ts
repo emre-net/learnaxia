@@ -17,8 +17,10 @@ export async function GET(req: Request) {
         const type = searchParams.get("type") || "MODULE"; // MODULE | COLLECTION
         const moduleType = searchParams.get("moduleType"); // FLASHCARD, MC, GAP, TRUE_FALSE
         const search = searchParams.get("search");
-        const limit = parseInt(searchParams.get("limit") || "20");
-        const offset = parseInt(searchParams.get("offset") || "0");
+        let limit = parseInt(searchParams.get("limit") || "20", 10);
+        let offset = parseInt(searchParams.get("offset") || "0", 10);
+        if (isNaN(limit) || limit < 1 || limit > 100) limit = 20;
+        if (isNaN(offset) || offset < 0) offset = 0;
 
         if (type === "NOTE") {
             const where = {
