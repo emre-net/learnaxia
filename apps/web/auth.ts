@@ -22,6 +22,15 @@ const nextAuth = NextAuth({
                 if (user.email) token.email = user.email;
                 if (user.name) token.name = user.name;
                 if ((user as any).handle) token.handle = (user as any).handle;
+            } else if (!token.id && token.email) {
+                // Recover missing ID for old sessions
+                try {
+                    const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
+                    if (dbUser) {
+                        token.id = dbUser.id;
+                        token.role = dbUser.role;
+                    }
+                } catch(e) {}
             }
             return token;
         },
