@@ -328,7 +328,8 @@ const en = {
         noDescription: "No description provided.",
         itemsCount: "{count} Items",
         byAuthor: "by @{author}",
-        optional: "optional"
+        optional: "optional",
+        add: "Add"
     },
     admin: {
         dashboard: {
@@ -744,7 +745,8 @@ const tr = {
         noDescription: "Açıklama girilmemiş.",
         itemsCount: "{count} Öğe",
         byAuthor: "yazar: @{author}",
-        optional: "opsiyonel"
+        optional: "opsiyonel",
+        add: "Ekle"
     },
     admin: {
         dashboard: {

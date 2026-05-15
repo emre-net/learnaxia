@@ -275,22 +275,41 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                 ) : (
                     <div className="grid gap-4">
                         {module.items.map((item, index) => (
-                            <Card key={item.id} className="p-5 flex items-start gap-4 hover:border-indigo-400/50 dark:hover:border-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 group rounded-2xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-                                <div className="bg-zinc-100 dark:bg-zinc-800 h-10 w-10 rounded-xl flex items-center justify-center font-bold text-zinc-500 dark:text-zinc-400 shrink-0 mt-1 shadow-sm border border-zinc-200/50 dark:border-zinc-700/50">
-                                    {index + 1}
+                            <Card key={item.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-4 hover:border-indigo-400/50 dark:hover:border-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 group rounded-2xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+                                <div className="flex items-center justify-between w-full sm:w-auto">
+                                    <div className="bg-zinc-100 dark:bg-zinc-800 h-10 w-10 rounded-xl flex items-center justify-center font-bold text-zinc-500 dark:text-zinc-400 shrink-0 shadow-sm border border-zinc-200/50 dark:border-zinc-700/50">
+                                        {index + 1}
+                                    </div>
+                                    <div className="flex sm:hidden items-center gap-1">
+                                        {(isOwner || module.isForkable) && (
+                                            <>
+                                                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 text-zinc-500" onClick={() => {
+                                                    setEditingItem(item);
+                                                    setIsSheetOpen(true);
+                                                }}>
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                {isOwner && (
+                                                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-rose-50 hover:text-rose-600 text-zinc-500" onClick={() => handleDeleteItem(item.id)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0 py-1">
-                                    <h4 className="font-bold text-xl text-zinc-900 dark:text-zinc-100 mb-2 leading-snug">
+                                <div className="flex-1 min-w-0 w-full py-1">
+                                    <h4 className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-zinc-100 mb-2 leading-snug break-words">
                                         {item.content?.question || item.content?.front || item.content?.statement || "Başlıksız Öğe"}
                                     </h4>
-                                    <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400 font-medium bg-zinc-50 dark:bg-zinc-800/30 w-fit px-3 py-1.5 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                                        <ArrowRight className="h-4 w-4 text-indigo-500" />
-                                        <span className="line-clamp-1">
+                                    <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400 font-medium bg-zinc-50 dark:bg-zinc-800/30 w-full sm:w-fit px-3 py-2 sm:py-1.5 rounded-xl border border-zinc-100 dark:border-zinc-800 break-words">
+                                        <ArrowRight className="h-4 w-4 text-indigo-500 shrink-0" />
+                                        <span className="line-clamp-2 sm:line-clamp-1 break-words">
                                             {item.content?.answer || item.content?.back || (item.type === 'MC' ? 'Seçenekler' : 'İçerik')}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 pl-4">
+                                <div className="hidden sm:flex opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all items-center gap-2 pl-4">
                                     {(isOwner || module.isForkable) && (
                                         <>
                                             <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20 text-zinc-400" onClick={() => {
