@@ -238,7 +238,10 @@ export function AuthForm() {
                                 />
 
                                 <div className="flex justify-end pb-1">
-                                    <span className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30">Şifremi unuttum?</span>
+                                    <span 
+                                        className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30"
+                                        onClick={() => alert("Şifre sıfırlama özelliği yakında eklenecektir.")}
+                                    >Şifremi unuttum?</span>
                                 </div>
 
                                 <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>

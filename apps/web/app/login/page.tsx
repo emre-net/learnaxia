@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
+import { Suspense } from "react"
 import { AuthForm } from "@/components/auth/auth-form"
 import { BrainCircuit, Sparkles, Zap } from "lucide-react"
 
@@ -63,7 +64,9 @@ export default function LoginPage() {
                         </h1>
                     </div>
                     
-                    <AuthForm />
+                    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+                        <AuthForm />
+                    </Suspense>
                 </div>
             </div>
         </div>

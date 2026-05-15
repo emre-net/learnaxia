@@ -7,7 +7,7 @@ const profileSchema = z.object({
     handle: z.string()
         .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
         .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
-        .regex(/^[a-zA-Z0-9_]+$/, "Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir.")
+        .regex(/^[a-zA-Z0-9_-]+$/, "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir.")
         .optional(),
     image: z.string().url("Geçersiz profil resmi URL'si.").optional().or(z.literal("")),
     language: z.enum(["tr", "en"]).optional(),

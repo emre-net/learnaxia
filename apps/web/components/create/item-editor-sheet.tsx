@@ -239,6 +239,7 @@ export function ItemEditorSheet({
                                     <div key={idx} className="flex items-center gap-3 group/opt">
                                         <div className="relative flex-1">
                                             <Input
+                                                type="text"
                                                 value={opt}
                                                 onChange={(e) => {
                                                     const newOpts = [...options];

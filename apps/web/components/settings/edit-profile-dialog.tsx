@@ -80,6 +80,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
                             <Input
                                 id="handle"
+                                type="text"
                                 value={handle}
                                 onChange={(e) => setHandle(e.target.value)}
                                 className="pl-8"
@@ -91,6 +92,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                         <Label htmlFor="image">Profil Resmi URL</Label>
                         <Input
                             id="image"
+                            type="url"
                             value={image}
                             onChange={(e) => setImage(e.target.value)}
                             placeholder="https://example.com/photo.jpg"

@@ -94,7 +94,7 @@ const nextAuth = NextAuth({
 
                         const user = await prisma.user.findUnique({ where: { email } });
                         if (!user || !user.password) return null;
-                        if (!user.emailVerified) return null;
+                        // if (!user.emailVerified) return null; // Disabled for MVP to allow immediate login
 
                         const passwordsMatch = await bcrypt.compare(password, user.password);
                         if (passwordsMatch) return user;

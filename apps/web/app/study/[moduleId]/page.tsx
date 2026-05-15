@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useStudyStore, StudyMode } from "@/stores/study-store";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -62,7 +62,7 @@ function StudyInterface() {
     );
 }
 
-export default function StudyPage() {
+function StudyPageContent() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -135,4 +135,12 @@ export default function StudyPage() {
     }
 
     return <StudyInterface />;
+}
+
+export default function StudyPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center h-screen"><BrandLoader size="lg" /></div>}>
+            <StudyPageContent />
+        </Suspense>
+    );
 }
