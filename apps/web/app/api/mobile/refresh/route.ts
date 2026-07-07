@@ -3,14 +3,15 @@ import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 import { SignJWT } from 'jose';
 import prisma from '@/lib/prisma';
 
-const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+const JWT_EXPIRY_DAYS = 1;
 
-if (!secret && process.env.NODE_ENV === 'production') {
-  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+  }
+  return new TextEncoder().encode(secret || 'development_fallback_secret');
 }
-
-const JWT_EXPIRY_DAYS = 1; 
-const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
   try {
@@ -54,8 +55,8 @@ export async function POST(req: Request) {
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`) // 1 day expiration for security
-      .sign(JWT_SECRET);
+      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
+      .sign(getJwtSecret());
 
     return NextResponse.json({
       accessToken,

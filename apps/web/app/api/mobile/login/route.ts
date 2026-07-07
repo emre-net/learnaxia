@@ -7,14 +7,15 @@ import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+const JWT_EXPIRY_DAYS = 1;
 
-if (!secret && process.env.NODE_ENV === 'production') {
-  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+  }
+  return new TextEncoder().encode(secret || 'development_fallback_secret');
 }
-
-const JWT_EXPIRY_DAYS = 1; 
-const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
 
 export async function POST(req: Request) {
   try {
@@ -58,14 +59,21 @@ export async function POST(req: Request) {
         }, { status: 429 });
     }
 
-    console.log(`[Mobile Login] Attempt for: ${email} from ${ip}`);
-
     const user = await prisma.user.findUnique({
       where: { email },
+      select: { id: true, email: true, name: true, image: true, password: true, role: true, emailVerified: true, deletedAt: true }
     });
 
-    if (!user || !user.password) {
+    if (!user || !user.password || user.deletedAt) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // S7: E-posta doğrulama kontrolü
+    if (!user.emailVerified) {
+      return NextResponse.json({
+        message: 'E-posta adresiniz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.',
+        code: 'EMAIL_NOT_VERIFIED'
+      }, { status: 403 });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
@@ -82,8 +90,8 @@ export async function POST(req: Request) {
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`) // Shorter expiration for security
-      .sign(JWT_SECRET);
+      .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
+      .sign(getJwtSecret());
 
     // Provide a SECURE refresh token mechanism
     const refreshToken = await MobileRefreshService.generate(user.id);
@@ -100,6 +108,6 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('Mobile Login Error:', error);
-    return NextResponse.json({ message: 'Internal server error', detail: error?.message || String(error) }, { status: 500 });
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

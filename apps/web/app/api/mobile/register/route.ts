@@ -7,14 +7,15 @@ import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
 
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
-
-if (!secret && process.env.NODE_ENV === 'production') {
-  throw new Error('MOBILE_JWT_SECRET is missing in production environment');
-}
-
 const JWT_EXPIRY_DAYS = 1;
-const JWT_SECRET = new TextEncoder().encode(secret || 'development_fallback_secret');
+
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('MOBILE_JWT_SECRET is missing in production environment');
+  }
+  return new TextEncoder().encode(secret || 'development_fallback_secret');
+}
 
 export async function POST(req: Request) {
   try {
@@ -65,6 +66,10 @@ export async function POST(req: Request) {
         name,
         email,
         password: hashedPassword,
+        // S8: Mobil kayıtta e-posta otomatik doğrulanmış kabul edilir.
+        // Mobil uygulama üzerinden kayıt olan kullanıcılar zaten doğrudan
+        // kendi cihazlarından kayıt yaptığından ek bir e-posta adımı gerekmez.
+        emailVerified: new Date(),
       },
     });
 
@@ -77,7 +82,7 @@ export async function POST(req: Request) {
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
-      .sign(JWT_SECRET);
+      .sign(getJwtSecret());
 
     // Use secure refresh token with rotation & revocation support
     const refreshToken = await MobileRefreshService.generate(user.id);
