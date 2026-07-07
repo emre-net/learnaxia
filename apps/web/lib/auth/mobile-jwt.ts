@@ -1,12 +1,14 @@
 import { jwtVerify } from 'jose';
 
-const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
-
-if (!secret && process.env.NODE_ENV === 'production') {
-  throw new Error('MOBILE_JWT_SECRET or AUTH_SECRET must be set in production');
+// Secret validation is deferred to runtime (not module-load time)
+// so Next.js can safely import this module during build without throwing.
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('MOBILE_JWT_SECRET or AUTH_SECRET must be set in production');
+  }
+  return new TextEncoder().encode(secret || 'fallback_secret_for_development');
 }
-
-const JWT_SECRET = new TextEncoder().encode(secret || 'fallback_secret_for_development');
 
 export async function getMobileUser(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -16,7 +18,7 @@ export async function getMobileUser(req: Request) {
 
   const token = authHeader.split(' ')[1];
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as { id: string; email: string; name: string; role?: string };
   } catch (error) {
     return null;
@@ -29,7 +31,7 @@ export function extractBearerToken(header: string | null): string | null {
 }
 
 export async function verifyMobileAccessToken(token: string) {
-  const { payload } = await jwtVerify(token, JWT_SECRET);
+  const { payload } = await jwtVerify(token, getJwtSecret());
   return {
     userId: payload.id as string,
     email: payload.email as string,
