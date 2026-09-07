@@ -4,8 +4,7 @@ import Animated, {
     useSharedValue, 
     useAnimatedStyle, 
     withTiming, 
-    withSequence, 
-    withSpring, 
+    withSpring,
     runOnJS,
     Easing
 } from 'react-native-reanimated';
@@ -17,51 +16,41 @@ interface AnimatedSplashProps {
 }
 
 export function AnimatedSplash({ onComplete }: AnimatedSplashProps) {
-    const scale = useSharedValue(0.8);
+    const scale = useSharedValue(0.85);
     const opacity = useSharedValue(0);
     const textOpacity = useSharedValue(0);
-    const textTranslateY = useSharedValue(15);
+    const textTranslateY = useSharedValue(10);
     const containerOpacity = useSharedValue(1);
 
     useEffect(() => {
-        const runAnimation = async () => {
-            // Native splash ekranını hemen gizle, kontrolü React Native'e al
-            await SplashScreen.hideAsync().catch(() => {});
+        // Hide native splash screen once AnimatedSplash mounts
+        SplashScreen.hideAsync().catch(() => {});
 
-            // 1. Faz: Giriş (Fade In & Scale Up)
-            opacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.ease) });
-            scale.value = withSpring(1, { damping: 12, stiffness: 90 });
-            
-            // Marka metni biraz gecikmeli gelsin
-            setTimeout(() => {
-                textOpacity.value = withTiming(1, { duration: 600 });
-                textTranslateY.value = withSpring(0, { damping: 15 });
-            }, 300);
+        // 1. Entrance: Fade in logo with spring (300ms)
+        opacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) });
+        scale.value = withSpring(1, { damping: 14, stiffness: 120 });
 
-            // 2. Faz: Bekleme ve Kalp Atışı (Pulse)
-            setTimeout(() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                scale.value = withSequence(
-                    withTiming(1.05, { duration: 150, easing: Easing.inOut(Easing.ease) }),
-                    withTiming(1, { duration: 200, easing: Easing.inOut(Easing.ease) })
-                );
-            }, 1200);
+        // Brand text entrance (150ms delay)
+        const t1 = setTimeout(() => {
+            textOpacity.value = withTiming(1, { duration: 350 });
+            textTranslateY.value = withSpring(0, { damping: 15 });
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        }, 150);
 
-            // 3. Faz: Çıkış (Zoom Out & Fade Out)
-            setTimeout(() => {
-                scale.value = withTiming(10, { duration: 600, easing: Easing.in(Easing.exp) });
-                opacity.value = withTiming(0, { duration: 400 });
-                textOpacity.value = withTiming(0, { duration: 200 });
-                containerOpacity.value = withTiming(0, { duration: 500 }, (finished) => {
-                    if (finished) {
-                        runOnJS(onComplete)();
-                    }
-                });
-            }, 2200);
+        // 2. Exit: Smooth fade out after 1100ms
+        const t2 = setTimeout(() => {
+            containerOpacity.value = withTiming(0, { duration: 350, easing: Easing.inOut(Easing.ease) }, (finished) => {
+                if (finished) {
+                    runOnJS(onComplete)();
+                }
+            });
+        }, 1100);
+
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
         };
-
-        runAnimation();
-    }, []);
+    }, [onComplete]);
 
     const imageStyle = useAnimatedStyle(() => ({
         opacity: opacity.value,
@@ -80,20 +69,16 @@ export function AnimatedSplash({ onComplete }: AnimatedSplashProps) {
     return (
         <Animated.View style={[styles.container, containerStyle]}>
             <View style={styles.centerContent}>
-                
-                {/* Orijinal Logo */}
-                <Animated.Image 
+                <Animated.Image
                     source={require('../../assets/images/logo.png')}
                     style={[styles.logo, imageStyle]}
                     resizeMode="contain"
                 />
 
-                {/* Marka Metni */}
                 <Animated.View style={[styles.textWrapper, textStyle]}>
                     <Text style={styles.brandText}>LEARNAXIA</Text>
                     <Text style={styles.tagline}>Learn Smart. Learn Fast.</Text>
                 </Animated.View>
-
             </View>
         </Animated.View>
     );
@@ -102,7 +87,7 @@ export function AnimatedSplash({ onComplete }: AnimatedSplashProps) {
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#000000', // Pure Black (App bg ile aynı)
+        backgroundColor: '#050A14', // Exact app dark theme background
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999,
@@ -111,26 +96,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     logo: {
-        width: 180,
-        height: 180,
-        marginBottom: 24,
-        borderRadius: 40, // Eğer Logonun köşeleri kareyse biraz yuvarlatmak iyi durabilir
+        width: 140,
+        height: 140,
+        marginBottom: 20,
+        borderRadius: 28,
     },
     textWrapper: {
         alignItems: 'center',
     },
     brandText: {
         color: '#FFFFFF',
-        fontSize: 34,
+        fontSize: 30,
         fontWeight: '800',
         letterSpacing: 2,
     },
     tagline: {
-        color: '#2563EB',
+        color: '#3B82F6',
         fontSize: 12,
         fontWeight: '700',
         letterSpacing: 2,
-        marginTop: 8,
+        marginTop: 6,
         textTransform: 'uppercase'
     }
 });

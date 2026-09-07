@@ -1,4 +1,5 @@
 import 'react-native-reanimated';
+import React, { useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,6 +7,11 @@ import { LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '../context/AuthContext';
+import { AnimatedSplash } from '@/components/ui/animated-splash';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Prevent native splash screen from hiding before JS components mount
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Suppress non-critical API error banners from showing in the UI
 LogBox.ignoreLogs([
@@ -18,25 +24,19 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
-
-import React, { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
-import { AnimatedSplash } from '@/components/ui/animated-splash';
-import * as SplashScreen from 'expo-splash-screen';
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#000000' }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#050A14' }}>
       <AuthProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack
             screenOptions={{
               headerShown: false,
               animation: 'fade',
-              contentStyle: { backgroundColor: '#000000' } // Pure Black
+              contentStyle: { backgroundColor: '#050A14' }
             }}
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -53,10 +53,9 @@ export default function RootLayout() {
             <AnimatedSplash onComplete={() => setIsSplashComplete(true)} />
           )}
 
-          <StatusBar style="light" backgroundColor="#000000" />
+          <StatusBar style="light" backgroundColor="#050A14" />
         </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );
 }
-
