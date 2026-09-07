@@ -10,7 +10,7 @@
     "build": "next build",
     "db:push": "prisma db push",
     "db:migrate:dev": "prisma migrate dev",
-    "start": "npx prisma migrate deploy && next start -H 0.0.0.0",
+    "start": "npx prisma migrate deploy && next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "eslint",
     "postinstall": "npx prisma@5.22.0 generate",
     "test:e2e": "npx playwright test",
