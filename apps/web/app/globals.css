@@ -144,7 +144,7 @@
   }
 
   /* ── Micro-interactions ───────────────────────────────────────────────────────── */
-  /* Tüm buton/kartlarda kullan — tıklanınca küçük basılı efekti */
+  /* Tüm buton/kartlarda kullan — tıklanınca küçül basılı efekti */
   .btn-press {
     @apply transition-transform duration-100 active:scale-[0.97] active:brightness-90;
   }
@@ -188,3 +188,4 @@ body {
   @apply bg-background text-foreground selection:bg-primary/20;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
+
