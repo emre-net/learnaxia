@@ -1,0 +1,114 @@
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import SessionProvider from "@/components/providers/session-provider"
+
+import { ReactQueryProvider } from "@/components/providers/query-provider"
+import "./globals.css";
+import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
+import { GlobalErrorListener } from "@/components/providers/error-listener";
+import { CookieConsent } from "@/components/shared/cookie-consent";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  preload: true,
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
+};
+
+export const metadata: Metadata = {
+  title: {
+    default: "Learnaxia",
+    template: "%s | Learnaxia",
+  },
+  description: "Öğrenmenin En Akıllı Yolu, Potansiyelini Keşfet. Akıllı öğrenme platformu ile kartlarını oluştur, çalış ve ilerlemeni takip et.",
+  keywords: ["öğrenme", "flashcard", "spaced repetition", "quiz", "eğitim", "AI", "yapay zeka"],
+  authors: [{ name: "Learnaxia" }],
+  creator: "Learnaxia",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://learnaxia.com"),
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    siteName: "Learnaxia",
+    title: "Learnaxia — Akıllı Öğrenme Platformu",
+    description: "AI destekli flashcard ve quiz oluştur, spaced repetition ile öğren.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Learnaxia — Akıllı Öğrenme Platformu",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Learnaxia",
+    description: "AI destekli akıllı öğrenme platformu",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+  },
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  // Import dynamically or normally. Since we need it inside an async function we can just import at top, but we already have auth inside @/auth
+  const { auth } = await import("@/auth");
+  const session = await auth();
+
+  return (
+    <html lang="tr" suppressHydrationWarning>
+      <head>
+        <link rel="dns-prefetch" href="https://accounts.google.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body
+        className={cn(
+          inter.variable,
+          "min-h-screen bg-background font-sans antialiased"
+        )}
+      >
+        <SessionProvider session={session}>
+          <ReactQueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <GlobalErrorListener />
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+              <CookieConsent />
+              <Toaster />
+            </ThemeProvider>
+          </ReactQueryProvider>
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}

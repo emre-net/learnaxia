@@ -1,0 +1,106 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { DailyActivityChart } from "@/components/analytics/daily-activity-chart";
+import { ModulePerformanceList } from "@/components/analytics/module-performance-list";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Clock, TrendingUp } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
+import { useToast } from "@/components/ui/use-toast";
+
+export default function AnalyticsPage() {
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+        const fetchData = async () => {
+            try {
+                const res = await fetch("/api/analytics", { signal: controller.signal });
+                if (!res.ok) throw new Error("Failed to load analytics");
+                const json = await res.json();
+                setData(json);
+            } catch (error: any) {
+                console.error(error);
+                const message = error.name === 'AbortError' ? "Bağlantı zaman aşımına uğradı." : "Analiz verileri yüklenemedi.";
+                toast({ title: "Hata", description: message, variant: "destructive" });
+                setData({ stats: { totalStudyMinutes: 0, modulesStarted: 0 }, dailyActivity: [], moduleStats: [] }); // Fallback empty data
+            } finally {
+                clearTimeout(timeoutId);
+                setLoading(false);
+            }
+        };
+        fetchData();
+        return () => {
+            controller.abort();
+            clearTimeout(timeoutId);
+        };
+    }, [toast]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col h-[70vh] items-center justify-center p-8 gap-4">
+                <BrandLoader size="lg" />
+                <p className="text-sm text-muted-foreground animate-pulse">Veriler hazırlanıyor...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+            <div>
+                <h2 className="text-2xl font-bold tracking-tight">Analitik</h2>
+                <p className="text-muted-foreground text-sm mt-1">Öğrenme ilerlemenin detaylı özeti.</p>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <Card className="glass card-hover border-l-4 border-cyan-500/40">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Çalışma Süresi</CardTitle>
+                        <Clock className="h-4 w-4 text-cyan-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-cyan-400">{data.stats.totalStudyMinutes} dk</div>
+                        <p className="text-xs text-muted-foreground mt-1">Tüm zamanlar toplamı.</p>
+                    </CardContent>
+                </Card>
+                <Card className="glass card-hover border-l-4 border-blue-500/40">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Başlatılan Modüller</CardTitle>
+                        <BookOpen className="h-4 w-4 text-blue-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-blue-400">{data.stats.modulesStarted}</div>
+                        <p className="text-xs text-muted-foreground mt-1">Kütüphanendeki aktif modüller.</p>
+                    </CardContent>
+                </Card>
+                {data.stats.averageAccuracy !== undefined && (
+                    <Card className="glass card-hover border-l-4 border-purple-500/40">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Ortalama Başarı</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-purple-400" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-purple-400">%{data.stats.averageAccuracy}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Genel doğruluk oranın.</p>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+
+            {/* Charts Area */}
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+                <div className="lg:col-span-4">
+                    <DailyActivityChart data={data.dailyActivity} />
+                </div>
+                <div className="lg:col-span-3">
+                    <ModulePerformanceList data={data.moduleStats} />
+                </div>
+            </div>
+        </div>
+    );
+}

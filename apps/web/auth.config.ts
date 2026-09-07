@@ -1,0 +1,61 @@
+import type { NextAuthConfig } from "next-auth"
+import Google from "next-auth/providers/google"
+
+export const authConfig: NextAuthConfig = {
+    pages: {
+        signIn: '/login',
+    },
+    callbacks: {
+        authorized({ auth, request: { nextUrl } }) {
+            const isLoggedIn = !!auth?.user;
+            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+            const isOnAdmin = nextUrl.pathname.startsWith('/dashboard/admin') ||
+                nextUrl.pathname.startsWith('/api/admin') ||
+                nextUrl.pathname.startsWith('/admin');
+
+            if (isOnAdmin) {
+                if (isLoggedIn) {
+                    const userRole = (auth.user as any)?.role;
+                    const userEmail = auth.user?.email;
+
+                    // Priority: ADMIN role or matching the configured ADMIN_EMAIL
+                    const isAdmin = userRole === "ADMIN" || userEmail === process.env.ADMIN_EMAIL;
+
+                    if (isAdmin) return true;
+
+                    return Response.redirect(new URL('/dashboard', nextUrl));
+                }
+                return false;
+            }
+
+            if (isOnDashboard) {
+                if (isLoggedIn) return true;
+                return false;
+            } else if (isLoggedIn) {
+                if (nextUrl.pathname === '/login') {
+                    return Response.redirect(new URL('/dashboard', nextUrl));
+                }
+            }
+            return true;
+        },
+    },
+    // Production stability
+    trustHost: true,
+    // AUTH_SECRET zorunludur. Yoksa production'da crash at — dummy fallback GÜVENLİ DEĞİL.
+    secret: process.env.AUTH_SECRET ?? (() => {
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('[auth] AUTH_SECRET environment variable is not set. Application cannot start.');
+        }
+        return 'development-only-secret-not-for-production';
+    })(),
+    providers: [
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET,
+            // ✅ KASITLI: Aynı e-posta adresiyle farklı OAuth sağlayıcılarından (Google, GitHub vb.)
+            // giriş yapıldığında tek bir hesaba yönlendirilmesini sağlar.
+            // Bu bir güvenlik açığı değil, UX tasarım tercihidir.
+            allowDangerousEmailAccountLinking: true,
+        }),
+    ],
+} satisfies NextAuthConfig;

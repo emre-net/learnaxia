@@ -1,0 +1,396 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Filter, X, BookOpen, Layers } from "lucide-react";
+import { BrandLoader } from "@/components/ui/brand-loader";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CATEGORIES } from "@/lib/constants/categories";
+import { ModuleCard } from "@/components/module/module-card";
+import { CollectionCard } from "@/components/collection/collection-card";
+import { LibraryCard } from "@/components/shared/library-card";
+import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/lib/i18n/i18n";
+import { useSettingsStore } from "@/stores/settings-store";
+import { EmptyState } from "@/components/shared/empty-state";
+import { sanitizeHtml } from "@/lib/sanitize-html";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
+// import { useDebounce } from "@/hooks/use-debounce"; // Removed: Using local implementation
+
+// If useDebounce doesn't exist, I'll inline a simple effect or use local state with delay
+// Let's check if useDebounce exists first. If not, I'll implement simple local debounce logic inside.
+
+function useDebounceValue<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+}
+
+const MODULE_TYPE_IDS = [
+    { id: null, key: 'study.moduleTypes.all' },
+    { id: "FLASHCARD", key: 'study.moduleTypes.flashcard' },
+    { id: "MC", key: 'study.moduleTypes.mc' },
+    { id: "TRUE_FALSE", key: 'study.moduleTypes.true_false' },
+    { id: "GAP", key: 'study.moduleTypes.gap' }
+];
+
+export function DiscoverClient() {
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+    const [selectedModuleType, setSelectedModuleType] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeTab, setActiveTab] = useState("modules"); // 'modules' | 'collections'
+
+    const [limit] = useState(12);
+    const [page, setPage] = useState(0);
+
+    const { t } = useTranslation();
+
+    const debouncedSearch = useDebounceValue(searchQuery, 300);
+
+    const { ref, inView } = useInView();
+
+    // Reset page logic handled by useInfiniteQuery's key
+    const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ['discover', activeTab, selectedCategory, selectedSubCategory, selectedModuleType, debouncedSearch],
+        queryFn: async ({ pageParam = 0 }) => {
+            const params = new URLSearchParams();
+            if (activeTab === "modules") params.set("type", "MODULE");
+            else if (activeTab === "collections") params.set("type", "COLLECTION");
+            else params.set("type", "NOTE");
+
+            if (selectedCategory) params.set("category", selectedCategory);
+            if (selectedSubCategory) params.set("subCategory", selectedSubCategory);
+            if (selectedModuleType) params.set("moduleType", selectedModuleType);
+            if (debouncedSearch) params.set("search", debouncedSearch);
+            params.set("limit", limit.toString());
+            params.set("offset", (pageParam * limit).toString());
+
+            const res = await fetch(`/api/discover?${params.toString()}`);
+            if (!res.ok) throw new Error("Failed to fetch");
+            return res.json();
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            const currentTotalItems = allPages.reduce((acc, page) => acc + page.items.length, 0);
+            return currentTotalItems < lastPage.total ? allPages.length : undefined;
+        },
+        staleTime: 30000
+    });
+
+    useEffect(() => {
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const items = data?.pages.flatMap((page) => page.items) || [];
+    const total = data?.pages[0]?.total || 0;
+
+    // Clear subcategory when category changes
+    const handleCategorySelect = (cat: string) => {
+        if (selectedCategory === cat) {
+            setSelectedCategory(null);
+            setSelectedSubCategory(null);
+        } else {
+            setSelectedCategory(cat);
+            setSelectedSubCategory(null);
+        }
+    };
+
+    const renderFilters = () => (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div className="font-bold flex items-center gap-2 text-lg">
+                    <Filter className="h-5 w-5 text-primary" /> {t('common.filters')}
+                </div>
+                {(selectedCategory || searchQuery || selectedModuleType) && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+                        onClick={() => {
+                            setSelectedCategory(null);
+                            setSelectedSubCategory(null);
+                            setSelectedModuleType(null);
+                            setSearchQuery("");
+                        }}
+                    >
+                        <X className="h-3 w-3 mr-1" /> {t('common.reset')}
+                    </Button>
+                )}
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder={t('discover.searchPlaceholder')}
+                    className="pl-10 bg-muted/30 border-none focus-visible:ring-1"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            <Separator className="opacity-50" />
+
+            {activeTab === "modules" && (
+                <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('study.moduleTypes.title')}</h3>
+                    <div className="grid grid-cols-1 gap-1">
+                        {MODULE_TYPE_IDS.map((type) => (
+                            <Button
+                                key={type.id || 'all'}
+                                variant={selectedModuleType === type.id ? "secondary" : "ghost"}
+                                size="sm"
+                                className={`w-full justify-start font-medium transition-all ${selectedModuleType === type.id ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`}
+                                onClick={() => setSelectedModuleType(type.id)}
+                            >
+                                {t(type.key as any)}
+                            </Button>
+                        ))}
+                    </div>
+                    <Separator className="opacity-50 mt-4" />
+                </div>
+            )}
+
+            <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('library.tabs.collections')}</h3>
+                <ScrollArea className="h-[calc(100vh-350px)] pr-4">
+                    <div className="space-y-1">
+                        {Object.keys(CATEGORIES).map(cat => (
+                            <div key={cat} className="space-y-1">
+                                <Button
+                                    variant={selectedCategory === cat ? "secondary" : "ghost"}
+                                    size="sm"
+                                    className={`w-full justify-start font-medium h-9 ${selectedCategory === cat ? 'bg-primary/10 text-primary' : ''}`}
+                                    onClick={() => handleCategorySelect(cat)}
+                                >
+                                    {cat}
+                                </Button>
+
+                                {selectedCategory === cat && (
+                                    <div className="ml-3 border-l-2 border-primary/20 pl-3 py-1 space-y-1 animate-in slide-in-from-left-2 duration-200">
+                                        <Button
+                                            variant={selectedSubCategory === null ? "secondary" : "ghost"}
+                                            size="sm"
+                                            className="w-full justify-start text-xs h-8"
+                                            onClick={() => setSelectedSubCategory(null)}
+                                        >
+                                            {t('study.moduleTypes.all')}
+                                        </Button>
+                                        {CATEGORIES[cat].map(sub => (
+                                            <Button
+                                                key={sub}
+                                                variant={selectedSubCategory === sub ? "secondary" : "ghost"}
+                                                size="sm"
+                                                className={`w-full justify-start text-xs h-8 ${selectedSubCategory === sub ? 'text-primary font-bold' : ''}`}
+                                                onClick={() => setSelectedSubCategory(sub === selectedSubCategory ? null : sub)}
+                                            >
+                                                {sub}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col md:flex-row h-full gap-8">
+            {/* Sidebar (Desktop) */}
+            <aside className="hidden md:block w-72 flex-shrink-0 space-y-6 border-r pr-8 h-fit sticky top-0">
+                {renderFilters()}
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 min-w-0">
+                <div className="flex flex-col gap-8">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('discover.title')}</h1>
+                                <p className="text-muted-foreground mt-1 text-lg">
+                                    {selectedCategory
+                                        ? `${selectedCategory} ${selectedSubCategory ? `> ${selectedSubCategory}` : ''}`
+                                        : t('discover.subtitle')}
+                                </p>
+                            </div>
+
+                            {/* Mobile Filters Trigger */}
+                            <div className="md:hidden">
+                                <Sheet>
+                                    <SheetTrigger asChild>
+                                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-2">
+                                            <Filter className="h-5 w-5" />
+                                        </Button>
+                                    </SheetTrigger>
+                                    <SheetContent side="left" className="w-[300px] sm:w-[350px] p-6">
+                                        <SheetHeader className="px-0 mb-6">
+                                            <SheetTitle>İçerikleri Filtrele</SheetTitle>
+                                        </SheetHeader>
+                                        {renderFilters()}
+                                    </SheetContent>
+                                </Sheet>
+                            </div>
+                        </div>
+
+                        {searchQuery && (
+                            <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-lg px-4 py-2 w-fit">
+                                <span className="text-sm font-medium">{t('common.searchResults', { query: searchQuery })}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 hover:bg-primary/10"
+                                    onClick={() => setSearchQuery("")}
+                                >
+                                    <X className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                            <TabsList className="inline-flex h-auto w-full sm:w-auto items-center justify-start sm:justify-center rounded-xl bg-muted/50 p-1 text-muted-foreground overflow-x-auto whitespace-nowrap scrollbar-hide">
+                                <TabsTrigger value="modules" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.modules')}</TabsTrigger>
+                                <TabsTrigger value="collections" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.collections')}</TabsTrigger>
+                                <TabsTrigger value="notes" className="rounded-lg px-4 sm:px-8 py-2 text-sm font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">{t('library.tabs.notes')}</TabsTrigger>
+                            </TabsList>
+
+                            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap">
+                                <span className="text-foreground font-bold">{t('discover.totalResults', { count: total })}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8 pb-10">
+                            {isLoading ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                                    {[1, 2, 3, 4, 5, 6].map(i => (
+                                        <div key={i} className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl border border-dashed" />
+                                    ))}
+                                </div>
+                            ) : items.length === 0 ? (
+                                <EmptyState
+                                    icon={searchQuery ? Search : activeTab === 'collections' ? Layers : BookOpen}
+                                    iconColor={searchQuery ? "text-purple-400" : activeTab === 'collections' ? "text-cyan-400" : "text-blue-400"}
+                                    iconBg={searchQuery ? "bg-purple-500/10" : activeTab === 'collections' ? "bg-cyan-500/10" : "bg-blue-500/10"}
+                                    title={
+                                        searchQuery
+                                            ? "Sonuç bulunamadı"
+                                            : selectedCategory
+                                            ? `${selectedCategory} kategorisinde içerik yok`
+                                            : "Henüz içerik yok"
+                                    }
+                                    description={
+                                        searchQuery
+                                            ? `"${searchQuery}" için eşleşen sonuç bulunamadı. Farklı anahtar kelimeler dene veya filtreleri kaldır.`
+                                            : "Topluluk henüz bu kategoride içerik oluşturmamış. İlk sen oluştur!"
+                                    }
+                                    primaryAction={{ label: "Modül Oluştur", href: "/dashboard/create" }}
+                                    secondaryAction={searchQuery || selectedCategory ? {
+                                        label: "Filtreleri Temizle",
+                                        href: "/dashboard/discover"
+                                    } : undefined}
+                                />
+                            ) : (
+                                <div className="space-y-12">
+                                    <TabsContent value="modules" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
+                                                <ModuleCard key={item.id} module={item} showOwner={true} />
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="collections" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
+                                                <CollectionCard
+                                                    key={item.id}
+                                                    item={{
+                                                        role: 'VIEWER',
+                                                        lastInteractionAt: item.createdAt,
+                                                        collection: item
+                                                    }}
+                                                    viewMode="grid"
+                                                />
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="notes" className="mt-0 w-full outline-none">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            {items.map((item: any) => (
+                                                <LibraryCard
+                                                    key={item.id}
+                                                    typeIcon={
+                                                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                                            <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
+                                                        </div>
+                                                    }
+                                                    visibility={item.visibility || "PUBLIC"}
+                                                    title={item.title || "İsimsiz Not"}
+                                                    description={
+                                                        <div className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 min-h-[40px] leading-relaxed break-words"
+                                                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.content) }}
+                                                        />
+                                                    }
+                                                    owner={item.owner}
+                                                    viewMode="grid"
+                                                    metadata={[
+                                                        new Date(item.createdAt).toLocaleDateString(),
+                                                        item.module ? `Modül: ${item.module.title}` : "Bağımsız Not"
+                                                    ]}
+                                                    shareType="note"
+                                                    shareId={item.id}
+                                                    shareTitle={item.title}
+                                                />
+                                            ))}
+                                        </div>
+                                    </TabsContent>
+                                </div>
+                            )}
+
+                            {hasNextPage && (
+                                <div ref={ref} className="flex justify-center py-8">
+                                    {isFetchingNextPage ? (
+                                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                            <BrandLoader size="sm" />
+                                            {t('library.modulesTab.loadingMore')}
+                                        </div>
+                                    ) : (
+                                        <div className="h-8"></div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </Tabs>
+                </div>
+            </main>
+        </div>
+    );
+}
