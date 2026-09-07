@@ -188,3 +188,4 @@ body {
   @apply bg-background text-foreground selection:bg-primary/20;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
+
