@@ -3,15 +3,13 @@ import { View, Text, TouchableOpacity, ScrollView, StatusBar, StyleSheet } from 
 import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInRight, Layout, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
 
-/** Journey slide tipi */
 interface JourneySlide {
     title: string;
     content: string;
@@ -20,14 +18,12 @@ interface JourneySlide {
     } | null;
 }
 
-/** Journey veri tipi */
 interface Journey {
     id: string;
     title: string;
     slides: JourneySlide[];
 }
 
-/** Snapchat-style tek segment pill — animasyonlu dolum */
 function StorySegment({ state, flex }: { state: 'done' | 'active' | 'empty'; flex: number }) {
     const fillWidth = useSharedValue(state === 'done' ? 100 : 0);
 
@@ -76,20 +72,13 @@ export default function JourneyPlayerScreen() {
         if (id) fetchJourney();
     }, [id]);
 
-    /**
-     * Slide ilerletme — progress'i backend'e kaydeder.
-     * Kaydedme başarısız olsa bile kullanıcı deneyimini bozmaz (fire-and-forget).
-     */
     const nextSlide = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         if (!journey) return;
 
-        // Progress'i backend'e kaydet (fire-and-forget, hata kullanıcıyı etkilemez)
         api.post(`/mobile/journeys/${id}/progress`, {
             slideIndex: currentIndex,
-        }).catch(() => {
-            // Sessizce geç — offline veya network sorunu
-        });
+        }).catch(() => {});
 
         if (currentIndex < journey.slides.length - 1) {
             setCurrentIndex(prev => prev + 1);
@@ -117,10 +106,10 @@ export default function JourneyPlayerScreen() {
         return (
             <Screen style={styles.centered}>
                 <View style={styles.errorIconWrapper}>
-                    <MaterialIcons
-                        name={fetchError ? 'wifi-off' : 'playlist-remove'}
-                        size={40}
-                        color="#475569"
+                    <Ionicons
+                        name={fetchError ? 'wifi-outline' : 'document-text-outline'}
+                        size={32}
+                        color="#64748B"
                     />
                 </View>
                 <Text style={styles.errorTitle}>
@@ -132,7 +121,7 @@ export default function JourneyPlayerScreen() {
                         : 'Bu yolculuğa henüz içerik eklenmemiş'}
                 </Text>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <MaterialIcons name="arrow-back" size={18} color="white" />
+                    <Ionicons name="arrow-back" size={18} color="#F8FAFC" />
                     <Text style={styles.backButtonText}>Geri Dön</Text>
                 </TouchableOpacity>
             </Screen>
@@ -145,7 +134,7 @@ export default function JourneyPlayerScreen() {
         <Screen style={styles.screen}>
             <StatusBar barStyle="light-content" />
 
-            {/* ─── Snapchat-style Segmentli Progress Bar ─────────────────────────── */}
+            {/* Snapchat-style Segmentli Progress Bar */}
             <View style={styles.storyProgressRow}>
                 {journey.slides.map((_, i) => (
                     <StorySegment
@@ -165,7 +154,7 @@ export default function JourneyPlayerScreen() {
                     }}
                     style={styles.iconBtn}
                 >
-                    <MaterialIcons name="close" size={24} color="white" />
+                    <Ionicons name="close" size={24} color="#F8FAFC" />
                 </TouchableOpacity>
 
                 <Text style={styles.journeyTitle} numberOfLines={1}>{journey.title}</Text>
@@ -188,14 +177,14 @@ export default function JourneyPlayerScreen() {
                         <Text style={styles.slideContent}>{currentSlide.content}</Text>
                     </View>
 
-                    {/* AI Sorusu — peekingQuestion varsa göster */}
+                    {/* AI Sorusu */}
                     {currentSlide.peekingQuestion && (
                         <TouchableOpacity
                             activeOpacity={0.9}
                             style={styles.peekingCard}
                         >
                             <View style={styles.peekingHeader}>
-                                <MaterialIcons name="auto-awesome" size={20} color="#00D2FF" />
+                                <Ionicons name="sparkles" size={16} color="#F8FAFC" />
                                 <Text style={styles.peekingBadge}>AI SORUSU</Text>
                             </View>
                             <Text style={styles.peekingQuestion}>
@@ -214,7 +203,7 @@ export default function JourneyPlayerScreen() {
                     disabled={currentIndex === 0}
                     style={[styles.navBtn, currentIndex === 0 && { opacity: 0.25 }]}
                 >
-                    <MaterialIcons name="arrow-back" size={28} color="white" />
+                    <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -225,10 +214,9 @@ export default function JourneyPlayerScreen() {
                     <Text style={styles.nextBtnText}>
                         {currentIndex === journey.slides.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
                     </Text>
-                    <MaterialIcons name="arrow-forward" size={24} color="white" />
+                    <Ionicons name="arrow-forward" size={18} color="#000000" />
                 </TouchableOpacity>
 
-                {/* Simetri için placeholder */}
                 <View style={[styles.navBtn, { opacity: 0 }]} />
             </View>
         </Screen>
@@ -238,16 +226,15 @@ export default function JourneyPlayerScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#050A14',
+        backgroundColor: '#000000',
     },
     centered: {
         flex: 1,
-        backgroundColor: '#050A14',
+        backgroundColor: '#000000',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,
     },
-    // Header
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -259,76 +246,74 @@ const styles = StyleSheet.create({
     iconBtn: {
         width: 44,
         height: 44,
-        borderRadius: 14,
-        backgroundColor: '#090F1D',
+        borderRadius: 99,
+        backgroundColor: '#0A0A0A',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#111111',
     },
     journeyTitle: {
         flex: 1,
-        color: 'rgba(255,255,255,0.6)',
+        color: '#64748B',
         fontSize: 13,
         fontWeight: '700',
         textAlign: 'center',
         letterSpacing: 0.5,
         paddingHorizontal: 8,
+        textTransform: 'uppercase',
     },
     progressText: {
-        color: 'rgba(255,255,255,0.35)',
-        fontSize: 11,
+        color: '#64748B',
+        fontSize: 12,
         fontWeight: '700',
         minWidth: 32,
         textAlign: 'right',
     },
-    // Snapchat-style story progress
     storyProgressRow: {
         flexDirection: 'row',
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingTop: 16,
         gap: 4,
     },
     storySegment: {
-        height: 3,
+        height: 4,
         borderRadius: 2,
-        backgroundColor: 'rgba(255,255,255,0.15)',
+        backgroundColor: '#1E293B',
         overflow: 'hidden',
     },
     storySegmentFill: {
         height: '100%',
-        backgroundColor: '#00D2FF',
+        backgroundColor: '#F8FAFC',
         borderRadius: 2,
     },
-    // Slide content
     slideTitle: {
         color: '#F8FAFC',
         fontSize: 28,
-        fontWeight: '900',
+        fontWeight: '700',
         marginBottom: 24,
         letterSpacing: -0.5,
         lineHeight: 36,
     },
     slideContentCard: {
-        backgroundColor: 'rgba(15, 23, 42, 0.5)',
+        backgroundColor: '#0A0A0A',
         borderWidth: 1,
-        borderColor: '#182234',
-        borderRadius: 28,
+        borderColor: '#111111',
+        borderRadius: 24,
         padding: 24,
         marginBottom: 24,
     },
     slideContent: {
-        color: 'rgba(255,255,255,0.8)',
+        color: '#F8FAFC',
         fontSize: 17,
-        lineHeight: 30,
-        fontWeight: '500',
+        lineHeight: 28,
+        fontWeight: '400',
     },
-    // Peeking question
     peekingCard: {
-        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+        backgroundColor: '#0A0A0A',
         borderWidth: 1,
-        borderColor: 'rgba(59, 130, 246, 0.15)',
-        borderRadius: 28,
+        borderColor: '#111111',
+        borderRadius: 24,
         padding: 24,
     },
     peekingHeader: {
@@ -337,78 +322,71 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     peekingBadge: {
-        color: '#60A5FA',
-        fontSize: 10,
-        fontWeight: '900',
+        color: '#F8FAFC',
+        fontSize: 11,
+        fontWeight: '700',
         textTransform: 'uppercase',
-        letterSpacing: 3,
+        letterSpacing: 2,
         marginLeft: 8,
     },
     peekingQuestion: {
         color: '#F8FAFC',
         fontSize: 18,
-        fontWeight: '700',
+        fontWeight: '600',
         marginBottom: 16,
         lineHeight: 26,
     },
     peekingHint: {
-        color: 'rgba(255,255,255,0.3)',
+        color: '#64748B',
         fontSize: 12,
-        fontWeight: '700',
+        fontWeight: '600',
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
-    // Controls
     controls: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
-        paddingBottom: 40,
+        paddingBottom: 48,
         paddingTop: 24,
     },
     navBtn: {
         width: 56,
         height: 56,
-        borderRadius: 18,
-        backgroundColor: '#090F1D',
+        borderRadius: 99,
+        backgroundColor: '#0A0A0A',
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#111111',
         alignItems: 'center',
         justifyContent: 'center',
     },
     nextBtn: {
-        backgroundColor: '#3B82F6',
-        paddingHorizontal: 28,
+        backgroundColor: '#F8FAFC',
+        paddingHorizontal: 32,
         height: 56,
-        borderRadius: 18,
+        borderRadius: 99,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 8,
-        shadowColor: '#3B82F6',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
     },
     nextBtnText: {
-        color: 'white',
-        fontWeight: '900',
+        color: '#000000',
+        fontWeight: '700',
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginRight: 8,
     },
-    // Hata ekranı
     errorIconWrapper: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#090F1D',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#0A0A0A',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#111111',
     },
     errorTitle: {
         color: '#F8FAFC',
@@ -426,16 +404,16 @@ const styles = StyleSheet.create({
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#090F1D',
+        backgroundColor: '#0A0A0A',
         paddingHorizontal: 24,
-        paddingVertical: 14,
-        borderRadius: 16,
+        paddingVertical: 16,
+        borderRadius: 99,
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#111111',
     },
     backButtonText: {
         color: '#F8FAFC',
-        fontWeight: '700',
+        fontWeight: '600',
         fontSize: 15,
         marginLeft: 8,
     },

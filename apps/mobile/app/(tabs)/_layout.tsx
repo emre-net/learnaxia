@@ -1,9 +1,9 @@
 import { Tabs, useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
-import { Platform, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import React, { useEffect } from 'react';
+import { Platform, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,37 +12,24 @@ import { useAuth } from '@/context/AuthContext';
 export default function TabLayout() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  // Sürekli nefes alan glow efekti
-  const glowAnim = useRef(new Animated.Value(0.4)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  const scaleAnim = useSharedValue(1);
 
   useEffect(() => {
-    // Glow pulse — 2.5sn
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowAnim, { toValue: 1, duration: 1250, useNativeDriver: true }),
-        Animated.timing(glowAnim, { toValue: 0.4, duration: 1250, useNativeDriver: true }),
-      ])
-    ).start();
-    // İkon rotasyonu — 4sn
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(rotateAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(rotateAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
-        Animated.delay(3200),
-      ])
-    ).start();
-  }, [glowAnim, rotateAnim]);
+      scaleAnim.value = withRepeat(
+          withTiming(1.08, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          -1,
+          true
+      );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scaleAnim.value }],
+  }));
 
   const handleCreatePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Animated.sequence([
-      Animated.spring(scaleAnim, { toValue: 0.88, useNativeDriver: true, speed: 50 }),
-      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 30 }),
-    ]).start();
-    // Small delay so animation is visible before push
-    setTimeout(() => router.push('/create'), 80);
+    router.push('/create');
   };
 
   useEffect(() => {
@@ -54,16 +41,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#3B82F6', // Primary Blue
-        tabBarInactiveTintColor: '#64748B', // Muted foreground
+        tabBarActiveTintColor: '#F8FAFC', // Saf Beyaz
+        tabBarInactiveTintColor: '#475569', // Koyu Gri (Slate 600)
         headerShown: false,
-        tabBarShowLabel: false, // Web doesn't have text labels
+        tabBarShowLabel: false,
         tabBarButton: HapticTab,
         tabBarBackground: () => (
           Platform.OS === 'ios' ? (
-            <BlurView intensity={80} tint="dark" style={[StyleSheet.absoluteFill, { borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' }]} />
+            <BlurView intensity={90} tint="dark" style={StyleSheet.absoluteFill} />
           ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(9, 15, 29, 0.98)', borderTopLeftRadius: 32, borderTopRightRadius: 32, borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0A0A0A', borderTopWidth: 1, borderTopColor: '#1E293B' }]} />
           )
         ),
         tabBarStyle: {
@@ -73,13 +60,11 @@ export default function TabLayout() {
           right: 0,
           backgroundColor: 'transparent',
           elevation: 0,
-          borderTopWidth: 0,
-          height: Platform.OS === 'ios' ? 88 : 72,
+          borderTopWidth: Platform.OS === 'ios' ? 1 : 0,
+          borderTopColor: '#1E293B',
+          height: Platform.OS === 'ios' ? 88 : 64,
           paddingBottom: Platform.OS === 'ios' ? 24 : 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -10 },
-          shadowOpacity: 0.2,
-          shadowRadius: 20,
+          paddingTop: 8,
         },
       }}>
       
@@ -100,7 +85,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.iconWrapper}>
-              <Ionicons name={focused ? 'book' : 'book-outline'} size={24} color={color} />
+              <Ionicons name={focused ? 'library' : 'library-outline'} size={24} color={color} />
               {focused && <View style={styles.activeDot} />}
             </View>
           ),
@@ -111,33 +96,14 @@ export default function TabLayout() {
         name="create_placeholder"
         options={{
           tabBarIcon: () => (
-            <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }] }]}>
-              {/* Pulse glow ring */}
-              <Animated.View style={[
-                styles.glowRing,
-                { opacity: glowAnim }
-              ]} />
-              {/* Gradient arkaplan */}
-              <LinearGradient
-                colors={['#3B82F6', '#7C3AED']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-              <Animated.View style={{
-                transform: [{ rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '15deg']
-                }) }]
-              }}>
-                <Ionicons name="sparkles" size={24} color="white" />
-              </Animated.View>
+            <Animated.View style={[styles.floatingButton, animatedStyle]}>
+              <Ionicons name="add" size={28} color="#000000" />
             </Animated.View>
           ),
           tabBarButton: (props) => (
             <TouchableOpacity
-              activeOpacity={1}
-              style={[props.style, { transform: [{ translateY: -16 }] }]}
+              activeOpacity={0.8}
+              style={[props.style, { transform: [{ translateY: -12 }] }]}
               onPress={handleCreatePress}
             >
               {props.children}
@@ -151,7 +117,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.iconWrapper}>
-              <Ionicons name={focused ? 'compass' : 'compass-outline'} size={26} color={color} />
+              <Ionicons name={focused ? 'search' : 'search-outline'} size={24} color={color} />
               {focused && <View style={styles.activeDot} />}
             </View>
           ),
@@ -183,35 +149,23 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     position: 'absolute',
-    bottom: -4,
+    bottom: -8,
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#3B82F6', // Primary Blue
+    backgroundColor: '#F8FAFC',
   },
   floatingButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#3B82F6',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#F8FAFC', // Beyaz minimal buton
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 4,
-    borderColor: '#050A14',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
-    overflow: 'hidden',
-  },
-  glowRing: {
-    position: 'absolute',
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 2,
-    borderColor: '#7C3AED',
-    zIndex: -1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });

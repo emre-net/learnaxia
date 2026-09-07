@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  RefreshControl, TextInput, StyleSheet
+  RefreshControl, TextInput, StyleSheet, ScrollView
 } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -36,7 +36,6 @@ export default function ExploreScreen() {
   const [total, setTotal] = useState(0);
   const [fetchError, setFetchError] = useState(false);
 
-  // 500ms debounce — her harf girişinde API çağrısı yapılmaz
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   const fetchDiscover = useCallback(async () => {
@@ -73,38 +72,21 @@ export default function ExploreScreen() {
     fetchDiscover();
   }, [fetchDiscover]);
 
-  const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'MODULE', label: t('library.tabs.modules', language), icon: 'menu-book' },
-    { id: 'COLLECTION', label: t('library.tabs.collections', language), icon: 'folder-special' },
+  const tabs: { id: TabType; label: string }[] = [
+    { id: 'MODULE', label: t('library.tabs.modules', language) },
+    { id: 'COLLECTION', label: t('library.tabs.collections', language) },
   ];
 
-  // ── İçerik tipi renk kimliği ───────────────────────────────────────────────────
-  const TYPE_IDENTITY: Record<TabType, {
-    color: string; bg: string; border: string;
-    icon: string; badgeLabel: string;
-  }> = {
-    MODULE: {
-      color: '#00D2FF', bg: 'rgba(0,210,255,0.08)', border: 'rgba(0,210,255,0.25)',
-      icon: 'menu-book', badgeLabel: t('library.types.module', language),
-    },
-    COLLECTION: {
-      color: '#A855F7', bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.25)',
-      icon: 'folder-special', badgeLabel: t('library.types.collection', language),
-    },
-  };
-
   const renderItem = ({ item }: { item: DiscoverItem }) => {
-    const identity = TYPE_IDENTITY[activeTab];
+    const isModule = activeTab === 'MODULE';
+    const badgeLabel = isModule ? t('library.types.module', language) : t('library.types.collection', language);
+
     return (
       <TouchableOpacity
-        activeOpacity={0.8}
-        style={[styles.cardContainer, {
-          borderLeftWidth: 3,
-          borderLeftColor: identity.color,
-          backgroundColor: identity.bg,
-        }]}
+        activeOpacity={0.7}
+        style={styles.cardContainer}
         onPress={() => {
-          if (activeTab === 'MODULE') {
+          if (isModule) {
             router.push(`/study/${item.id}` as any);
           } else {
             router.push(`/collections/${item.id}` as any);
@@ -112,41 +94,29 @@ export default function ExploreScreen() {
         }}
       >
         <View style={styles.cardHeader}>
-          <View style={[styles.badgeWrapper, {
-            backgroundColor: identity.bg,
-            borderColor: identity.border,
-          }]}>
-            <MaterialIcons name={identity.icon as any} size={12} color={identity.color} />
-            <Text style={[styles.badgeText, { color: identity.color, marginLeft: 4 }]}>
-              {identity.badgeLabel}
-            </Text>
-          </View>
+          <Text style={styles.badgeText}>{badgeLabel}</Text>
           {item.owner?.handle && (
             <Text style={styles.ownerText}>@{item.owner.handle}</Text>
           )}
         </View>
 
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
+        <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
 
         {item.description && (
-          <Text style={styles.cardDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
+          <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
         )}
 
         <View style={styles.cardFooter}>
           <View style={styles.footerInfo}>
-            <MaterialIcons name="layers" size={14} color={identity.color} />
-            <Text style={[styles.footerItemsText, { color: identity.color }]}>
+            <Ionicons name={isModule ? "document-text-outline" : "folder-outline"} size={16} color="#64748B" />
+            <Text style={styles.footerItemsText}>
               {item._count?.items || 0} {t('library.items', language).toLowerCase()}
             </Text>
           </View>
           <View style={styles.footerInfo}>
-            <MaterialIcons name="schedule" size={12} color="rgba(255,255,255,0.2)" />
+            <Ionicons name="time-outline" size={14} color="#475569" />
             <Text style={styles.footerDateText}>
-              {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+              {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
             </Text>
           </View>
         </View>
@@ -156,88 +126,62 @@ export default function ExploreScreen() {
 
   return (
     <Screen style={styles.screen} tabScreen>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('discover.title', language)}</Text>
-        <Text style={styles.subtitle}>{t('discover.subtitle', language)}</Text>
       </View>
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchInputWrapper}>
-          <MaterialIcons style={styles.searchIcon} name="search" size={20} color="rgba(255,255,255,0.3)" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('discover.searchPlaceholder', language)}
-            placeholderTextColor="rgba(255,255,255,0.2)"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <MaterialIcons name="close" size={20} color="rgba(255,255,255,0.3)" />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* Tab Bar */}
-      <View style={styles.tabsContainer}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={[
-              styles.tabButton,
-              {
-                backgroundColor: activeTab === tab.id ? 'rgba(37, 99, 235, 0.2)' : 'rgba(15, 23, 42, 1)',
-                borderColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.3)' : 'rgba(30, 41, 59, 1)'
-              }
-            ]}
-            onPress={() => setActiveTab(tab.id)}
-          >
-            <MaterialIcons
-              name={tab.icon as any}
-              size={16}
-              color={activeTab === tab.id ? '#00D2FF' : 'rgba(255,255,255,0.3)'}
-            />
-            <Text
-              style={[styles.tabButtonText, { color: activeTab === tab.id ? '#60A5FA' : 'rgba(255, 255, 255, 0.3)' }]}
-            >
-              {tab.label}
-            </Text>
+        <Ionicons style={styles.searchIcon} name="search" size={18} color="#475569" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('discover.searchPlaceholder', language)}
+          placeholderTextColor="#475569"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={18} color="#475569" />
           </TouchableOpacity>
-        ))}
-        <View style={{ flex: 1 }} />
-        <Text style={styles.totalResultsText}>
-          {t('discover.totalResults', language, { count: total })}
-        </Text>
+        )}
       </View>
 
-      {/* Content List */}
+      <View style={styles.tabsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tabButton, isActive && styles.tabButtonActive]}
+                onPress={() => setActiveTab(tab.id)}
+              >
+                <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
       {loading ? (
         <View style={styles.loadingContainer}>
           <BrandLoader size="lg" />
         </View>
       ) : (
         <FlatList
-          style={{ flex: 1, backgroundColor: '#050A14' }}
+          style={styles.list}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: TAB_SCREEN_CONTENT_BOTTOM }}
+          contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#334155" />
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <View style={styles.emptyIconWrapper}>
-                {fetchError ? (
-                  <MaterialIcons name="wifi-off" size={32} color="rgba(255,255,255,0.1)" />
-                ) : (
-                  <MaterialIcons name="explore" size={32} color="rgba(255,255,255,0.1)" />
-                )}
-              </View>
               <Text style={styles.emptyTitle}>
                 {fetchError ? 'Bağlantı Hatası' : t('discover.emptyTitle', language)}
               </Text>
@@ -250,11 +194,20 @@ export default function ExploreScreen() {
               </Text>
               {fetchError && (
                 <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-                  <MaterialIcons name="refresh" size={16} color="#60A5FA" />
+                  <Ionicons name="refresh" size={16} color="#000000" />
                   <Text style={styles.retryText}>Tekrar Dene</Text>
                 </TouchableOpacity>
               )}
             </View>
+          }
+          ListFooterComponent={
+            items.length > 0 ? (
+              <View style={styles.footerNoteContainer}>
+                <Text style={styles.totalResultsText}>
+                  {t('discover.totalResults', language, { count: total })}
+                </Text>
+              </View>
+            ) : null
           }
         />
       )}
@@ -265,44 +218,33 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#050A14',
+    backgroundColor: '#000000',
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 48,
+    paddingTop: 64,
     paddingBottom: 24,
   },
   title: {
     fontSize: 28,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#F8FAFC',
     letterSpacing: -0.5,
-  },
-  subtitle: {
-    color: '#64748B',
-    fontSize: 13,
-    fontWeight: '500',
-    marginTop: 2,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#090F1D',
+    backgroundColor: '#0A0A0A',
     marginHorizontal: 24,
     marginBottom: 20,
     paddingHorizontal: 16,
-    height: 52,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#182234',
-  },
-  searchInputWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderColor: '#111111',
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
@@ -311,50 +253,49 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   tabsContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    paddingLeft: 24,
-    alignItems: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 24,
   },
   tabButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: 8,
+    borderRadius: 99,
     borderWidth: 1,
+    borderColor: '#111111',
+    backgroundColor: '#000000',
+  },
+  tabButtonActive: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#F8FAFC',
   },
   tabButtonText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: 'bold',
+    color: '#94A3B8',
+    fontWeight: '600',
+    fontSize: 13,
   },
-  totalResultsText: {
-    color: 'rgba(255, 255, 255, 0.2)',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    paddingRight: 24,
+  tabButtonTextActive: {
+    color: '#000000',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 24,
+    paddingBottom: TAB_SCREEN_CONTENT_BOTTOM,
+    gap: 12,
   },
   cardContainer: {
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    borderRadius: 32,
-    padding: 24,
-    marginBottom: 16,
+    backgroundColor: '#0A0A0A',
+    borderRadius: 20,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderColor: '#111111',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -362,116 +303,95 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  badgeWrapper: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderColor: 'rgba(59, 130, 246, 0.2)',
-  },
   badgeText: {
-    color: '#60A5FA',
+    color: '#64748B',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    letterSpacing: 2,
   },
   ownerText: {
-    color: 'rgba(255, 255, 255, 0.2)',
-    fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: -0.5,
+    color: '#475569',
+    fontSize: 12,
+    fontWeight: '500',
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#F8FAFC',
     marginBottom: 8,
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
   cardDescription: {
-    color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
-    marginBottom: 16,
+    color: '#64748B',
     lineHeight: 20,
+    marginBottom: 16,
   },
   cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: '#111111',
   },
   footerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   footerItemsText: {
-    color: 'rgba(255, 255, 255, 0.3)',
-    fontSize: 12,
-    marginLeft: 8,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
+    color: '#64748B',
+    fontSize: 13,
+    fontWeight: '500',
+    marginLeft: 6,
   },
   footerDateText: {
-    color: 'rgba(255, 255, 255, 0.2)',
-    fontSize: 10,
-    marginLeft: 6,
-    fontWeight: 'bold',
+    color: '#475569',
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
   },
   emptyContainer: {
-    alignItems: 'center',
-    marginTop: 64,
-    paddingHorizontal: 40,
-  },
-  emptyIconWrapper: {
-    width: 80,
-    height: 80,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    alignItems: 'flex-start',
+    paddingVertical: 48,
   },
   emptyTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#F8FAFC',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   emptyDesc: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#64748B',
     lineHeight: 20,
-    fontWeight: '500',
+    marginBottom: 24,
   },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
+    paddingVertical: 12,
+    borderRadius: 99,
+    backgroundColor: '#F8FAFC',
+    gap: 8,
   },
   retryText: {
-    color: '#60A5FA',
-    fontSize: 13,
+    color: '#000000',
+    fontSize: 14,
     fontWeight: '600',
-    marginLeft: 6,
+  },
+  footerNoteContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  totalResultsText: {
+    color: '#475569',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 });

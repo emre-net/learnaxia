@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, AppState, StyleSheet, Animated as RNAnimated } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, AppState, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Theme as SharedTheme, t } from '@learnaxia/shared';
+import { t } from '@learnaxia/shared';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
@@ -36,38 +35,18 @@ export default function HomeScreen() {
   const [recentModules, setRecentModules] = useState<RecentModule[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
-
-  // ─── Hero Banner — motivasyon cümleleri ───────────────────────────────────────────────────
-  const MOTIVATION_QUOTES = [
-    { text: 'Her gün küçük bir adım — büyük değişimler yaratır.', emoji: '🎯' },
-    { text: 'Tekrar, ustalığın anasidır.', emoji: '🧠' },
-    { text: 'Bugün öğrendiğin, yarın silahın olur.', emoji: '⚡' },
-    { text: 'Sabr eden, bilgiye kavuşur.', emoji: '🌱' },
-    { text: 'Her doruğu bilmek, seni bir adım öteye taşır.', emoji: '🚀' },
-  ];
-  const [quoteIndex, setQuoteIndex] = useState(0);
-  const quoteOpacity = useRef(new RNAnimated.Value(1)).current;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      RNAnimated.timing(quoteOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
-        setQuoteIndex(prev => (prev + 1) % MOTIVATION_QUOTES.length);
-        RNAnimated.timing(quoteOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [quoteOpacity]);
+  const [streak, setStreak] = useState(0);
 
   const fetchDashboardData = useCallback(async () => {
-    setFetchError(false);
     try {
-      const [analyticsRes, recentRes] = await Promise.all([
+      const [analyticsRes, recentRes, scoreRes] = await Promise.all([
         api.get('/mobile/analytics').catch(() => ({ data: { stats: {} } })),
         api.get('/mobile/library/recent').catch(() => ({ data: { modules: [] } })),
+        api.get('/scores/me').catch(() => ({ data: null })),
       ]);
 
       const data = analyticsRes.data?.stats || {};
+      setStreak(scoreRes.data?.metrics?.activeDays || 0);
       setStats({
         totalStudyMinutes: data.totalStudyMinutes || 0,
         modulesStarted: data.modulesStarted || 0,
@@ -77,7 +56,6 @@ export default function HomeScreen() {
       setRecentModules(recentRes.data?.modules || []);
     } catch (error) {
       console.error('[HomeScreen] Error fetching dashboard data:', error);
-      setFetchError(true);
       setStats({
         totalStudyMinutes: 0,
         modulesStarted: 0,
@@ -92,13 +70,9 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchDashboardData();
-
     const subscription = AppState.addEventListener('change', nextAppState => {
-      if (nextAppState === 'active') {
-        fetchDashboardData();
-      }
+      if (nextAppState === 'active') fetchDashboardData();
     });
-
     return () => subscription.remove();
   }, [fetchDashboardData]);
 
@@ -116,204 +90,131 @@ export default function HomeScreen() {
   }
 
   const firstName = user?.name?.split(' ')[0] || user?.handle || 'Kullanıcı';
-  // Gradient avatar rengi: ismin ilk iki harfine göre
-  const avatarColors = [
-    ['#3B82F6', '#8B5CF6'], ['#06B6D4', '#3B82F6'], ['#10B981', '#06B6D4'],
-    ['#F59E0B', '#EF4444'], ['#8B5CF6', '#EC4899'],
-  ];
-  const avatarColorPair = avatarColors[(firstName.charCodeAt(0) || 0) % avatarColors.length];
   const initials = firstName.slice(0, 2).toUpperCase();
+
+  // Saat ve Dakika hesaplama (Büyük tipografi için)
+  const hours = Math.floor((stats?.totalStudyMinutes || 0) / 60);
+  const minutes = (stats?.totalStudyMinutes || 0) % 60;
 
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: TAB_SCREEN_CONTENT_BOTTOM }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />
-        }
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_CONTENT_BOTTOM, paddingTop: 64 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#334155" />}
       >
-        {/* ─── HERO BANNER ─────────────────────────────────────────────────────────── */}
-        <View style={styles.heroBanner}>
-          {/* Üst gradient şerit */}
-          <LinearGradient
-            colors={['rgba(59,130,246,0.15)', 'transparent']}
-            style={[StyleSheet.absoluteFill, { borderRadius: 28 }]}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-          />
-          <View style={styles.heroTop}>
-            <View style={styles.heroLeft}>
-              {fetchError && (
-                <Text style={styles.errorHint}>Veriler yüklenemedi — yenilemek için çekin.</Text>
-              )}
-              <Text style={styles.heroGreeting}>Merhaba, {firstName} 👋</Text>
-              <RNAnimated.View style={{ opacity: quoteOpacity }}>
-                <Text style={styles.heroQuoteEmoji}>{MOTIVATION_QUOTES[quoteIndex].emoji}</Text>
-                <Text style={styles.heroQuote}>{MOTIVATION_QUOTES[quoteIndex].text}</Text>
-              </RNAnimated.View>
-            </View>
-
-            {/* Gradient Avatar */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/profile');
-              }}
-            >
-              <LinearGradient
-                colors={avatarColorPair as [string, string]}
-                style={styles.gradientAvatar}
-              >
-                <Text style={styles.avatarInitials}>{initials}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+        {/* ÜST BAR */}
+        <View style={styles.header}>
+          <View style={styles.streakBadge}>
+            <Text style={styles.streakEmoji}>🔥</Text>
+            <Text style={styles.streakText}>{streak} Günlük Seri</Text>
           </View>
 
-          {/* Stats özet şeridi */}
-          <View style={styles.heroStatsRow}>
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{stats?.totalStudyMinutes ?? '0'}</Text>
-              <Text style={styles.heroStatLabel}>dk çalışma</Text>
-            </View>
-            <View style={styles.heroStatDivider} />
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{stats?.modulesStarted ?? '0'}</Text>
-              <Text style={styles.heroStatLabel}>modül</Text>
-            </View>
-            <View style={styles.heroStatDivider} />
-            <View style={styles.heroStat}>
-              <Text style={[styles.heroStatValue, { color: '#A855F7' }]}>
-                %{stats?.averageAccuracy ?? '0'}
-              </Text>
-              <Text style={styles.heroStatLabel}>doğruluk</Text>
-            </View>
-            <View style={styles.heroStatDivider} />
-            <View style={styles.heroStat}>
-              <Text style={[styles.heroStatValue, { color: '#F59E0B' }]}>
-                {stats?.totalSolved ?? '0'}
-              </Text>
-              <Text style={styles.heroStatLabel}>soru</Text>
-            </View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/profile');
+            }}
+            style={styles.avatarButton}
+          >
+            <Text style={styles.avatarText}>{initials}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* HERO METRİK - DEVASA TİPOGRAFİ (Apple Health Tarzı) */}
+        <View style={styles.heroSection}>
+          <Text style={styles.heroGreeting}>İyi çalışmalar, {firstName}!</Text>
+          <Text style={styles.heroLabel}>TOPLAM ÇALIŞMA</Text>
+          <View style={styles.timeRow}>
+            {hours > 0 && (
+              <>
+                <Text style={styles.timeValue}>{hours}</Text>
+                <Text style={styles.timeUnit}>sa</Text>
+              </>
+            )}
+            <Text style={styles.timeValue}>{minutes}</Text>
+            <Text style={styles.timeUnit}>dk</Text>
           </View>
         </View>
 
-        {/* Daily Review Widget */}
-        <View style={styles.widgetContainer}>
+        <View style={styles.separator} />
+
+        {/* ASİMETRİK BENTO BOX İSTATİSTİKLERİ */}
+        <View style={styles.bentoSection}>
+          
+          {/* Sol Büyük Kutu (Doğruluk) */}
+          <View style={[styles.bentoBox, styles.bentoLarge]}>
+            <Text style={styles.bentoLabel}>DOĞRULUK</Text>
+            <Text style={styles.bentoMainValue}>%{stats?.averageAccuracy || 0}</Text>
+            <View style={styles.bentoFooter}>
+              <Ionicons name="trending-up" size={14} color="#10B981" />
+              <Text style={styles.bentoTrendText}> İyi gidiyorsun</Text>
+            </View>
+          </View>
+
+          {/* Sağ Taraftaki 2 Küçük Kutu */}
+          <View style={styles.bentoRightColumn}>
+            <View style={[styles.bentoBox, styles.bentoSmall]}>
+              <Text style={styles.bentoLabel}>ÇÖZÜLEN</Text>
+              <View style={styles.bentoValueRow}>
+                  <Text style={styles.bentoSecondaryValue}>{stats?.totalSolved || 0}</Text>
+                  <Ionicons name="caret-up" size={16} color="#10B981" />
+              </View>
+            </View>
+            <View style={[styles.bentoBox, styles.bentoSmall]}>
+              <Text style={styles.bentoLabel}>SETLER</Text>
+              <View style={styles.bentoValueRow}>
+                  <Text style={styles.bentoSecondaryValue}>{stats?.modulesStarted || 0}</Text>
+                  <Ionicons name="caret-up" size={16} color="#10B981" />
+              </View>
+            </View>
+          </View>
+
+        </View>
+
+        {/* WIDGETS */}
+        <View style={styles.widgetWrapper}>
           <DailyReviewWidget />
         </View>
-
-        {/* Focus Widget */}
-        <View style={styles.widgetContainer}>
+        <View style={styles.widgetWrapper}>
           <FocusWidget />
         </View>
 
-        {/* Quick Stats Grid - 2x2 */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statsGrid}>
-
-            {/* Duration Card (Cyan) */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              style={styles.statCard}
-            >
-              <LinearGradient colors={['rgba(6, 182, 212, 0.05)', 'transparent']} style={StyleSheet.absoluteFill} />
-              <View style={styles.statHeader}>
-                <Text style={styles.statTitle}>{t('settings.duration', language)}</Text>
-                <MaterialIcons name="schedule" size={16} color="#06B6D4" />
-              </View>
-              <View style={styles.statBody}>
-                <Text style={styles.statValue}>{stats ? stats.totalStudyMinutes : '0'} dk</Text>
-                <Text style={styles.statDesc}>Platformda geçirdiğin süre</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Modules Started Card (Blue) */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              style={styles.statCard}
-            >
-              <LinearGradient colors={['rgba(59, 130, 246, 0.05)', 'transparent']} style={StyleSheet.absoluteFill} />
-              <View style={styles.statHeader}>
-                <Text style={styles.statTitle}>{t('dashboard.modules', language)}</Text>
-                <MaterialIcons name="menu-book" size={16} color="#3B82F6" />
-              </View>
-              <View style={styles.statBody}>
-                <Text style={styles.statValue}>{stats ? stats.modulesStarted : '0'}</Text>
-                <Text style={styles.statDesc}>İlerleme kaydettiğin setler</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Accuracy Card (Purple) */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              style={styles.statCard}
-            >
-              <LinearGradient colors={['rgba(168, 85, 247, 0.05)', 'transparent']} style={StyleSheet.absoluteFill} />
-              <View style={styles.statHeader}>
-                <Text style={styles.statTitle}>{t('dashboard.stats.accuracy', language)}</Text>
-                <MaterialIcons name="trending-up" size={16} color="#A855F7" />
-              </View>
-              <View style={styles.statBody}>
-                <Text style={[styles.statValue, { color: '#C084FC' }]}>%{stats ? stats.averageAccuracy : '0'}</Text>
-                <Text style={styles.statDesc}>Genel doğruluk oranınız</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Total Solved Card (Amber) */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              style={styles.statCard}
-            >
-              <LinearGradient colors={['rgba(245, 158, 11, 0.05)', 'transparent']} style={StyleSheet.absoluteFill} />
-              <View style={styles.statHeader}>
-                <Text style={styles.statTitle}>{t('dashboard.stats.solved', language)}</Text>
-                <MaterialIcons name="check-circle-outline" size={16} color="#F59E0B" />
-              </View>
-              <View style={styles.statBody}>
-                <Text style={[styles.statValue, { color: '#FBBF24' }]}>{stats ? stats.totalSolved : '0'}</Text>
-                <Text style={styles.statDesc}>Çözülen toplam soru sayısı</Text>
-              </View>
-            </TouchableOpacity>
-
-          </View>
-        </View>
-
-        {/* Son Çalışılan Modüller */}
+        {/* SON ÇALIŞILANLAR (Liste Görünümü - Clean) */}
         {recentModules.length > 0 && (
-          <View style={styles.recentContainer}>
+          <View style={styles.recentSection}>
             <View style={styles.recentHeader}>
-              <Text style={styles.sectionLabel}>SON ÇALIŞILANLAR</Text>
+              <Text style={styles.recentTitle}>Son Aktiviteler</Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/library' as any)}>
-                <Text style={styles.sectionLink}>Tümünü Gör</Text>
+                <Ionicons name="arrow-forward" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
-            {recentModules.slice(0, 3).map((mod) => (
-              <TouchableOpacity
-                key={mod.id}
-                activeOpacity={0.8}
-                style={styles.recentCard}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push(`/study/${mod.id}` as any);
-                }}
-              >
-                <View style={styles.recentIcon}>
-                  <MaterialIcons name="menu-book" size={18} color="#60A5FA" />
-                </View>
-                <View style={styles.recentInfo}>
-                  <Text style={styles.recentTitle} numberOfLines={1}>{mod.title}</Text>
-                  <Text style={styles.recentDate}>
-                    {new Date(mod.lastStudied).toLocaleDateString('tr-TR')}
-                  </Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={20} color="#334155" />
-              </TouchableOpacity>
-            ))}
+            
+            <View style={styles.recentList}>
+              {recentModules.slice(0, 4).map((mod, index) => (
+                <TouchableOpacity
+                  key={mod.id}
+                  activeOpacity={0.6}
+                  style={[
+                    styles.recentRow,
+                    index === recentModules.slice(0, 4).length - 1 && { borderBottomWidth: 0 }
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(`/study/${mod.id}` as any);
+                  }}
+                >
+                  <View style={styles.recentDot} />
+                  <View style={styles.recentTextContainer}>
+                    <Text style={styles.recentItemTitle} numberOfLines={1}>{mod.title}</Text>
+                    <Text style={styles.recentItemDate}>
+                      {new Date(mod.lastStudied).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
 
@@ -336,163 +237,155 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  // Hero Banner styles
-  heroBanner: {
-    marginHorizontal: 16,
-    marginTop: 48,
-    marginBottom: 24,
-    borderRadius: 28,
-    padding: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    overflow: 'hidden',
-  },
-  heroTop: {
+  header: {
+    paddingHorizontal: 24,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  heroLeft: {
-    flex: 1,
-    marginRight: 16,
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E1000',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: '#331A00',
+  },
+  streakEmoji: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  streakText: {
+    color: '#F59E0B',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  avatarButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#111111',
+    borderWidth: 1,
+    borderColor: '#222222',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#F8FAFC',
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  heroSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
   },
   heroGreeting: {
     color: '#F8FAFC',
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 24,
     letterSpacing: -0.5,
+  },
+  heroLabel: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1.5,
     marginBottom: 8,
   },
-  heroQuoteEmoji: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  heroQuote: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 13,
-    fontWeight: '500',
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-  gradientAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitials: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  heroStatsRow: {
+  timeRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'baseline',
   },
-  heroStat: {
-    flex: 1,
-    alignItems: 'center',
+  timeValue: {
+    color: '#FFFFFF',
+    fontSize: 56,
+    fontWeight: '300',
+    letterSpacing: -2,
   },
-  heroStatValue: {
-    color: '#F8FAFC',
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: -0.5,
+  timeUnit: {
+    color: '#64748B',
+    fontSize: 24,
+    fontWeight: '400',
+    marginLeft: 4,
+    marginRight: 12,
   },
-  heroStatLabel: {
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 10,
-    fontWeight: '600',
-    marginTop: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  heroStatDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-  },
-  // Legacy (artık kullanılmıyor ama silinmedi)
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 48,
-    paddingBottom: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: { flex: 1, marginRight: 12 },
-  headerTitle: { color: '#F8FAFC', fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
-  errorHint: { color: '#EF4444', fontSize: 11, marginTop: 4, fontWeight: '500' },
-  profileButton: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  profileIconWrapper: { alignItems: 'center', justifyContent: 'center' },
-  widgetContainer: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  statsContainer: {
-    paddingHorizontal: 24,
+  separator: {
+    height: 1,
+    backgroundColor: '#111111',
+    marginHorizontal: 24,
     marginBottom: 32,
   },
-  statsGrid: {
+  bentoSection: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    marginBottom: 32,
+    gap: 12,
   },
-  statCard: {
-    width: '47%',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 20,
-    padding: 16,
+  bentoBox: {
+    backgroundColor: '#0A0A0A',
+    borderRadius: 24,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  statHeader: {
-    flexDirection: 'row',
+    borderColor: '#111111',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
   },
-  statTitle: {
-    color: '#F1F5F9',
-    fontSize: 14,
-    fontWeight: '600',
+  bentoLarge: {
+    flex: 1,
+    aspectRatio: 1,
   },
-  statBody: {
-    justifyContent: 'center',
+  bentoRightColumn: {
+    flex: 1,
+    gap: 12,
   },
-  statValue: {
-    color: '#F8FAFC',
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: -0.5,
+  bentoSmall: {
+    flex: 1,
+    padding: 16,
   },
-  statDesc: {
+  bentoLabel: {
     color: '#64748B',
     fontSize: 10,
-    fontWeight: '500',
-    marginTop: 4,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
-  // Son Çalışılanlar
-  recentContainer: {
+  bentoMainValue: {
+    color: '#FFFFFF',
+    fontSize: 40,
+    fontWeight: '400',
+    letterSpacing: -1,
+  },
+  bentoValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  bentoSecondaryValue: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '400',
+    letterSpacing: -0.5,
+  },
+  bentoFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bentoTrendText: {
+    color: '#10B981',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  widgetWrapper: {
     paddingHorizontal: 24,
-    marginBottom: 32,
+    marginBottom: 20,
+  },
+  recentSection: {
+    paddingHorizontal: 24,
+    marginBottom: 40,
   },
   recentHeader: {
     flexDirection: 'row',
@@ -500,48 +393,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  sectionLabel: {
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 3,
-    textTransform: 'uppercase',
-  },
-  sectionLink: {
-    color: '#60A5FA',
-    fontSize: 12,
+  recentTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: '600',
+    letterSpacing: -0.5,
   },
-  recentCard: {
+  recentList: {
+    backgroundColor: '#0A0A0A',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#111111',
+    overflow: 'hidden',
+  },
+  recentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#111111',
   },
-  recentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(59,130,246,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
+  recentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#333333',
+    marginRight: 16,
   },
-  recentInfo: {
+  recentTextContainer: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  recentTitle: {
-    color: '#F8FAFC',
+  recentItemTitle: {
+    color: '#E2E8F0',
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '400',
+    flex: 1,
+    marginRight: 12,
   },
-  recentDate: {
-    color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 11,
-    marginTop: 2,
+  recentItemDate: {
+    color: '#64748B',
+    fontSize: 13,
   },
 });

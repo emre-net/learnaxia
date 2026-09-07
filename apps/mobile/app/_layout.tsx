@@ -26,15 +26,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [isSplashComplete, setIsSplashComplete] = useState(Platform.OS === 'android');
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      // Android uses Native Animated Vector Drawable splash screen now.
-      // We can hide the static Expo wrapper immediately to let Native AVD finish.
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, []);
+  const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   return (
     <SafeAreaProvider style={{ flex: 1, backgroundColor: '#000000' }}>
