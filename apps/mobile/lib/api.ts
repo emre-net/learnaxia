@@ -19,7 +19,7 @@ const getDevBaseUrl = () => {
 // 2. Öncelik: Eğer geliştirme ortamındaysak ve .env yoksa (Localhost)
 // 3. Öncelik: Prod ortamındaysak ve .env yoksa (Ana domain)
 const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
-export const API_BASE_URL = envApiUrl || (isDev ? getDevBaseUrl() : 'https://learnaxia.com/api');
+export const API_BASE_URL = envApiUrl || (isDev ? getDevBaseUrl() : 'https://www.learnaxia.com/api');
 
 const TOKEN_KEY = 'learnaxia_access_token';
 const REFRESH_TOKEN_KEY = 'learnaxia_refresh_token';
