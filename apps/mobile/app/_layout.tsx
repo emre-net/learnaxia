@@ -8,10 +8,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '../context/AuthContext';
 import { AnimatedSplash } from '@/components/ui/animated-splash';
-import * as SplashScreen from 'expo-splash-screen';
-
-// Prevent native splash screen from hiding before JS components mount
-SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Suppress non-critical API error banners from showing in the UI
 LogBox.ignoreLogs([

@@ -23,28 +23,26 @@ export function AnimatedSplash({ onComplete }: AnimatedSplashProps) {
     const containerOpacity = useSharedValue(1);
 
     useEffect(() => {
-        // Hide native splash screen once AnimatedSplash mounts
+        // Hide native splash immediately and safely
         SplashScreen.hideAsync().catch(() => {});
 
-        // 1. Entrance: Fade in logo with spring (300ms)
-        opacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) });
+        // Entrance animation
+        opacity.value = withTiming(1, { duration: 250, easing: Easing.out(Easing.ease) });
         scale.value = withSpring(1, { damping: 14, stiffness: 120 });
 
-        // Brand text entrance (150ms delay)
         const t1 = setTimeout(() => {
-            textOpacity.value = withTiming(1, { duration: 350 });
+            textOpacity.value = withTiming(1, { duration: 300 });
             textTranslateY.value = withSpring(0, { damping: 15 });
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-        }, 150);
+        }, 120);
 
-        // 2. Exit: Smooth fade out after 1100ms
         const t2 = setTimeout(() => {
-            containerOpacity.value = withTiming(0, { duration: 350, easing: Easing.inOut(Easing.ease) }, (finished) => {
+            containerOpacity.value = withTiming(0, { duration: 300, easing: Easing.inOut(Easing.ease) }, (finished) => {
                 if (finished) {
                     runOnJS(onComplete)();
                 }
             });
-        }, 1100);
+        }, 900);
 
         return () => {
             clearTimeout(t1);
@@ -87,7 +85,7 @@ export function AnimatedSplash({ onComplete }: AnimatedSplashProps) {
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#050A14', // Exact app dark theme background
+        backgroundColor: '#050A14',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999,
