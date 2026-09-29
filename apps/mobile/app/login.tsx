@@ -275,8 +275,7 @@ const styles = StyleSheet.create({
     inputGroup: {
         borderBottomWidth: 1,
         borderBottomColor: '#262626',
-        paddingBottom: 8,
-        transition: 'border-color 0.2s'
+        paddingBottom: 8
     },
     inputGroupFocused: {
         borderBottomColor: '#2563EB', // Tech Blue accent when focused
