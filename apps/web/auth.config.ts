@@ -41,13 +41,15 @@ export const authConfig: NextAuthConfig = {
     },
     // Production stability
     trustHost: true,
-    // AUTH_SECRET zorunludur. Yoksa production'da crash at — dummy fallback GÜVENLİ DEĞİL.
-    secret: process.env.AUTH_SECRET ?? (() => {
-        if (process.env.NODE_ENV === 'production') {
-            throw new Error('[auth] AUTH_SECRET environment variable is not set. Application cannot start.');
-        }
-        return 'development-only-secret-not-for-production';
-    })(),
+    // AUTH_SECRET zorunludur. Production runtime'da yoksa hata fırlat.
+    // Ancak derleme (next build / page data collection) aşamasında çökmemesi için fallback secret kullanılır.
+    secret: process.env.AUTH_SECRET ?? (
+        (process.env.NODE_ENV === 'production' && process.env.PORT)
+            ? (() => {
+                throw new Error('[auth] AUTH_SECRET environment variable is not set. Application cannot start.');
+            })()
+            : 'development-or-build-phase-secret-placeholder'
+    ),
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID,

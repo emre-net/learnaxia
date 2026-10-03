@@ -3,6 +3,6 @@ builder = "nixpacks"
 buildCommand = "npm run build -w web && cp -r apps/web/public apps/web/.next/standalone/apps/web/public && mkdir -p apps/web/.next/standalone/apps/web/.next && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static"
 
 [deploy]
-# preDeployCommand = "cd apps/web && npx prisma migrate deploy"
-startCommand = "node -e \"process.env.PORT=process.env.PORT||'8080'; require('./apps/web/.next/standalone/apps/web/server.js')\""
+preDeployCommand = "cd apps/web && npx prisma migrate deploy"
+startCommand = "node -e \"process.env.PORT = process.env.PORT || '3000'; process.env.HOSTNAME = '0.0.0.0'; require('./apps/web/.next/standalone/apps/web/server.js');\""
 restartPolicyType = "ON_FAILURE"
