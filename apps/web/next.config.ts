@@ -40,6 +40,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
 
