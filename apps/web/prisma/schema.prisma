@@ -208,6 +208,9 @@ model Item {
   notes             Note[]
   sm2Progress       SM2Progress[]
   questionOverrides UserQuestionOverride[]
+
+  @@index([moduleId])
+  @@index([sourceItemId])
 }
 
 model PDFAsset {
@@ -297,10 +300,12 @@ model ItemProgress {
   aiMetadata     Json?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  item           Item     @relation(fields: [itemId], references: [id])
-  user           User     @relation(fields: [userId], references: [id])
+  item           Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, itemId])
+  @@index([itemId])
+  @@index([userId])
 }
 
 model SM2Progress {
@@ -312,10 +317,11 @@ model SM2Progress {
   nextReviewAt DateTime
   isRetired    Boolean  @default(false)
   updatedAt    DateTime @updatedAt
-  item         Item     @relation(fields: [itemId], references: [id])
-  user         User     @relation(fields: [userId], references: [id])
+  item         Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, itemId])
+  @@index([userId, nextReviewAt])
 }
 
 model UserModuleLibrary {
@@ -359,6 +365,9 @@ model LearningSession {
   itemSessions ItemSession[]
   module       Module        @relation(fields: [moduleId], references: [id])
   user         User          @relation(fields: [userId], references: [id])
+
+  @@index([userId, moduleId])
+  @@index([userId, startedAt])
 }
 
 model ItemSession {
@@ -369,11 +378,13 @@ model ItemSession {
   result     String
   durationMs Int
   createdAt  DateTime        @default(now())
-  item       Item            @relation(fields: [itemId], references: [id])
-  session    LearningSession @relation(fields: [sessionId], references: [id])
-  user       User            @relation(fields: [userId], references: [id])
+  item       Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  session    LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([sessionId])
+  @@index([itemId])
 }
 
 model UserQuestionOverride {
@@ -621,5 +632,6 @@ model ContentAdoptionLog {
   @@unique([moduleId, studentId])
   @@index([ownerId])
   @@index([moduleId])
+  @@index([studentId])
   @@map("content_adoption_logs")
 }

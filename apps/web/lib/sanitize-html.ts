@@ -29,7 +29,8 @@ const ALLOWED_TAGS = new Set([
 const ALLOWED_ATTRS = new Set([
     'href', 'target', 'rel',
     'src', 'alt', 'width', 'height',
-    'class', 'id', 'style',
+    'class', 'id',
+    // 'style' kasıtlı olarak çıkarıldı — XSS vektörü (background: url(javascript:...))
 ]);
 
 // Event handler pattern — tüm on* attr'ları kaldır

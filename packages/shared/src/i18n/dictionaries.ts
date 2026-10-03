@@ -83,7 +83,19 @@ const en = {
         loginErrorMessage: "Could not log in. Please check your credentials.",
         registerErrorMessage: "Could not register. Please try again.",
         errorTitle: "Authentication Error",
-        info: "Information"
+        info: "Information",
+        forgotPasswordTitle: "Reset Password",
+        forgotPasswordPrompt: "Would you like to send a password reset link to your registered email?",
+        cancel: "Cancel",
+        send: "Send",
+        enterEmailFirst: "Please enter your email address first.",
+        passwordResetSent: "Sent ✓",
+        passwordResetError: "An error occurred. Please try again.",
+        loginSubtitle: "Please log in to your account.",
+        registerSubtitle: "Enter your information to join us.",
+        or: "OR",
+        comingSoon: "COMING SOON",
+        error: "Error"
     },
     create: {
         title: "Create New Content",
@@ -655,7 +667,19 @@ const tr = {
         loginErrorMessage: "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.",
         registerErrorMessage: "Kayıt olunamadı. Lütfen tekrar deneyin.",
         errorTitle: "Kimlik Doğrulama Hatası",
-        info: "Bilgi"
+        info: "Bilgi",
+        forgotPasswordTitle: "Şifre Sıfırlama",
+        forgotPasswordPrompt: "Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı göndermek ister misiniz?",
+        cancel: "İptal",
+        send: "Gönder",
+        enterEmailFirst: "Lütfen önce e-posta adresinizi girin.",
+        passwordResetSent: "Gönderildi ✓",
+        passwordResetError: "Bir hata oluştu. Lütfen tekrar deneyin.",
+        loginSubtitle: "Lütfen hesabınıza giriş yapın.",
+        registerSubtitle: "Aramıza katılmak için bilgilerinizi girin.",
+        or: "VEYA",
+        comingSoon: "YAKINDA",
+        error: "Hata"
     },
     create: {
         title: "Yeni İçerik Oluştur",

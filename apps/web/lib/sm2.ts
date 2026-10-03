@@ -86,10 +86,10 @@ export function calculateSM2(input: SM2Input): SM2Output {
     // 4. Retirement Check
     // If interval exceeds threshold, we consider it "mastered/retired" if enabled.
     if (SM2_CONFIG.enableRetirement && nextInterval >= SM2_CONFIG.retirementThreshold) {
-        // Logic choice: Does retirement mean we stop reviewing? 
-        // Or just that it's flagged?
-        // For this app: It's a flag, but we still schedule it (capped at 365).
+        // Retired olarak işaretle ama interval'ı maxInterval içinde tut.
+        // UI tarafında retired kartlar ayrı gösterilebilir/gizlenebilir.
         isRetired = true;
+        nextInterval = Math.min(nextInterval, SM2_CONFIG.maxInterval);
     }
 
     // 5. Calculate Date

@@ -58,29 +58,36 @@ export default function LoginScreen() {
 
     const handleForgotPassword = () => {
         Alert.alert(
-            'Şifre Sıfırlama',
-            'Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı göndermek ister misiniz?',
+            t('auth.forgotPasswordTitle', currentLang),
+            t('auth.forgotPasswordPrompt', currentLang),
             [
-                { text: 'İptal', style: 'cancel' },
+                { text: t('auth.cancel', currentLang), style: 'cancel' },
                 {
-                    text: 'Gönder',
+                    text: t('auth.send', currentLang),
                     onPress: async () => {
                         if (!email.trim()) {
-                            Alert.alert('Hata', 'Lütfen önce e-posta adresinizi girin.');
+                            Alert.alert(t('auth.error', currentLang), t('auth.enterEmailFirst', currentLang));
                             return;
                         }
                         setLoading(true);
                         try {
                             await api.post('/mobile/forgot-password', { email: email.trim() });
                             Alert.alert(
-                                'Gönderildi ✓',
-                                `${email.trim()} adresine şifre sıfırlama bağlantısı gönderildi. Lütfen gelen kutunuzu kontrol edin.`
+                                t('auth.passwordResetSent', currentLang),
+                                `${email.trim()} adresine şifre sıfırlama bağlantısı gönderildi.`
                             );
-                        } catch (err: any) {
-                            Alert.alert(
-                                'Hata',
-                                err?.response?.data?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.'
-                            );
+                        } catch (err: unknown) {
+                            const serverMessage =
+                                err &&
+                                typeof err === 'object' &&
+                                'response' in err
+                                    ? (err as { response?: { data?: { message?: unknown } } }).response?.data?.message
+                                    : undefined;
+                            const message =
+                                typeof serverMessage === 'string' && serverMessage.length < 300
+                                    ? serverMessage
+                                    : t('auth.passwordResetError', currentLang);
+                            Alert.alert(t('auth.error', currentLang), message);
                         } finally {
                             setLoading(false);
                         }
@@ -111,8 +118,8 @@ export default function LoginScreen() {
                         </Text>
                         <Text style={styles.subtitle}>
                             {isLogin 
-                                ? "Lütfen hesabınıza giriş yapın." 
-                                : "Aramıza katılmak için bilgilerinizi girin."}
+                                ? t('auth.loginSubtitle', currentLang)
+                                : t('auth.registerSubtitle', currentLang)}
                         </Text>
                     </Animated.View>
 
@@ -192,14 +199,14 @@ export default function LoginScreen() {
                         <View style={styles.socialContainer}>
                             <View style={styles.divider}>
                                 <View style={styles.dividerLine} />
-                                <Text style={styles.dividerText}>VEYA</Text>
+                                <Text style={styles.dividerText}>{t('auth.or', currentLang)}</Text>
                                 <View style={styles.dividerLine} />
                             </View>
                             
                             <TouchableOpacity style={styles.socialButton} disabled={true}>
                                 <Text style={styles.socialButtonText}>{t('auth.googleLogin', currentLang)}</Text>
                                 <View style={styles.soonBadge}>
-                                    <Text style={styles.soonText}>YAKINDA</Text>
+                                    <Text style={styles.soonText}>{t('auth.comingSoon', currentLang)}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>

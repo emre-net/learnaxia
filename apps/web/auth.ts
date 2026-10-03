@@ -62,27 +62,27 @@ const nextAuth = NextAuth({
                     if (parsedCredentials.success) {
                         const { email, password } = parsedCredentials.data;
 
-                        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-                            // Ensure the admin user exists in the database to allow FK relations
-                            let adminUser = await prisma.user.findUnique({ where: { email } });
-
-                            if (!adminUser) {
-                                adminUser = await prisma.user.create({
-                                    data: {
-                                        email,
-                                        name: "Admin",
-                                        role: "ADMIN",
-                                        handle: "admin",
-                                        emailVerified: new Date(),
-                                    }
-                                });
-                            } else if (adminUser.role !== 'ADMIN') {
-                                // Ensure the existing user with this email has ADMIN role
-                                adminUser = await prisma.user.update({
-                                    where: { id: adminUser.id },
-                                    data: { role: 'ADMIN' }
-                                });
-                            }
+                        if (
+                            process.env.ADMIN_EMAIL &&
+                            process.env.ADMIN_PASSWORD &&
+                            email === process.env.ADMIN_EMAIL &&
+                            password === process.env.ADMIN_PASSWORD
+                        ) {
+                            // upsert: atomik, race condition-safe
+                            const adminUser = await prisma.user.upsert({
+                                where: { email },
+                                update: {
+                                    role: "ADMIN",
+                                    emailVerified: new Date(),
+                                },
+                                create: {
+                                    email,
+                                    name: "Admin",
+                                    role: "ADMIN",
+                                    handle: "admin-system",
+                                    emailVerified: new Date(),
+                                },
+                            });
 
                             return {
                                 id: adminUser.id,

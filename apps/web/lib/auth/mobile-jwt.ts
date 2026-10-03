@@ -35,6 +35,7 @@ export async function verifyMobileAccessToken(token: string) {
   return {
     userId: payload.id as string,
     email: payload.email as string,
-    tokenVersion: payload.tokenVersion as number | undefined
+    role: payload.role as string | undefined,
+    tokenVersion: payload.tokenVersion as number | undefined,
   };
 }

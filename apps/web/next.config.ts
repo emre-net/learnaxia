@@ -45,10 +45,16 @@ const nextConfig: NextConfig = {
 
   // Security & Performance headers
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
+
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-eval Next.js için gerekli
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      isDev
+        ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+        : "script-src 'self'",
+      isDev
+        ? "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
+        : "style-src 'self' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
       "media-src 'self' blob:",

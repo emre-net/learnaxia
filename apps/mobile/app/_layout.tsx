@@ -9,12 +9,15 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '../context/AuthContext';
 import { AnimatedSplash } from '@/components/ui/animated-splash';
 
-// Suppress non-critical API error banners from showing in the UI
-LogBox.ignoreLogs([
-  'AxiosError',
-  'Request failed with status code',
-  'Network Error',
-]);
+// Sadece dev modunda non-critical uyarıları bastır
+// AxiosError, Network Error gibi kritik hatalar kasıtlı olarak burada gizlenmez —
+// API interceptor'larının bu hataları yakalaması ve loglaması beklenir.
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    'Non-serializable values detected',
+    'ViewPropTypes will be removed',
+  ]);
+}
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',

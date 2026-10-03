@@ -81,53 +81,82 @@ apiClient.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // If 401 Unauthorized and we haven't already retried
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            
-            if (isRefreshing) {
-                // If currently refreshing, wait for it by adding request to queue
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                })
-                    .then(token => {
-                        originalRequest.headers.Authorization = `Bearer ${token}`;
-                        return apiClient(originalRequest);
-                    })
-                    .catch(err => Promise.reject(err));
-            }
-
-            originalRequest._retry = true;
-            isRefreshing = true;
-
-            try {
-                const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-                if (!refreshToken) throw new Error('No refresh token available');
-
-                const response = await axios.post(`${API_BASE_URL}/mobile/refresh`, {
-                    refreshToken
-                });
-
-                const { accessToken, refreshToken: newRefreshToken } = response.data;
-                await setAuthToken(accessToken, newRefreshToken);
-
-                // Process the queued requests with the new token
-                processQueue(null, accessToken);
-
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                // If refresh fails, clear everything and fail the queue
-                processQueue(refreshError, null);
-                await clearAuthToken();
-                
-                // DeviceEventEmitter ile logout olayı yayınlanabilir (AuthContext dinliyor)
-                
-                return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
-            }
+        // Guard: config yoksa veya 401 değilse doğrudan reddet
+        if (
+            error.response?.status !== 401 ||
+            !originalRequest ||
+            originalRequest._retry
+        ) {
+            return Promise.reject(error);
         }
-        return Promise.reject(error);
+
+        // Guard: refresh endpoint'inin kendisine gelen 401'i tekrar refresh etme
+        const isRefreshRequest =
+            typeof originalRequest.url === 'string' &&
+            originalRequest.url.includes('/mobile/refresh');
+
+        if (isRefreshRequest) {
+            await clearAuthToken();
+            return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+            // If currently refreshing, wait for it by adding request to queue
+            return new Promise<string>((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+            })
+                .then((token) => {
+                    if (!token) {
+                        return Promise.reject(new Error('Token refresh failed'));
+                    }
+                    originalRequest.headers = originalRequest.headers ?? {};
+                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    return apiClient(originalRequest);
+                })
+                .catch(err => Promise.reject(err));
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+            const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+            if (!refreshToken) throw new Error('No refresh token available');
+
+            // Refresh isteği apiClient dışında yapılır — interceptor döngüsünü önler
+            const response = await axios.post(`${API_BASE_URL}/mobile/refresh`, {
+                refreshToken
+            }, {
+                timeout: 15000,
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+            if (typeof accessToken !== 'string' || accessToken.length === 0) {
+                throw new Error('Refresh response did not contain a valid access token');
+            }
+
+            await setAuthToken(
+                accessToken,
+                typeof newRefreshToken === 'string' ? newRefreshToken : refreshToken
+            );
+
+            // Process the queued requests with the new token
+            processQueue(null, accessToken);
+
+            originalRequest.headers = originalRequest.headers ?? {};
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            return apiClient(originalRequest);
+        } catch (refreshError) {
+            // If refresh fails, clear everything and fail the queue
+            processQueue(refreshError, null);
+            await clearAuthToken();
+
+            return Promise.reject(refreshError);
+        } finally {
+            isRefreshing = false;
+        }
     }
 );
 

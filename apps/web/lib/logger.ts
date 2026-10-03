@@ -7,11 +7,15 @@ interface LogOptions {
 
 const logQueue: any[] = [];
 let flushTimeout: NodeJS.Timeout | null = null;
+let retryCount = 0;
+const MAX_RETRY_ATTEMPTS = 3;
 
 const flushLogs = async () => {
     if (logQueue.length === 0) return;
+
+    // Kuyruktan kopyala — başarılı olana kadar silme
     const batch = [...logQueue];
-    logQueue.length = 0;
+
     if (flushTimeout) {
         clearTimeout(flushTimeout);
         flushTimeout = null;
@@ -19,16 +23,51 @@ const flushLogs = async () => {
 
     try {
         const controller = new AbortController();
-        setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        await fetch('/api/logs', {
+        const response = await fetch('/api/logs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             signal: controller.signal,
             body: JSON.stringify(batch),
         });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        // Sadece başarılı flush'ta kuyruğu temizle
+        logQueue.splice(0, batch.length);
+        retryCount = 0;
     } catch (err) {
-        // Silent fail for logging errors
+        console.error('[Logger] Flush failed, retrying...', err);
+
+        if (retryCount < MAX_RETRY_ATTEMPTS) {
+            retryCount++;
+            const backoffMs = Math.min(1000 * Math.pow(2, retryCount), 30000);
+            flushTimeout = setTimeout(flushLogs, backoffMs);
+            return;
+        }
+
+        // Max retry aşıldı: localStorage'a yedekle
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const existing = localStorage.getItem('learnaxia_pending_logs') || '[]';
+                const pending = JSON.parse(existing);
+                const nextPending = [...pending, ...batch];
+                localStorage.setItem(
+                    'learnaxia_pending_logs',
+                    JSON.stringify(nextPending.slice(-1000))
+                );
+            } catch {
+                // localStorage erişim hatası — sessizce geç
+            }
+        }
+
+        logQueue.splice(0, batch.length);
+        retryCount = 0;
     }
 };
 
