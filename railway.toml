@@ -4,5 +4,5 @@ buildCommand = "npm run build -w web && cp -r apps/web/public apps/web/.next/sta
 
 [deploy]
 # preDeployCommand = "cd apps/web && npx prisma migrate deploy"
-startCommand = "node apps/web/.next/standalone/apps/web/server.js"
+startCommand = "node -e \"process.env.PORT=process.env.PORT||'8080'; require('./apps/web/.next/standalone/apps/web/server.js')\""
 restartPolicyType = "ON_FAILURE"
