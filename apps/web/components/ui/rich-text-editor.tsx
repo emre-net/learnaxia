@@ -13,7 +13,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Typography from '@tiptap/extension-typography';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
-import { common, createLowlight } from 'lowlight';
+import { lowlight } from 'lowlight';
 
 import {
     Bold,
@@ -49,7 +49,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 
-const lowlight = createLowlight(common);
+
 
 export interface RichTextEditorProps {
     value?: string;
