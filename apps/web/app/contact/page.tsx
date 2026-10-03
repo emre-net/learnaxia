@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
-import { Mail, Github, MessageSquare } from "lucide-react";
+import { Mail, ExternalLink, MessageSquare } from "lucide-react";
 
 export default function ContactPage() {
     return (
@@ -29,7 +29,7 @@ export default function ContactPage() {
 
                                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border hover:border-primary/50 transition-all group">
                                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                        <Github className="h-6 w-6" />
+                                        <ExternalLink className="h-6 w-6" />
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground uppercase font-black tracking-widest">GitHub</p>

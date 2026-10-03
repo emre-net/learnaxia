@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Copy, Check, MessageCircle, Twitter, Linkedin, Mail } from "lucide-react";
+import { Share2, Copy, Check, MessageCircle, Link, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -76,13 +76,13 @@ export function ShareButton({ type, id, title }: ShareButtonProps) {
         },
         {
             name: "X (Twitter)",
-            icon: Twitter,
+            icon: Share2,
             color: "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 border-zinc-200 dark:border-zinc-700",
             href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(link)}`,
         },
         {
             name: "LinkedIn",
-            icon: Linkedin,
+            icon: Link,
             color: "bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white border-[#0A66C2]/20",
             href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`,
         },
