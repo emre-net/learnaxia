@@ -1,9 +1,8 @@
-import { Tabs, useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { Tabs, useRouter, Redirect } from 'expo-router';
+import React from 'react';
 import { Platform, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,30 +12,14 @@ export default function TabLayout() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const scaleAnim = useSharedValue(1);
-
-  useEffect(() => {
-      scaleAnim.value = withRepeat(
-          withTiming(1.08, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-          -1,
-          true
-      );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: scaleAnim.value }],
-  }));
-
   const handleCreatePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/create');
   };
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace('/login');
-    }
-  }, [user, isLoading, router]);
+  if (!isLoading && !user) {
+    return <Redirect href="/login" />;
+  }
 
   return (
     <Tabs
@@ -96,9 +79,9 @@ export default function TabLayout() {
         name="create_placeholder"
         options={{
           tabBarIcon: () => (
-            <Animated.View style={[styles.floatingButton, animatedStyle]}>
+            <View style={styles.floatingButton}>
               <Ionicons name="add" size={28} color="#000000" />
-            </Animated.View>
+            </View>
           ),
           tabBarButton: (props) => (
             <TouchableOpacity

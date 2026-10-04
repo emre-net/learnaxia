@@ -112,13 +112,18 @@ apiClient.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // Guard: refresh endpoint'inin kendisine gelen 401'i tekrar refresh etme
-        const isRefreshRequest =
+        // Guard: auth endpoint'lerinin (login, register, forgot-password, refresh) 401 yanıtlarında token yenileme denenmemelidir
+        const isAuthEndpoint =
             typeof originalRequest.url === 'string' &&
-            originalRequest.url.includes('/mobile/refresh');
+            (originalRequest.url.includes('/mobile/login') ||
+             originalRequest.url.includes('/mobile/register') ||
+             originalRequest.url.includes('/mobile/refresh') ||
+             originalRequest.url.includes('/mobile/forgot-password'));
 
-        if (isRefreshRequest) {
-            await clearAuthToken();
+        if (isAuthEndpoint) {
+            if (originalRequest.url.includes('/mobile/refresh')) {
+                await clearAuthToken();
+            }
             return Promise.reject(error);
         }
 

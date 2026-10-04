@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, AppState, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -68,8 +68,13 @@ export default function HomeScreen() {
     }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchDashboardData();
+    }, [fetchDashboardData])
+  );
+
   useEffect(() => {
-    fetchDashboardData();
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') fetchDashboardData();
     });

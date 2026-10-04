@@ -10,6 +10,7 @@ import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
 import Constants from 'expo-constants';
+import { useFocusEffect } from 'expo-router';
 
 export default function ProfileScreen() {
     const { user, logout } = useAuth();
@@ -46,9 +47,11 @@ export default function ProfileScreen() {
         }
     }, []);
 
-    useEffect(() => {
-        fetchProfile();
-    }, [fetchProfile]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchProfile();
+        }, [fetchProfile])
+    );
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);

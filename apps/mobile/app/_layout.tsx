@@ -20,7 +20,7 @@ if (__DEV__) {
 }
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  initialRouteName: 'login',
 };
 
 export default function RootLayout() {
@@ -28,14 +28,14 @@ export default function RootLayout() {
   const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#050A14' }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#000000' }}>
       <AuthProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack
             screenOptions={{
               headerShown: false,
               animation: 'fade',
-              contentStyle: { backgroundColor: '#050A14' }
+              contentStyle: { backgroundColor: '#000000' }
             }}
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -52,7 +52,7 @@ export default function RootLayout() {
             <AnimatedSplash onComplete={() => setIsSplashComplete(true)} />
           )}
 
-          <StatusBar style="light" backgroundColor="#050A14" />
+          <StatusBar style="light" backgroundColor="#000000" />
         </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>

@@ -35,7 +35,7 @@ export default function StudyScreen() {
         items: Array<{
             id: string;
             type: string;
-            content: { question?: string; answer?: string; content?: string; correctAnswer?: string };
+            content: { question?: string; answer?: string; front?: string; back?: string; content?: string; correctAnswer?: string };
         }>;
     } | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -322,7 +322,7 @@ export default function StudyScreen() {
                                         <Text style={styles.labelText}>SORU</Text>
                                     </View>
                                     <Text style={styles.cardText}>
-                                        {currentItem.content.question || 'Soru eksik'}
+                                        {currentItem.content.question || currentItem.content.front || 'Soru eksik'}
                                     </Text>
                                     <View style={styles.tapHint}>
                                         <Ionicons name="hand-right-outline" size={14} color="#64748B" />
@@ -336,7 +336,7 @@ export default function StudyScreen() {
                                         <Text style={[styles.labelText, { color: '#F8FAFC' }]}>CEVAP</Text>
                                     </View>
                                     <Text style={[styles.cardText, { color: '#F8FAFC' }]}>
-                                        {currentItem.content.answer || currentItem.content.content || 'Cevap eksik'}
+                                        {currentItem.content.answer || currentItem.content.back || currentItem.content.content || 'Cevap eksik'}
                                     </Text>
                                 </Animated.View>
                             </View>

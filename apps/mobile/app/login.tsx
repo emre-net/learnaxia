@@ -195,21 +195,7 @@ export default function LoginScreen() {
                             )}
                         </TouchableOpacity>
 
-                        {/* Social Sign in - Minimal */}
-                        <View style={styles.socialContainer}>
-                            <View style={styles.divider}>
-                                <View style={styles.dividerLine} />
-                                <Text style={styles.dividerText}>{t('auth.or', currentLang)}</Text>
-                                <View style={styles.dividerLine} />
-                            </View>
-                            
-                            <TouchableOpacity style={styles.socialButton} disabled={true}>
-                                <Text style={styles.socialButtonText}>{t('auth.googleLogin', currentLang)}</Text>
-                                <View style={styles.soonBadge}>
-                                    <Text style={styles.soonText}>{t('auth.comingSoon', currentLang)}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
+
 
                     </Animated.View>
 

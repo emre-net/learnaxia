@@ -6,7 +6,7 @@ import {
 import { Screen } from '@/components/ui/screen';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
@@ -71,9 +71,11 @@ export default function LibraryScreen() {
         }
     }, []);
 
-    useEffect(() => {
-        fetchLibrary();
-    }, [fetchLibrary]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchLibrary();
+        }, [fetchLibrary])
+    );
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);

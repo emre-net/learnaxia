@@ -57,7 +57,12 @@ export default function NewModuleScreen() {
 
         try {
             const formattedItems = validItems.map((item, index) => ({
-                content: { front: item.front.trim(), back: item.back.trim() },
+                content: {
+                    front: item.front.trim(),
+                    back: item.back.trim(),
+                    question: item.front.trim(),
+                    answer: item.back.trim(),
+                },
                 type: 'FLASHCARD',
                 order: index
             }));
@@ -90,11 +95,7 @@ export default function NewModuleScreen() {
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" />
-            <LinearGradient
-                colors={['#050A14', '#090F1D']}
-                style={StyleSheet.absoluteFillObject}
-            />
+            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
 
             {/* Header */}
             <View style={styles.header}>
@@ -213,56 +214,56 @@ export default function NewModuleScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#050A14' },
+    screen: { flex: 1, backgroundColor: '#09090b' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 24, paddingTop: 64, paddingBottom: 16,
-        borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomWidth: 1, borderBottomColor: '#27272a',
     },
     closeBtn: {
-        width: 40, height: 40, borderRadius: 20, backgroundColor: '#090F1D',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#182234',
+        width: 40, height: 40, borderRadius: 20, backgroundColor: '#18181b',
+        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#27272a',
     },
-    headerTitle: { color: '#F8FAFC', fontWeight: '600', fontSize: 18 },
+    headerTitle: { color: '#f4f4f5', fontWeight: '600', fontSize: 18 },
     saveBtn: {
-        backgroundColor: '#3B82F6', paddingHorizontal: 16, paddingVertical: 10,
+        backgroundColor: '#2563eb', paddingHorizontal: 16, paddingVertical: 10,
         borderRadius: 20, flexDirection: 'row', alignItems: 'center', gap: 4,
     },
-    saveBtnDisabled: { backgroundColor: '#182234', opacity: 0.5 },
-    saveBtnText: { color: 'white', fontWeight: '700', fontSize: 13, marginLeft: 4 },
+    saveBtnDisabled: { backgroundColor: '#27272a', opacity: 0.5 },
+    saveBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13, marginLeft: 4 },
     scrollContent: { paddingHorizontal: 20, paddingVertical: 24, paddingBottom: 100 },
-    sectionLabel: { color: '#64748B', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 12, marginLeft: 4 },
+    sectionLabel: { color: '#71717a', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 12, marginLeft: 4 },
     inputContainer: {
-        backgroundColor: '#0A0A0A', borderWidth: 1, borderColor: '#111111', borderRadius: 16,
+        backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a', borderRadius: 16,
         paddingHorizontal: 16, paddingVertical: 16, marginBottom: 12,
     },
-    inputFocused: { borderColor: '#3B82F6' },
-    input: { color: '#F8FAFC', fontSize: 16, fontWeight: '600' },
+    inputFocused: { borderColor: '#3b82f6' },
+    input: { color: '#f4f4f5', fontSize: 16, fontWeight: '600' },
     row: { flexDirection: 'row', gap: 12 },
     halfInput: { flex: 1 },
-    inputSmall: { color: '#F8FAFC', fontSize: 14 },
+    inputSmall: { color: '#f4f4f5', fontSize: 14 },
     cardItem: {
-        backgroundColor: '#0A0A0A', borderWidth: 1, borderColor: '#111111', borderRadius: 20,
+        backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a', borderRadius: 20,
         marginBottom: 16, overflow: 'hidden',
     },
     cardHeader: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#0F172A',
+        paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#27272a',
     },
-    cardLabel: { color: '#94A3B8', fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+    cardLabel: { color: '#a1a1aa', fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
     removeBtn: { padding: 4 },
     cardInput: {
-        color: '#F8FAFC', fontSize: 16, paddingHorizontal: 16, paddingVertical: 16,
+        color: '#f4f4f5', fontSize: 16, paddingHorizontal: 16, paddingVertical: 16,
         minHeight: 80, textAlignVertical: 'top',
     },
     cardInputBack: {
-        color: '#A855F7',
+        color: '#38bdf8',
     },
-    cardDivider: { height: 1, backgroundColor: '#111111', marginHorizontal: 16 },
+    cardDivider: { height: 1, backgroundColor: '#27272a', marginHorizontal: 16 },
     addCardBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)',
+        backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a',
         borderRadius: 20, paddingVertical: 16, gap: 8, marginTop: 8,
     },
-    addCardBtnText: { color: '#3B82F6', fontSize: 15, fontWeight: '600' },
+    addCardBtnText: { color: '#f4f4f5', fontSize: 15, fontWeight: '600' },
 });
