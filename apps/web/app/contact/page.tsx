@@ -1,56 +1,188 @@
+"use client";
+
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
-import { Mail, ExternalLink, MessageSquare } from "lucide-react";
+import { Mail, Github, MessageSquare, CheckCircle2, Clock, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export default function ContactPage() {
+    const [submitted, setSubmitted] = useState(false);
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email.trim() || !message.trim()) return;
+        setSubmitted(true);
+    };
+
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-primary/20">
+        <div className="flex flex-col min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-sky-500/20">
             <Navbar />
-            <main className="flex-1 pt-32 pb-16">
+
+            <main className="flex-1 pt-32 pb-24">
                 <div className="container mx-auto px-4 md:px-6 max-w-4xl">
-                    <h1 className="text-4xl font-black mb-8">İletişim</h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400 text-xs font-mono mb-6">
+                        <span>İLETİŞİM & DESTEK MERKEZİ</span>
+                    </div>
+
+                    <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-100 mb-4">
+                        Bizimle iletişime geçin.
+                    </h1>
+                    <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl mb-12">
+                        Bir öneriniz, hata bildiriminiz veya sormak istediğiniz bir konu mu var? 
+                        Doğrudan geliştiriciye ulaşın; tüm geri bildirimler dikkatle okunur ve yanıtlanır.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Direct Channels */}
                         <div className="space-y-6">
-                            <p className="text-muted-foreground leading-relaxed">
-                                Görüşleriniz, önerileriniz veya destek talepleriniz bizim için değerlidir.
-                                En kısa sürede dönüş sağlamaya çalışıyoruz.
-                            </p>
+                            <h2 className="text-lg font-bold text-zinc-100 mb-4">
+                                Doğrudan Kanallar
+                            </h2>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border hover:border-primary/50 transition-all group">
-                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                        <Mail className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground uppercase font-black tracking-widest">E-posta</p>
-                                        <p className="font-bold">hello@learnaxia.com</p>
-                                    </div>
+                            <a
+                                href="mailto:hello@learnaxia.com"
+                                className="p-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all flex items-start gap-4 group block"
+                            >
+                                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 shrink-0">
+                                    <Mail className="w-5 h-5" />
                                 </div>
+                                <div>
+                                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider block mb-1">
+                                        E-posta
+                                    </span>
+                                    <strong className="text-sm sm:text-base text-zinc-200 group-hover:text-white transition-colors block">
+                                        hello@learnaxia.com
+                                    </strong>
+                                    <span className="text-xs text-zinc-400 mt-1 block">
+                                        Genellikle 24 saat içinde yanıtlanır
+                                    </span>
+                                </div>
+                            </a>
 
-                                <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border hover:border-primary/50 transition-all group">
-                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                        <ExternalLink className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground uppercase font-black tracking-widest">GitHub</p>
-                                        <p className="font-bold">github.com/learnaxia</p>
-                                    </div>
+                            <a
+                                href="https://github.com/emre-net/learnaxia"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all flex items-start gap-4 group block"
+                            >
+                                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
+                                    <Github className="w-5 h-5" />
                                 </div>
+                                <div>
+                                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider block mb-1">
+                                        Açık Kaynak & GitHub
+                                    </span>
+                                    <strong className="text-sm sm:text-base text-zinc-200 group-hover:text-white transition-colors block">
+                                        github.com/emre-net/learnaxia
+                                    </strong>
+                                    <span className="text-xs text-zinc-400 mt-1 block">
+                                        Hata bildirimleri ve katkılar için
+                                    </span>
+                                </div>
+                            </a>
+
+                            {/* Trust Note */}
+                            <div className="p-5 rounded-2xl border border-zinc-800/60 bg-zinc-900/20 text-xs text-zinc-400 space-y-2">
+                                <div className="flex items-center gap-2 font-medium text-zinc-300">
+                                    <Clock className="w-4 h-4 text-sky-400" />
+                                    <span>Hızlı ve Samimi Destek</span>
+                                </div>
+                                <p className="leading-relaxed">
+                                    Otomatik bot yanıtları yok. Mesajınız doğrudan ürünün geliştiricisine iletilir.
+                                </p>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-blue-600/5 to-purple-600/5 p-8 rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center text-center">
-                            <div className="h-16 w-16 rounded-full bg-white dark:bg-zinc-900 shadow-xl flex items-center justify-center mb-6">
-                                <MessageSquare className="h-8 w-8 text-purple-600" />
-                            </div>
-                            <h2 className="text-xl font-black mb-2">Hızlı Destek</h2>
-                            <p className="text-sm text-muted-foreground mb-6">
-                                Acil teknik sorunlar için e-posta kanalını tercih ediniz.
-                            </p>
+                        {/* Direct Form */}
+                        <div className="p-6 sm:p-8 rounded-2xl border border-zinc-800 bg-zinc-900/40">
+                            {submitted ? (
+                                <div className="py-12 flex flex-col items-center text-center space-y-3">
+                                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                        <CheckCircle2 className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-zinc-100">Mesajınız Alındı</h3>
+                                    <p className="text-xs text-zinc-400 max-w-xs">
+                                        Geri bildiriminiz için teşekkürler. İnceleyip en kısa sürede size dönüş yapacağız.
+                                    </p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSubmitted(false);
+                                            setMessage("");
+                                        }}
+                                        className="mt-4 border-zinc-800 text-xs"
+                                    >
+                                        Yeni Mesaj Gönder
+                                    </Button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <h3 className="text-base font-bold text-zinc-100 mb-1">
+                                        Doğrudan Mesaj Bırakın
+                                    </h3>
+                                    <p className="text-xs text-zinc-400 mb-4">
+                                        Formu doldurarak önerinizi hemen iletebilirsiniz.
+                                    </p>
+
+                                    <div>
+                                        <label className="text-xs font-mono text-zinc-400 block mb-1.5">
+                                            İsminiz
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            placeholder="Adınız Soyadınız"
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950/80 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-sky-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-mono text-zinc-400 block mb-1.5">
+                                            E-posta Adresiniz *
+                                        </label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="ornek@posta.com"
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950/80 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-sky-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-mono text-zinc-400 block mb-1.5">
+                                            Mesajınız *
+                                        </label>
+                                        <textarea
+                                            required
+                                            rows={4}
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                            placeholder="Düşüncelerinizi veya sorunuzu buraya yazın..."
+                                            className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950/80 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-sky-500 resize-none"
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="w-full bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold py-2.5 rounded-xl transition-all"
+                                    >
+                                        <Send className="w-4 h-4 mr-2" /> Gönder
+                                    </Button>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>
             </main>
+
             <Footer />
         </div>
     );

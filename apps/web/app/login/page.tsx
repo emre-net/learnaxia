@@ -3,132 +3,120 @@ import Link from "next/link"
 import Image from "next/image"
 import { Suspense } from "react"
 import { AuthForm } from "@/components/auth/auth-form"
-import { BrainCircuit, Zap, BookOpen, Sparkles, CheckCircle } from "lucide-react"
+import { BrainCircuit, Zap, CheckCircle2, ShieldCheck, Clock } from "lucide-react"
 
 export const metadata: Metadata = {
-    title: "Giriş Yap | Learnaxia",
-    description: "Hesabına giriş yap veya yeni kayıt oluştur.",
+    title: "Giriş Yap & Kayıt Ol | Learnaxia",
+    description: "Learnaxia hesabınıza giriş yapın veya yeni bir hesap oluşturun.",
 }
 
-const FEATURES = [
+const HIGHLIGHTS = [
     {
         icon: BrainCircuit,
-        color: "text-purple-400",
-        bg: "bg-purple-500/15 border-purple-500/20",
-        title: "Akıllı Tekrar Sistemi",
-        desc: "SM-2 algoritması ile kişiselleştirilmiş öğrenme yolu",
-        delay: "0s",
-    },
-    {
-        icon: Sparkles,
-        color: "text-cyan-400",
-        bg: "bg-cyan-500/15 border-cyan-500/20",
-        title: "Yapay Zeka ile Üret",
-        desc: "Doküman ve notlarından saniyeler içinde flashcard",
-        delay: "0.15s",
+        title: "SM-2 Aralıklı Tekrar",
+        desc: "Hafıza eğrisine göre optimize edilmiş kart tekrarları",
     },
     {
         icon: Zap,
-        color: "text-amber-400",
-        bg: "bg-amber-500/15 border-amber-500/20",
-        title: "Hızlı Öğrenme",
-        desc: "Odak modu ve Pomodoro timer ile verimli çalışma",
-        delay: "0.3s",
+        title: "Hızlı İçerik Üretimi",
+        desc: "PDF ve notlardan saniyeler içinde çalışma kartları",
     },
     {
-        icon: CheckCircle,
-        color: "text-emerald-400",
-        bg: "bg-emerald-500/15 border-emerald-500/20",
-        title: "İlerleme Takibi",
-        desc: "Detaylı analitik ile güçlü ve zayıf yönlerini gör",
-        delay: "0.45s",
+        icon: CheckCircle2,
+        title: "Ölçülebilir İlerleme",
+        desc: "Çalışma süresi, doğruluk oranı ve momentum analitiği",
     },
 ]
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex flex-col md:flex-row bg-background">
-            {/* Left Panel: Branding & Animated Features */}
-            <div className="hidden md:flex flex-1 relative bg-slate-950 overflow-hidden flex-col justify-between p-12">
-                {/* Gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-slate-950 z-0" />
+        <div className="min-h-screen flex flex-col md:flex-row bg-zinc-950 text-zinc-100 antialiased selection:bg-sky-500/20">
+            {/* Left Panel: Curated Product Narrative */}
+            <div className="hidden md:flex flex-1 relative bg-zinc-900/40 border-r border-zinc-800/80 overflow-hidden flex-col justify-between p-12 lg:p-16">
+                {/* Subtle Grid Accent */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293d0f_1px,transparent_1px),linear-gradient(to_bottom,#1f293d0f_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
 
-                {/* Animated glowing shapes */}
-                <div
-                    className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/30 blur-[120px] rounded-full pointer-events-none z-0"
-                    style={{ animation: 'float 8s ease-in-out infinite' }}
-                />
-                <div
-                    className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-600/30 blur-[120px] rounded-full pointer-events-none z-0"
-                    style={{ animation: 'float 10s ease-in-out infinite reverse' }}
-                />
-                <div
-                    className="absolute top-[40%] right-[10%] w-[30%] h-[30%] bg-cyan-600/20 blur-[80px] rounded-full pointer-events-none z-0"
-                    style={{ animation: 'float 6s ease-in-out infinite 2s' }}
-                />
-
-                {/* Logo */}
+                {/* Brand Logo & Name */}
                 <div className="relative z-10">
-                    <Link href="/" className="flex items-center gap-3">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]" />
-                        <span className="text-4xl font-black tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase">
-                            LEARNAXIA
+                    <Link href="/" className="inline-flex items-center gap-3 group">
+                        <Image
+                            src="/logo.png"
+                            alt="Learnaxia Logo"
+                            width={36}
+                            height={36}
+                            className="w-9 h-9 object-contain shrink-0 transition-transform group-hover:scale-105"
+                        />
+                        <span className="text-xl font-bold tracking-tight text-zinc-100 group-hover:text-white transition-colors">
+                            Learnaxia
                         </span>
                     </Link>
                 </div>
 
-                {/* Hero Text */}
-                <div className="relative z-10 space-y-8">
+                {/* Central Value Statement */}
+                <div className="relative z-10 max-w-lg space-y-8 my-auto py-12">
                     <div className="space-y-4">
-                        <h1 className="text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-                            Öğrenme yolculuğuna
-                            <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-                                yapay zeka
+                        <span className="text-xs font-mono uppercase tracking-widest text-sky-400 bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full inline-block">
+                            Bilişsel Bilim Destekli Öğrenme
+                        </span>
+                        <h1 className="text-3xl lg:text-4xl font-extrabold text-zinc-100 tracking-tight leading-tight">
+                            Ezber yükünü bırakın,{" "}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500">
+                                akılcı tekrarlarla
                             </span>{" "}
-                            ile yön ver.
+                            uzmanlaşın.
                         </h1>
-                        <p className="text-base text-slate-400 max-w-md leading-relaxed">
-                            Notlarını ve hedeflerini saniyeler içinde interaktif testlere, flashcard'lara ve öğrenme yolculuklarına dönüştür.
+                        <p className="text-sm text-zinc-400 leading-relaxed font-normal">
+                            Notlarınızı, PDF&apos;lerinizi ve ders slaytlarınızı saniyeler içinde zenginleştirilmiş çalışma setlerine dönüştürün.
                         </p>
                     </div>
 
-                    {/* Animated Feature Cards */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {FEATURES.map((feature) => (
+                    {/* Features List */}
+                    <div className="space-y-3 pt-2">
+                        {HIGHLIGHTS.map((item, idx) => (
                             <div
-                                key={feature.title}
-                                className={`flex items-start gap-3 p-4 rounded-2xl border backdrop-blur-sm ${feature.bg}`}
-                                style={{
-                                    animation: `float 6s ease-in-out infinite`,
-                                    animationDelay: feature.delay,
-                                }}
+                                key={idx}
+                                className="flex items-start gap-3.5 p-3.5 rounded-xl border border-zinc-800/80 bg-zinc-950/60"
                             >
-                                <div className={`mt-0.5 shrink-0 ${feature.color}`}>
-                                    <feature.icon className="w-5 h-5" />
+                                <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400 shrink-0">
+                                    <item.icon className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-white">{feature.title}</p>
-                                    <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{feature.desc}</p>
+                                    <p className="text-xs font-semibold text-zinc-200">{item.title}</p>
+                                    <p className="text-[11px] text-zinc-400 leading-relaxed mt-0.5">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+
+                {/* Bottom Trust Quote */}
+                <div className="relative z-10 pt-6 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-500">
+                    <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        Güvenli ve şifreli veri saklama
+                    </span>
+                    <span className="font-mono text-[11px]">v2.4 Production</span>
+                </div>
             </div>
 
             {/* Right Panel: Auth Form */}
-            <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-24 relative overflow-y-auto">
-                <div className="w-full max-w-[440px] space-y-8">
+            <div className="flex-1 flex items-center justify-center p-6 md:p-12 lg:p-16 relative">
+                <div className="w-full max-w-[420px] space-y-6">
                     {/* Mobile Logo Only */}
-                    <div className="md:hidden flex flex-col items-center justify-center space-y-4 mb-8 overflow-hidden">
-                        <Image src="/logo.png" alt="Learnaxia Logo" width={64} height={64} className="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)] shrink-0" />
-                        <h1 className="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase truncate">
-                            LEARNAXIA
-                        </h1>
+                    <div className="md:hidden flex flex-col items-center justify-center space-y-2 mb-6">
+                        <Image
+                            src="/logo.png"
+                            alt="Learnaxia Logo"
+                            width={48}
+                            height={48}
+                            className="w-12 h-12 object-contain"
+                        />
+                        <span className="text-xl font-bold tracking-tight text-zinc-100">
+                            Learnaxia
+                        </span>
                     </div>
 
-                    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>}>
+                    <Suspense fallback={<div className="flex justify-center items-center h-64"><div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" /></div>}>
                         <AuthForm />
                     </Suspense>
                 </div>
