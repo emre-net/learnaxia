@@ -11,20 +11,20 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        // 1. Get recent study sessions to find modules the user studied recently
-        const recentSessions = await prisma.studySession.findMany({
+        // 1. Get recent learning sessions
+        const recentSessions = await prisma.learningSession.findMany({
             where: { userId: user.id },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { startedAt: 'desc' },
             take: 10,
             select: {
                 moduleId: true,
-                createdAt: true,
+                startedAt: true,
                 module: {
                     select: {
                         id: true,
                         title: true,
                         type: true,
-                        updatedAt: true,
+                        createdAt: true,
                     }
                 }
             }
@@ -40,37 +40,69 @@ export async function GET(req: Request) {
                     id: session.module.id,
                     title: session.module.title,
                     type: session.module.type,
-                    lastStudied: session.createdAt.toISOString(),
+                    lastStudied: session.startedAt.toISOString(),
                 });
             }
         }
 
-        // 2. If fewer than 5, fill with user's created or library modules
+        // 2. Also check userModuleLibrary for recently interacted modules
         if (modules.length < 5) {
-            const fallbackModules = await prisma.module.findMany({
+            const libraryEntries = await prisma.userModuleLibrary.findMany({
                 where: {
-                    OR: [
-                        { ownerId: user.id },
-                        { userLibrary: { some: { userId: user.id } } }
-                    ],
+                    userId: user.id,
+                    moduleId: { notIn: Array.from(seenModuleIds) }
+                },
+                take: 5 - modules.length,
+                orderBy: { lastInteractionAt: 'desc' },
+                select: {
+                    lastInteractionAt: true,
+                    module: {
+                        select: {
+                            id: true,
+                            title: true,
+                            type: true,
+                            createdAt: true,
+                        }
+                    }
+                }
+            });
+
+            for (const entry of libraryEntries) {
+                if (entry.module && !seenModuleIds.has(entry.module.id)) {
+                    seenModuleIds.add(entry.module.id);
+                    modules.push({
+                        id: entry.module.id,
+                        title: entry.module.title,
+                        type: entry.module.type,
+                        lastStudied: entry.lastInteractionAt.toISOString(),
+                    });
+                }
+            }
+        }
+
+        // 3. Fallback: User's owned modules
+        if (modules.length < 5) {
+            const ownedModules = await prisma.module.findMany({
+                where: {
+                    ownerId: user.id,
                     id: { notIn: Array.from(seenModuleIds) }
                 },
                 take: 5 - modules.length,
-                orderBy: { updatedAt: 'desc' },
+                orderBy: { createdAt: 'desc' },
                 select: {
                     id: true,
                     title: true,
                     type: true,
-                    updatedAt: true,
+                    createdAt: true,
                 }
             });
 
-            for (const mod of fallbackModules) {
+            for (const mod of ownedModules) {
                 modules.push({
                     id: mod.id,
                     title: mod.title,
                     type: mod.type,
-                    lastStudied: mod.updatedAt.toISOString(),
+                    lastStudied: mod.createdAt.toISOString(),
                 });
             }
         }
