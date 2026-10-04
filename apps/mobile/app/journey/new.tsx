@@ -50,7 +50,7 @@ export default function NewJourneyScreen() {
 
             if (startRes.data.journeyId) {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                router.replace(`/study/${startRes.data.journeyId}` as any);
+                router.replace(`/journey/${startRes.data.journeyId}` as any);
             } else {
                 throw new Error('Yolculuk başlatılamadı.');
             }

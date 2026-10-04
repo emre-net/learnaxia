@@ -66,6 +66,9 @@
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": false
+    },
+    "extra": {
+      "apiUrl": "https://learnaxia.com/api"
     }
   }
 }

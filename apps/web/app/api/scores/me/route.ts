@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { calculateMomentum, saveAndRecalculate } from "@/lib/scoring/engine";
 import { getTierForScore, getTierProgress, getPointsToNextTier } from "@/lib/scoring/tiers";
 import { getBadgeDetails } from "@/lib/scoring/badges";
@@ -11,13 +12,25 @@ import { NextResponse } from "next/server";
  * Kullanıcının güncel Momentum skoru, tier, rozetler ve görünür metrikler.
  * Gizli sinyal ağırlıkları asla dönmez.
  */
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) {
+        let userId: string | undefined;
+
+        // 1. Mobile Bearer token
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            // 2. Web session
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        const userId = session.user.id;
 
         // Bu ay için skor hesapla (DB'den cache'li değer varsa kullan)
         const period = periodStart();

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
@@ -19,14 +20,23 @@ const StartJourneySchema = z.object({
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await req.json();
         const { topic, depth, syllabus } = StartJourneySchema.parse(body);
-        const userId = session.user.id;
 
         const user = await prisma.user.findUnique({ where: { id: userId } });
         const language = user?.language || "tr";

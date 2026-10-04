@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { getMobileUser } from '@/lib/auth/mobile-jwt';
 import prisma from '@/lib/prisma';
 import { AIService } from '@/domains/ai/ai.service';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -13,17 +14,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
         }
 
-        // Optional: Implement rate limiting
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
 
-        const session = await auth();
-        // M4: Auth zorunlu
-        if (!session?.user?.id) {
+        // Auth zorunlu
+        if (!userId) {
             return NextResponse.json({ error: 'Bu özelliği kullanmak için giriş yapmalısınız.' }, { status: 401 });
         }
 
-        // S6: Rate limit — saatte 10 AI isteği
+        // Rate limit — saatte 10 AI isteği
         const rateLimitResult = await checkRateLimit({
-            key: `ai-journey:${session.user.id}`,
+            key: `ai-journey:${userId}`,
             limit: 10,
             windowMs: 60 * 60 * 1000
         });
@@ -32,7 +41,7 @@ export async function POST(req: Request) {
         }
 
         let userLang = "tr";
-        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+        const user = await prisma.user.findUnique({ where: { id: userId } });
         if (user?.language) userLang = user.language;
 
         const validation = await AIService.validateTopic(topic, userLang);

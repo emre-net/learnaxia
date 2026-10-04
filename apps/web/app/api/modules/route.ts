@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { ModuleService } from "@/domains/module/module.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -25,15 +26,25 @@ const CreateModuleSchema = z.object({
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await req.json();
         const validatedData = CreateModuleSchema.parse(body);
 
-        const module = await ModuleService.create(session.user.id, validatedData);
+        const module = await ModuleService.create(userId, validatedData);
 
         return NextResponse.json(module, { status: 201 });
     } catch (error) {
@@ -47,8 +58,18 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -63,11 +84,11 @@ export async function GET(req: Request) {
         const role = searchParams.get("role") || "all";
 
         if (scope === "discover") {
-            const modules = await ModuleService.getDiscoverModules(session.user.id, search);
+            const modules = await ModuleService.getDiscoverModules(userId, search);
             return NextResponse.json(modules);
         }
 
-        const libraryPayload = await ModuleService.getUserLibrary(session.user.id, limit, offset, { search, type, category, role });
+        const libraryPayload = await ModuleService.getUserLibrary(userId, limit, offset, { search, type, category, role });
         return NextResponse.json(libraryPayload);
     } catch (error) {
         console.error("Get Modules Error:", error);

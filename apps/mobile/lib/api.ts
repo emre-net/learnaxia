@@ -15,11 +15,28 @@ const getDevBaseUrl = () => {
     return 'http://127.0.0.1:3000/api';
 };
 
-// 1. Öncelik: .env dosyasından gelen URL (Mevcutsa Railway veya başka bir canlı ortam)
-// 2. Öncelik: Eğer geliştirme ortamındaysak ve .env yoksa (Localhost)
-// 3. Öncelik: Prod ortamındaysak ve .env yoksa (Ana domain)
-const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
-export const API_BASE_URL = envApiUrl || (isDev ? getDevBaseUrl() : 'https://www.learnaxia.com/api');
+const DEFAULT_PROD_API_URL = 'https://learnaxia.com/api';
+
+const resolveApiBaseUrl = () => {
+    // 1. If explicit env variable is set
+    const envUrl = process.env.EXPO_PUBLIC_API_URL;
+    if (envUrl && envUrl.trim().length > 0) {
+        return envUrl.trim().replace('https://www.learnaxia.com', 'https://learnaxia.com');
+    }
+    // 2. If app.json extra config has apiUrl
+    const extraApiUrl = (Constants.expoConfig?.extra as Record<string, any> | undefined)?.apiUrl;
+    if (extraApiUrl && typeof extraApiUrl === 'string' && extraApiUrl.trim().length > 0) {
+        return extraApiUrl.trim().replace('https://www.learnaxia.com', 'https://learnaxia.com');
+    }
+    // 3. Only if explicitly opted into local dev mode via EXPO_PUBLIC_USE_LOCAL === 'true'
+    if (process.env.EXPO_PUBLIC_USE_LOCAL === 'true') {
+        return getDevBaseUrl();
+    }
+    // 4. Default: Live production API on Railway
+    return DEFAULT_PROD_API_URL;
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 const TOKEN_KEY = 'learnaxia_access_token';
 const REFRESH_TOKEN_KEY = 'learnaxia_refresh_token';
@@ -55,6 +72,11 @@ apiClient.interceptors.request.use(async (config) => {
     const token = await getAuthToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    // React Native'de FormData ile yapılan yüklemelerde Content-Type'ı silerek
+    // boundary parametresinin otomatik ve doğru eklenmesini sağla
+    if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
     }
     return config;
 });
@@ -102,7 +124,7 @@ apiClient.interceptors.response.use(
 
         if (isRefreshing) {
             // If currently refreshing, wait for it by adding request to queue
-            return new Promise<string>((resolve, reject) => {
+            return new Promise<string | null>((resolve, reject) => {
                 failedQueue.push({ resolve, reject });
             })
                 .then((token) => {

@@ -64,10 +64,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (res.data) {
                 setUser(res.data);
             }
-        } catch (error) {
+        } catch (error: any) {
             if (__DEV__) console.error('[AuthContext] refreshProfile error:', error);
-            // Profil yenilenemezse oturumu sonlandır
-            await logout();
+            // Sadece 401 Unauthorized durumunda oturumu sonlandır (ağ kopmalarında oturumu kapatma)
+            if (error?.response?.status === 401) {
+                await logout();
+            }
         }
     }, [logout]);
 

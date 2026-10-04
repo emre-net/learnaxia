@@ -83,6 +83,7 @@ export default function JourneyPlayerScreen() {
         if (currentIndex < journey.slides.length - 1) {
             setCurrentIndex(prev => prev + 1);
         } else {
+            api.post(`/mobile/journeys/${id}/complete`).catch(() => {});
             router.back();
         }
     }, [currentIndex, journey, router, id]);
