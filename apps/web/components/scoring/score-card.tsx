@@ -48,8 +48,13 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
 
     useEffect(() => {
         fetch("/api/scores/me")
-            .then(r => r.json())
-            .then(setData)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (d && d.tier && d.momentum) {
+                    setData(d);
+                }
+            })
+            .catch(() => setData(null))
             .finally(() => setLoading(false));
     }, []);
 
@@ -61,10 +66,10 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
         );
     }
 
-    if (!data) return null;
+    if (!data || !data.tier || !data.tier[view] || !data.momentum) return null;
 
     const tier = data.tier[view];
-    const momentum = view === "thisMonth" ? data.momentum.thisMonth : data.momentum.allTime;
+    const momentum = view === "thisMonth" ? (data.momentum.thisMonth ?? 0) : (data.momentum.allTime ?? 0);
     const tierObj = getTierForScore(momentum);
 
     if (compact) {
