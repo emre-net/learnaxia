@@ -48,6 +48,7 @@ config.resolver.blockList = exclusionList([
 
 // Ensure critical packages resolve correctly in the monorepo
 config.resolver.extraNodeModules = {
+    '@': projectRoot,
     '@learnaxia/shared': path.resolve(workspaceRoot, 'packages/shared'),
     'react-native-worklets': path.resolve(workspaceRoot, 'node_modules/react-native-worklets-core'),
     'react': path.resolve(projectRoot, 'node_modules/react'),
@@ -59,6 +60,10 @@ config.resolver.extraNodeModules = {
 
 // Force Metro to always resolve 'react' to the local React 18 version (not root's React 19)
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName.startsWith('@/')) {
+    const targetPath = path.resolve(projectRoot, moduleName.substring(2));
+    return context.resolveRequest(context, targetPath, platform);
+  }
   if (moduleName.startsWith('react-native-css-interop') || moduleName.startsWith('nativewind/jsx-')) {
     const localReactPath = path.resolve(projectRoot, 'node_modules/react');
     const runtimeName = moduleName.endsWith('jsx-runtime') ? 'jsx-runtime' : 'jsx-dev-runtime';
