@@ -45,10 +45,11 @@ export function BlockEditor({ initialContent, onChange, readOnly = false }: Bloc
         if (editor && initialContent && initialBlocks === undefined) {
             // If it's HTML, try to parse it
             if (initialContent.trim().startsWith("<")) {
-                const blocks = editor.tryParseHTMLToBlocks(initialContent);
-                if (blocks && blocks.length > 0) {
-                    editor.replaceBlocks(editor.document, blocks);
-                }
+                editor.tryParseHTMLToBlocks(initialContent).then((blocks) => {
+                    if (blocks && blocks.length > 0) {
+                        editor.replaceBlocks(editor.document, blocks);
+                    }
+                }).catch(console.error);
             } else {
                 // Otherwise treat as plain text
                 editor.replaceBlocks(editor.document, [

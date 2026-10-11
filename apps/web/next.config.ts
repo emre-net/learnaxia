@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
   },
 
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   output: 'standalone',
@@ -55,13 +55,16 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
       "media-src 'self' blob:",
-      "connect-src 'self' https:",
+      "connect-src 'self' https: wss:",
+      "object-src 'none'",
+      "worker-src 'self' blob:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      ...(isDev ? [] : ["upgrade-insecure-requests"]),
     ].join('; ');
 
     return [

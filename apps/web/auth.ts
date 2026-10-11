@@ -15,6 +15,26 @@ const nextAuth = NextAuth({
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     callbacks: {
+        async signIn({ user, account, profile }) {
+            // Güvenlik Doğrulaması: OAuth / OIDC sağlayıcıları üzerinden otomatik hesap bağlama
+            // (allowDangerousEmailAccountLinking: true) yapıldığında, sağlayıcının bu e-postayı
+            // doğrulamış (email_verified) olduğunu garanti ediyoruz.
+            // Bu sayede e-postası doğrulanmamış üçüncü şahıslar mevcut hesapları ele geçiremez.
+            if (account?.type === "oauth" || account?.type === "oidc") {
+                const isVerified = Boolean(
+                    (profile as any)?.email_verified ??
+                    (profile as any)?.verified_email ??
+                    (profile as any)?.verified ??
+                    (user as any)?.emailVerified
+                );
+
+                if (!isVerified) {
+                    console.warn(`[Auth Security] OAuth login rejected: unverified email for ${user.email}`);
+                    return false;
+                }
+            }
+            return true;
+        },
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;

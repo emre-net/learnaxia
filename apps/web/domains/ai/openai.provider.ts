@@ -3,7 +3,7 @@ import { AIProvider, AIResponseItem, VisionResult, AIError, SyllabusItem } from 
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-import { EvaluationSchema, VisionSchema, SlideGenerationSchema } from "@learnaxia/shared";
+import { EvaluationSchema, VisionSchema, SlideGenerationSchema, SlideGeneration } from "@learnaxia/shared";
 
 const ProviderGenerationSchema = z.object({
     items: z.array(z.any()),
@@ -374,7 +374,7 @@ export class OpenAIAIProvider implements AIProvider {
         }
     }
 
-    async generateJourneySlide(topic: string, parentTopic: string, depth: string, language: string = "tr"): Promise<z.infer<typeof SlideGenerationSchema>> {
+    async generateJourneySlide(topic: string, parentTopic: string, depth: string, language: string = "tr"): Promise<SlideGeneration> {
         if (!process.env.GROQ_API_KEY) {
             throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
         }
@@ -402,7 +402,7 @@ export class OpenAIAIProvider implements AIProvider {
             Respond ONLY in valid JSON matching the schema.
         `;
 
-        let currentSlide: z.infer<typeof SlideGenerationSchema> | null = null;
+        let currentSlide: SlideGeneration | null = null;
         let feedback = "";
         const MAX_RETRIES = 1;
         const generationId = crypto.randomUUID();

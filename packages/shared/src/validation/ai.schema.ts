@@ -54,3 +54,12 @@ export const SlideGenerationSchema = z.object({
         explanation: z.string()
     }).optional()
 });
+
+export type SlideGeneration = z.infer<typeof SlideGenerationSchema>;
+export type Flashcard = z.infer<typeof FlashcardSchema>;
+export type MC = z.infer<typeof MCSchema>;
+export type Gap = z.infer<typeof GapSchema>;
+export type TF = z.infer<typeof TFSchema>;
+export type Generation = z.infer<typeof GenerationSchema>;
+export type Evaluation = z.infer<typeof EvaluationSchema>;
+export type Vision = z.infer<typeof VisionSchema>;
