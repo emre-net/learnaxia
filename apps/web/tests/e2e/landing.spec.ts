@@ -14,29 +14,28 @@ test.describe('Landing Page', () => {
         await expect(hero).toBeVisible();
     });
 
-    test('displays CTA button "Hemen Başla"', async ({ page }) => {
-        const ctaButton = page.getByRole('link', { name: /Hemen Başla/i });
+    test('displays CTA button "Ücretsiz Başla"', async ({ page }) => {
+        const ctaButton = page.getByRole('link', { name: /Ücretsiz Başla/i }).first();
         await expect(ctaButton).toBeVisible();
     });
 
-    test('shows feature section with 6 cards', async ({ page }) => {
+    test('shows feature section with 4 cards', async ({ page }) => {
         const featureSection = page.locator('#features');
         await expect(featureSection).toBeVisible();
 
         const cards = featureSection.locator('h3');
-        await expect(cards).toHaveCount(6);
+        await expect(cards).toHaveCount(4);
     });
 
-    test('CTA link points to dashboard', async ({ page }) => {
-        // Just verify href instead of clicking (click triggers auth redirect which is slow)
-        const ctaLink = page.getByRole('link', { name: /Hemen Başla/i });
-        await expect(ctaLink).toHaveAttribute('href', '/dashboard');
+    test('CTA link points to registration or dashboard', async ({ page }) => {
+        const ctaLink = page.getByRole('link', { name: /Ücretsiz Başla/i }).first();
+        await expect(ctaLink).toHaveAttribute('href', /\/login\?tab=register|\/dashboard/);
     });
 
-    test('"Nasıl Çalışır?" button scrolls to features', async ({ page }) => {
-        const howItWorksLink = page.getByRole('link', { name: /Nasıl Çalışır/i });
+    test('"Nasıl Çalışır?" button scrolls to how-it-works', async ({ page }) => {
+        const howItWorksLink = page.getByRole('link', { name: /Nasıl Çalışır/i }).first();
         await expect(howItWorksLink).toBeVisible();
-        await expect(howItWorksLink).toHaveAttribute('href', '#features');
+        await expect(howItWorksLink).toHaveAttribute('href', /#how-it-works/);
     });
 
     test('is responsive on mobile viewport', async ({ page }) => {

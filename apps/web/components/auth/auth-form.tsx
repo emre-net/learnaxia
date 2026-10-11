@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -168,8 +169,12 @@ export function AuthForm() {
     return (
         <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2 text-center mb-8">
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">Hoş Geldiniz</h2>
-                <p className="text-sm text-muted-foreground">Devam etmek için hesabınıza giriş yapın veya yeni bir hesap oluşturun.</p>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    {activeTab === "login" ? "Tekrar Hoş Geldin" : "Hesap Oluşturun"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                    {activeTab === "login" ? "Devam etmek için hesabınıza giriş yapın." : "Öğrenme yolculuğunuza bugün başlayın."}
+                </p>
             </div>
             
             <div className="space-y-6">
@@ -390,6 +395,18 @@ export function AuthForm() {
                         </Form>
                     )}
             </div>
+
+            <p className="text-center text-xs text-zinc-500 pt-1 leading-relaxed">
+                Devam ederek{" "}
+                <Link href="/terms" className="underline hover:text-zinc-300 transition-colors">
+                    Kullanım Şartları
+                </Link>{" "}
+                ve{" "}
+                <Link href="/privacy" className="underline hover:text-zinc-300 transition-colors">
+                    Gizlilik Politikası
+                </Link>
+                &apos;nı kabul etmiş olursunuz.
+            </p>
         </div>
     )
 }
