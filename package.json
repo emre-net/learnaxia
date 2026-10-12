@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
+    "build": "turbo run build && node apps/web/scripts/copy-standalone.mjs",
+    "postbuild": "node apps/web/scripts/copy-standalone.mjs",
     "start": "npm start -w web",
     "lint": "turbo run lint",
     "postinstall": "patch-package && turbo run postinstall",
