@@ -59,6 +59,16 @@ export async function POST(req: Request) {
 
             // --- 1. Merge Progress ---
             for (const local of guestData.progress) {
+                // Ensure item exists in DB to prevent foreign key errors (e.g. from virtual tutorial cards)
+                const itemRecord = await tx.item.findUnique({
+                    where: { id: local.itemId },
+                    select: { id: true }
+                });
+                if (!itemRecord) {
+                    counts.skipped++;
+                    continue;
+                }
+
                 const serverProgress = await tx.itemProgress.findUnique({
                     where: {
                         userId_itemId: { userId, itemId: local.itemId },
@@ -114,6 +124,16 @@ export async function POST(req: Request) {
 
             // --- 2. Merge Sessions ---
             for (const s of guestData.sessions) {
+                // Ensure module exists in DB
+                const moduleRecord = await tx.module.findUnique({
+                    where: { id: s.moduleId },
+                    select: { id: true }
+                });
+                if (!moduleRecord) {
+                    counts.skipped++;
+                    continue;
+                }
+
                 const existingSession = await tx.learningSession.findUnique({
                     where: { id: s.id }
                 });
@@ -140,7 +160,8 @@ export async function POST(req: Request) {
 
                     if (!existingLog) {
                         const parentSession = await tx.learningSession.findUnique({ where: { id: log.sessionId } });
-                        if (parentSession) {
+                        const itemRecord = await tx.item.findUnique({ where: { id: log.itemId }, select: { id: true } });
+                        if (parentSession && itemRecord) {
                             await tx.itemSession.create({
                                 data: {
                                     id: log.id,

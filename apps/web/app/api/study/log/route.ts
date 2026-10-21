@@ -12,13 +12,24 @@ const LogResultSchema = z.object({
 
 export async function POST(req: Request) {
     try {
+        const body = await req.json();
+        const { sessionId, itemId, quality, durationMs } = LogResultSchema.parse(body);
+
+        // Guest session bypass: guests do not write to PostgreSQL learningSession
+        if (sessionId.startsWith('guest_')) {
+            return NextResponse.json({
+                success: true,
+                isGuest: true,
+                itemId,
+                quality,
+                durationMs
+            });
+        }
+
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-
-        const body = await req.json();
-        const { sessionId, itemId, quality, durationMs } = LogResultSchema.parse(body);
 
         const result = await ProgressService.recordItemResult(
             session.user.id,

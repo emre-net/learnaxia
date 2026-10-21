@@ -2,7 +2,93 @@ import prisma from "@/lib/prisma";
 import { ItemType, StudyMode } from "@/lib/types";
 
 export class StudyService {
-    static async startSession(userId: string, moduleId: string, mode: StudyMode) {
+    static async startSession(userId: string | null, moduleId: string, mode: StudyMode) {
+        // Virtual Tutorial / Demo Mode for Guests & First-Time Users
+        if (moduleId === 'tutorial' || moduleId === 'demo') {
+            const tutorialItems = [
+                {
+                    id: 'tut-1',
+                    moduleId: 'tutorial',
+                    type: 'FLASHCARD' as const,
+                    content: {
+                        front: 'Aralıklı Tekrar (Spaced Repetition) Nedir?',
+                        back: 'Bilişsel psikolojide hafıza eğrisine göre optimize edilmiş bir öğrenme tekniğidir. Bilgiyi unutmaya en yakın olduğunuz anda hatırlatarak uzun süreli hafızaya yerleştirir.',
+                        question: 'Aralıklı Tekrar (Spaced Repetition) Nedir?',
+                        answer: 'Bilişsel psikolojide hafıza eğrisine göre optimize edilmiş bir öğrenme tekniğidir. Bilgiyi unutmaya en yakın olduğunuz anda hatırlatarak uzun süreli hafızaya yerleştirir.'
+                    },
+                    hash: 'tut-1-hash',
+                    strengthScore: 1,
+                    box: 1,
+                    interval: 1,
+                    isRetired: false
+                },
+                {
+                    id: 'tut-2',
+                    moduleId: 'tutorial',
+                    type: 'MC' as const,
+                    content: {
+                        question: "Learnaxia'da momentum serinizi (streak) korumak ve puan kazanmak için en etkili yöntem nedir?",
+                        options: [
+                            'Her gün düzenli olarak en az 1 modül tamamlamak',
+                            'Haftada bir gün 10 saat aralıksız çalışmak',
+                            'Sadece sınav gecesi sabahlamak',
+                            'Çalışma kartlarını karıştırmadan ezberlemek'
+                        ],
+                        answer: 'Her gün düzenli olarak en az 1 modül tamamlamak'
+                    },
+                    hash: 'tut-2-hash',
+                    strengthScore: 1,
+                    box: 1,
+                    interval: 1,
+                    isRetired: false
+                },
+                {
+                    id: 'tut-3',
+                    moduleId: 'tutorial',
+                    type: 'GAP' as const,
+                    content: {
+                        text: 'Learnaxia, yapay zeka ile notlarınızı saniyeler içinde [bilimsel] çalışma kartlarına dönüştürür.',
+                        gap: 'bilimsel',
+                        answer: 'bilimsel',
+                        question: 'Boşluğu doldurunuz:'
+                    },
+                    hash: 'tut-3-hash',
+                    strengthScore: 1,
+                    box: 1,
+                    interval: 1,
+                    isRetired: false
+                },
+                {
+                    id: 'tut-4',
+                    moduleId: 'tutorial',
+                    type: 'MC' as const,
+                    content: {
+                        question: 'Düzenli kısa aralıklı tekrarlar, tek seferlik yoğun ezbere göre bilginin akılda kalıcılığını 3 kata kadar artırır.',
+                        options: ['Doğru', 'Yanlış'],
+                        answer: 'Doğru'
+                    },
+                    hash: 'tut-4-hash',
+                    strengthScore: 1,
+                    box: 1,
+                    interval: 1,
+                    isRetired: false
+                }
+            ];
+
+            return {
+                sessionId: `guest_tutorial_${Date.now()}`,
+                module: {
+                    id: 'tutorial',
+                    title: 'Learnaxia Hızlı Başlangıç & Deneme Turu',
+                    type: 'FLASHCARD'
+                },
+                items: tutorialItems,
+                mode: mode || 'NORMAL',
+                resumedFromIndex: 0,
+                isGuest: true
+            };
+        }
+
         // 1. Fetch Module & Items First
         const dbModule = await prisma.module.findUnique({
             where: { id: moduleId },
@@ -15,9 +101,63 @@ export class StudyService {
 
         if (!dbModule) throw new Error("Module not found");
 
-        // 2. Permissive Access Check
-        // Rule: Access allowed if Public OR Owner OR Linked Access (Private but has valid ID)
-        // Since we are fetching by unique ID here, having the ID is proof of linked access.
+        // 2. Access Check for Guests (userId === null) vs Authenticated Users
+        if (!userId) {
+            // Unauthenticated guest: only allow public modules
+            if (dbModule.visibility !== 'PUBLIC') {
+                throw new Error("Unauthorized Study Access");
+            }
+
+            const items = dbModule.items.map(item => {
+                let type: any = item.type;
+                let content: any = { ...item.content as object };
+
+                if (type === 'MULTIPLE_CHOICE') type = 'MC';
+                if (type === 'GAP_FILL') type = 'GAP';
+                if (type === 'MC' || type === 'FLASHCARD' || type === 'TRUE_FALSE') {
+                    if (!content.question && content.front) content.question = content.front;
+                    if (!content.front && content.question) content.front = content.question;
+                    if (!content.answer && content.back) content.answer = content.back;
+                    if (!content.back && content.answer) content.back = content.answer;
+                }
+
+                if (type === 'TRUE_FALSE') {
+                    type = 'MC';
+                    const tfQuestion = content.question || content.Question || content.statement || content.Statement || content.text;
+                    if (!content.question && tfQuestion) content.question = tfQuestion;
+                    if (!content.options || content.options.length === 0) content.options = ["True", "False"];
+                }
+
+                return {
+                    id: item.id,
+                    moduleId: item.moduleId,
+                    type: type,
+                    content: content,
+                    hash: item.contentHash,
+                    lastResult: null,
+                    strengthScore: 0,
+                    box: 1,
+                    interval: 0,
+                    nextReviewAt: null,
+                    isRetired: false
+                };
+            });
+
+            return {
+                sessionId: `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                module: {
+                    id: dbModule.id,
+                    title: dbModule.title,
+                    type: dbModule.type
+                },
+                items,
+                mode: 'NORMAL' as StudyMode,
+                resumedFromIndex: 0,
+                isGuest: true
+            };
+        }
+
+        // Permissive Access Check for Authenticated Users
         const isPublic = dbModule.visibility === 'PUBLIC';
         const isOwner = dbModule.ownerId === userId;
         const isPrivateLinked = dbModule.visibility === 'PRIVATE';
@@ -144,7 +284,8 @@ export class StudyService {
             },
             items,
             mode,
-            resumedFromIndex: firstUnsolvedIndex >= 0 ? firstUnsolvedIndex : 0
+            resumedFromIndex: firstUnsolvedIndex >= 0 ? firstUnsolvedIndex : 0,
+            isGuest: false
         };
     }
 }

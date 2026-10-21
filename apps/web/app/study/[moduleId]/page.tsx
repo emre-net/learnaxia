@@ -17,7 +17,7 @@ import { StudyControls } from "@/components/study/study-controls";
 import { StudySummary } from "@/components/study/study-summary";
 
 function StudyInterface() {
-    const { items, currentIndex, mode, nextItem, sessionId } = useStudyStore();
+    const { items, currentIndex, mode, nextItem, sessionId, isGuest, moduleId } = useStudyStore();
     const currentItem = items[currentIndex];
 
     if (!currentItem) {
@@ -36,6 +36,24 @@ function StudyInterface() {
                     durationMs: 1000
                 })
             });
+
+            // Guest local persistence via Dexie IndexedDB
+            if (isGuest || sessionId?.startsWith('guest_')) {
+                try {
+                    const { db } = await import('@/lib/guest-db');
+                    await db.guestProgress.put({
+                        itemId: result.itemId,
+                        moduleId: moduleId || 'tutorial',
+                        contentHash: currentItem?.hash || 'guest_item_hash',
+                        correctCount: result.quality >= 3 ? 1 : 0,
+                        wrongCount: result.quality < 3 ? 1 : 0,
+                        lastResult: result.quality >= 3 ? 'CORRECT' : 'WRONG',
+                        lastReviewedAt: new Date()
+                    });
+                } catch (dexieErr) {
+                    console.warn("Guest local storage write bypassed", dexieErr);
+                }
+            }
         } catch (error) {
             console.error("Failed to log progress", error);
         }
@@ -99,7 +117,7 @@ function StudyPageContent() {
                     return;
                 }
 
-                initSession(moduleId, data.items, mode, data.resumedFromIndex);
+                initSession(moduleId, data.items, mode, data.resumedFromIndex, data.sessionId, data.isGuest);
             } catch (err: any) {
                 console.error(err);
                 setError(err.message || dict.errorStarting);
@@ -127,8 +145,8 @@ function StudyPageContent() {
                 <AlertCircle className="h-10 w-10 text-destructive" />
                 <h2 className="text-xl font-semibold">{dict.errorStarting}</h2>
                 <p className="text-muted-foreground max-w-sm">{error}</p>
-                <Button variant="outline" onClick={() => router.push(`/dashboard/modules/${moduleId}`)}>
-                    {backToModuleLabel}
+                <Button variant="outline" onClick={() => router.push(moduleId === 'tutorial' ? '/' : `/dashboard/modules/${moduleId}`)}>
+                    {moduleId === 'tutorial' ? 'Ana Sayfaya Dön' : backToModuleLabel}
                 </Button>
             </div>
         );

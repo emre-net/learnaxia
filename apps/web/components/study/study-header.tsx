@@ -18,17 +18,24 @@ export function StudyHeader() {
         currentIndex,
         correctCount,
         wrongCount,
-        moduleId
+        moduleId,
+        isGuest,
+        sessionId
     } = useStudyStore();
 
     const { t } = useTranslation();
 
     if (!items.length) return null;
 
+    const isGuestSession = isGuest || sessionId?.startsWith('guest_') || moduleId === 'tutorial';
     const progressValue = ((currentIndex) / items.length) * 100;
 
     const handleExit = () => {
-        router.push(`/dashboard/modules/${moduleId}`);
+        if (isGuestSession) {
+            router.push('/');
+        } else {
+            router.push(`/dashboard/modules/${moduleId}`);
+        }
     };
 
     return (
@@ -74,9 +81,12 @@ export function StudyHeader() {
             <div className="flex gap-4 text-sm font-medium items-center">
                 <span className="text-green-500">{correctCount}</span>
                 <span className="text-red-500">{wrongCount}</span>
-                <div className="h-4 w-[1px] bg-border mx-2" />
-                <NotesSidebar moduleId={moduleId || ""} itemId={items[currentIndex]?.id || undefined} />
-                {/* Fallback empty string for moduleId if null, though logically valid in valid session */}
+                {!isGuestSession && (
+                    <>
+                        <div className="h-4 w-[1px] bg-border mx-2" />
+                        <NotesSidebar moduleId={moduleId || ""} itemId={items[currentIndex]?.id || undefined} />
+                    </>
+                )}
             </div>
         </header>
     );

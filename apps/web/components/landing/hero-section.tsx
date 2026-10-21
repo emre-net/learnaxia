@@ -71,7 +71,17 @@ export function HeroSection() {
                     <Button
                         variant="outline"
                         size="lg"
-                        className="h-12 px-7 text-base font-medium border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl active:scale-95"
+                        className="h-12 px-6 text-base font-semibold border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white rounded-xl shadow-sm transition-all active:scale-95"
+                        asChild
+                    >
+                        <Link href="/study/tutorial">
+                            🚀 Kayıt Olmadan Dene (Demo)
+                        </Link>
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className="h-12 px-6 text-base font-medium text-zinc-400 hover:text-white rounded-xl active:scale-95"
                         asChild
                     >
                         <Link href="#how-it-works">

@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { BrandLoader } from "@/components/ui/brand-loader"
 import { useToast } from "@/components/ui/use-toast"
+import { syncGuestDataToServer } from "@/lib/guest-sync"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -88,6 +89,7 @@ export function AuthForm() {
             if (result?.error) {
                 setError("Giriş yapılamadı. E-posta veya parola hatalı.")
             } else {
+                syncGuestDataToServer().catch(() => {})
                 router.push("/dashboard")
                 router.refresh()
             }
@@ -394,6 +396,22 @@ export function AuthForm() {
                             </form>
                         </Form>
                     )}
+            </div>
+
+            {/* Guest / Demo Mode Entry */}
+            <div className="pt-1">
+                <Link
+                    href="/study/tutorial"
+                    className="flex items-center justify-between p-3.5 rounded-2xl border border-sky-500/20 bg-sky-500/5 hover:bg-sky-500/10 text-xs text-sky-300 hover:text-white transition-all group"
+                >
+                    <span className="flex items-center gap-2 font-medium">
+                        <span className="text-base">🚀</span>
+                        Hesap açmadan sistemi keşfet: Demo Modu
+                    </span>
+                    <span className="text-sky-400 group-hover:translate-x-0.5 transition-transform font-bold">
+                        Hemen Başla →
+                    </span>
+                </Link>
             </div>
 
             <p className="text-center text-xs text-zinc-500 pt-1 leading-relaxed">

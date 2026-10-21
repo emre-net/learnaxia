@@ -21,6 +21,7 @@ interface StudyState {
     moduleId: string | null;
     mode: StudyMode;
     startTime: Date | null;
+    isGuest: boolean;
 
     // Data
     items: StudyItem[];
@@ -37,7 +38,7 @@ interface StudyState {
     skipped: number;
 
     // Actions
-    initSession: (moduleId: string, items: StudyItem[], mode: StudyMode, startIndex?: number) => void;
+    initSession: (moduleId: string, items: StudyItem[], mode: StudyMode, startIndex?: number, sessionId?: string, isGuest?: boolean) => void;
     setIsFlipped: (value: boolean) => void;
     setSelectedOption: (option: string | null) => void;
     setFeedback: (feedback: 'CORRECT' | 'WRONG' | null) => void;
@@ -54,6 +55,7 @@ export const useStudyStore = create<StudyState>()(
             moduleId: null,
             mode: 'NORMAL',
             startTime: null,
+            isGuest: false,
             items: [],
             currentIndex: 0,
 
@@ -65,18 +67,19 @@ export const useStudyStore = create<StudyState>()(
             wrongCount: 0,
             skipped: 0,
 
-            initSession: (moduleId, items, mode, startIndex = 0) => {
+            initSession: (moduleId, items, mode, startIndex = 0, sessionId, isGuest = false) => {
                 set({
-                    sessionId: crypto.randomUUID(),
+                    sessionId: sessionId || crypto.randomUUID(),
                     moduleId,
                     items,
                     mode,
+                    isGuest,
                     currentIndex: startIndex,
                     startTime: new Date(),
                     isFlipped: false,
                     selectedOption: null,
                     feedback: null,
-                    correctCount: startIndex, // Assume already solved are correct for stats? User didn't specify, but better than 0 if we want accuracy.
+                    correctCount: startIndex,
                     wrongCount: 0,
                     skipped: 0
                 });

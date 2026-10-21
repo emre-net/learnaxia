@@ -1,6 +1,7 @@
 import { Sidebar, MobileSidebar } from "@/components/layout/sidebar"
 import { UserNav } from "@/components/layout/user-nav"
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav"
+import { GuestDataSyncTrigger } from "@/components/auth/guest-data-sync-trigger"
 import Link from "next/link"
 
 export default function DashboardLayout({
@@ -10,6 +11,7 @@ export default function DashboardLayout({
 }) {
     return (
         <div className="h-full relative">
+            <GuestDataSyncTrigger />
             {/* Desktop Sidebar */}
             <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-background border-r border-white/[0.07]">
                 <Sidebar className="h-full" />

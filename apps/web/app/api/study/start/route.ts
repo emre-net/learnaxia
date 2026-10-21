@@ -11,19 +11,23 @@ const StartSessionSchema = z.object({
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        if (!session || !session.user?.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const userId = session?.user?.id || null;
 
         const body = await req.json();
         const { moduleId, mode } = StartSessionSchema.parse(body);
 
-        const studyData = await StudyService.startSession(session.user.id, moduleId, mode);
+        const studyData = await StudyService.startSession(userId, moduleId, mode);
 
         return NextResponse.json(studyData);
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Invalid Request", details: error.issues }, { status: 400 });
+        }
+        if (error.message === "Unauthorized Study Access") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        if (error.message === "Module not found") {
+            return NextResponse.json({ error: "Module not found" }, { status: 404 });
         }
         console.error("Start Session Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
