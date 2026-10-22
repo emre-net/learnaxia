@@ -14,6 +14,10 @@ import * as Haptics from 'expo-haptics';
 import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
+import { MCCard } from '@/components/study/mc-card';
+import { TrueFalseCard } from '@/components/study/tf-card';
+import { GapCard } from '@/components/study/gap-card';
+import { OfflineStorageService } from '@/services/offline-storage.service';
 
 const { width } = Dimensions.get('window');
 
@@ -35,7 +39,11 @@ export default function StudyScreen() {
         items: Array<{
             id: string;
             type: string;
-            content: { question?: string; answer?: string; front?: string; back?: string; content?: string; correctAnswer?: string };
+            content: {
+                question?: string; answer?: string; front?: string; back?: string;
+                content?: string; correctAnswer?: string; options?: string[];
+                explanation?: string; statement?: string; text?: string; answers?: string[];
+            };
         }>;
     } | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -47,6 +55,7 @@ export default function StudyScreen() {
     const [correctCount, setCorrectCount] = useState(0);
     const [totalAnswered, setTotalAnswered] = useState(0);
     const [bookmarkedItems, setBookmarkedItems] = useState<Set<string>>(new Set());
+    const [isOffline, setIsOffline] = useState(false);
 
     // ─── 3D Flip Animation ───────────────────────────────────────────────────
     const flipProgress = useSharedValue(0);
@@ -70,8 +79,16 @@ export default function StudyScreen() {
     useEffect(() => {
         const initStudy = async () => {
             try {
+                // Arka planda bekleyen çevrimdışı cevapları senkronize et
+                OfflineStorageService.processSyncQueue(api).catch(() => {});
+
                 const moduleRes = await api.get(`/mobile/study/${id}`);
-                setStudyModule(moduleRes.data.module);
+                const mod = moduleRes.data.module;
+                setStudyModule(mod);
+                setIsOffline(false);
+
+                // Modülü yerel önbelleğe kaydet (çevrimdışı çalışma için)
+                await OfflineStorageService.cacheModule(mod);
 
                 const sessionRes = await api.post('/mobile/study/start', {
                     moduleId: id,
@@ -80,7 +97,17 @@ export default function StudyScreen() {
                 setSessionId(sessionRes.data.sessionId);
                 setStartTime(Date.now());
             } catch (error) {
-                console.error('[StudyScreen] Failed to initialize study:', error);
+                console.warn('[StudyScreen] Network failed, trying offline cache:', error);
+                // İnternet yoksa veya ağ hatası aldıysa yerel önbelleğe bak
+                const cached = await OfflineStorageService.getCachedModule(id as string);
+                if (cached && cached.items && cached.items.length > 0) {
+                    setStudyModule(cached);
+                    setIsOffline(true);
+                    setSessionId(`offline_session_${Date.now()}`);
+                    setStartTime(Date.now());
+                } else {
+                    console.error('[StudyScreen] No cached data available for module:', id);
+                }
             } finally {
                 setLoading(false);
             }
@@ -112,12 +139,31 @@ export default function StudyScreen() {
             const itemId = studyModule.items[currentIndex].id;
             const durationMs = Date.now() - startTime;
 
-            api.post('/mobile/study/log', {
-                sessionId,
-                itemId,
-                quality,
-                durationMs
-            }).catch(err => console.error('[StudyScreen] Failed to log result:', err));
+            if (isOffline) {
+                OfflineStorageService.queueStudyAnswer({
+                    moduleId: id as string,
+                    itemId,
+                    quality,
+                    durationMs,
+                    isCorrect
+                });
+            } else {
+                api.post('/mobile/study/log', {
+                    sessionId,
+                    itemId,
+                    quality,
+                    durationMs
+                }).catch(() => {
+                    // Ağ kesilirse sessizce yerel kuyruğa ekle
+                    OfflineStorageService.queueStudyAnswer({
+                        moduleId: id as string,
+                        itemId,
+                        quality,
+                        durationMs,
+                        isCorrect
+                    });
+                });
+            }
         }
 
         if (currentIndex < (studyModule?.items?.length || 0) - 1) {
@@ -127,8 +173,16 @@ export default function StudyScreen() {
             setStartTime(Date.now());
         } else {
             setSessionComplete(true);
+            if (isOffline) {
+                OfflineStorageService.queueStudySessionComplete({
+                    moduleId: id as string,
+                    totalAnswered: totalAnswered + 1,
+                    correctCount: isCorrect ? correctCount + 1 : correctCount,
+                    durationSeconds: Math.round((Date.now() - startTime) / 1000)
+                });
+            }
         }
-    }, [currentIndex, studyModule, sessionId, startTime, triggerFlip]);
+    }, [currentIndex, studyModule, sessionId, startTime, triggerFlip, isOffline, id, totalAnswered, correctCount]);
 
     const prevCard = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -256,7 +310,12 @@ export default function StudyScreen() {
     }
 
     const currentItem = studyModule.items[currentIndex];
-    const isFlashcard = currentItem.type === 'FLASHCARD' || currentItem.type === 'question';
+    const itemType = currentItem.type?.toUpperCase?.() || 'FLASHCARD';
+    const isFlashcard = itemType === 'FLASHCARD' || currentItem.type === 'question';
+    const isMC = itemType === 'MC';
+    const isTrueFalse = itemType === 'TRUE_FALSE' || itemType === 'TF';
+    const isGap = itemType === 'GAP';
+    const isInteractive = isMC || isTrueFalse || isGap;
     const progress = ((currentIndex + 1) / studyModule.items.length) * 100;
 
     return (
@@ -300,6 +359,16 @@ export default function StudyScreen() {
                 </TouchableOpacity>
             </View>
 
+            {/* Offline Status Banner */}
+            {isOffline && (
+                <View style={styles.offlineBanner}>
+                    <MaterialIcons name="cloud-off" size={13} color="#F59E0B" />
+                    <Text style={styles.offlineBannerText}>
+                        Çevrimdışı Mod — İlerlemeniz internete bağlanınca eşitlenecektir
+                    </Text>
+                </View>
+            )}
+
             {/* Main Content Area */}
             <View style={styles.cardArea}>
                 <Animated.View
@@ -309,52 +378,99 @@ export default function StudyScreen() {
                     layout={Layout.springify()}
                     style={{ width: '100%' }}
                 >
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        onPress={() => isFlashcard ? handleFlip() : null}
-                        style={[styles.flashcard, { transform: [{ perspective: 1200 }] }]}
-                    >
-                        {isFlashcard ? (
-                            <View style={{ flex: 1, width: '100%' }}>
-                                {/* SORU YÜZÜ */}
-                                <Animated.View style={[styles.cardFace, frontAnimStyle]}>
-                                    <View style={styles.label}>
-                                        <Text style={styles.labelText}>SORU</Text>
-                                    </View>
-                                    <Text style={styles.cardText}>
-                                        {currentItem.content.question || currentItem.content.front || 'Soru eksik'}
-                                    </Text>
-                                    <View style={styles.tapHint}>
-                                        <Ionicons name="hand-right-outline" size={14} color="#64748B" />
-                                        <Text style={styles.tapHintText}>Cevap için dokun</Text>
-                                    </View>
-                                </Animated.View>
+                    {/* MC — Çoktan Seçmeli */}
+                    {isMC ? (
+                        <View style={[styles.flashcard, { justifyContent: 'flex-start' }]}>
+                            <MCCard
+                                question={currentItem.content.question || 'Soru eksik'}
+                                options={currentItem.content.options || []}
+                                correctAnswer={currentItem.content.correctAnswer || currentItem.content.answer || ''}
+                                explanation={currentItem.content.explanation}
+                                onAnswer={(isCorrect) => {
+                                    setShowAnswer(true);
+                                    if (isCorrect) setCorrectCount(prev => prev + 1);
+                                    setTotalAnswered(prev => prev + 1);
+                                }}
+                            />
+                        </View>
+                    ) : isTrueFalse ? (
+                        /* TRUE_FALSE — Doğru / Yanlış */
+                        <View style={[styles.flashcard, { justifyContent: 'center' }]}>
+                            <TrueFalseCard
+                                statement={currentItem.content.statement || currentItem.content.question || 'Önerme eksik'}
+                                correctAnswer={
+                                    (currentItem.content.answer || currentItem.content.correctAnswer || 'True').toLowerCase() === 'true'
+                                }
+                                explanation={currentItem.content.explanation}
+                                onAnswer={(isCorrect) => {
+                                    setShowAnswer(true);
+                                    if (isCorrect) setCorrectCount(prev => prev + 1);
+                                    setTotalAnswered(prev => prev + 1);
+                                }}
+                            />
+                        </View>
+                    ) : isGap ? (
+                        /* GAP — Boşluk Doldurma */
+                        <View style={[styles.flashcard, { justifyContent: 'center' }]}>
+                            <GapCard
+                                text={currentItem.content.text || currentItem.content.question || ''}
+                                answers={currentItem.content.answers || [currentItem.content.answer || '']}
+                                onAnswer={(isCorrect) => {
+                                    setShowAnswer(true);
+                                    if (isCorrect) setCorrectCount(prev => prev + 1);
+                                    setTotalAnswered(prev => prev + 1);
+                                }}
+                            />
+                        </View>
+                    ) : (
+                        /* FLASHCARD / NOTE — Mevcut flip kart */
+                        <TouchableOpacity
+                            activeOpacity={1}
+                            onPress={() => isFlashcard ? handleFlip() : null}
+                            style={[styles.flashcard, { transform: [{ perspective: 1200 }] }]}
+                        >
+                            {isFlashcard ? (
+                                <View style={{ flex: 1, width: '100%' }}>
+                                    {/* SORU YÜZÜ */}
+                                    <Animated.View style={[styles.cardFace, frontAnimStyle]}>
+                                        <View style={styles.label}>
+                                            <Text style={styles.labelText}>SORU</Text>
+                                        </View>
+                                        <Text style={styles.cardText}>
+                                            {currentItem.content.question || currentItem.content.front || 'Soru eksik'}
+                                        </Text>
+                                        <View style={styles.tapHint}>
+                                            <Ionicons name="hand-right-outline" size={14} color="#64748B" />
+                                            <Text style={styles.tapHintText}>Cevap için dokun</Text>
+                                        </View>
+                                    </Animated.View>
 
-                                {/* CEVAP YÜZÜ */}
-                                <Animated.View style={[styles.cardFace, backAnimStyle]}>
-                                    <View style={[styles.label, { backgroundColor: '#111111' }]}>
-                                        <Text style={[styles.labelText, { color: '#F8FAFC' }]}>CEVAP</Text>
-                                    </View>
-                                    <Text style={[styles.cardText, { color: '#F8FAFC' }]}>
-                                        {currentItem.content.answer || currentItem.content.back || currentItem.content.content || 'Cevap eksik'}
-                                    </Text>
-                                </Animated.View>
-                            </View>
-                        ) : (
-                            <ScrollView
-                                style={{ width: '100%', flex: 1 }}
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingVertical: 20 }}
-                            >
-                                <View style={styles.label}>
-                                    <Text style={styles.labelText}>NOT</Text>
+                                    {/* CEVAP YÜZÜ */}
+                                    <Animated.View style={[styles.cardFace, backAnimStyle]}>
+                                        <View style={[styles.label, { backgroundColor: '#111111' }]}>
+                                            <Text style={[styles.labelText, { color: '#F8FAFC' }]}>CEVAP</Text>
+                                        </View>
+                                        <Text style={[styles.cardText, { color: '#F8FAFC' }]}>
+                                            {currentItem.content.answer || currentItem.content.back || currentItem.content.content || 'Cevap eksik'}
+                                        </Text>
+                                    </Animated.View>
                                 </View>
-                                <Text style={styles.noteText}>
-                                    {currentItem.content.content || 'İçerik eksik'}
-                                </Text>
-                            </ScrollView>
-                        )}
-                    </TouchableOpacity>
+                            ) : (
+                                <ScrollView
+                                    style={{ width: '100%', flex: 1 }}
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{ paddingVertical: 20 }}
+                                >
+                                    <View style={styles.label}>
+                                        <Text style={styles.labelText}>NOT</Text>
+                                    </View>
+                                    <Text style={styles.noteText}>
+                                        {currentItem.content.content || 'İçerik eksik'}
+                                    </Text>
+                                </ScrollView>
+                            )}
+                        </TouchableOpacity>
+                    )}
                 </Animated.View>
             </View>
 
@@ -387,7 +503,8 @@ export default function StudyScreen() {
                             </TouchableOpacity>
                         ))}
                     </View>
-                ) : (
+                ) : isInteractive && showAnswer ? (
+                    /* MC / TF / GAP cevaplandıktan sonra sonraki butonu */
                     <TouchableOpacity
                         onPress={() => nextCard(3)}
                         activeOpacity={0.8}
@@ -398,7 +515,18 @@ export default function StudyScreen() {
                         </Text>
                         <Ionicons name="arrow-forward" size={18} color="#000000" />
                     </TouchableOpacity>
-                )}
+                ) : !isInteractive ? (
+                    <TouchableOpacity
+                        onPress={() => nextCard(3)}
+                        activeOpacity={0.8}
+                        style={styles.nextBtn}
+                    >
+                        <Text style={styles.nextBtnText}>
+                            {currentIndex === studyModule.items.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
+                        </Text>
+                        <Ionicons name="arrow-forward" size={18} color="#000000" />
+                    </TouchableOpacity>
+                ) : null}
 
                 <View style={[styles.navBtn, { opacity: 0 }]} />
             </View>
@@ -614,5 +742,21 @@ const styles = StyleSheet.create({
         color: '#F8FAFC',
         fontWeight: '600',
         fontSize: 15,
+    },
+    offlineBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(245, 158, 11, 0.25)',
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+    },
+    offlineBannerText: {
+        color: '#FCD34D',
+        fontSize: 11,
+        fontWeight: '600',
     },
 });

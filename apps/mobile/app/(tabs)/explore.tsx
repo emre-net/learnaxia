@@ -8,9 +8,10 @@ import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { t } from '@learnaxia/shared';
+import { t, MAIN_CATEGORIES } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import { useDebounce } from '@/hooks/use-debounce';
+import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
 
 type DiscoverItem = {
@@ -33,6 +34,7 @@ export default function ExploreScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [total, setTotal] = useState(0);
   const [fetchError, setFetchError] = useState(false);
 
@@ -48,6 +50,9 @@ export default function ExploreScreen() {
       if (debouncedSearch.trim()) {
         params.set('search', debouncedSearch.trim());
       }
+      if (selectedCategory && selectedCategory !== 'ALL') {
+        params.set('category', selectedCategory);
+      }
 
       const res = await api.get(`/mobile/discover?${params.toString()}`);
       setItems(res.data.items || []);
@@ -60,7 +65,7 @@ export default function ExploreScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeTab, debouncedSearch]);
+  }, [activeTab, debouncedSearch, selectedCategory]);
 
   useEffect(() => {
     setLoading(true);
@@ -155,7 +160,10 @@ export default function ExploreScreen() {
               <TouchableOpacity
                 key={tab.id}
                 style={[styles.tabButton, isActive && styles.tabButtonActive]}
-                onPress={() => setActiveTab(tab.id)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setActiveTab(tab.id);
+                }}
               >
                 <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
                   {tab.label}
@@ -165,6 +173,63 @@ export default function ExploreScreen() {
           })}
         </ScrollView>
       </View>
+
+      {/* Synchronized Category Chips */}
+      {activeTab === 'MODULE' && (
+        <View style={styles.categoryContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScrollContent}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedCategory('ALL');
+              }}
+              style={[
+                styles.categoryChip,
+                selectedCategory === 'ALL' && styles.categoryChipActive
+              ]}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  selectedCategory === 'ALL' && styles.categoryChipTextActive
+                ]}
+              >
+                Tümü
+              </Text>
+            </TouchableOpacity>
+
+            {MAIN_CATEGORIES.map((cat) => {
+              const isCatActive = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedCategory(isCatActive ? 'ALL' : cat);
+                  }}
+                  style={[
+                    styles.categoryChip,
+                    isCatActive && styles.categoryChipActive
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.categoryChipText,
+                      isCatActive && styles.categoryChipTextActive
+                    ]}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -393,5 +458,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  categoryContainer: {
+    paddingBottom: 12,
+  },
+  categoryScrollContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  categoryChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  categoryChipActive: {
+    backgroundColor: '#6366F1',
+    borderColor: '#6366F1',
+  },
+  categoryChipText: {
+    color: '#94A3B8',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  categoryChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });

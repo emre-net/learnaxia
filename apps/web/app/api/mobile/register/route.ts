@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const { name, email, password } = validatedData.data;
+    const { name, email, password, handle } = validatedData.data;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -59,12 +59,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'User already exists' }, { status: 409 });
     }
 
+    // Handle benzersizlik kontrolü (opsiyonel alan)
+    if (handle) {
+      const existingHandle = await prisma.user.findUnique({
+        where: { handle },
+      });
+      if (existingHandle) {
+        return NextResponse.json({ message: 'Bu kullanıcı adı zaten alınmış' }, { status: 409 });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
+        handle: handle || null,
         password: hashedPassword,
         // S8: Mobil kayıtta e-posta otomatik doğrulanmış kabul edilir.
         // Mobil uygulama üzerinden kayıt olan kullanıcılar zaten doğrudan

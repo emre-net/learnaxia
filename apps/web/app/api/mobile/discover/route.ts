@@ -13,6 +13,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type") || "MODULE";
         const search = searchParams.get("search");
+        const category = searchParams.get("category");
         const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
         const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
@@ -48,6 +49,9 @@ export async function GET(req: Request) {
                 visibility: 'PUBLIC',
                 isForkable: true,
                 status: "ACTIVE",
+                ...(category && category !== 'ALL' && {
+                    category: { equals: category, mode: 'insensitive' as const }
+                }),
                 ...(search && {
                     OR: [
                         { title: { contains: search, mode: 'insensitive' as const } },

@@ -8,7 +8,7 @@ interface AuthContextType {
     user: UserProfile | null;
     isLoading: boolean;
     login: (email: string, password?: string) => Promise<void>;
-    register: (name: string, email: string, password?: string) => Promise<void>;
+    register: (name: string, email: string, password?: string, handle?: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshProfile: () => Promise<void>;
 }
@@ -131,9 +131,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const register = async (name: string, email: string, password?: string) => {
+    const register = async (name: string, email: string, password?: string, handle?: string) => {
         try {
-            const res = await api.post('/mobile/register', { name, email, password });
+            const res = await api.post('/mobile/register', { name, email, password, handle: handle || undefined });
             const { accessToken, refreshToken, user: userData } = res.data;
 
             await setAuthToken(accessToken, refreshToken);

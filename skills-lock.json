@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "skills": {
+    "agentmemory-agents": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-agents/SKILL.md",
+      "computedHash": "c2c4ec9861a3a766f559619addf44324c83bc2ba650eb80e15ac722b78f0097d"
+    },
+    "agentmemory-architecture": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-architecture/SKILL.md",
+      "computedHash": "319220b410f40c268ecbb23ab557036afffef2aa301fd8f807f26c6bdb89e62f"
+    },
+    "agentmemory-config": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-config/SKILL.md",
+      "computedHash": "d58b6c0cd43bb9a14fda65c4fb7e267844903d2faf02b484ea4099fa34bdd754"
+    },
+    "agentmemory-hooks": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-hooks/SKILL.md",
+      "computedHash": "8429e077c7c5ea5ec5daec583c234c01132619b20885e3a59bef3b7fcb2bdec9"
+    },
+    "agentmemory-mcp-tools": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-mcp-tools/SKILL.md",
+      "computedHash": "8f09093e87d46ad7015f6b825ceb46eaf669fa85fc3947fd5940b4119ef9c1fd"
+    },
+    "agentmemory-rest-api": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/agentmemory-rest-api/SKILL.md",
+      "computedHash": "5df8e13fc5571618d6900347f5a50b91c37f085b37b1bfb46153b56921fae1ea"
+    },
+    "commit-context": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/commit-context/SKILL.md",
+      "computedHash": "993100a302e2401acaf7d8f89294b301d51f32805fa4569e7c913b464d20a398"
+    },
+    "commit-history": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/commit-history/SKILL.md",
+      "computedHash": "347bf74dbf6ef0058a91b23450e181250df8d85841e1d7fdbaba762903fae1f4"
+    },
+    "forget": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/forget/SKILL.md",
+      "computedHash": "4bf66f848867171a727301ab4cb0d0e03153a83393f97b7f0cdde370e7397acd"
+    },
+    "handoff": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/handoff/SKILL.md",
+      "computedHash": "30aa25ba43c06379a79829b166c98a254ba8671e8fa6adc5d03a57ddd0e3dfb2"
+    },
+    "lesson": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/lesson/SKILL.md",
+      "computedHash": "aba10c01296ba7b8bb15776284dc19ab21e7538e842a3a41b7b4e1a2a7a4e9a2"
+    },
+    "memory-discipline": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/memory-discipline/SKILL.md",
+      "computedHash": "bbe8ecbbc45bb498e9f26d8c75070dc1d5db37853916b8fa44d486d1d92e4b08"
+    },
+    "recall": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/recall/SKILL.md",
+      "computedHash": "37bce0c67d710c0689458946dcccf352ba8fd86a9866b7464a2c718797b11224"
+    },
+    "recap": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/recap/SKILL.md",
+      "computedHash": "344a6b9378fddb8ef3021367c837ab649488cfc3c894dfe6e070eb02a17c4133"
+    },
+    "remember": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/remember/SKILL.md",
+      "computedHash": "bf965c34d8ac807a090b925dd1a259ed0a02bb82e79c945bd6300fe69ea10b4d"
+    },
+    "session-history": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/session-history/SKILL.md",
+      "computedHash": "618444a865a891a4aa3ede9386cc061c2fedcb8d490675399bef82bfffba596d"
+    },
+    "write-agentmemory-skill": {
+      "source": "rohitg00/agentmemory",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/write-agentmemory-skill/SKILL.md",
+      "computedHash": "55f165e5e817e8252254efea1f914ee53c8e14930092e526bede1aed6ccd06cd"
+    },
+    "offline-first-sync": {
+      "source": "local",
+      "sourceType": "local",
+      "skillPath": ".agents/skills/offline-first-sync/SKILL.md"
+    },
+    "drawing-canvas-engine": {
+      "source": "local",
+      "sourceType": "local",
+      "skillPath": ".agents/skills/drawing-canvas-engine/SKILL.md"
+    }
+  }
+}

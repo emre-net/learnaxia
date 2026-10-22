@@ -10,6 +10,7 @@ import api from '@/lib/api';
 
 export default function LoginScreen() {
     const [name, setName] = useState('');
+    const [handle, setHandle] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function LoginScreen() {
     const handleSubmit = async () => {
         const formData = isLogin
             ? { email: email.trim(), password: password.trim() }
-            : { name: name.trim(), email: email.trim(), password: password.trim() };
+            : { name: name.trim(), handle: handle.trim() || undefined, email: email.trim(), password: password.trim() };
 
         const schema = isLogin ? MobileLoginSchema : MobileRegisterSchema;
         const result = schema.safeParse(formData);
@@ -39,7 +40,7 @@ export default function LoginScreen() {
             if (isLogin) {
                 await login(formData.email, formData.password);
             } else {
-                await register(formData.name!, formData.email, formData.password);
+                await register(formData.name!, formData.email, formData.password, (formData as any).handle);
             }
         } catch (error) {
             let message = isLogin
@@ -126,19 +127,37 @@ export default function LoginScreen() {
                     {/* Clean Form */}
                     <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.formContainer}>
                         {!isLogin && (
+                            <>
                             <View style={[styles.inputGroup, focusedInput === 'name' && styles.inputGroupFocused]}>
                                 <Text style={styles.label}>{t('auth.fullNamePlaceholder', currentLang)}</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="John Doe"
+                                    placeholder="Emre Yılmaz"
                                     placeholderTextColor="#475569"
                                     value={name}
                                     onChangeText={setName}
                                     editable={!loading}
+                                    autoCapitalize="words"
                                     onFocus={() => setFocusedInput('name')}
                                     onBlur={() => setFocusedInput(null)}
                                 />
                             </View>
+                            <View style={[styles.inputGroup, focusedInput === 'handle' && styles.inputGroupFocused]}>
+                                <Text style={styles.label}>{t('auth.handlePlaceholder', currentLang) || 'Kullanıcı Adı (opsiyonel)'}</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="emre_dev"
+                                    placeholderTextColor="#475569"
+                                    value={handle}
+                                    onChangeText={(text) => setHandle(text.replace(/[^a-zA-Z0-9_]/g, ''))}
+                                    editable={!loading}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    onFocus={() => setFocusedInput('handle')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            </>
                         )}
 
                         <View style={[styles.inputGroup, focusedInput === 'email' && styles.inputGroupFocused]}>
