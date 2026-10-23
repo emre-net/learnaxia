@@ -9,6 +9,9 @@ const ProviderGenerationSchema = z.object({
     items: z.array(z.any()),
 });
 
+const DEFAULT_AI_MODEL = process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
+const DEFAULT_VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b";
+
 export class OpenAIAIProvider implements AIProvider {
     name = "OpenAI";
     private client: OpenAI;
@@ -76,7 +79,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: isExtraction ? `Extract from this content:\n\n${topic}` : `Generate content for topic: ${topic}` }
@@ -139,7 +142,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review these generated items:\n\n${JSON.stringify(currentItems, null, 2)}` }
@@ -245,7 +248,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: `Generate a study note for: ${topic}` }
@@ -278,7 +281,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this note:\n\n${currentNote}` }
@@ -339,7 +342,7 @@ export class OpenAIAIProvider implements AIProvider {
 
         try {
             const response = await this.client.chat.completions.create({
-                model: "meta-llama/llama-4-scout-17b-16e-instruct", // Groq'un vision-capable modeli
+                model: DEFAULT_VISION_MODEL, // Groq'un vision-capable modeli
                 messages: [
                     { role: "system", content: systemPrompt },
                     {
@@ -415,7 +418,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: `Generate the slide for topic: ${topic}` }
@@ -449,7 +452,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this slide:\n\n${JSON.stringify(currentSlide, null, 2)}` }
@@ -534,7 +537,7 @@ export class OpenAIAIProvider implements AIProvider {
             try {
                 // 1. Generator AI
                 const response = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
                         {
@@ -565,7 +568,7 @@ export class OpenAIAIProvider implements AIProvider {
                 `;
 
                 const evalResponse = await this.client.chat.completions.create({
-                    model: "llama-3.1-8b-instant",
+                    model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
                         { role: "user", content: `Review this syllabus:\n\n${JSON.stringify(currentSyllabus, null, 2)}` }
@@ -617,7 +620,7 @@ export class OpenAIAIProvider implements AIProvider {
 
         try {
             const response = await this.client.chat.completions.create({
-                model: "llama-3.1-8b-instant",
+                model: DEFAULT_AI_MODEL,
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: `Topic input to validate: "${topic}"` }
