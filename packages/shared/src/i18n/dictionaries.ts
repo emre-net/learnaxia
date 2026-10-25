@@ -179,6 +179,8 @@ const en = {
         types: {
             mc: "Multiple Choice",
             flashcard: "Flashcard",
+            true_false: "True / False",
+            gap: "Gap Fill",
             module: "Module",
             collection: "Collection",
             note: "Note"
@@ -764,6 +766,8 @@ const tr = {
         types: {
             mc: "Çoktan Seçmeli",
             flashcard: "Flashcard",
+            true_false: "Doğru / Yanlış",
+            gap: "Boşluk Doldurma",
             module: "Modül",
             collection: "Koleksiyon",
             note: "Not"

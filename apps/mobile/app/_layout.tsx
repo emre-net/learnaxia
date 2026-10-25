@@ -13,10 +13,7 @@ import { AnimatedSplash } from '@/components/ui/animated-splash';
 // AxiosError, Network Error gibi kritik hatalar kasıtlı olarak burada gizlenmez —
 // API interceptor'larının bu hataları yakalaması ve loglaması beklenir.
 if (__DEV__) {
-  LogBox.ignoreLogs([
-    'Non-serializable values detected',
-    'ViewPropTypes will be removed',
-  ]);
+  LogBox.ignoreAllLogs();
 }
 
 export const unstable_settings = {
@@ -45,7 +42,8 @@ export default function RootLayout() {
             <Stack.Screen name="journey/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="collections" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="collections/[id]" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="collections/new" options={{ animation: 'slide_from_right' }} />
           </Stack>
 
           {!isSplashComplete && (

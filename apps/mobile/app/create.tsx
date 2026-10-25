@@ -205,8 +205,23 @@ export default function CreateScreen() {
                 <View style={styles.bentoGrid}>
                     <TouchableOpacity style={[styles.bentoCard, styles.bentoLarge]} onPress={openCamera}>
                         <View style={styles.bentoIconTop}>
-                            <Ionicons name="camera" size={32} color="#F8FAFC" />
+                            <View style={styles.cameraIconCircle}>
+                                <Ionicons name="camera" size={24} color="#38BDF8" />
+                            </View>
+                            <View style={styles.liveAiBadge}>
+                                <View style={styles.liveDot} />
+                                <Text style={styles.liveAiText}>AI GÖRÜŞ</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.scannerGraphic}>
+                            <View style={styles.scannerCornerTL} />
+                            <View style={styles.scannerCornerTR} />
+                            <View style={styles.scannerCornerBL} />
+                            <View style={styles.scannerCornerBR} />
+                            <Ionicons name="scan-outline" size={32} color="#0284C7" style={{ opacity: 0.9 }} />
+                        </View>
+
                         <View style={styles.bentoTextContainer}>
                             <Text style={styles.bentoTitle}>Kameradan Çöz</Text>
                             <Text style={styles.bentoDesc}>Soruyu çek, AI çözsün.</Text>
@@ -357,7 +372,89 @@ const styles = StyleSheet.create({
         minHeight: 220,
     },
     bentoIconTop: {
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    cameraIconCircle: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: 'rgba(56, 189, 248, 0.12)',
+        borderWidth: 1,
+        borderColor: 'rgba(56, 189, 248, 0.25)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    liveAiBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(56, 189, 248, 0.2)',
+    },
+    liveDot: {
+        width: 5,
+        height: 5,
+        borderRadius: 2.5,
+        backgroundColor: '#38BDF8',
+    },
+    liveAiText: {
+        color: '#38BDF8',
+        fontSize: 9,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+    },
+    scannerGraphic: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 10,
+        height: 50,
+        position: 'relative',
+    },
+    scannerCornerTL: {
+        position: 'absolute',
+        top: 0,
+        left: '28%',
+        width: 9,
+        height: 9,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderColor: '#38BDF8',
+    },
+    scannerCornerTR: {
+        position: 'absolute',
+        top: 0,
+        right: '28%',
+        width: 9,
+        height: 9,
+        borderTopWidth: 2,
+        borderRightWidth: 2,
+        borderColor: '#38BDF8',
+    },
+    scannerCornerBL: {
+        position: 'absolute',
+        bottom: 0,
+        left: '28%',
+        width: 9,
+        height: 9,
+        borderBottomWidth: 2,
+        borderLeftWidth: 2,
+        borderColor: '#38BDF8',
+    },
+    scannerCornerBR: {
+        position: 'absolute',
+        bottom: 0,
+        right: '28%',
+        width: 9,
+        height: 9,
+        borderBottomWidth: 2,
+        borderRightWidth: 2,
+        borderColor: '#38BDF8',
     },
     bentoTextContainer: {
         marginTop: 'auto',

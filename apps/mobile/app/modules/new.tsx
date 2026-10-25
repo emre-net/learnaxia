@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
     KeyboardAvoidingView, Platform, ScrollView,
-    Alert, StatusBar, StyleSheet
+    Alert, StatusBar, StyleSheet, Modal, FlatList
 } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
+import { CATEGORIES, MAIN_CATEGORIES } from '@learnaxia/shared';
 
 export type QuestionType = 'FLASHCARD' | 'MC' | 'TRUE_FALSE' | 'GAP';
 
 interface NewItem {
     id: string;
-    type: QuestionType;
     // Flashcard
     front: string;
     back: string;
@@ -33,17 +33,40 @@ interface NewItem {
     gapExplanation: string;
 }
 
-const TYPE_CONFIG = [
-    { type: 'FLASHCARD' as QuestionType, label: 'Flashcard', icon: 'layers' },
-    { type: 'MC' as QuestionType, label: 'Çoktan Seçmeli', icon: 'radio-button-on' },
-    { type: 'TRUE_FALSE' as QuestionType, label: 'Doğru/Yanlış', icon: 'checkmark-circle' },
-    { type: 'GAP' as QuestionType, label: 'Boşluk Doldurma', icon: 'create' },
+const MODULE_TYPES: { type: QuestionType; label: string; subtext: string; icon: any; color: string }[] = [
+    {
+        type: 'FLASHCARD',
+        label: 'Flashcard',
+        subtext: 'Ön & Arka Yüz',
+        icon: 'layers-outline',
+        color: '#6366F1'
+    },
+    {
+        type: 'MC',
+        label: 'Çoktan Seçmeli',
+        subtext: '4 Seçenekli Test',
+        icon: 'radio-button-on-outline',
+        color: '#3B82F6'
+    },
+    {
+        type: 'TRUE_FALSE',
+        label: 'Doğru / Yanlış',
+        subtext: 'Önerme Testi',
+        icon: 'checkmark-circle-outline',
+        color: '#10B981'
+    },
+    {
+        type: 'GAP',
+        label: 'Boşluk Doldurma',
+        subtext: 'Cümle İçi {{Kelime}}',
+        icon: 'create-outline',
+        color: '#EC4899'
+    },
 ];
 
-function createDefaultItem(type: QuestionType = 'FLASHCARD'): NewItem {
+function createDefaultItem(): NewItem {
     return {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 6),
-        type,
         front: '',
         back: '',
         mcQuestion: '',
@@ -61,14 +84,23 @@ function createDefaultItem(type: QuestionType = 'FLASHCARD'): NewItem {
 export default function NewModuleScreen() {
     const router = useRouter();
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState('');
-    const [subCategory, setSubCategory] = useState('');
-    const [items, setItems] = useState<NewItem[]>([createDefaultItem('FLASHCARD')]);
+    const [description, setDescription] = useState('');
+    const [moduleType, setModuleType] = useState<QuestionType>('FLASHCARD');
+    const [category, setCategory] = useState<string>('Matematik & Fen');
+    const [subCategory, setSubCategory] = useState<string>('Biyoloji');
+    const [isForkable, setIsForkable] = useState(true);
+    const [items, setItems] = useState<NewItem[]>([createDefaultItem()]);
     const [saving, setSaving] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
-    const handleAddItem = (type: QuestionType = 'FLASHCARD') => {
-        setItems(prev => [...prev, createDefaultItem(type)]);
+    // Modal states for Category and SubCategory
+    const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+    const [subCategoryModalVisible, setSubCategoryModalVisible] = useState(false);
+
+    const availableSubCategories = category && CATEGORIES[category] ? CATEGORIES[category] : [];
+
+    const handleAddItem = () => {
+        setItems(prev => [...prev, createDefaultItem()]);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
@@ -78,11 +110,6 @@ export default function NewModuleScreen() {
             return;
         }
         setItems(prev => prev.filter(i => i.id !== id));
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    };
-
-    const setItemType = (id: string, type: QuestionType) => {
-        setItems(prev => prev.map(item => item.id === id ? { ...item, type } : item));
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
@@ -106,15 +133,20 @@ export default function NewModuleScreen() {
             return;
         }
 
-        // Validate items according to their types
+        if (!category) {
+            Alert.alert('Eksik Bilgi', 'Lütfen bir kategori seçin.');
+            return;
+        }
+
+        // Validate items according to chosen moduleType
         const validatedItems = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const num = i + 1;
 
-            if (item.type === 'FLASHCARD') {
+            if (moduleType === 'FLASHCARD') {
                 if (!item.front.trim() || !item.back.trim()) {
-                    Alert.alert('Eksik Bilgi', `Soru ${num} (Flashcard) için ön ve arka yüz metnini doldurun.`);
+                    Alert.alert('Eksik Bilgi', `Kart #${num} için ön ve arka yüz metnini doldurun.`);
                     return;
                 }
                 validatedItems.push({
@@ -127,14 +159,14 @@ export default function NewModuleScreen() {
                         answer: item.back.trim(),
                     }
                 });
-            } else if (item.type === 'MC') {
+            } else if (moduleType === 'MC') {
                 if (!item.mcQuestion.trim()) {
-                    Alert.alert('Eksik Bilgi', `Soru ${num} (Çoktan Seçmeli) için soru metnini girin.`);
+                    Alert.alert('Eksik Bilgi', `Soru #${num} için soru metnini girin.`);
                     return;
                 }
                 const filledOptions = item.mcOptions.map(o => o.trim());
                 if (filledOptions.some(o => o === '')) {
-                    Alert.alert('Eksik Bilgi', `Soru ${num} için 4 seçeneğin tamamını doldurun.`);
+                    Alert.alert('Eksik Bilgi', `Soru #${num} için 4 seçeneğin tamamını doldurun.`);
                     return;
                 }
                 validatedItems.push({
@@ -147,9 +179,9 @@ export default function NewModuleScreen() {
                         explanation: item.mcExplanation.trim() || undefined,
                     }
                 });
-            } else if (item.type === 'TRUE_FALSE') {
+            } else if (moduleType === 'TRUE_FALSE') {
                 if (!item.tfStatement.trim()) {
-                    Alert.alert('Eksik Bilgi', `Soru ${num} (Doğru/Yanlış) için önerme metnini girin.`);
+                    Alert.alert('Eksik Bilgi', `Soru #${num} için önerme metnini girin.`);
                     return;
                 }
                 validatedItems.push({
@@ -162,7 +194,7 @@ export default function NewModuleScreen() {
                         explanation: item.tfExplanation.trim() || undefined,
                     }
                 });
-            } else if (item.type === 'GAP') {
+            } else if (moduleType === 'GAP') {
                 const regex = /\{\{([^}]+)\}\}/g;
                 const matches = [];
                 let m;
@@ -172,7 +204,7 @@ export default function NewModuleScreen() {
                 if (!item.gapText.trim() || matches.length === 0) {
                     Alert.alert(
                         'Eksik Bilgi',
-                        `Soru ${num} (Boşluk Doldurma) içinde en az bir {{kelime}} formatında boşluk olmalıdır.\n\nÖrnek: Başkentimiz {{Ankara}} şehridir.`
+                        `Soru #${num} içinde en az bir {{kelime}} formatında boşluk olmalıdır.\n\nÖrnek: Başkentimiz {{Ankara}} şehridir.`
                     );
                     return;
                 }
@@ -194,14 +226,13 @@ export default function NewModuleScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         try {
-            const primaryType = validatedItems[0]?.type || 'FLASHCARD';
-
             const res = await api.post('/modules', {
                 title: trimmedTitle,
-                type: primaryType,
+                description: description.trim() || undefined,
+                type: moduleType,
                 category: category.trim() || 'Genel',
                 subCategory: subCategory.trim() || 'Genel',
-                isForkable: true,
+                isForkable,
                 status: 'ACTIVE',
                 items: validatedItems
             });
@@ -231,7 +262,7 @@ export default function NewModuleScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
                     <MaterialIcons name="close" size={20} color="#D1D5DB" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Modül Oluştur</Text>
+                <Text style={styles.headerTitle}>Yeni Modül</Text>
                 <TouchableOpacity
                     onPress={handleSave}
                     disabled={isDisabled}
@@ -256,8 +287,48 @@ export default function NewModuleScreen() {
                     contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                 >
+                    {/* Soru / Modül Türü Seçimi */}
+                    <Text style={styles.sectionLabel}>MODÜL TÜRÜ (TÜM KARTLAR BU TÜRDE OLUR)</Text>
+                    <View style={styles.typeGrid}>
+                        {MODULE_TYPES.map(cfg => {
+                            const isSelected = moduleType === cfg.type;
+                            return (
+                                <TouchableOpacity
+                                    key={cfg.type}
+                                    style={[styles.typeCard, isSelected && { borderColor: cfg.color, backgroundColor: 'rgba(99, 102, 241, 0.08)' }]}
+                                    onPress={() => {
+                                        setModuleType(cfg.type);
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    }}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={[styles.typeIconBox, isSelected && { backgroundColor: cfg.color }]}>
+                                        <Ionicons
+                                            name={cfg.icon}
+                                            size={18}
+                                            color={isSelected ? '#FFFFFF' : '#94A3B8'}
+                                        />
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={[styles.typeCardLabel, isSelected && { color: '#FFFFFF' }]}>
+                                            {cfg.label}
+                                        </Text>
+                                        <Text style={styles.typeCardSubtext}>
+                                            {cfg.subtext}
+                                        </Text>
+                                    </View>
+                                    {isSelected && (
+                                        <View style={[styles.typeCheckBadge, { backgroundColor: cfg.color }]}>
+                                            <MaterialIcons name="check" size={12} color="#FFFFFF" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+
                     {/* Temel Bilgiler */}
-                    <Text style={styles.sectionLabel}>MODÜL BİLGİLERİ</Text>
+                    <Text style={[styles.sectionLabel, { marginTop: 20 }]}>MODÜL BİLGİLERİ</Text>
 
                     <View style={[styles.inputContainer, focusedField === 'title' && styles.inputFocused]}>
                         <TextInput
@@ -273,36 +344,118 @@ export default function NewModuleScreen() {
                         />
                     </View>
 
-                    <View style={styles.row}>
-                        <View style={[styles.inputContainer, styles.halfInput, focusedField === 'category' && styles.inputFocused]}>
-                            <TextInput
-                                style={styles.inputSmall}
-                                placeholder="Kategori (Biyoloji, Tarih...)"
-                                placeholderTextColor="rgba(255,255,255,0.25)"
-                                value={category}
-                                onChangeText={setCategory}
-                                editable={!saving}
-                                onFocus={() => setFocusedField('category')}
-                                onBlur={() => setFocusedField(null)}
-                            />
-                        </View>
-                        <View style={[styles.inputContainer, styles.halfInput, focusedField === 'subCategory' && styles.inputFocused]}>
-                            <TextInput
-                                style={styles.inputSmall}
-                                placeholder="Alt Kategori"
-                                placeholderTextColor="rgba(255,255,255,0.25)"
-                                value={subCategory}
-                                onChangeText={setSubCategory}
-                                editable={!saving}
-                                onFocus={() => setFocusedField('subCategory')}
-                                onBlur={() => setFocusedField(null)}
-                            />
-                        </View>
+                    {/* Kategori ve Alt Kategori Seçimi */}
+                    <View style={styles.pickerRow}>
+                        <TouchableOpacity
+                            style={[styles.pickerButton, styles.halfPicker]}
+                            onPress={() => setCategoryModalVisible(true)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.pickerHeader}>
+                                <Ionicons name="folder-outline" size={14} color="#6366F1" />
+                                <Text style={styles.pickerLabelText}>KATEGORİ</Text>
+                            </View>
+                            <View style={styles.pickerValueRow}>
+                                <Text style={styles.pickerValueText} numberOfLines={1}>
+                                    {category || 'Seçin'}
+                                </Text>
+                                <Ionicons name="chevron-down" size={16} color="#64748B" />
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.pickerButton, styles.halfPicker, !category && { opacity: 0.5 }]}
+                            onPress={() => {
+                                if (category) setSubCategoryModalVisible(true);
+                            }}
+                            disabled={!category}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.pickerHeader}>
+                                <Ionicons name="pricetag-outline" size={14} color="#38BDF8" />
+                                <Text style={styles.pickerLabelText}>ALT KATEGORİ</Text>
+                            </View>
+                            <View style={styles.pickerValueRow}>
+                                <Text style={styles.pickerValueText} numberOfLines={1}>
+                                    {subCategory || 'Seçin'}
+                                </Text>
+                                <Ionicons name="chevron-down" size={16} color="#64748B" />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Açıklama (Opsiyonel) */}
+                    <View style={[styles.inputContainer, focusedField === 'description' && styles.inputFocused, { minHeight: 64 }]}>
+                        <TextInput
+                            style={[styles.inputSmall, { textAlignVertical: 'top' }]}
+                            placeholder="Açıklama (opsiyonel: Bu set neleri kapsıyor?)"
+                            placeholderTextColor="rgba(255,255,255,0.25)"
+                            value={description}
+                            onChangeText={setDescription}
+                            editable={!saving}
+                            multiline
+                            numberOfLines={2}
+                            onFocus={() => setFocusedField('description')}
+                            onBlur={() => setFocusedField(null)}
+                        />
+                    </View>
+
+                    {/* Görünürlük Seçimi */}
+                    <View style={styles.visibilityRow}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setIsForkable(true);
+                            }}
+                            style={[
+                                styles.visibilityCard,
+                                isForkable && styles.visibilityCardActive
+                            ]}
+                        >
+                            <View style={styles.visibilityHeader}>
+                                <Ionicons
+                                    name="globe-outline"
+                                    size={15}
+                                    color={isForkable ? '#3B82F6' : '#64748B'}
+                                />
+                                <Text style={[
+                                    styles.visibilityTitle,
+                                    isForkable && styles.visibilityTitleActive
+                                ]}>Herkese Açık</Text>
+                            </View>
+                            <Text style={styles.visibilityDesc}>Topluluk keşfinde paylaşılır</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setIsForkable(false);
+                            }}
+                            style={[
+                                styles.visibilityCard,
+                                !isForkable && styles.visibilityCardActive
+                            ]}
+                        >
+                            <View style={styles.visibilityHeader}>
+                                <Ionicons
+                                    name="lock-closed"
+                                    size={15}
+                                    color={!isForkable ? '#A855F7' : '#64748B'}
+                                />
+                                <Text style={[
+                                    styles.visibilityTitle,
+                                    !isForkable && styles.visibilityTitleActive
+                                ]}>Gizli</Text>
+                            </View>
+                            <Text style={styles.visibilityDesc}>Yalnızca siz görebilirsiniz</Text>
+                        </TouchableOpacity>
                     </View>
 
                     {/* Soru Listesi */}
                     <View style={styles.sectionHeaderRow}>
-                        <Text style={styles.sectionLabel}>SORULAR & KARTLAR ({items.length})</Text>
+                        <Text style={styles.sectionLabel}>
+                            {moduleType === 'FLASHCARD' ? 'KARTLAR' : 'SORULAR'} ({items.length})
+                        </Text>
                     </View>
 
                     {items.map((item, index) => (
@@ -313,46 +466,24 @@ export default function NewModuleScreen() {
                                     <View style={styles.badgeIndex}>
                                         <Text style={styles.badgeIndexText}>#{index + 1}</Text>
                                     </View>
+                                    <Text style={styles.cardHeaderTypeText}>
+                                        {MODULE_TYPES.find(m => m.type === moduleType)?.label}
+                                    </Text>
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => handleRemoveItem(item.id)}
-                                    style={styles.removeBtn}
-                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                >
-                                    <Ionicons name="trash-outline" size={17} color="#EF4444" />
-                                </TouchableOpacity>
+                                {items.length > 1 && (
+                                    <TouchableOpacity
+                                        onPress={() => handleRemoveItem(item.id)}
+                                        style={styles.removeBtn}
+                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                                    </TouchableOpacity>
+                                )}
                             </View>
 
-                            {/* Type Selector Tabs */}
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={styles.typeTabsContainer}
-                            >
-                                {TYPE_CONFIG.map(cfg => {
-                                    const active = item.type === cfg.type;
-                                    return (
-                                        <TouchableOpacity
-                                            key={cfg.type}
-                                            onPress={() => setItemType(item.id, cfg.type)}
-                                            style={[styles.typeTab, active && styles.typeTabActive]}
-                                        >
-                                            <Ionicons
-                                                name={cfg.icon as any}
-                                                size={13}
-                                                color={active ? '#6366F1' : '#71717A'}
-                                            />
-                                            <Text style={[styles.typeTabText, active && styles.typeTabTextActive]}>
-                                                {cfg.label}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    );
-                                })}
-                            </ScrollView>
-
-                            {/* Conditional Form per Question Type */}
+                            {/* Form Fields for Selected Module Type */}
                             <View style={styles.cardBody}>
-                                {item.type === 'FLASHCARD' && (
+                                {moduleType === 'FLASHCARD' && (
                                     <>
                                         <Text style={styles.fieldLabel}>ÖN YÜZ (SORU / KAVRAM)</Text>
                                         <TextInput
@@ -378,7 +509,7 @@ export default function NewModuleScreen() {
                                     </>
                                 )}
 
-                                {item.type === 'MC' && (
+                                {moduleType === 'MC' && (
                                     <>
                                         <Text style={styles.fieldLabel}>SORU METNİ</Text>
                                         <TextInput
@@ -392,7 +523,7 @@ export default function NewModuleScreen() {
                                         />
 
                                         <Text style={[styles.fieldLabel, { marginTop: 12 }]}>
-                                            SEÇENEKLER (Doğru olanı işaretleyin)
+                                            SEÇENEKLER (Doğru seçeneğe dokunun)
                                         </Text>
 
                                         {['A', 'B', 'C', 'D'].map((letter, optIdx) => {
@@ -400,7 +531,10 @@ export default function NewModuleScreen() {
                                             return (
                                                 <View key={letter} style={styles.mcOptionRow}>
                                                     <TouchableOpacity
-                                                        onPress={() => updateItem(item.id, { mcCorrectIndex: optIdx })}
+                                                        onPress={() => {
+                                                            updateItem(item.id, { mcCorrectIndex: optIdx });
+                                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                        }}
                                                         style={[styles.mcCheckBtn, isCorrect && styles.mcCheckBtnActive]}
                                                     >
                                                         <Text style={[styles.mcLetterText, isCorrect && styles.mcLetterTextActive]}>
@@ -431,7 +565,7 @@ export default function NewModuleScreen() {
                                     </>
                                 )}
 
-                                {item.type === 'TRUE_FALSE' && (
+                                {moduleType === 'TRUE_FALSE' && (
                                     <>
                                         <Text style={styles.fieldLabel}>ÖNERME / METİN</Text>
                                         <TextInput
@@ -447,7 +581,10 @@ export default function NewModuleScreen() {
                                         <Text style={[styles.fieldLabel, { marginTop: 12 }]}>DOĞRU CEVAP</Text>
                                         <View style={styles.tfButtonsRow}>
                                             <TouchableOpacity
-                                                onPress={() => updateItem(item.id, { tfCorrect: true })}
+                                                onPress={() => {
+                                                    updateItem(item.id, { tfCorrect: true });
+                                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                }}
                                                 style={[styles.tfChoiceBtn, item.tfCorrect && styles.tfChoiceCorrectActive]}
                                             >
                                                 <MaterialIcons
@@ -461,7 +598,10 @@ export default function NewModuleScreen() {
                                             </TouchableOpacity>
 
                                             <TouchableOpacity
-                                                onPress={() => updateItem(item.id, { tfCorrect: false })}
+                                                onPress={() => {
+                                                    updateItem(item.id, { tfCorrect: false });
+                                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                }}
                                                 style={[styles.tfChoiceBtn, !item.tfCorrect && styles.tfChoiceWrongActive]}
                                             >
                                                 <MaterialIcons
@@ -487,13 +627,13 @@ export default function NewModuleScreen() {
                                     </>
                                 )}
 
-                                {item.type === 'GAP' && (
+                                {moduleType === 'GAP' && (
                                     <>
                                         <Text style={styles.fieldLabel}>METİN VE BOŞLUKLAR</Text>
                                         <View style={styles.gapHelperBox}>
-                                            <Ionicons name="information-circle-outline" size={16} color="#6366F1" />
+                                            <Ionicons name="information-circle-outline" size={16} color="#EC4899" />
                                             <Text style={styles.gapHelperText}>
-                                                Boş bırakılacak kelimeleri <Text style={{ color: '#A5B4FC', fontWeight: '700' }}>{"{{kelime}}"}</Text> şeklinde yazın.
+                                                Boş bırakılacak kelimeleri <Text style={{ color: '#F472B6', fontWeight: '700' }}>{"{{kelime}}"}</Text> şeklinde yazın.
                                             </Text>
                                         </View>
                                         <TextInput
@@ -521,26 +661,109 @@ export default function NewModuleScreen() {
                         </View>
                     ))}
 
-                    {/* Hızlı Ekleme Butonları */}
-                    <View style={styles.addButtonsSection}>
-                        <Text style={[styles.sectionLabel, { marginBottom: 10 }]}>YENİ SORU EKLE</Text>
-                        <View style={styles.addGrid}>
-                            {TYPE_CONFIG.map(cfg => (
-                                <TouchableOpacity
-                                    key={cfg.type}
-                                    style={styles.addGridBtn}
-                                    onPress={() => handleAddItem(cfg.type)}
-                                    disabled={saving}
-                                >
-                                    <Ionicons name={cfg.icon as any} size={16} color="#6366F1" />
-                                    <Text style={styles.addGridBtnText}>{cfg.label}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
+                    {/* Tekil ve Net Ekleme Butonu */}
+                    <TouchableOpacity
+                        style={styles.addSingleBtn}
+                        onPress={handleAddItem}
+                        disabled={saving}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons name="add-circle-outline" size={20} color="#6366F1" />
+                        <Text style={styles.addSingleBtnText}>
+                            {moduleType === 'FLASHCARD' ? 'Yeni Kart Ekle' : 'Yeni Soru Ekle'}
+                        </Text>
+                    </TouchableOpacity>
 
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Kategori Seçim Modalı */}
+            <Modal
+                visible={categoryModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setCategoryModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Ana Kategori Seçin</Text>
+                            <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
+                                <Ionicons name="close" size={22} color="#94A3B8" />
+                            </TouchableOpacity>
+                        </View>
+                        <FlatList
+                            data={MAIN_CATEGORIES}
+                            keyExtractor={cat => cat}
+                            renderItem={({ item: cat }) => {
+                                const isSelected = category === cat;
+                                return (
+                                    <TouchableOpacity
+                                        style={[styles.modalItem, isSelected && styles.modalItemSelected]}
+                                        onPress={() => {
+                                            setCategory(cat);
+                                            const subCats = CATEGORIES[cat] || [];
+                                            setSubCategory(subCats[0] || '');
+                                            setCategoryModalVisible(false);
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        }}
+                                    >
+                                        <Text style={[styles.modalItemText, isSelected && styles.modalItemTextSelected]}>
+                                            {cat}
+                                        </Text>
+                                        {isSelected && (
+                                            <Ionicons name="checkmark" size={18} color="#6366F1" />
+                                        )}
+                                    </TouchableOpacity>
+                                );
+                            }}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Alt Kategori Seçim Modalı */}
+            <Modal
+                visible={subCategoryModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setSubCategoryModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>{category} - Alt Kategori</Text>
+                            <TouchableOpacity onPress={() => setSubCategoryModalVisible(false)}>
+                                <Ionicons name="close" size={22} color="#94A3B8" />
+                            </TouchableOpacity>
+                        </View>
+                        <FlatList
+                            data={availableSubCategories}
+                            keyExtractor={sub => sub}
+                            renderItem={({ item: sub }) => {
+                                const isSelected = subCategory === sub;
+                                return (
+                                    <TouchableOpacity
+                                        style={[styles.modalItem, isSelected && styles.modalItemSelected]}
+                                        onPress={() => {
+                                            setSubCategory(sub);
+                                            setSubCategoryModalVisible(false);
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        }}
+                                    >
+                                        <Text style={[styles.modalItemText, isSelected && styles.modalItemTextSelected]}>
+                                            {sub}
+                                        </Text>
+                                        {isSelected && (
+                                            <Ionicons name="checkmark" size={18} color="#38BDF8" />
+                                        )}
+                                    </TouchableOpacity>
+                                );
+                            }}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </Screen>
     );
 }
@@ -550,7 +773,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16,
-        borderBottomWidth: 1, borderBottomColor: '#27272a',
+        borderBottomWidth: 1, borderBottomColor: '#18181b',
     },
     closeBtn: {
         width: 38, height: 38, borderRadius: 19, backgroundColor: '#18181b',
@@ -565,16 +788,49 @@ const styles = StyleSheet.create({
     saveBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
     scrollContent: { paddingHorizontal: 16, paddingVertical: 20, paddingBottom: 120 },
     sectionLabel: { color: '#71717a', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10, marginLeft: 2 },
-    sectionHeaderRow: { marginTop: 24, marginBottom: 4 },
+    sectionHeaderRow: { marginTop: 20, marginBottom: 6 },
+
+    // Module Type Grid
+    typeGrid: {
+        flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 6,
+    },
+    typeCard: {
+        flexDirection: 'row', alignItems: 'center', gap: 10,
+        backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a',
+        borderRadius: 14, padding: 12, flexBasis: '48%', flexGrow: 1,
+    },
+    typeIconBox: {
+        width: 34, height: 34, borderRadius: 10, backgroundColor: '#27272a',
+        alignItems: 'center', justifyContent: 'center',
+    },
+    typeCardLabel: { color: '#D4D4D8', fontSize: 13, fontWeight: '700' },
+    typeCardSubtext: { color: '#71717A', fontSize: 10, marginTop: 1 },
+    typeCheckBadge: {
+        width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center',
+    },
+
+    // Inputs
     inputContainer: {
         backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a', borderRadius: 14,
         paddingHorizontal: 14, paddingVertical: 14, marginBottom: 12,
     },
     inputFocused: { borderColor: '#6366F1' },
     input: { color: '#f4f4f5', fontSize: 15, fontWeight: '600' },
-    row: { flexDirection: 'row', gap: 10 },
-    halfInput: { flex: 1 },
     inputSmall: { color: '#f4f4f5', fontSize: 13 },
+
+    // Category Pickers
+    pickerRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+    halfPicker: { flex: 1 },
+    pickerButton: {
+        backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a',
+        borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10,
+    },
+    pickerHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+    pickerLabelText: { color: '#71717A', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+    pickerValueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    pickerValueText: { color: '#F4F4F5', fontSize: 13, fontWeight: '600', flex: 1 },
+
+    // Cards
     cardItem: {
         backgroundColor: '#18181b', borderWidth: 1, borderColor: '#27272a', borderRadius: 18,
         marginBottom: 16, overflow: 'hidden',
@@ -589,21 +845,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#2D3748', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8,
     },
     badgeIndexText: { color: '#A0AEC0', fontSize: 11, fontWeight: '700' },
+    cardHeaderTypeText: { color: '#94A3B8', fontSize: 12, fontWeight: '600' },
     removeBtn: { padding: 4 },
-    typeTabsContainer: {
-        flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingVertical: 10,
-        backgroundColor: '#141822', borderBottomWidth: 1, borderBottomColor: '#222838',
-    },
-    typeTab: {
-        flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10,
-        paddingVertical: 6, borderRadius: 20, backgroundColor: '#1E2433',
-        borderWidth: 1, borderColor: '#2D3548',
-    },
-    typeTabActive: {
-        backgroundColor: 'rgba(99, 102, 241, 0.15)', borderColor: '#6366F1',
-    },
-    typeTabText: { color: '#94A3B8', fontSize: 11, fontWeight: '600' },
-    typeTabTextActive: { color: '#A5B4FC', fontWeight: '700' },
     cardBody: { padding: 14 },
     fieldLabel: { color: '#94A3B8', fontSize: 10, fontWeight: '700', letterSpacing: 0.8, marginBottom: 6 },
     cardInput: {
@@ -619,6 +862,7 @@ const styles = StyleSheet.create({
         color: '#E2E8F0', fontSize: 13, backgroundColor: '#11141E', borderRadius: 10,
         paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: '#222838',
     },
+
     // MC Options
     mcOptionRow: {
         flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8,
@@ -640,6 +884,7 @@ const styles = StyleSheet.create({
     mcInputCorrect: {
         borderColor: 'rgba(16, 185, 129, 0.4)', backgroundColor: 'rgba(16, 185, 129, 0.05)',
     },
+
     // True/False
     tfButtonsRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
     tfChoiceBtn: {
@@ -656,20 +901,54 @@ const styles = StyleSheet.create({
     tfChoiceText: { color: '#94A3B8', fontSize: 12, fontWeight: '700' },
     tfChoiceTextCorrect: { color: '#10B981', fontWeight: '800' },
     tfChoiceTextWrong: { color: '#EF4444', fontWeight: '800' },
+
     // Gap Fill
     gapHelperBox: {
-        flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(99, 102, 241, 0.08)',
-        borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.25)', borderRadius: 10,
+        flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(236, 72, 153, 0.08)',
+        borderWidth: 1, borderColor: 'rgba(236, 72, 153, 0.25)', borderRadius: 10,
         paddingHorizontal: 10, paddingVertical: 8, marginBottom: 8,
     },
-    gapHelperText: { color: '#C7D2FE', fontSize: 11, flex: 1 },
-    // Add Buttons Grid
-    addButtonsSection: { marginTop: 16 },
-    addGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    addGridBtn: {
-        flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#18181b',
-        borderWidth: 1, borderColor: '#27272a', borderRadius: 14,
-        paddingHorizontal: 14, paddingVertical: 12, flexBasis: '48%', flexGrow: 1,
+    gapHelperText: { color: '#FBCFE8', fontSize: 11, flex: 1 },
+
+    // Single Add Button
+    addSingleBtn: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+        backgroundColor: '#18181b', borderWidth: 1.5, borderColor: '#3F3F46', borderStyle: 'dashed',
+        borderRadius: 16, paddingVertical: 14, marginTop: 8,
     },
-    addGridBtnText: { color: '#f4f4f5', fontSize: 12, fontWeight: '600' },
+    addSingleBtnText: { color: '#E4E4E7', fontSize: 14, fontWeight: '700' },
+
+    // Visibility
+    visibilityRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+    visibilityCard: {
+        flex: 1, backgroundColor: '#18181b', borderWidth: 1.5, borderColor: '#27272a',
+        borderRadius: 14, padding: 12,
+    },
+    visibilityCardActive: { borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.08)' },
+    visibilityHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+    visibilityTitle: { color: '#71717A', fontSize: 13, fontWeight: '700' },
+    visibilityTitleActive: { color: '#F4F4F5' },
+    visibilityDesc: { color: '#52525B', fontSize: 10, lineHeight: 14 },
+
+    // Modals
+    modalOverlay: {
+        flex: 1, backgroundColor: 'rgba(0,0,0,0.7)',
+        justifyContent: 'center', padding: 20,
+    },
+    modalContent: {
+        backgroundColor: '#18181b', borderRadius: 20, borderWidth: 1, borderColor: '#27272a',
+        maxHeight: '75%', padding: 18,
+    },
+    modalHeader: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: '#27272a', marginBottom: 8,
+    },
+    modalTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+    modalItem: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 14, paddingHorizontal: 12, borderRadius: 10,
+    },
+    modalItemSelected: { backgroundColor: 'rgba(99, 102, 241, 0.1)' },
+    modalItemText: { color: '#D4D4D8', fontSize: 14, fontWeight: '500' },
+    modalItemTextSelected: { color: '#FFFFFF', fontWeight: '700' },
 });

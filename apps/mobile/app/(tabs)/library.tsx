@@ -137,7 +137,11 @@ export default function LibraryScreen() {
                         ? t('library.types.mc', language)
                         : item.type === 'FLASHCARD'
                             ? t('library.types.flashcard', language)
-                            : item.type || t('library.types.module', language)}
+                            : item.type === 'TRUE_FALSE'
+                                ? t('library.types.true_false', language)
+                                : item.type === 'GAP'
+                                    ? t('library.types.gap', language)
+                                    : item.type || t('library.types.module', language)}
                 </Text>
                 <Text style={styles.dateText}>
                     {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
@@ -259,9 +263,9 @@ export default function LibraryScreen() {
                 )}
             </View>
 
-            {/* Tab Bar - Minimal Pill */}
+            {/* Tab Bar - Responsive Segmented Row */}
             <View style={styles.tabsContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                <View style={styles.tabsRow}>
                     {tabs.map((tab) => {
                         const isActive = activeTab === tab.id;
                         return (
@@ -270,7 +274,7 @@ export default function LibraryScreen() {
                                 style={[styles.tabButton, isActive && styles.tabButtonActive]}
                                 onPress={() => handleTabChange(tab.id)}
                             >
-                                <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
+                                <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]} numberOfLines={1}>
                                     {tab.label}
                                 </Text>
                                 <View style={[styles.tabCountBadge, isActive && styles.tabCountBadgeActive]}>
@@ -281,7 +285,7 @@ export default function LibraryScreen() {
                             </TouchableOpacity>
                         );
                     })}
-                </ScrollView>
+                </View>
             </View>
 
             <FlatList
@@ -293,8 +297,31 @@ export default function LibraryScreen() {
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyTitle}>Burada henüz bir şey yok.</Text>
-                        <Text style={styles.emptyDesc}>Öğrenmeye başlamak için yeni içerikler oluşturun.</Text>
+                        <View style={styles.emptyIconCircle}>
+                            <Ionicons
+                                name={
+                                    activeTab === 'modules'
+                                        ? 'layers-outline'
+                                        : activeTab === 'collections'
+                                        ? 'folder-open-outline'
+                                        : 'document-text-outline'
+                                }
+                                size={36}
+                                color="#6366F1"
+                            />
+                        </View>
+                        <Text style={styles.emptyTitle}>
+                            {searchQuery ? 'Sonuç Bulunamadı' : 'Burada henüz bir şey yok'}
+                        </Text>
+                        <Text style={styles.emptyDesc}>
+                            {searchQuery
+                                ? `"${searchQuery}" ile eşleşen içerik bulunamadı.`
+                                : activeTab === 'modules'
+                                ? 'Kendi modülünüzü oluşturun veya Keşfet sekmesinden yeni setler keşfedin.'
+                                : activeTab === 'collections'
+                                ? 'Modüllerinizi düzenli tutmak için yeni bir koleksiyon başlatın.'
+                                : 'Hızlı notlar alarak öğrenme sürecinizi hızlandırın.'}
+                        </Text>
                         {!searchQuery && !fetchError && (
                             <TouchableOpacity
                                 style={styles.emptyActionBtn}
@@ -304,8 +331,14 @@ export default function LibraryScreen() {
                                     else router.push('/notes/new' as any);
                                 }}
                             >
-                                <Ionicons name="add" size={18} color="#000000" />
-                                <Text style={styles.emptyActionBtnText}>Oluştur</Text>
+                                <Ionicons name="add" size={18} color="#FFFFFF" />
+                                <Text style={styles.emptyActionBtnText}>
+                                    {activeTab === 'modules'
+                                        ? 'Modül Oluştur'
+                                        : activeTab === 'collections'
+                                        ? 'Koleksiyon Oluştur'
+                                        : 'Not Yaz'}
+                                </Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -371,18 +404,25 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     tabsContainer: {
-        marginBottom: 24,
-        paddingHorizontal: 24,
+        marginBottom: 20,
+        paddingHorizontal: 20,
+    },
+    tabsRow: {
+        flexDirection: 'row',
+        gap: 6,
     },
     tabButton: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 99,
+        justifyContent: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 6,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#111111',
-        backgroundColor: '#000000',
+        borderColor: '#18181b',
+        backgroundColor: '#09090b',
+        gap: 5,
     },
     tabButtonActive: {
         backgroundColor: '#F8FAFC',
@@ -391,20 +431,19 @@ const styles = StyleSheet.create({
     tabButtonText: {
         color: '#94A3B8',
         fontWeight: '600',
-        fontSize: 13,
+        fontSize: 12,
     },
     tabButtonTextActive: {
         color: '#000000',
     },
     tabCountBadge: {
-        backgroundColor: '#111111',
+        backgroundColor: '#18181b',
         paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 10,
-        marginLeft: 8,
+        borderRadius: 8,
     },
     tabCountBadgeActive: {
-        backgroundColor: 'rgba(0,0,0,0.1)',
+        backgroundColor: '#E2E8F0',
     },
     tabCountText: {
         color: '#64748B',
@@ -485,35 +524,50 @@ const styles = StyleSheet.create({
         backgroundColor: '#000000',
     },
     emptyContainer: {
-        alignItems: 'flex-start',
-        paddingVertical: 48,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 56,
+        paddingHorizontal: 24,
+    },
+    emptyIconCircle: {
+        width: 76,
+        height: 76,
+        borderRadius: 38,
+        backgroundColor: '#1E1B4B',
+        borderWidth: 1,
+        borderColor: '#312E81',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
     },
     emptyTitle: {
-        fontSize: 20,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '700',
         color: '#F8FAFC',
         marginBottom: 8,
-        letterSpacing: -0.5,
+        letterSpacing: -0.3,
+        textAlign: 'center',
     },
     emptyDesc: {
         fontSize: 14,
-        color: '#64748B',
+        color: '#94A3B8',
         marginBottom: 24,
         lineHeight: 20,
+        textAlign: 'center',
     },
     emptyActionBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
+        paddingHorizontal: 22,
         paddingVertical: 12,
         borderRadius: 99,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         gap: 8,
     },
     emptyActionBtnText: {
-        color: '#000000',
+        color: '#FFFFFF',
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
     },
     loadMoreBtn: {
         alignItems: 'center',

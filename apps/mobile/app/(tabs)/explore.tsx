@@ -152,31 +152,37 @@ export default function ExploreScreen() {
         )}
       </View>
 
-      <View style={styles.tabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+      {/* Segmented Type Switcher */}
+      <View style={styles.segmentedWrapper}>
+        <View style={styles.segmentedControl}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <TouchableOpacity
                 key={tab.id}
-                style={[styles.tabButton, isActive && styles.tabButtonActive]}
+                style={[styles.segmentBtn, isActive && styles.segmentBtnActive]}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setActiveTab(tab.id);
                 }}
               >
-                <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
+                <Ionicons
+                  name={tab.id === 'MODULE' ? 'document-text' : 'folder'}
+                  size={14}
+                  color={isActive ? '#0F172A' : '#94A3B8'}
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={[styles.segmentBtnText, isActive && styles.segmentBtnTextActive]}>
                   {tab.label}
                 </Text>
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
       </View>
 
       {/* Synchronized Category Chips */}
-      {activeTab === 'MODULE' && (
-        <View style={styles.categoryContainer}>
+      <View style={styles.categoryContainer}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -229,7 +235,6 @@ export default function ExploreScreen() {
             })}
           </ScrollView>
         </View>
-      )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -247,6 +252,13 @@ export default function ExploreScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons
+                  name={fetchError ? 'cloud-offline-outline' : activeTab === 'MODULE' ? 'compass-outline' : 'folder-open-outline'}
+                  size={36}
+                  color="#38BDF8"
+                />
+              </View>
               <Text style={styles.emptyTitle}>
                 {fetchError ? 'Bağlantı Hatası' : t('discover.emptyTitle', language)}
               </Text>
@@ -257,10 +269,15 @@ export default function ExploreScreen() {
                     ? t('discover.emptyNoResults', language, { query: searchQuery })
                     : t('discover.emptyDesc', language)}
               </Text>
-              {fetchError && (
+              {fetchError ? (
                 <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
                   <Ionicons name="refresh" size={16} color="#000000" />
                   <Text style={styles.retryText}>Tekrar Dene</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.emptyActionBtn} onPress={() => router.push('/create' as any)}>
+                  <Ionicons name="add" size={18} color="#0F172A" />
+                  <Text style={styles.emptyActionBtnText}>İçerik Oluştur</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -317,29 +334,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
-  tabsContainer: {
-    marginBottom: 24,
+  segmentedWrapper: {
     paddingHorizontal: 24,
+    marginBottom: 16,
   },
-  tabButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: '#0F172A',
+    borderRadius: 14,
+    padding: 4,
     borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#000000',
+    borderColor: '#1E293B',
   },
-  tabButtonActive: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#F8FAFC',
+  segmentBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
   },
-  tabButtonText: {
+  segmentBtnActive: {
+    backgroundColor: '#38BDF8',
+  },
+  segmentBtnText: {
     color: '#94A3B8',
-    fontWeight: '600',
     fontSize: 13,
+    fontWeight: '600',
   },
-  tabButtonTextActive: {
-    color: '#000000',
+  segmentBtnTextActive: {
+    color: '#0F172A',
+    fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,
@@ -418,21 +443,50 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   emptyContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 48,
+    paddingHorizontal: 20,
+  },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#F8FAFC',
     marginBottom: 8,
-    letterSpacing: -0.5,
+    textAlign: 'center',
+    letterSpacing: -0.3,
   },
   emptyDesc: {
     fontSize: 14,
     color: '#64748B',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  emptyActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#38BDF8',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 99,
+  },
+  emptyActionBtnText: {
+    color: '#0F172A',
+    fontSize: 14,
+    fontWeight: '700',
   },
   retryButton: {
     flexDirection: 'row',

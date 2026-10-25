@@ -90,8 +90,10 @@ export default function CollectionDetailScreen() {
 
     const getModuleTypeLabel = (type: string): string => {
         switch (type) {
-            case 'MC': return 'Test';
-            case 'FLASHCARD': return 'Kart';
+            case 'MC': return 'Çoktan Seçmeli';
+            case 'FLASHCARD': return 'Flashcard';
+            case 'TRUE_FALSE': return 'Doğru / Yanlış';
+            case 'GAP': return 'Boşluk Doldurma';
             default: return 'Modül';
         }
     };

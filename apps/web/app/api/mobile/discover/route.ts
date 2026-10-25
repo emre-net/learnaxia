@@ -20,6 +20,9 @@ export async function GET(req: Request) {
         if (type === "COLLECTION") {
             const where: Prisma.CollectionWhereInput = {
                 visibility: 'PUBLIC',
+                ...(category && category !== 'ALL' && {
+                    category: { equals: category, mode: 'insensitive' as const }
+                }),
                 ...(search && {
                     OR: [
                         { title: { contains: search, mode: 'insensitive' as const } },

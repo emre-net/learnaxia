@@ -172,11 +172,6 @@ export default function ProfileScreen() {
             value: profileData?.stats?.collections || 0,
             icon: 'folder-outline' as const,
         },
-        {
-            label: t('profile.stats.studyTime', language),
-            value: `${analyticsData?.totalStudyMinutes || 0} ${t('dashboard.stats.minutesUnit', language)}`,
-            icon: 'time-outline' as const,
-        },
     ];
 
     return (
@@ -290,15 +285,15 @@ export default function ProfileScreen() {
                     </View>
                 )}
 
-                {/* Stats */}
-                <View style={styles.statsColumn}>
+                {/* Stats Grid */}
+                <View style={styles.statsGrid}>
                     {statItems.map((stat, i) => (
-                        <View key={i} style={styles.statRow}>
-                            <Ionicons name={stat.icon} size={24} color="#64748B" />
-                            <View style={styles.statContent}>
-                                <Text style={styles.statLabel}>{stat.label}</Text>
-                                <Text style={styles.statValue}>{stat.value}</Text>
+                        <View key={i} style={styles.statCard}>
+                            <View style={styles.statIconCircle}>
+                                <Ionicons name={stat.icon} size={20} color="#6366F1" />
                             </View>
+                            <Text style={styles.statValue}>{stat.value}</Text>
+                            <Text style={styles.statLabel}>{stat.label}</Text>
                         </View>
                     ))}
                 </View>
@@ -582,35 +577,41 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '500',
     },
-    statsColumn: {
+    statsGrid: {
+        flexDirection: 'row',
         marginHorizontal: 24,
         marginBottom: 32,
         gap: 12,
     },
-    statRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    statCard: {
+        flex: 1,
         backgroundColor: '#0A0A0A',
         borderRadius: 20,
-        padding: 20,
+        padding: 16,
         borderWidth: 1,
         borderColor: '#111111',
+        alignItems: 'center',
     },
-    statContent: {
-        flex: 1,
-        marginLeft: 16,
+    statIconCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#1E1B4B',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
+    statValue: {
+        color: '#F8FAFC',
+        fontSize: 22,
+        fontWeight: '700',
+        letterSpacing: -0.5,
+        marginBottom: 2,
     },
     statLabel: {
         color: '#64748B',
         fontSize: 12,
-        fontWeight: '500',
-    },
-    statValue: {
-        color: '#F8FAFC',
-        fontSize: 20,
         fontWeight: '600',
-        marginTop: 4,
-        letterSpacing: -0.3,
     },
     settingsSection: {
         paddingHorizontal: 24,

@@ -4,18 +4,23 @@ Bu kural; birden fazla yapay zeka ajanının veya geliştiricinin projede çalı
 
 ---
 
-## 1. Dört Temel Soru Tipi Dokunulmazlığı
+## 1. Dört Temel Soru Tipi Dokunulmazlığı ve Modül Başına Tek Soru Tipi (Homogeneous Modules)
 
 Platform her iki tarafta da şu 4 soru tipini **eksiksiz ve ödünsüz** desteklemek zorundadır:
 
 1. **`FLASHCARD`:** Çift yüzlü kart (Ön: `front`/`question`, Arka: `back`/`answer`).
 2. **`MC` (Multiple Choice):** Soru, 4 seçenek (`options: string[]`), doğru cevap (`correctAnswer`) ve opsiyonel açıklama (`explanation`).
 3. **`TRUE_FALSE` / `TF`:** Önerme metni ve iki seçenekli (Doğru / Yanlış) karar yapısı.
-4. **`GAP` (Gap Fill):** Cümle içinde `[boşluk]` içeren metin ve tamamlama alanı.
+4. **`GAP` (Gap Fill):** Cümle içinde `{{kelime}}` boşluğu içeren metin ve tamamlama alanı.
+
+### 📌 Modül Başına Tek Soru Tipi Kuralı:
+- Bir modül oluşturulurken kullanıcı bu 4 soru tipinden **yalnızca birini** seçer. Modül içindeki tüm sorular/kartlar seçilen bu tipe tabidir.
+- Kart bazında soru tipi değiştiren switcher'lar veya tek bir modül içinde farklı soru tiplerini karıştıran (heterojen) yapılar **KESİNLİKLE YASAKTIR**. (Karma soru tipli modül desteği sistemin gelecek yol haritasında yer alan bağımsız bir geliştirme olup mevcut mimaride bulunmaz).
 
 ### 🚫 KESİN YASAKLAR:
 - Hiçbir ajan mobil veya web çalışma ekranında soru tiplerini tek tipleştiremez (örneğin `MC` tipini flashcard'a çeviremez).
-- Mobil oluşturma ekranı (`modules/new.tsx`) sadece flashcard ile sınırlandırılamaz; diğer tiplerin de eklenmesine imkan tanınmalıdır.
+- Rozetlerde, listelerde ve kütüphanede `TRUE_FALSE` ve `GAP` tiplerini "Modül" veya "Test" diyerek yutmak yasaktır.
+- Mobil oluşturma ekranı (`modules/new.tsx`) 4 soru tipinin tamamını (modül tipi seçimi olarak) desteklemelidir.
 - Kod refactoring sırasında `MC`, `TF` veya `GAP` renderer bileşenleri basitleştirme bahanesiyle silinemez.
 
 ---
@@ -42,14 +47,25 @@ Kullanıcı modeli daima şu iki alanı birbirinden bağımsız tutmalıdır:
 
 ---
 
-## 4. Kategori Senkronizasyonu
+## 4. Kategori ve Alt Kategori Seçimi (Önceden Tanımlı Liste Zorunluluğu)
 
-- `apps/web/lib/constants/categories.ts` içinde tanımlanan ana kategoriler ve alt kategoriler, mobil Keşfet (`explore.tsx`) ve Modül Oluşturucu ekranlarında da birebir yer almalıdır.
-- Mobilde kategoriler silinerek `"Genel"` varsayılanına indirgenemez.
+- Kategoriler ve Alt Kategoriler daima `@learnaxia/shared` (`CATEGORIES` ve `MAIN_CATEGORIES`) paketinden seçilmek zorundadır.
+- **Serbest Metin Kategori Girişi KESİNLİKLE YASAKTIR**: Ne Web'de ne de Mobilde kullanıcılara serbest kategori metin kutusu (`TextInput` / `<input>`) sunulamaz.
+- Seçilen Ana Kategori, kullanıcının seçebileceği Alt Kategorileri dinamik olarak belirlemelidir.
+- Mobilde kategoriler silinerek veya basitleştirilerek `"Genel"` varsayılanına indirgenemez.
 
 ---
 
-## 5. UI/UX ve Responsive Standartları
+## 5. Görünürlük (Public/Private) ve Koleksiyon Bütünlüğü
+
+- Hem **Modüller** hem de **Koleksiyonlar** Web ve Mobilde `PUBLIC` (Herkese Açık) ve `PRIVATE` (Gizli) görünürlük seviyelerini tam olarak desteklemelidir.
+- Bir içerik `PUBLIC` olarak ayarlandığında, Ana Kategori ve Alt Kategori seçimi zorunlu olmalıdır.
+- Mobilde koleksiyon oluşturma (`apps/mobile/app/collections/new.tsx`) ekranı yalnızca başlık ve açıklamaya indirgenemez; kategori, alt kategori ve görünürlük seçicilerini içermek zorundadır.
+- Keşfet / Arama ekranı ve backend arama endpoint'leri kategori filtresini hem Modüller hem de Koleksiyonlar için ortak çalıştırmalıdır.
+
+---
+
+## 6. UI/UX ve Responsive Standartları
 
 - **Hesap Silme (Danger Zone):** Profil ana ekranında çıkış butonunun altında doğrudan "Hesabı Sil" butonu bulunamaz. Yalnızca Ayarlar menüsü altındaki onaylı güvenlik sekmesinde yer alabilir.
 - **Tablet Desteği:** Kartlar (`flashcard`, `quiz-card` vb.) tablet ekranlarında sınırsız esneyemez; `maxWidth: 580` ve responsive padding kurallarına uymak zorundadır.
