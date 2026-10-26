@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useTranslation } from "@/lib/i18n/i18n"
 import {
@@ -16,18 +17,9 @@ import {
     Compass,
     User,
     LayoutDashboard,
-    Sparkles,
-    PenTool,
-    FileText,
-    Camera,
-    FolderPlus,
-    Zap,
-    Cpu,
     Trophy
 } from "lucide-react"
-import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { motion, AnimatePresence } from "framer-motion"
 
 // ─── User Card — Sidebar alt kısmı için kullanıcı özeti ──────────────────────
 function UserCard() {
@@ -77,7 +69,6 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const { t } = useTranslation()
-    const [isHoveringAtölye, setIsHoveringAtölye] = useState(false)
 
     const routes = [
         {
@@ -114,18 +105,6 @@ export function Sidebar({ className }: SidebarProps) {
 
     const isCreateActive = pathname.startsWith("/dashboard/create")
 
-    const manualShortcuts = [
-        { icon: PenTool, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50", label: t('sidebar.manualModule'), href: "/dashboard/create/manual" },
-        { icon: FolderPlus, color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/50", label: t('sidebar.collection'), href: "/dashboard/collections/new" },
-        { icon: FileText, color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/50", label: t('sidebar.writeNote'), href: "/dashboard/create/manual-note" },
-    ]
-
-    const aiShortcuts = [
-        { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50", label: t('sidebar.aiModule'), href: "/dashboard/create/ai" },
-        { icon: Cpu, color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/50", label: t('sidebar.aiNote'), href: "/dashboard/create/ai-notes" },
-        { icon: Camera, color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/50", label: t('sidebar.solvePhoto'), href: "/dashboard/create/solve-photo" },
-    ]
-
     return (
         <div className={cn("pb-12 h-full bg-gradient-to-b from-slate-900 to-black text-white border-r border-slate-800", className)}>
             <div className="space-y-4 py-4 flex flex-col h-full">
@@ -137,29 +116,20 @@ export function Sidebar({ className }: SidebarProps) {
                         </span>
                     </div>
 
-                    {/* Atölye — Featured CTA with Branching Shortcuts */}
-                    <div
-                        className="mb-6 relative"
-                        onMouseEnter={() => setIsHoveringAtölye(true)}
-                        onMouseLeave={() => setIsHoveringAtölye(false)}
-                    >
+                    {/* Atölye — Featured CTA Button */}
+                    <div className="mb-6">
                         <Link href="/dashboard/create">
                             <div className={cn(
                                 "relative group rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all duration-300 overflow-hidden z-20",
                                 isCreateActive
-                                    ? "bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/30"
+                                    ? "bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-purple-500/30 ring-1 ring-white/20"
                                     : "bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/25"
                             )}>
                                 {/* Shimmer Effect */}
                                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
 
-                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm z-10 transition-all duration-500 group-hover:scale-110 group-hover:bg-white/20 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-white/5">
-                                    <motion.div
-                                        animate={isHoveringAtölye ? { rotate: 90, scale: 1.1 } : { rotate: 0, scale: 1 }}
-                                        transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                                    >
-                                        <PlusCircle className="h-5 w-5 text-white shadow-sm" />
-                                    </motion.div>
+                                <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm z-10 transition-all duration-300 group-hover:scale-110 group-hover:bg-white/20 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-white/5">
+                                    <PlusCircle className="h-5 w-5 text-white shadow-sm transition-transform duration-300 group-hover:rotate-90" />
                                 </div>
                                 <div className="flex flex-col z-10">
                                     <span className="text-sm font-semibold text-white tracking-wide group-hover:text-white transition-colors">{t('sidebar.workshop')}</span>
@@ -167,73 +137,6 @@ export function Sidebar({ className }: SidebarProps) {
                                 </div>
                             </div>
                         </Link>
-
-                        {/* Branching Shortcuts — Opening to the right like a data grid */}
-                        <AnimatePresence>
-                            {isHoveringAtölye && (
-                                <motion.div
-                                    className="absolute top-0 left-full ml-4 flex flex-col gap-3 z-50 pointer-events-auto"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.3, ease: "easeOut" }}
-                                >
-                                    {/* Manual Section Branch */}
-                                    <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-blue-500/20 rounded-xl shadow-2xl shadow-blue-500/10">
-                                        <div className="text-[9px] font-bold text-blue-500/70 border-r border-blue-500/20 pr-2 mr-1 uppercase tracking-tighter">{t('sidebar.produce')}</div>
-                                        {manualShortcuts.map((shortcut, idx) => (
-                                            <motion.div
-                                                key={shortcut.label}
-                                                initial={{ opacity: 0, scale: 0.8, x: -5 }}
-                                                animate={{ opacity: 1, scale: 1, x: 0 }}
-                                                transition={{ delay: idx * 0.04 }}
-                                            >
-                                                <Link href={shortcut.href}>
-                                                    <div className={cn(
-                                                        "group/shortcut relative p-1.5 rounded-lg border transition-all duration-300 cursor-pointer hover:bg-white/5",
-                                                        shortcut.bg,
-                                                        shortcut.border,
-                                                        "hover:scale-110 active:scale-95"
-                                                    )}>
-                                                        <shortcut.icon className={cn("h-4 w-4", shortcut.color)} />
-                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap z-50">
-                                                            {shortcut.label}
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-
-                                    {/* AI Section Branch */}
-                                    <div className="flex items-center gap-2 p-2 bg-slate-900/95 backdrop-blur-xl border border-purple-500/20 rounded-xl shadow-2xl shadow-purple-500/10">
-                                        <div className="text-[9px] font-bold text-purple-500/70 border-r border-purple-500/20 pr-2 mr-1 uppercase tracking-tighter">{t('sidebar.intelligence')}</div>
-                                        {aiShortcuts.map((shortcut, idx) => (
-                                            <motion.div
-                                                key={shortcut.label}
-                                                initial={{ opacity: 0, scale: 0.8, x: -5 }}
-                                                animate={{ opacity: 1, scale: 1, x: 0 }}
-                                                transition={{ delay: 0.1 + idx * 0.04 }}
-                                            >
-                                                <Link href={shortcut.href}>
-                                                    <div className={cn(
-                                                        "group/shortcut relative p-1.5 rounded-lg border transition-all duration-300 cursor-pointer hover:bg-white/5",
-                                                        shortcut.bg,
-                                                        shortcut.border,
-                                                        "hover:scale-110 active:scale-95"
-                                                    )}>
-                                                        <shortcut.icon className={cn("h-4 w-4", shortcut.color)} />
-                                                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover/shortcut:opacity-100 transition-opacity whitespace-nowrap z-50">
-                                                            {shortcut.label}
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </div>
 
                     <div className="space-y-1">

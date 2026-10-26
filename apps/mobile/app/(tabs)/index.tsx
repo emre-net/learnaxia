@@ -33,6 +33,7 @@ export default function HomeScreen() {
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentModules, setRecentModules] = useState<RecentModule[]>([]);
+  const [scoreData, setScoreData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -46,6 +47,7 @@ export default function HomeScreen() {
       ]);
 
       const data = analyticsRes.data?.stats || {};
+      setScoreData(scoreRes.data || null);
       setStreak(scoreRes.data?.metrics?.activeDays || 0);
       setStats({
         totalStudyMinutes: data.totalStudyMinutes || 0,
@@ -56,6 +58,7 @@ export default function HomeScreen() {
       setRecentModules(recentRes.data?.modules || []);
     } catch (error) {
       console.error('[HomeScreen] Error fetching dashboard data:', error);
+      setScoreData(null);
       setStats({
         totalStudyMinutes: 0,
         modulesStarted: 0,
@@ -179,6 +182,55 @@ export default function HomeScreen() {
         </View>
 
         {/* WIDGETS */}
+        {scoreData?.tier?.thisMonth && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.scoreCardContainer}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/leaderboard' as any);
+            }}
+          >
+            <View style={styles.scoreCardHeader}>
+              <View style={styles.scoreCardTierInfo}>
+                <Text style={styles.scoreCardEmoji}>{scoreData.tier.thisMonth.emoji || '⚡'}</Text>
+                <View>
+                  <Text style={styles.scoreCardTierLabel}>{scoreData.tier.thisMonth.label}</Text>
+                  <Text style={styles.scoreCardSub}>Momentum Seviyen</Text>
+                </View>
+              </View>
+              <View style={styles.scoreCardRight}>
+                <Text style={styles.scoreCardPoints}>
+                  {(scoreData.momentum?.thisMonth || 0).toLocaleString('tr-TR')}
+                </Text>
+                <Text style={styles.scoreCardPtsLabel}>pts</Text>
+              </View>
+            </View>
+
+            {/* Progress Bar */}
+            <View style={styles.scoreProgressBarBg}>
+              <View
+                style={[
+                  styles.scoreProgressBarFill,
+                  { width: `${Math.min(100, Math.max(5, scoreData.tier.thisMonth.progress || 0))}%` }
+                ]}
+              />
+            </View>
+
+            <View style={styles.scoreCardFooter}>
+              <Text style={styles.scoreCardFooterText}>
+                {scoreData.tier.thisMonth.pointsToNext != null
+                  ? `Sonraki seviyeye ${scoreData.tier.thisMonth.pointsToNext.toLocaleString('tr-TR')} pts`
+                  : 'En yüksek seviyedesin!'}
+              </Text>
+              <View style={styles.leaderboardLink}>
+                <Text style={styles.leaderboardLinkText}>Sıralama</Text>
+                <Ionicons name="chevron-forward" size={14} color="#38BDF8" />
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+
         <View style={styles.widgetWrapper}>
           <DailyReviewWidget />
         </View>
@@ -442,5 +494,84 @@ const styles = StyleSheet.create({
   recentItemDate: {
     color: '#64748B',
     fontSize: 13,
+  },
+  scoreCardContainer: {
+    marginHorizontal: 24,
+    marginBottom: 20,
+    backgroundColor: '#0F172A',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.2)',
+  },
+  scoreCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  scoreCardTierInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  scoreCardEmoji: {
+    fontSize: 28,
+  },
+  scoreCardTierLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#F8FAFC',
+  },
+  scoreCardSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  scoreCardRight: {
+    alignItems: 'flex-end',
+  },
+  scoreCardPoints: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#38BDF8',
+    fontVariant: ['tabular-nums'],
+  },
+  scoreCardPtsLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    textTransform: 'uppercase',
+  },
+  scoreProgressBarBg: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  scoreProgressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: '#38BDF8',
+  },
+  scoreCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scoreCardFooterText: {
+    fontSize: 12,
+    color: '#94A3B8',
+  },
+  leaderboardLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  leaderboardLinkText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#38BDF8',
   },
 });

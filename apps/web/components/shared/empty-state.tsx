@@ -12,8 +12,8 @@ interface EmptyStateProps {
     iconBg?: string;
     title: string;
     description: string;
-    primaryAction?: { label: string; href: string };
-    secondaryAction?: { label: string; href: string };
+    primaryAction?: { label: string; href?: string; onClick?: () => void };
+    secondaryAction?: { label: string; href?: string; onClick?: () => void };
     /** Extra content below actions (e.g. tips) */
     children?: ReactNode;
 }
@@ -63,21 +63,40 @@ export function EmptyState({
                 {(primaryAction || secondaryAction) && (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                         {primaryAction && (
-                            <Button
-                                asChild
-                                className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-blue-900/30 rounded-xl px-6"
-                            >
-                                <Link href={primaryAction.href}>{primaryAction.label}</Link>
-                            </Button>
+                            primaryAction.href ? (
+                                <Button
+                                    asChild
+                                    className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-blue-900/30 rounded-xl px-6"
+                                >
+                                    <Link href={primaryAction.href}>{primaryAction.label}</Link>
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={primaryAction.onClick}
+                                    className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-blue-900/30 rounded-xl px-6"
+                                >
+                                    {primaryAction.label}
+                                </Button>
+                            )
                         )}
                         {secondaryAction && (
-                            <Button
-                                asChild
-                                variant="outline"
-                                className="border-white/10 text-white/60 hover:text-white hover:border-white/20 rounded-xl px-6"
-                            >
-                                <Link href={secondaryAction.href}>{secondaryAction.label}</Link>
-                            </Button>
+                            secondaryAction.href ? (
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="border-white/10 text-white/60 hover:text-white hover:border-white/20 rounded-xl px-6"
+                                >
+                                    <Link href={secondaryAction.href}>{secondaryAction.label}</Link>
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={secondaryAction.onClick}
+                                    variant="outline"
+                                    className="border-white/10 text-white/60 hover:text-white hover:border-white/20 rounded-xl px-6"
+                                >
+                                    {secondaryAction.label}
+                                </Button>
+                            )
                         )}
                     </div>
                 )}

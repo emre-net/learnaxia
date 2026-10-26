@@ -10,9 +10,10 @@ import { t } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
 import Constants from 'expo-constants';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
+    const router = useRouter();
     const { user, logout } = useAuth();
     const { language, setLanguage } = useLanguage();
     const [profileData, setProfileData] = useState<{
@@ -284,6 +285,45 @@ export default function ProfileScreen() {
                         </ScrollView>
                     </View>
                 )}
+
+                {/* Performance & Competition Actions */}
+                <View style={styles.actionGrid}>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.actionCard}
+                        onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push('/leaderboard' as any);
+                        }}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(234, 179, 8, 0.1)' }]}>
+                            <Ionicons name="trophy" size={20} color="#EAB308" />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Liderlik Sıralaması</Text>
+                            <Text style={styles.actionSubtitle}>Sıralamadaki yerini gör</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color="#64748B" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        style={styles.actionCard}
+                        onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push('/analytics' as any);
+                        }}
+                    >
+                        <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(99, 102, 241, 0.1)' }]}>
+                            <Ionicons name="stats-chart" size={20} color="#6366F1" />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Detaylı Analiz</Text>
+                            <Text style={styles.actionSubtitle}>Çalışma verilerini incele</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color="#64748B" />
+                    </TouchableOpacity>
+                </View>
 
                 {/* Stats Grid */}
                 <View style={styles.statsGrid}>
@@ -680,5 +720,41 @@ const styles = StyleSheet.create({
         color: '#F8FAFC',
         fontWeight: '600',
         fontSize: 15,
+    },
+    actionGrid: {
+        paddingHorizontal: 24,
+        marginBottom: 24,
+        gap: 10,
+    },
+    actionCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 16,
+        backgroundColor: '#0A0A0A',
+        borderWidth: 1,
+        borderColor: '#1E293B',
+    },
+    actionIconCircle: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 14,
+    },
+    actionTextContainer: {
+        flex: 1,
+    },
+    actionTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#F8FAFC',
+    },
+    actionSubtitle: {
+        fontSize: 11,
+        color: '#64748B',
+        marginTop: 2,
     },
 });

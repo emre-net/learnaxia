@@ -174,7 +174,7 @@ export function DiscoverClient() {
             )}
 
             <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('library.tabs.collections')}</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-1">{t('discover.categories')}</h3>
                 <ScrollArea className="h-[calc(100vh-350px)] pr-4">
                     <div className="space-y-1">
                         {Object.keys(CATEGORIES).map(cat => (
@@ -196,7 +196,7 @@ export function DiscoverClient() {
                                             className="w-full justify-start text-xs h-8"
                                             onClick={() => setSelectedSubCategory(null)}
                                         >
-                                            {t('study.moduleTypes.all')}
+                                            {t('discover.allSubCategories')}
                                         </Button>
                                         {CATEGORIES[cat].map(sub => (
                                             <Button
@@ -310,10 +310,26 @@ export function DiscoverClient() {
                                             ? `"${searchQuery}" için eşleşen sonuç bulunamadı. Farklı anahtar kelimeler dene veya filtreleri kaldır.`
                                             : "Topluluk henüz bu kategoride içerik oluşturmamış. İlk sen oluştur!"
                                     }
-                                    primaryAction={{ label: "Modül Oluştur", href: "/dashboard/create" }}
-                                    secondaryAction={searchQuery || selectedCategory ? {
+                                    primaryAction={{
+                                        label: activeTab === 'collections'
+                                            ? "Koleksiyon Oluştur"
+                                            : activeTab === 'notes'
+                                            ? "Not Yaz"
+                                            : "Modül Oluştur",
+                                        href: activeTab === 'collections'
+                                            ? "/dashboard/collections/new"
+                                            : activeTab === 'notes'
+                                            ? "/dashboard/create/manual-note"
+                                            : "/dashboard/create"
+                                    }}
+                                    secondaryAction={searchQuery || selectedCategory || selectedModuleType ? {
                                         label: "Filtreleri Temizle",
-                                        href: "/dashboard/discover"
+                                        onClick: () => {
+                                            setSelectedCategory(null);
+                                            setSelectedSubCategory(null);
+                                            setSelectedModuleType(null);
+                                            setSearchQuery("");
+                                        }
                                     } : undefined}
                                 />
                             ) : (

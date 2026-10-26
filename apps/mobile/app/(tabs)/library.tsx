@@ -38,14 +38,25 @@ type NoteData = {
     updatedAt: string;
 };
 
-type TabType = 'modules' | 'collections' | 'notes';
-type ListItem = ModuleData | CollectionData | NoteData;
+type JourneyData = {
+    id: string;
+    title: string;
+    description: string | null;
+    depth?: string;
+    completedAt?: string | null;
+    _count?: { slides: number };
+    createdAt: string;
+};
+
+type TabType = 'modules' | 'collections' | 'notes' | 'journeys';
+type ListItem = ModuleData | CollectionData | NoteData | JourneyData;
 
 export default function LibraryScreen() {
     const { language } = useLanguage();
     const [modules, setModules] = useState<ModuleData[]>([]);
     const [collections, setCollections] = useState<CollectionData[]>([]);
     const [notes, setNotes] = useState<NoteData[]>([]);
+    const [journeys, setJourneys] = useState<JourneyData[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('modules');
@@ -62,6 +73,7 @@ export default function LibraryScreen() {
             setModules(response.data.modules || []);
             setCollections(response.data.collections || []);
             setNotes(response.data.notes || []);
+            setJourneys(response.data.journeys || []);
         } catch (error) {
             console.error('Failed to fetch library', error);
             setFetchError(true);
@@ -94,12 +106,18 @@ export default function LibraryScreen() {
         !searchQuery || (n.title && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
+    const filteredJourneys = journeys.filter(j =>
+        !searchQuery || j.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const currentData: ListItem[] =
         activeTab === 'modules'
             ? filteredModules
             : activeTab === 'collections'
                 ? filteredCollections
-                : filteredNotes;
+                : activeTab === 'notes'
+                    ? filteredNotes
+                    : filteredJourneys;
 
     const pagedData = currentData.slice(0, visibleCount);
     const hasMore = visibleCount < currentData.length;
@@ -110,6 +128,7 @@ export default function LibraryScreen() {
         { id: 'modules', label: t('library.tabs.modules', language), count: modules.length },
         { id: 'collections', label: t('library.tabs.collections', language), count: collections.length },
         { id: 'notes', label: t('library.tabs.notes', language), count: notes.length },
+        { id: 'journeys', label: 'Rotalar', count: journeys.length },
     ];
 
     const handleTabChange = (tab: TabType) => {
@@ -222,9 +241,47 @@ export default function LibraryScreen() {
         </TouchableOpacity>
     );
 
+    const renderJourneyItem = ({ item }: { item: JourneyData }) => (
+        <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.cardContainer}
+            onPress={() => router.push(`/journey/${item.id}` as any)}
+        >
+            <View style={styles.cardHeader}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={[styles.badgeText, { color: '#A855F7' }]}>ÖĞRENME ROTASI</Text>
+                    {item.completedAt && (
+                        <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                            <Text style={{ fontSize: 9, fontWeight: '700', color: '#10B981' }}>TAMAMLANDI</Text>
+                        </View>
+                    )}
+                </View>
+                <Text style={styles.dateText}>
+                    {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                </Text>
+            </View>
+
+            <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+            {item.description && (
+                <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
+            )}
+
+            <View style={styles.cardFooter}>
+                <View style={styles.footerInfo}>
+                    <Ionicons name="map-outline" size={16} color="#A855F7" />
+                    <Text style={styles.footerInfoText}>
+                        {item._count?.slides || 0} Adım
+                    </Text>
+                </View>
+                <Ionicons name="play-circle-outline" size={20} color="#A855F7" />
+            </View>
+        </TouchableOpacity>
+    );
+
     const renderListItem = ({ item }: { item: ListItem }) => {
         if (activeTab === 'modules') return renderModuleItem({ item: item as ModuleData });
         if (activeTab === 'collections') return renderCollectionItem({ item: item as CollectionData });
+        if (activeTab === 'journeys') return renderJourneyItem({ item: item as JourneyData });
         return renderNoteItem({ item: item as NoteData });
     };
 
@@ -232,12 +289,13 @@ export default function LibraryScreen() {
         <Screen style={styles.screen} tabScreen>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>{t('library.title', language)}</Text>
-                {(activeTab === 'notes' || activeTab === 'collections') && (
+                {(activeTab === 'notes' || activeTab === 'collections' || activeTab === 'journeys') && (
                     <TouchableOpacity
                         style={styles.headerAddBtn}
                         onPress={() => {
                             if (activeTab === 'notes') router.push('/notes/new' as any);
                             else if (activeTab === 'collections') router.push('/collections/new' as any);
+                            else router.push('/journey/new' as any);
                         }}
                     >
                         <Ionicons name="add" size={20} color="#FFFFFF" />
@@ -304,7 +362,9 @@ export default function LibraryScreen() {
                                         ? 'layers-outline'
                                         : activeTab === 'collections'
                                         ? 'folder-open-outline'
-                                        : 'document-text-outline'
+                                        : activeTab === 'notes'
+                                        ? 'document-text-outline'
+                                        : 'map-outline'
                                 }
                                 size={36}
                                 color="#6366F1"
@@ -320,7 +380,9 @@ export default function LibraryScreen() {
                                 ? 'Kendi modülünüzü oluşturun veya Keşfet sekmesinden yeni setler keşfedin.'
                                 : activeTab === 'collections'
                                 ? 'Modüllerinizi düzenli tutmak için yeni bir koleksiyon başlatın.'
-                                : 'Hızlı notlar alarak öğrenme sürecinizi hızlandırın.'}
+                                : activeTab === 'notes'
+                                ? 'Hızlı notlar alarak öğrenme sürecinizi hızlandırın.'
+                                : 'Yapay zeka ile adım adım interaktif bir öğrenme rotası oluşturun.'}
                         </Text>
                         {!searchQuery && !fetchError && (
                             <TouchableOpacity
@@ -328,7 +390,8 @@ export default function LibraryScreen() {
                                 onPress={() => {
                                     if (activeTab === 'modules') router.push('/create' as any);
                                     else if (activeTab === 'collections') router.push('/collections/new' as any);
-                                    else router.push('/notes/new' as any);
+                                    else if (activeTab === 'notes') router.push('/notes/new' as any);
+                                    else router.push('/journey/new' as any);
                                 }}
                             >
                                 <Ionicons name="add" size={18} color="#FFFFFF" />
@@ -337,7 +400,9 @@ export default function LibraryScreen() {
                                         ? 'Modül Oluştur'
                                         : activeTab === 'collections'
                                         ? 'Koleksiyon Oluştur'
-                                        : 'Not Yaz'}
+                                        : activeTab === 'notes'
+                                        ? 'Not Yaz'
+                                        : 'Yeni Rota Başlat'}
                                 </Text>
                             </TouchableOpacity>
                         )}

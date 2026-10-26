@@ -465,7 +465,9 @@ const en = {
         totalResults: "{count} results",
         emptyTitle: "No Content Yet",
         emptyNoResults: "No results found for \"{query}\". Try a different search.",
-        emptyDesc: "Community creations will appear here."
+        emptyDesc: "Community creations will appear here.",
+        categories: "Categories",
+        allSubCategories: "All Topics"
     },
     common: {
         cancel: "Cancel",
@@ -639,7 +641,7 @@ const tr = {
             resumeStudy: "Çalışmaya Devam Et"
         },
         moduleTypes: {
-            title: "Module Type",
+            title: "Modül Tipi",
             all: "Tüm Tipler",
             flashcard: "Kartlar",
             mc: "Çoktan Seçmeli",
@@ -1055,7 +1057,9 @@ const tr = {
         totalResults: "{count} sonuç",
         emptyTitle: "Henüz İçerik Yok",
         emptyNoResults: "\"{query}\" için sonuç bulunamadı. Farklı bir arama deneyin.",
-        emptyDesc: "Topluluk üretimleri burada görünecek."
+        emptyDesc: "Topluluk üretimleri burada görünecek.",
+        categories: "Kategoriler",
+        allSubCategories: "Tüm Konular"
     },
     common: {
         cancel: "Vazgeç",

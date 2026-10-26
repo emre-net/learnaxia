@@ -40,7 +40,9 @@ export default function RootLayout() {
             <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create' }} />
             <Stack.Screen name="study/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="journey/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="journey/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="leaderboard" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="collections/[id]" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="collections/new" options={{ animation: 'slide_from_right' }} />

@@ -469,7 +469,7 @@ const tr = {
             resumeStudy: "Çalışmaya Devam Et"
         },
         moduleTypes: {
-            title: "Module Type",
+            title: "Modül Tipi",
             all: "Tüm Tipler",
             flashcard: "Kartlar",
             mc: "Çoktan Seçmeli",

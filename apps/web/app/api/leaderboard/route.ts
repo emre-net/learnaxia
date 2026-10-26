@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import prisma from "@/lib/prisma";
 import { getTierForScore } from "@/lib/scoring/tiers";
 import { periodStart } from "@/lib/scoring/signals";
@@ -32,8 +33,24 @@ function getPeriodFilter(period: Period): { gte: Date } | undefined {
  */
 export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) {
+        let currentUserId: string | undefined;
+        let currentUserName: string | null = null;
+        let currentUserImage: string | null = null;
+
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            currentUserId = mobileUser.id;
+            currentUserName = mobileUser.name ?? null;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                currentUserId = session.user.id;
+                currentUserName = session.user.name ?? null;
+                currentUserImage = session.user.image ?? null;
+            }
+        }
+
+        if (!currentUserId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -100,13 +117,13 @@ export async function GET(req: Request) {
                         emoji: tier.emoji,
                         color: tier.color,
                     },
-                    isCurrentUser: user.id === session.user?.id,
+                    isCurrentUser: user.id === currentUserId,
                 };
             })
             .filter(Boolean);
 
         // Mevcut kullanıcının kendi sıralaması (ilk 50'de yoksa)
-        const myRankInList = entries.findIndex(e => e?.userId === session.user?.id);
+        const myRankInList = entries.findIndex(e => e?.userId === currentUserId);
         let myEntry = null;
         if (myRankInList === -1) {
             // Kullanıcı listede yok — kendi sırasını bul
@@ -119,16 +136,16 @@ export async function GET(req: Request) {
             const sorted = myTotalRank.sort((a, b) =>
                 (b._sum.finalScore ?? 0) - (a._sum.finalScore ?? 0)
             );
-            const myIdx = sorted.findIndex(s => s.userId === session.user?.id);
+            const myIdx = sorted.findIndex(s => s.userId === currentUserId);
             if (myIdx !== -1) {
                 const myScore = Math.round(sorted[myIdx]._sum.finalScore ?? 0);
                 const myTier = getTierForScore(myScore);
                 myEntry = {
                     rank: myIdx + 1,
-                    userId: session.user.id,
-                    name: session.user.name ?? null,
+                    userId: currentUserId,
+                    name: currentUserName,
                     handle: null,
-                    image: session.user.image ?? null,
+                    image: currentUserImage,
                     momentum: myScore,
                     tier: { key: myTier.key, label: myTier.label, emoji: myTier.emoji, color: myTier.color },
                     isCurrentUser: true,
