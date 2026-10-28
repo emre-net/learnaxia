@@ -34,16 +34,18 @@ export default function HomeScreen() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentModules, setRecentModules] = useState<RecentModule[]>([]);
   const [scoreData, setScoreData] = useState<any>(null);
+  const [journeys, setJourneys] = useState<{ id: string; title: string; _count: { slides: number } }[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [streak, setStreak] = useState(0);
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const [analyticsRes, recentRes, scoreRes] = await Promise.all([
+      const [analyticsRes, recentRes, scoreRes, journeysRes] = await Promise.all([
         api.get('/mobile/analytics').catch(() => ({ data: { stats: {} } })),
         api.get('/mobile/library/recent').catch(() => ({ data: { modules: [] } })),
         api.get('/scores/me').catch(() => ({ data: null })),
+        api.get('/mobile/journeys').catch(() => ({ data: { journeys: [] } })),
       ]);
 
       const data = analyticsRes.data?.stats || {};
@@ -56,6 +58,7 @@ export default function HomeScreen() {
         averageAccuracy: data.averageAccuracy || 0,
       });
       setRecentModules(recentRes.data?.modules || []);
+      setJourneys(journeysRes.data?.journeys || []);
     } catch (error) {
       console.error('[HomeScreen] Error fetching dashboard data:', error);
       setScoreData(null);
@@ -275,6 +278,41 @@ export default function HomeScreen() {
           </View>
         )}
 
+        {/* ÖĞRENME YOLCULUKLARı */}
+        {journeys.length > 0 && (
+          <View style={styles.recentSection}>
+            <View style={styles.recentHeader}>
+              <Text style={styles.recentTitle}>Öğrenme Yolculukları</Text>
+              <View style={styles.journeyBadge}>
+                <Text style={styles.journeyBadgeText}>{journeys.length}</Text>
+              </View>
+            </View>
+            <View style={styles.recentList}>
+              {journeys.slice(0, 3).map((journey, index) => (
+                <TouchableOpacity
+                  key={journey.id}
+                  activeOpacity={0.6}
+                  style={[
+                    styles.recentRow,
+                    index === Math.min(journeys.length, 3) - 1 && { borderBottomWidth: 0 }
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(`/journey/${journey.id}` as any);
+                  }}
+                >
+                  <View style={[styles.recentDot, { backgroundColor: '#818CF8' }]} />
+                  <View style={styles.recentTextContainer}>
+                    <Text style={styles.recentItemTitle} numberOfLines={1}>{journey.title}</Text>
+                    <Text style={styles.recentItemDate}>{journey._count.slides} slayt</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#334155" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
       </ScrollView>
     </View>
   );
@@ -455,6 +493,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     letterSpacing: -0.5,
+  },
+  journeyBadge: {
+    backgroundColor: 'rgba(129, 140, 248, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: 'rgba(129, 140, 248, 0.3)',
+  },
+  journeyBadgeText: {
+    color: '#818CF8',
+    fontSize: 12,
+    fontWeight: '700',
   },
   recentList: {
     backgroundColor: '#0A0A0A',
