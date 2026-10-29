@@ -267,3 +267,39 @@ export async function seedTestDataAction() {
         return { success: false, message: `Test verisi üretirken hata oluştu: ${error?.message}` };
     }
 }
+
+/**
+ * AI Destekli Resmi LearnAxia Modülü Üretimi Server Action'ı
+ */
+export async function generateOfficialModuleAction(data: {
+    topic: string;
+    type?: 'FLASHCARD' | 'MC' | 'TRUE_FALSE' | 'GAP' | 'AUTO';
+    count?: number;
+    language?: 'tr' | 'en';
+}) {
+    await ensureAdmin();
+
+    try {
+        const { OfficialModuleGeneratorService } = await import("@/domains/ai/official-generator.service");
+        const result = await OfficialModuleGeneratorService.generateAndPublish({
+            topic: data.topic,
+            type: data.type || 'AUTO',
+            count: data.count || 8,
+            language: data.language || 'tr'
+        });
+
+        revalidatePath("/admin");
+        revalidatePath("/dashboard/discover");
+        return {
+            success: true,
+            message: `"${result.title}" (${result.type}) modülü ${result.itemCount} içerikle @learnaxia adına yayınlandı!`,
+            module: result
+        };
+    } catch (error: any) {
+        console.error("Generate official module action error:", error);
+        return {
+            success: false,
+            message: error.message || "Modül üretilirken bir hata oluştu."
+        };
+    }
+}

@@ -17,6 +17,7 @@
     "start": "npm start -w web",
     "lint": "turbo run lint",
     "postinstall": "patch-package && turbo run postinstall",
+    "generate:module": "node --env-file=apps/web/.env apps/web/scripts/trigger-official-generator.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
@@ -51,6 +52,7 @@
     "autoprefixer": "^10.4.27",
     "next": "^15.2.0",
     "patch-package": "^8.0.1",
+    "railway": "^3.16.0",
     "tailwindcss": "^4.1.0",
     "turbo": "^2.8.20"
   },
