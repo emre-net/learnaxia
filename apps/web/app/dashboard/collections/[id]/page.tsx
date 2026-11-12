@@ -9,7 +9,7 @@ export default async function CollectionDetailPage(props: { params: Promise<{ id
     const params = await props.params;
     const session = await auth();
     if (!session || !session.user?.id) {
-        redirect("/auth/login");
+        redirect("/login");
     }
 
     let collection;

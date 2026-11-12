@@ -45,6 +45,8 @@ export default function RootLayout() {
             <Stack.Screen name="leaderboard" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="notes/new" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="modules/[id]" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="modules/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="collections/[id]" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="collections/new" options={{ animation: 'slide_from_right' }} />
           </Stack>

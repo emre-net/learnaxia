@@ -2,6 +2,7 @@
 "use client";
 
 import { FileText, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { BrandLoader } from "@/components/ui/brand-loader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,26 +69,44 @@ export function NotesTab({
     return (
         <div className="space-y-4">
             {items.map((note) => (
-                <Card key={note.id} className="hover:border-primary/50 transition-colors">
-                    <CardHeader className="p-4 pb-2">
-                        <div className="flex items-center justify-between">
-                            <Badge variant="secondary" className="text-[10px]">
-                                {note.moduleId ? dictionary.library.notes.moduleNote : dictionary.library.notes.aiSolution}
-                            </Badge>
-                            <span className="text-[10px] text-muted-foreground">
-                                {new Date(note.updatedAt).toLocaleDateString()}
-                            </span>
-                        </div>
-                        <CardTitle className="text-sm mt-2">{note.title || "Adsız Not"}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                        <p className="text-sm text-muted-foreground line-clamp-3">{note.content}</p>
-                        <div className="mt-3 text-[10px] font-medium text-primary flex items-center gap-1">
-                            <BookOpen className="h-3 w-3" />
-                            {note.module?.title || note.solvedQuestion?.questionText.substring(0, 30) + "..."}
-                        </div>
-                    </CardContent>
-                </Card>
+                <Link href={`/dashboard/notes/${note.id}`} key={note.id} className="block group">
+                    <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">
+                        <CardHeader className="p-4 pb-2">
+                            <div className="flex items-center justify-between">
+                                <Badge variant="secondary" className="text-[10px]">
+                                    {note.moduleId ? dictionary.library.notes.moduleNote : dictionary.library.notes.aiSolution}
+                                </Badge>
+                                <span className="text-[10px] text-muted-foreground">
+                                    {new Date(note.updatedAt).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <CardTitle className="text-sm mt-2 group-hover:text-primary transition-colors">{note.title || "Adsız Not"}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                            <p className="text-sm text-muted-foreground line-clamp-3">
+                                {(() => {
+                                    try {
+                                        const parsed = JSON.parse(note.content);
+                                        if (Array.isArray(parsed)) {
+                                            return parsed
+                                                .map((b: any) => (Array.isArray(b.content) ? b.content.map((c: any) => c.text || "").join("") : ""))
+                                                .filter(Boolean)
+                                                .join(" ") || "...";
+                                        }
+                                        if (parsed && typeof parsed === 'object') {
+                                            return parsed.text || "...";
+                                        }
+                                    } catch { }
+                                    return note.content?.replace(/<[^>]*>?/gm, '') || "...";
+                                })()}
+                            </p>
+                            <div className="mt-3 text-[10px] font-medium text-primary flex items-center gap-1">
+                                <BookOpen className="h-3 w-3" />
+                                {note.module?.title || note.solvedQuestion?.questionText.substring(0, 30) + "..."}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
             ))}
 
             {hasNextPage && (

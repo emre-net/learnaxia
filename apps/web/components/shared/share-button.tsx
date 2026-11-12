@@ -37,9 +37,9 @@ export function ShareButton({ type, id, title }: ShareButtonProps) {
             case "collection":
                 return `${baseUrl}/dashboard/collections/${id}`;
             case "note":
-                return `${baseUrl}/dashboard/notes?id=${id}`;
+                return `${baseUrl}/dashboard/notes/${id}`;
             case "profile":
-                return `${baseUrl}/u/${id}`;
+                return `${baseUrl}/dashboard/profile`;
             default:
                 return baseUrl;
         }

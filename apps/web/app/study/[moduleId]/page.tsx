@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { StudyHeader } from "@/components/study/study-header";
 import { FlashcardRenderer } from "@/components/study/flashcard-renderer";
 import { QuizRenderer } from "@/components/study/quiz-renderer";
+import { TrueFalseRenderer } from "@/components/study/true-false-renderer";
 import { GapRenderer } from "@/components/study/gap-renderer";
 import { StudyControls } from "@/components/study/study-controls";
 import { StudySummary } from "@/components/study/study-summary";
@@ -66,13 +67,13 @@ function StudyInterface() {
             <StudyHeader />
 
             <div className="flex-1 w-full flex flex-col items-center justify-center max-w-5xl">
-                {mode === 'QUIZ' || currentItem.type === 'MC' ? (
-                    <QuizRenderer item={currentItem} />
-                ) : currentItem.type === 'GAP' ? (
-                    <GapRenderer item={currentItem} />
-                ) : (
-                    <FlashcardRenderer item={currentItem} />
-                )}
+                {(() => {
+                    const itemType = currentItem.type as string;
+                    if (mode === 'QUIZ' || itemType === 'MC') return <QuizRenderer item={currentItem} />;
+                    if (itemType === 'TRUE_FALSE' || itemType === 'TF') return <TrueFalseRenderer item={currentItem} />;
+                    if (itemType === 'GAP') return <GapRenderer item={currentItem} />;
+                    return <FlashcardRenderer item={currentItem} />;
+                })()}
 
                 <StudyControls onNext={handleNext} />
             </div>

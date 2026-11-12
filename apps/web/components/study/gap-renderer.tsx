@@ -19,12 +19,13 @@ export function GapRenderer({ item }: { item: any }) {
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
 
     const { parts, gapIndices } = useMemo(() => {
-        const splitText = item.content.text.split(/(\{\{.*?\}\})/g);
+        const textToSplit = item.content?.text || item.content?.question || "";
+        const splitText = textToSplit.split(/(\{\{.*?\}\})/g);
         const indices = splitText
             .map((part: string, index: number) => part.startsWith('{{') && part.endsWith('}}') ? index : -1)
             .filter((index: number) => index !== -1);
         return { parts: splitText, gapIndices: indices };
-    }, [item.content.text]);
+    }, [item.content?.text, item.content?.question]);
 
     // Initialize state when item changes
     useEffect(() => {

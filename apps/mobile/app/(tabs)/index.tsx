@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, AppState, StyleSheet } from 'react-native';
+import { Screen } from '@/components/ui/screen';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -108,10 +109,10 @@ export default function HomeScreen() {
   const minutes = (stats?.totalStudyMinutes || 0) % 60;
 
   return (
-    <View style={styles.container}>
+    <Screen style={styles.container} tabScreen>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: TAB_SCREEN_CONTENT_BOTTOM, paddingTop: 64 }}
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_CONTENT_BOTTOM, paddingTop: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#334155" />}
       >
         {/* ÜST BAR */}
@@ -262,7 +263,7 @@ export default function HomeScreen() {
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(`/study/${mod.id}` as any);
+                    router.push(`/modules/${mod.id}` as any);
                   }}
                 >
                   <View style={styles.recentDot} />
@@ -314,7 +315,7 @@ export default function HomeScreen() {
         )}
 
       </ScrollView>
-    </View>
+    </Screen>
   );
 }
 

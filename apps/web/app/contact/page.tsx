@@ -25,14 +25,42 @@ function GithubIcon({ className = "w-5 h-5" }: { className?: string }) {
 
 export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email.trim() || !message.trim()) return;
-        setSubmitted(true);
+
+        setIsSubmitting(true);
+        setErrorMsg(null);
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name.trim() || "Anonim",
+                    email: email.trim(),
+                    message: message.trim()
+                })
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Mesaj gönderilemedi");
+            }
+
+            setSubmitted(true);
+        } catch (err: any) {
+            console.error("[ContactPage] Submit error:", err);
+            setErrorMsg(err.message || "Mesaj iletilirken bir hata oluştu. Lütfen tekrar deneyin.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -187,11 +215,19 @@ export default function ContactPage() {
                                         />
                                     </div>
 
+                                    {errorMsg && (
+                                        <p className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
+                                            {errorMsg}
+                                        </p>
+                                    )}
+
                                     <Button
                                         type="submit"
+                                        disabled={isSubmitting}
                                         className="w-full bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold py-2.5 rounded-xl transition-all"
                                     >
-                                        <Send className="w-4 h-4 mr-2" /> Gönder
+                                        <Send className="w-4 h-4 mr-2" />
+                                        {isSubmitting ? "Gönderiliyor..." : "Gönder"}
                                     </Button>
                                 </form>
                             )}

@@ -23,37 +23,61 @@ export async function GET(req: Request) {
         if (isNaN(offset) || offset < 0) offset = 0;
 
         if (type === "NOTE") {
-            const where = {
-                visibility: 'PUBLIC',
-                ...(search && {
-                    OR: [
-                        { title: { contains: search, mode: "insensitive" } },
-                        { content: { contains: search, mode: "insensitive" } }
-                    ]
-                })
-            };
+            try {
+                const where: any = {
+                    ...(search && {
+                        OR: [
+                            { title: { contains: search, mode: "insensitive" } },
+                            { content: { contains: search, mode: "insensitive" } }
+                        ]
+                    })
+                };
 
-            const [notes, total] = await Promise.all([
-                prisma.note.findMany({
-                    where: where as any,
-                    include: {
-                        user: { select: { handle: true, image: true, id: true, name: true } },
-                        module: { select: { title: true, id: true } }
-                    },
-                    take: limit,
-                    skip: offset,
-                    orderBy: { createdAt: "desc" }
-                }),
-                prisma.note.count({ where: where as any })
-            ]);
+                let notes: any[] = [];
+                let total = 0;
 
-            const normalizedNotes = notes.map((n: any) => ({
-                ...n,
-                owner: n.user, // Normalize it so the frontend can read `item.owner.handle` like modules
-                user: undefined
-            }));
+                try {
+                    [notes, total] = await Promise.all([
+                        prisma.note.findMany({
+                            where: { ...where, visibility: 'PUBLIC' } as any,
+                            include: {
+                                user: { select: { handle: true, image: true, id: true, name: true } },
+                                module: { select: { title: true, id: true } }
+                            },
+                            take: limit,
+                            skip: offset,
+                            orderBy: { createdAt: "desc" }
+                        }),
+                        prisma.note.count({ where: { ...where, visibility: 'PUBLIC' } as any })
+                    ]);
+                } catch (colErr: any) {
+                    console.warn("[DiscoverAPI] Querying notes without visibility constraint:", colErr?.message);
+                    [notes, total] = await Promise.all([
+                        prisma.note.findMany({
+                            where,
+                            include: {
+                                user: { select: { handle: true, image: true, id: true, name: true } },
+                                module: { select: { title: true, id: true } }
+                            },
+                            take: limit,
+                            skip: offset,
+                            orderBy: { createdAt: "desc" }
+                        }),
+                        prisma.note.count({ where })
+                    ]);
+                }
 
-            return NextResponse.json({ items: normalizedNotes, total, type: "NOTE" });
+                const normalizedNotes = notes.map((n: any) => ({
+                    ...n,
+                    owner: n.user, // Normalize it so the frontend can read `item.owner.handle` like modules
+                    user: undefined
+                }));
+
+                return NextResponse.json({ items: normalizedNotes, total, type: "NOTE" });
+            } catch (noteErr: any) {
+                console.error("[DiscoverAPI] Error in NOTE discovery:", noteErr);
+                return NextResponse.json({ items: [], total: 0, type: "NOTE" });
+            }
 
         } else if (type === "COLLECTION") {
             const where = {

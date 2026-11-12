@@ -45,12 +45,7 @@ export default async function SettingsPage() {
     }
 
     if (!user) {
-        return (
-            <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8 flex flex-col items-center justify-center min-h-[50vh]">
-                <h2 className="text-xl font-semibold">Veri Alınamadı</h2>
-                <p className="text-muted-foreground">Şu an kullanıcı bilgilerinize erişemiyoruz. Lütfen daha sonra tekrar deneyin.</p>
-            </div>
-        );
+        redirect("/login?error=SessionExpired");
     }
 
     return (

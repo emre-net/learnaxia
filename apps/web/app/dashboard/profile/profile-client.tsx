@@ -209,22 +209,40 @@ export function ProfileClient() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {myNotes?.map((note: any) => (
-                                <Card key={note.id} className="hover:border-primary/50 transition-colors">
-                                    <CardHeader className="p-4 pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <Badge variant="secondary" className="text-[10px]">
-                                                {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
-                                            </Badge>
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {new Date(note.updatedAt).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                        <CardTitle className="text-sm mt-2">{note.title || "Adsız Not"}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-4 pt-0">
-                                        <p className="text-sm text-muted-foreground line-clamp-3">{note.content}</p>
-                                    </CardContent>
-                                </Card>
+                                <Link href={`/dashboard/notes/${note.id}`} key={note.id} className="block group">
+                                    <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">
+                                        <CardHeader className="p-4 pb-2">
+                                            <div className="flex items-center justify-between">
+                                                <Badge variant="secondary" className="text-[10px]">
+                                                    {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
+                                                </Badge>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    {new Date(note.updatedAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <CardTitle className="text-sm mt-2 group-hover:text-primary transition-colors">{note.title || "Adsız Not"}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-4 pt-0">
+                                            <p className="text-sm text-muted-foreground line-clamp-3">
+                                                {(() => {
+                                                    try {
+                                                        const parsed = JSON.parse(note.content);
+                                                        if (Array.isArray(parsed)) {
+                                                            return parsed
+                                                                .map((b: any) => (Array.isArray(b.content) ? b.content.map((c: any) => c.text || "").join("") : ""))
+                                                                .filter(Boolean)
+                                                                .join(" ") || "...";
+                                                        }
+                                                        if (parsed && typeof parsed === 'object') {
+                                                            return parsed.text || "...";
+                                                        }
+                                                    } catch { }
+                                                    return note.content?.replace(/<[^>]*>?/gm, '') || "...";
+                                                })()}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
                             ))}
                         </div>
                     )}

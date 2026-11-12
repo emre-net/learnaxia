@@ -84,7 +84,17 @@ export default function ExploreScreen() {
 
   const renderItem = ({ item }: { item: DiscoverItem }) => {
     const isModule = activeTab === 'MODULE';
-    const badgeLabel = isModule ? t('library.types.module', language) : t('library.types.collection', language);
+    const badgeLabel = !isModule
+      ? t('library.types.collection', language)
+      : item.type === 'MC'
+        ? t('library.types.mc', language)
+        : item.type === 'FLASHCARD'
+          ? t('library.types.flashcard', language)
+          : item.type === 'TRUE_FALSE'
+            ? t('library.types.true_false', language)
+            : item.type === 'GAP'
+              ? t('library.types.gap', language)
+              : (item.type || t('library.types.module', language));
 
     return (
       <TouchableOpacity
@@ -92,7 +102,7 @@ export default function ExploreScreen() {
         style={styles.cardContainer}
         onPress={() => {
           if (isModule) {
-            router.push(`/study/${item.id}` as any);
+            router.push(`/modules/${item.id}` as any);
           } else {
             router.push(`/collections/${item.id}` as any);
           }
@@ -183,58 +193,58 @@ export default function ExploreScreen() {
 
       {/* Synchronized Category Chips */}
       <View style={styles.categoryContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryScrollContent}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScrollContent}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedCategory('ALL');
+            }}
+            style={[
+              styles.categoryChip,
+              selectedCategory === 'ALL' && styles.categoryChipActive
+            ]}
           >
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedCategory('ALL');
-              }}
+            <Text
               style={[
-                styles.categoryChip,
-                selectedCategory === 'ALL' && styles.categoryChipActive
+                styles.categoryChipText,
+                selectedCategory === 'ALL' && styles.categoryChipTextActive
               ]}
             >
-              <Text
+              Tümü
+            </Text>
+          </TouchableOpacity>
+
+          {MAIN_CATEGORIES.map((cat) => {
+            const isCatActive = selectedCategory === cat;
+            return (
+              <TouchableOpacity
+                key={cat}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedCategory(isCatActive ? 'ALL' : cat);
+                }}
                 style={[
-                  styles.categoryChipText,
-                  selectedCategory === 'ALL' && styles.categoryChipTextActive
+                  styles.categoryChip,
+                  isCatActive && styles.categoryChipActive
                 ]}
               >
-                Tümü
-              </Text>
-            </TouchableOpacity>
-
-            {MAIN_CATEGORIES.map((cat) => {
-              const isCatActive = selectedCategory === cat;
-              return (
-                <TouchableOpacity
-                  key={cat}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setSelectedCategory(isCatActive ? 'ALL' : cat);
-                  }}
+                <Text
                   style={[
-                    styles.categoryChip,
-                    isCatActive && styles.categoryChipActive
+                    styles.categoryChipText,
+                    isCatActive && styles.categoryChipTextActive
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.categoryChipText,
-                      isCatActive && styles.categoryChipTextActive
-                    ]}
-                  >
-                    {cat}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -304,8 +314,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 64,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   title: {
     fontSize: 28,

@@ -124,8 +124,28 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Redirects for trailing slashes
+  // Redirects for trailing slashes & legacy routes
   trailingSlash: false,
+
+  async redirects() {
+    return [
+      {
+        source: '/explore',
+        destination: '/dashboard/discover',
+        permanent: false,
+      },
+      {
+        source: '/discover',
+        destination: '/dashboard/discover',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/explore',
+        destination: '/dashboard/discover',
+        permanent: false,
+      },
+    ];
+  },
 
   // Production source maps off for smaller bundles
   productionBrowserSourceMaps: false,

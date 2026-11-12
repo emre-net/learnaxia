@@ -7,7 +7,7 @@ export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW' | 'QUIZ' | 'A
 export interface StudyItem {
     id: string;
     moduleId: string;
-    type: 'FLASHCARD' | 'MC' | 'GAP';
+    type: 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
     content: any; // JSONB content
     hash: string;
     // Progress snapshot

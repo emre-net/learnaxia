@@ -73,6 +73,19 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                                     .substring(0, 150);
                                                 return <p className="text-sm text-muted-foreground line-clamp-3">{textPreview || "..."}</p>;
                                             }
+                                            if (parsed && typeof parsed === 'object') {
+                                                const textPreview = (parsed.text || "").substring(0, 150);
+                                                return (
+                                                    <div className="space-y-1.5">
+                                                        <p className="text-sm text-muted-foreground line-clamp-3">{textPreview || "..."}</p>
+                                                        {parsed.drawing && (
+                                                            <span className="inline-flex items-center text-[10px] font-bold text-sky-500 bg-sky-500/10 px-2 py-0.5 rounded-full">
+                                                                ✏️ Çizim içeriyor
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
                                         } catch (e) {
                                             // Fallback for legacy raw text or HTML
                                             return (
@@ -111,6 +124,9 @@ export function NoteList({ moduleId, itemId }: NoteListProps) {
                                                         }
                                                     });
                                                     return totalLength;
+                                                }
+                                                if (parsed && typeof parsed === 'object') {
+                                                    return (parsed.text || "").length;
                                                 }
                                             } catch (e) { }
                                             return note.content.replace(/<[^>]*>?/gm, '').length;

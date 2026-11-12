@@ -43,7 +43,7 @@ export function StudyHeader() {
             <div className="flex items-center gap-4 flex-1">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label={t('common.exit')}>
                             <X className="h-5 w-5" />
                         </Button>
                     </AlertDialogTrigger>
@@ -74,7 +74,7 @@ export function StudyHeader() {
                         <span>{t('study.progress')}</span>
                         <span>{currentIndex + 1} / {items.length}</span>
                     </div>
-                    <Progress value={progressValue} className="h-2" />
+                    <Progress value={progressValue} className="h-2" aria-label={t('study.progress')} />
                 </div>
             </div>
 

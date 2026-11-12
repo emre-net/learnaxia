@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, StyleSheet, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -321,8 +321,11 @@ export default function StudyScreen() {
     return (
         <Screen style={{ backgroundColor: '#000000' }}>
             <StatusBar barStyle="light-content" />
-
-            {/* Header */}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+            >
+                {/* Header */}
             <View style={styles.headerRow}>
                 <TouchableOpacity
                     onPress={() => {
@@ -530,6 +533,7 @@ export default function StudyScreen() {
 
                 <View style={[styles.navBtn, { opacity: 0 }]} />
             </View>
+            </KeyboardAvoidingView>
         </Screen>
     );
 }

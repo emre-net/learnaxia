@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,7 @@ const MODULE_TYPE_IDS = [
 ];
 
 export function DiscoverClient() {
+    const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
     const [selectedModuleType, setSelectedModuleType] = useState<string | null>(null);
@@ -220,9 +222,9 @@ export function DiscoverClient() {
     );
 
     return (
-        <div className="flex flex-col md:flex-row h-full gap-8">
+        <div className="flex flex-col lg:flex-row h-full gap-8">
             {/* Sidebar (Desktop) */}
-            <aside className="hidden md:block w-72 flex-shrink-0 space-y-6 border-r pr-8 h-fit sticky top-0">
+            <aside className="hidden lg:block w-72 flex-shrink-0 space-y-6 border-r pr-8 h-fit sticky top-0">
                 {renderFilters()}
             </aside>
 
@@ -240,8 +242,8 @@ export function DiscoverClient() {
                                 </p>
                             </div>
 
-                            {/* Mobile Filters Trigger */}
-                            <div className="md:hidden">
+                            {/* Mobile & Tablet Filters Trigger */}
+                            <div className="lg:hidden">
                                 <Sheet>
                                     <SheetTrigger asChild>
                                         <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-2">
@@ -384,6 +386,7 @@ export function DiscoverClient() {
                                                     shareType="note"
                                                     shareId={item.id}
                                                     shareTitle={item.title}
+                                                    onClick={() => router.push(`/dashboard/notes/${item.id}`)}
                                                 />
                                             ))}
                                         </div>

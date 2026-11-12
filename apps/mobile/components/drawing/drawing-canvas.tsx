@@ -90,6 +90,9 @@ export function DrawingCanvas({
         PanResponder.create({
             onStartShouldSetPanResponder: () => !readOnly,
             onMoveShouldSetPanResponder: () => !readOnly,
+            onStartShouldSetPanResponderCapture: () => !readOnly,
+            onMoveShouldSetPanResponderCapture: () => !readOnly,
+            onPanResponderTerminationRequest: () => false,
 
             onPanResponderGrant: (evt: GestureResponderEvent) => {
                 if (readOnly) return;

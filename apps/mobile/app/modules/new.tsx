@@ -86,6 +86,7 @@ export default function NewModuleScreen() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [moduleType, setModuleType] = useState<QuestionType>('FLASHCARD');
+    const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
     const [category, setCategory] = useState<string>('Matematik & Fen');
     const [subCategory, setSubCategory] = useState<string>('Biyoloji');
     const [isForkable, setIsForkable] = useState(true);
@@ -133,8 +134,8 @@ export default function NewModuleScreen() {
             return;
         }
 
-        if (!category) {
-            Alert.alert('Eksik Bilgi', 'Lütfen bir kategori seçin.');
+        if (!category && visibility === 'PUBLIC') {
+            Alert.alert('Eksik Bilgi', 'Herkese açık modüller için bir kategori seçmelisiniz.');
             return;
         }
 
@@ -230,6 +231,7 @@ export default function NewModuleScreen() {
                 title: trimmedTitle,
                 description: description.trim() || undefined,
                 type: moduleType,
+                visibility,
                 category: category.trim() || 'Genel',
                 subCategory: subCategory.trim() || 'Genel',
                 isForkable,
@@ -405,22 +407,23 @@ export default function NewModuleScreen() {
                         <TouchableOpacity
                             onPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setVisibility('PUBLIC');
                                 setIsForkable(true);
                             }}
                             style={[
                                 styles.visibilityCard,
-                                isForkable && styles.visibilityCardActive
+                                visibility === 'PUBLIC' && styles.visibilityCardActive
                             ]}
                         >
                             <View style={styles.visibilityHeader}>
                                 <Ionicons
                                     name="globe-outline"
                                     size={15}
-                                    color={isForkable ? '#3B82F6' : '#64748B'}
+                                    color={visibility === 'PUBLIC' ? '#3B82F6' : '#64748B'}
                                 />
                                 <Text style={[
                                     styles.visibilityTitle,
-                                    isForkable && styles.visibilityTitleActive
+                                    visibility === 'PUBLIC' && styles.visibilityTitleActive
                                 ]}>Herkese Açık</Text>
                             </View>
                             <Text style={styles.visibilityDesc}>Topluluk keşfinde paylaşılır</Text>
@@ -429,22 +432,23 @@ export default function NewModuleScreen() {
                         <TouchableOpacity
                             onPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setVisibility('PRIVATE');
                                 setIsForkable(false);
                             }}
                             style={[
                                 styles.visibilityCard,
-                                !isForkable && styles.visibilityCardActive
+                                visibility === 'PRIVATE' && styles.visibilityCardActive
                             ]}
                         >
                             <View style={styles.visibilityHeader}>
                                 <Ionicons
                                     name="lock-closed"
                                     size={15}
-                                    color={!isForkable ? '#A855F7' : '#64748B'}
+                                    color={visibility === 'PRIVATE' ? '#A855F7' : '#64748B'}
                                 />
                                 <Text style={[
                                     styles.visibilityTitle,
-                                    !isForkable && styles.visibilityTitleActive
+                                    visibility === 'PRIVATE' && styles.visibilityTitleActive
                                 ]}>Gizli</Text>
                             </View>
                             <Text style={styles.visibilityDesc}>Yalnızca siz görebilirsiniz</Text>

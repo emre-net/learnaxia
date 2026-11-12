@@ -25,7 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 const aiConfigSchema = z.object({
     topic: z.string().min(10, "Text must be at least 10 characters").max(20000), // Increased for large docs
     count: z.number().min(3).max(20),
-    type: z.enum(["FLASHCARD", "MC", "GAP", "TF"]), // Changed to single type
+    type: z.enum(["FLASHCARD", "MC", "GAP", "TRUE_FALSE", "TF"]), // Standardized question types
     focusMode: z.enum(["detailed", "summary", "key_concepts", "auto"])
 });
 
@@ -166,10 +166,13 @@ export function AICreationWizard() {
                 body: JSON.stringify({
                     title: config.topic.substring(0, 50) + (config.topic.length > 50 ? "..." : ""),
                     description: `AI Generated module from ${inputType === 'FILE' ? 'Document' : 'Text'}`,
-                    type: config.type, // Use selected type!
+                    type: config.type === 'TF' ? 'TRUE_FALSE' : config.type, // Standardized question type
                     isForkable: true,
                     status: 'ACTIVE',
-                    items: generatedItems
+                    items: generatedItems.map(item => ({
+                        ...item,
+                        type: item.type === 'TF' ? 'TRUE_FALSE' : item.type
+                    }))
                 })
             });
 
@@ -270,7 +273,7 @@ export function AICreationWizard() {
                             <div className="space-y-3">
                                 <Label>Content Type</Label>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {["FLASHCARD", "MC", "GAP", "TF"].map((type) => (
+                                    {["FLASHCARD", "MC", "GAP", "TRUE_FALSE"].map((type) => (
                                         <div
                                             key={type}
                                             className={`flex items-center space-x-2 border p-3 rounded-lg cursor-pointer transition-all ${config.type === type ? 'border-purple-500 bg-purple-500/5 ring-1 ring-purple-500' : 'hover:bg-muted/50'}`}
@@ -280,7 +283,7 @@ export function AICreationWizard() {
                                                 {config.type === type && <div className="h-2 w-2 rounded-full bg-purple-500" />}
                                             </div>
                                             <label className="text-sm font-medium leading-none cursor-pointer w-full">
-                                                {type === 'MC' ? t("creation.mcLabel") : type === 'TF' ? t("creation.tfLabel") : type === 'GAP' ? t("creation.gapLabel") : t("creation.flashcardsLabel")}
+                                                {type === 'MC' ? t("creation.mcLabel") : (type === 'TRUE_FALSE' || type === 'TF') ? t("creation.tfLabel") : type === 'GAP' ? t("creation.gapLabel") : t("creation.flashcardsLabel")}
                                             </label>
                                         </div>
                                     ))}
@@ -425,7 +428,7 @@ export function AICreationWizard() {
                                         </div>
                                     )}
 
-                                    {item.type === 'TF' && (
+                                    {(item.type === 'TRUE_FALSE' || item.type === 'TF') && (
                                         <div className="mt-2">
                                             <p className="font-medium">{item.content?.statement || item.content?.question}</p>
                                             <p className={`mt-1 font-bold ${(item.content?.answer || item.content?.correct)?.toString().toLowerCase() === 'true' ? 'text-green-500' : 'text-red-500'}`}>{String(item.content?.answer || item.content?.correct)}</p>

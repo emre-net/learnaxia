@@ -16,6 +16,36 @@ import { DrawingCanvasData } from '@learnaxia/shared';
 
 const NOTE_CACHE_PREFIX = 'learnaxia_note_';
 
+function parseNotePayload(rawContent: string): { text: string; drawing: DrawingCanvasData | null } {
+    if (!rawContent) return { text: '', drawing: null };
+    try {
+        const parsed = JSON.parse(rawContent);
+        // 1. Mobile hybrid format: { text: "...", drawing: ... }
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return {
+                text: typeof parsed.text === 'string' ? parsed.text : '',
+                drawing: parsed.drawing || null,
+            };
+        }
+        // 2. Web BlockNote array format: [ { type: "paragraph", content: [ { type: "text", text: "..." } ] } ]
+        if (Array.isArray(parsed)) {
+            const extractedText = parsed
+                .map((block: any) => {
+                    if (block.content && Array.isArray(block.content)) {
+                        return block.content.map((c: any) => c.text || '').join('');
+                    }
+                    return '';
+                })
+                .filter(Boolean)
+                .join('\n\n');
+            return { text: extractedText, drawing: null };
+        }
+    } catch {
+        // Plain text or legacy HTML
+    }
+    return { text: rawContent, drawing: null };
+}
+
 export default function NoteEditorScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
@@ -48,21 +78,13 @@ export default function NoteEditorScreen() {
                 const data = res.data;
                 setTitle(data.title || '');
 
-                // Parse content: check if it contains serialized drawing
+                // Parse content: supports Mobile hybrid { text, drawing } and Web BlockNote blocks
                 if (typeof data.content === 'string') {
-                    try {
-                        const parsed = JSON.parse(data.content);
-                        if (parsed && typeof parsed === 'object' && (parsed.text !== undefined || parsed.drawing !== undefined)) {
-                            setContent(parsed.text || '');
-                            if (parsed.drawing) {
-                                setDrawingData(parsed.drawing);
-                                setShowDrawing(true);
-                            }
-                        } else {
-                            setContent(data.content);
-                        }
-                    } catch {
-                        setContent(data.content);
+                    const parsed = parseNotePayload(data.content);
+                    setContent(parsed.text);
+                    if (parsed.drawing) {
+                        setDrawingData(parsed.drawing);
+                        setShowDrawing(true);
                     }
                 }
 
@@ -77,19 +99,11 @@ export default function NoteEditorScreen() {
                     const data = JSON.parse(cached);
                     setTitle(data.title || '');
                     if (typeof data.content === 'string') {
-                        try {
-                            const parsed = JSON.parse(data.content);
-                            if (parsed && typeof parsed === 'object') {
-                                setContent(parsed.text || '');
-                                if (parsed.drawing) {
-                                    setDrawingData(parsed.drawing);
-                                    setShowDrawing(true);
-                                }
-                            } else {
-                                setContent(data.content);
-                            }
-                        } catch {
-                            setContent(data.content);
+                        const parsed = parseNotePayload(data.content);
+                        setContent(parsed.text);
+                        if (parsed.drawing) {
+                            setDrawingData(parsed.drawing);
+                            setShowDrawing(true);
                         }
                     }
                     setIsOffline(true);
@@ -185,7 +199,7 @@ export default function NoteEditorScreen() {
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+            <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
             {/* Header */}
             <View style={styles.header}>
@@ -308,12 +322,12 @@ export default function NoteEditorScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#09090b' },
-    loadingScreen: { flex: 1, backgroundColor: '#09090b', alignItems: 'center', justifyContent: 'center' },
+    screen: { flex: 1, backgroundColor: '#000000' },
+    loadingScreen: { flex: 1, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 16, paddingTop: 56, paddingBottom: 12,
-        borderBottomWidth: 1, borderBottomColor: '#1E293B',
+        paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14,
+        borderBottomWidth: 1, borderBottomColor: '#111111',
     },
     backBtn: {
         flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4,
@@ -321,13 +335,14 @@ const styles = StyleSheet.create({
     backBtnText: { color: '#94A3B8', fontSize: 14, fontWeight: '600', marginLeft: 2 },
     headerStatus: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     savedBadge: {
-        flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#1E293B',
+        flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#0A0A0A',
+        borderWidth: 1, borderColor: '#1E293B',
         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
     },
     savedText: { color: '#94A3B8', fontSize: 11, fontWeight: '600' },
     drawingToggleBtn: {
-        width: 36, height: 36, borderRadius: 10, backgroundColor: '#18181b',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#27272a',
+        width: 36, height: 36, borderRadius: 10, backgroundColor: '#0A0A0A',
+        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E293B',
     },
     drawingToggleBtnActive: {
         backgroundColor: '#1E293B', borderColor: '#38BDF8',

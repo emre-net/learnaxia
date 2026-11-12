@@ -79,8 +79,9 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
     // Handle Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // QUIZ / MC / GAP: Next Question or Show Answer
-            if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+            // QUIZ / MC / GAP / TRUE_FALSE: Next Question or Show Answer
+            const itemType = currentItem.type as string;
+            if (mode === 'QUIZ' || itemType === 'MC' || itemType === 'GAP' || itemType === 'TRUE_FALSE' || itemType === 'TF') {
                 if (e.code === 'Enter' || e.code === 'NumpadEnter') {
                     e.preventDefault();
                     handleQuizStep();
@@ -118,7 +119,8 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [mode, isFlipped, feedback, selectedOption, setIsFlipped, handleRate, currentItem, handleNextItem, handleQuizStep]);
 
-    if (mode === 'QUIZ' || currentItem.type === 'MC' || currentItem.type === 'GAP') {
+    const itemType = currentItem.type as string;
+    if (mode === 'QUIZ' || itemType === 'MC' || itemType === 'GAP' || itemType === 'TRUE_FALSE' || itemType === 'TF') {
         const isLastItem = currentIndex === items.length - 1;
 
         return (

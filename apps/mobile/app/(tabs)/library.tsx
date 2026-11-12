@@ -148,7 +148,7 @@ export default function LibraryScreen() {
         <TouchableOpacity
             activeOpacity={0.7}
             style={styles.cardContainer}
-            onPress={() => router.push(`/study/${item.id}` as any)}
+            onPress={() => router.push(`/modules/${item.id}` as any)}
         >
             <View style={styles.cardHeader}>
                 <Text style={styles.badgeText}>
@@ -230,6 +230,22 @@ export default function LibraryScreen() {
             <Text style={styles.cardTitle} numberOfLines={2}>
                 {item.title || t('library.notes.untitledNote', language)}
             </Text>
+
+            {(() => {
+                if (!item.content) return null;
+                try {
+                    const parsed = JSON.parse(item.content);
+                    if (Array.isArray(parsed)) {
+                        const txt = parsed.map((b: any) => Array.isArray(b.content) ? b.content.map((c: any) => c.text || '').join('') : '').filter(Boolean).join(' ');
+                        return txt ? <Text style={styles.cardDescription} numberOfLines={2}>{txt}</Text> : null;
+                    }
+                    if (parsed && typeof parsed === 'object') {
+                        return parsed.text ? <Text style={styles.cardDescription} numberOfLines={2}>{parsed.text}</Text> : null;
+                    }
+                } catch { }
+                const clean = item.content.replace(/<[^>]*>?/gm, '').trim();
+                return clean ? <Text style={styles.cardDescription} numberOfLines={2}>{clean}</Text> : null;
+            })()}
 
             <View style={styles.cardFooter}>
                 <View style={styles.footerInfo}>
@@ -429,8 +445,8 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 24,
-        paddingTop: 64,
-        paddingBottom: 24,
+        paddingTop: 16,
+        paddingBottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',

@@ -1,8 +1,16 @@
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { CollectionService } from "@/domains/collection/collection.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
+async function getUserId(req: Request): Promise<string | null> {
+    const mobileUser = await getMobileUser(req);
+    if (mobileUser?.id) return mobileUser.id;
+    const session = await auth();
+    return session?.user?.id || null;
+}
 
 const UpdateCollectionSchema = z.object({
     title: z.string().optional(),
@@ -13,13 +21,13 @@ const UpdateCollectionSchema = z.object({
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await getUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { id } = await params;
-        const collection = await CollectionService.getById(session.user.id, id);
+        const collection = await CollectionService.getById(userId, id);
         return NextResponse.json(collection);
     } catch (error) {
         console.error("Get Collection Error:", error);
@@ -35,8 +43,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await getUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -44,7 +52,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const body = await req.json();
         const validatedData = UpdateCollectionSchema.parse(body);
 
-        const updatedCollection = await CollectionService.update(session.user.id, id, validatedData);
+        const updatedCollection = await CollectionService.update(userId, id, validatedData);
 
         return NextResponse.json(updatedCollection);
     } catch (error) {

@@ -9,7 +9,7 @@ import prisma from "@/lib/prisma";
 
 const GenerateSchema = z.object({
     topic: z.string().min(3),
-    types: z.array(z.enum(['FLASHCARD', 'MC', 'GAP', 'TF'])).default(['FLASHCARD', 'MC', 'GAP', 'TF']),
+    types: z.array(z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE', 'TF'])).default(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']),
     count: z.number().min(-1).max(30).default(5),
     focusMode: z.enum(['detailed', 'summary', 'key_concepts', 'auto']).optional()
 });
@@ -55,7 +55,8 @@ export async function POST(req: Request) {
         }
 
         try {
-            const items = await AIService.generateContent(topic, types, count, focusMode, language);
+            const normalizedTypes = types.map(t => t === 'TF' ? 'TRUE_FALSE' : t);
+            const items = await AIService.generateContent(topic, normalizedTypes, count, focusMode, language);
             return NextResponse.json({ items });
         } catch (aiError: any) {
             console.error("AI Generation Failed:", aiError);

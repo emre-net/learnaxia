@@ -72,3 +72,36 @@ export async function sendVerificationEmail(email: string, token: string) {
     throw error;
   }
 }
+
+export async function sendContactEmail(name: string, email: string, message: string) {
+  const adminEmail = process.env.ADMIN_EMAIL || "support@learnaxia.com";
+  console.log(`[Mail] Forwarding contact message from ${email} (${name}) to ${adminEmail}`);
+
+  try {
+    const response = await getResend().emails.send({
+      from: process.env.MAIL_FROM || "Learnaxia Contact <no-reply@learnaxia.com>",
+      to: adminEmail,
+      reply_to: email,
+      subject: `Yeni İletişim Mesajı: ${name}`,
+      text: `Gönderen: ${name} (${email})\n\nMesaj:\n${message}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; line-height: 1.6; color: #111;">
+          <h2>Yeni İletişim Formu Mesajı</h2>
+          <p><strong>İsim:</strong> ${name}</p>
+          <p><strong>E-posta:</strong> ${email}</p>
+          <hr />
+          <p><strong>Mesaj:</strong></p>
+          <p style="white-space: pre-wrap;">${message}</p>
+        </div>
+      `,
+    });
+
+    if (response.error) {
+      console.error("[Mail] Resend Contact Error:", response.error);
+    }
+    return response;
+  } catch (error) {
+    console.error("[Mail] Failed to send contact email:", error);
+    return null;
+  }
+}

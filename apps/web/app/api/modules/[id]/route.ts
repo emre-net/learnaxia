@@ -1,8 +1,16 @@
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { ModuleService } from "@/domains/module/module.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
+async function getUserId(req: Request): Promise<string | null> {
+    const mobileUser = await getMobileUser(req);
+    if (mobileUser?.id) return mobileUser.id;
+    const session = await auth();
+    return session?.user?.id || null;
+}
 
 // Validation Schema for Update
 const ItemSchema = z.object({
@@ -25,13 +33,13 @@ const UpdateModuleSchema = z.object({
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await getUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { id } = await params;
-        const module = await ModuleService.getById(session.user.id, id);
+        const module = await ModuleService.getById(userId, id);
         if (!module) {
             return NextResponse.json({ error: "Module not found" }, { status: 404 });
         }
@@ -48,8 +56,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await getUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -57,7 +65,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const body = await req.json();
         const validatedData = UpdateModuleSchema.parse(body);
 
-        const updatedModule = await ModuleService.update(session.user.id, id, validatedData as any);
+        const updatedModule = await ModuleService.update(userId, id, validatedData as any);
 
         return NextResponse.json(updatedModule);
     } catch (error) {
@@ -74,13 +82,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await getUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { id } = await params;
-        await ModuleService.archive(session.user.id, id);
+        await ModuleService.archive(userId, id);
 
         return NextResponse.json({ success: true });
     } catch (error) {

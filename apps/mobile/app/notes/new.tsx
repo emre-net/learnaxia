@@ -90,7 +90,7 @@ export default function NewNoteScreen() {
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+            <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
             {/* Header */}
             <View style={styles.header}>
@@ -201,27 +201,27 @@ export default function NewNoteScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#09090b',
+        backgroundColor: '#000000',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingTop: 56,
-        paddingBottom: 16,
+        paddingTop: 12,
+        paddingBottom: 14,
         borderBottomWidth: 1,
-        borderBottomColor: '#1E293B',
+        borderBottomColor: '#111111',
     },
     closeBtn: {
         width: 38,
         height: 38,
         borderRadius: 19,
-        backgroundColor: '#18181b',
+        backgroundColor: '#0A0A0A',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#27272a',
+        borderColor: '#1E293B',
     },
     headerTitle: {
         color: '#F8FAFC',

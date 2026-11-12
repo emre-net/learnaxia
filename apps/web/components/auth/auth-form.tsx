@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react"
 import { BrandLoader } from "@/components/ui/brand-loader"
 import { useToast } from "@/components/ui/use-toast"
 import { syncGuestDataToServer } from "@/lib/guest-sync"
@@ -45,6 +45,7 @@ export function AuthForm() {
     const router = useRouter()
     const { toast } = useToast()
     const [isResetting, setIsResetting] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState(false)
     
     // Read the tab parameter from the URL, or default to login
     const initialTab = searchParams.get("tab") === "register" ? "register" : "login"
@@ -266,17 +267,19 @@ export function AuthForm() {
                                                         </svg>
                                                     </div>
                                                     <Input
-                                                        type="password"
+                                                        type={showPassword ? "text" : "password"}
                                                         className="pl-12 pr-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Parola"
                                                         {...field} disabled={isLoading}
                                                     />
-                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-[#94A3B8] cursor-pointer transition-colors">
-                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(prev => !prev)}
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-white transition-colors"
+                                                        aria-label={showPassword ? "Parolayı Gizle" : "Parolayı Göster"}
+                                                    >
+                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
                                                 </div>
                                             </FormControl>
                                             <FormMessage className="text-xs text-red-400" />
@@ -285,10 +288,11 @@ export function AuthForm() {
                                 />
 
                                 <div className="flex justify-end pb-1">
-                                    <span 
-                                        className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30"
+                                    <button
+                                        type="button"
+                                        className="text-xs font-bold text-blue-400/80 cursor-pointer hover:text-white transition-colors underline underline-offset-4 decoration-blue-500/30 bg-transparent border-none p-0"
                                         onClick={handleForgotPassword}
-                                    >{isResetting ? "Gönderiliyor..." : "Şifremi unuttum?"}</span>
+                                    >{isResetting ? "Gönderiliyor..." : "Şifremi unuttum?"}</button>
                                 </div>
 
                                 <Button type="submit" className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold shadow-[0_4px_14px_rgba(79,70,229,0.4)] border-none transition-all duration-300 active:scale-[0.98]" disabled={isLoading}>
@@ -298,7 +302,7 @@ export function AuthForm() {
 
                                 <div className="text-center pt-4">
                                     <span className="text-[13px] text-[#64748B] font-medium">Hesabın yok mu? </span>
-                                    <span className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setActiveTab("register")}>Kaydol</span>
+                                    <button type="button" className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors bg-transparent border-none p-0" onClick={() => setActiveTab("register")}>Kaydol</button>
                                 </div>
                             </form>
                         </Form>
@@ -365,17 +369,19 @@ export function AuthForm() {
                                                         </svg>
                                                     </div>
                                                     <Input
-                                                        type="password"
+                                                        type={showPassword ? "text" : "password"}
                                                         className="pl-12 pr-12 h-[56px] bg-[#0F172A] border-white/10 text-white placeholder:text-slate-400 rounded-2xl focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 transition-all font-medium text-base shadow-inner"
                                                         placeholder="Parola (En az 6 karakter)"
                                                         {...field} disabled={isLoading}
                                                     />
-                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-[#94A3B8] cursor-pointer transition-colors">
-                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(prev => !prev)}
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#64748B] hover:text-white transition-colors"
+                                                        aria-label={showPassword ? "Parolayı Gizle" : "Parolayı Göster"}
+                                                    >
+                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
                                                 </div>
                                             </FormControl>
                                             <FormMessage className="text-xs text-red-400" />
@@ -391,7 +397,7 @@ export function AuthForm() {
 
                                 <div className="text-center pt-4">
                                     <span className="text-[13px] text-[#64748B] font-medium">Zaten hesabın var mı? </span>
-                                    <span className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors" onClick={() => setActiveTab("login")}>Giriş Yap</span>
+                                    <button type="button" className="text-[13px] text-[#00D2FF] font-bold cursor-pointer hover:text-blue-400 transition-colors bg-transparent border-none p-0" onClick={() => setActiveTab("login")}>Giriş Yap</button>
                                 </div>
                             </form>
                         </Form>

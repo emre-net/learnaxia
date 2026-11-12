@@ -5,13 +5,27 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Layers, Play, BookOpen, Clock, ChevronLeft, Bookmark, Copy } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ModuleCard } from "@/components/module/module-card";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 export function CollectionDetailClient({ collection }: { collection: any }) {
+    const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
+
+    const handleStudyAll = () => {
+        if (!collection.modules || collection.modules.length === 0) {
+            toast({
+                title: "Uyarı",
+                description: "Bu koleksiyonda henüz çalışılacak modül bulunmuyor.",
+                variant: "destructive"
+            });
+            return;
+        }
+        router.push(`/study/${collection.modules[0].id}`);
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -71,7 +85,12 @@ export function CollectionDetailClient({ collection }: { collection: any }) {
                             <Bookmark className="mr-2 h-5 w-5" />
                             Kitaplığa Kaydet
                         </Button>
-                        <Button size="lg" className="h-12 px-8 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all font-bold">
+                        <Button 
+                            size="lg" 
+                            className="h-12 px-8 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all font-bold"
+                            onClick={handleStudyAll}
+                            disabled={!collection.modules || collection.modules.length === 0}
+                        >
                             <Play className="mr-2 h-5 w-5 fill-current" />
                             Hepsini Çalış
                         </Button>

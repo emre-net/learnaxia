@@ -364,6 +364,10 @@ export default function ProfileScreen() {
                             style={styles.settingsItem}
                             onPress={() => {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                Alert.alert(
+                                    'LearnAxia',
+                                    `Sürüm: v${Constants.expoConfig?.version || '1.0.0'}\n\nAkıllı ve kişiselleştirilmiş eğitim platformu.\nhttps://learnaxia.com`
+                                );
                             }}
                         >
                             <View>
@@ -424,8 +428,8 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 24,
-        paddingTop: 64,
-        paddingBottom: 24,
+        paddingTop: 16,
+        paddingBottom: 20,
     },
     headerTitle: {
         fontSize: 28,
