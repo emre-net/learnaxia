@@ -44,12 +44,30 @@ export class ErrorBoundary extends Component<Props, State> {
                     <p className="text-zinc-500 dark:text-zinc-400 max-w-md mb-8 font-medium">
                         Beklenmedik bir hata ile karşılaştık. Merak etmeyin, mühendislerimiz konu hakkında bilgilendirildi.
                     </p>
-                    <Button
-                        onClick={() => this.setState({ hasError: false })}
-                        className="rounded-2xl h-12 px-8 font-black bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all active:scale-95"
-                    >
-                        <RotateCcw className="mr-2 h-4 w-4" /> Tekrar Dene
-                    </Button>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <Button
+                            onClick={() => {
+                                this.setState({ hasError: false });
+                                if (typeof window !== "undefined") {
+                                    window.location.reload();
+                                }
+                            }}
+                            className="rounded-2xl h-12 px-8 font-black bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all active:scale-95"
+                        >
+                            <RotateCcw className="mr-2 h-4 w-4" /> Tekrar Dene
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                if (typeof window !== "undefined") {
+                                    window.location.href = "/dashboard";
+                                }
+                            }}
+                            className="rounded-2xl h-12 px-6 font-bold border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                        >
+                            Ana Sayfaya Dön
+                        </Button>
+                    </div>
                 </div>
             );
         }

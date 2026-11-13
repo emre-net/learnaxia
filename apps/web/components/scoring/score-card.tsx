@@ -147,7 +147,7 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
             </div>
 
             {/* Metrikler */}
-            <div className="grid grid-cols-4 gap-4 mb-5 rounded-xl bg-white/[0.03] border border-white/5 p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 rounded-xl bg-white/[0.03] border border-white/5 p-3 sm:p-4">
                 <MetricItem
                     label="Çalışma"
                     value={`${data.metrics.studyMinutes} dk`}

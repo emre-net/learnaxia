@@ -248,27 +248,38 @@ export async function collectSignals(
         prisma.note.count({
             where: { userId, createdAt: { gte: period, lt: periodEnd } },
         }),
-        // Journey üretimi (sadece ACTIVE + COMPLETED)
-        prisma.learningJourney.count({
-            where: {
-                userId,
-                status: { in: ['ACTIVE', 'COMPLETED'] },
-                createdAt: { gte: period, lt: periodEnd },
-            },
-        }),
+        // Journey üretimi (sadece ACTIVE + COMPLETED) - güvenli fallback
+        (async () => {
+            try {
+                return await prisma.learningJourney.count({
+                    where: {
+                        userId,
+                        status: { in: ['ACTIVE', 'COMPLETED'] },
+                        createdAt: { gte: period, lt: periodEnd },
+                    },
+                });
+            } catch {
+                return 0;
+            }
+        })(),
     ]);
     const modulesCreated = publicModulesCreated + privateModulesCreated;
 
     // ── 11. JOURNEY COMPLETIONS ───────────────────────────────────────────
     // Journey "tamamlandı" = son slide'a kadar ilerlendi
-    // Bu basit: LearningJourney status = COMPLETED
-    const journeyCompletions = await prisma.learningJourney.count({
-        where: {
-            userId,
-            status: 'COMPLETED',
-            updatedAt: { gte: period, lt: periodEnd },
-        },
-    });
+    // Bu basit: LearningJourney status = COMPLETED - güvenli fallback
+    let journeyCompletions = 0;
+    try {
+        journeyCompletions = await prisma.learningJourney.count({
+            where: {
+                userId,
+                status: 'COMPLETED',
+                updatedAt: { gte: period, lt: periodEnd },
+            },
+        });
+    } catch {
+        journeyCompletions = 0;
+    }
 
     // ── 12. CONTENT ADOPTION ──────────────────────────────────────────────
     const adoptionData = await prisma.contentAdoptionLog.aggregate({

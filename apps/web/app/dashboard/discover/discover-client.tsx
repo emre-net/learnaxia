@@ -290,7 +290,7 @@ export function DiscoverClient() {
 
                         <div className="space-y-8 pb-10">
                             {isLoading ? (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-6">
                                     {[1, 2, 3, 4, 5, 6].map(i => (
                                         <div key={i} className="h-48 w-full bg-muted/20 animate-pulse rounded-2xl border border-dashed" />
                                     ))}
@@ -337,7 +337,7 @@ export function DiscoverClient() {
                             ) : (
                                 <div className="space-y-12">
                                     <TabsContent value="modules" className="mt-0 w-full outline-none">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                             {items.map((item: any) => (
                                                 <ModuleCard key={item.id} module={item} showOwner={true} />
                                             ))}
@@ -345,7 +345,7 @@ export function DiscoverClient() {
                                     </TabsContent>
 
                                     <TabsContent value="collections" className="mt-0 w-full outline-none">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                             {items.map((item: any) => (
                                                 <CollectionCard
                                                     key={item.id}
@@ -361,7 +361,7 @@ export function DiscoverClient() {
                                     </TabsContent>
 
                                     <TabsContent value="notes" className="mt-0 w-full outline-none">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                             {items.map((item: any) => (
                                                 <LibraryCard
                                                     key={item.id}

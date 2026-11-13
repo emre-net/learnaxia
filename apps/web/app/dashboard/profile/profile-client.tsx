@@ -156,7 +156,7 @@ export function ProfileClient() {
 
                 <TabsContent value="modules" className="space-y-4">
                     {isLoadingModules ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[250px]" />)}
                         </div>
                     ) : myModules?.length === 0 ? (
@@ -168,7 +168,7 @@ export function ProfileClient() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {myModules?.map((item: any) => (
                                 <ModuleCard key={item.moduleId} module={item.module} />
                             ))}
@@ -178,7 +178,7 @@ export function ProfileClient() {
 
                 <TabsContent value="collections" className="space-y-4">
                     {isLoadingCollections ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[250px]" />)}
                         </div>
                     ) : myCollections?.length === 0 ? (
@@ -186,7 +186,7 @@ export function ProfileClient() {
                             Henüz koleksiyon oluşturmadınız.
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {myCollections?.map((item: any) => (
                                 <CollectionCard key={item.collectionId} item={item} viewMode="grid" />
                             ))}
@@ -196,7 +196,7 @@ export function ProfileClient() {
 
                 <TabsContent value="notes" className="space-y-4">
                     {isLoadingNotes ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[150px]" />)}
                         </div>
                     ) : myNotes?.length === 0 ? (
@@ -208,7 +208,7 @@ export function ProfileClient() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {myNotes?.map((note: any) => (
                                 <Link href={`/dashboard/notes/${note.id}`} key={note.id} className="block group">
                                     <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">

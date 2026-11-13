@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Play, Pause, RotateCcw, Timer, Hourglass, Settings2, Maximize2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play, Pause, RotateCcw, Timer, Hourglass, Settings2, Maximize2, Minimize2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,18 @@ export function FocusWidget() {
     const [activeTab, setActiveTab] = useState<'POMODORO' | 'STOPWATCH'>('POMODORO');
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pomodoroDuration, setPomodoroDuration] = useState(25 * 60);
+
+    // Escape key listener for exiting fullscreen
+    useEffect(() => {
+        if (!isFullscreen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsFullscreen(false);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isFullscreen]);
 
     // Timer instances
     const timer = useTimer({
@@ -91,8 +103,13 @@ export function FocusWidget() {
                         size="icon"
                         onClick={() => setIsFullscreen(!isFullscreen)}
                         className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        title={isFullscreen ? "Tam ekrandan çık (Esc)" : "Tam ekran"}
                     >
-                        <Maximize2 className="h-4 w-4" />
+                        {isFullscreen ? (
+                            <Minimize2 className="h-4 w-4" />
+                        ) : (
+                            <Maximize2 className="h-4 w-4" />
+                        )}
                     </Button>
                 </div>
 

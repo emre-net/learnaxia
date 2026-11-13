@@ -27,9 +27,9 @@ export function MobileBottomNav() {
             active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules"),
         },
         {
-            icon: Sparkles, // Central AI Action
-            href: "/dashboard/create/ai-notes",
-            active: pathname === "/dashboard/create/ai-notes",
+            icon: Sparkles, // Central Create / AI Action
+            href: "/dashboard/create",
+            active: pathname.startsWith("/dashboard/create"),
             primary: true
         },
         {

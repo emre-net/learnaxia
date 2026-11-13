@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { TIERS } from "@/lib/scoring/tiers";
 
 type Period = "weekly" | "monthly" | "3month" | "alltime";
@@ -13,7 +12,7 @@ interface LeaderboardEntry {
     handle: string | null;
     image: string | null;
     momentum: number;
-    tier: { key: string; label: string; emoji: string; color: string };
+    tier?: { key: string; label: string; emoji: string; color: string };
     isCurrentUser: boolean;
 }
 
@@ -24,6 +23,13 @@ interface LeaderboardData {
     total: number;
 }
 
+const DEFAULT_TIER = {
+    key: "bronze",
+    label: "Bronz",
+    emoji: "🥉",
+    color: "#CD7F32",
+};
+
 const PERIOD_LABELS: Record<Period, string> = {
     weekly: "Bu Hafta",
     monthly: "Bu Ay",
@@ -31,7 +37,8 @@ const PERIOD_LABELS: Record<Period, string> = {
     alltime: "Tüm Zamanlar",
 };
 
-function formatMomentum(n: number): string {
+function formatMomentum(n?: number): string {
+    if (n == null || isNaN(n)) return "0";
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
     return n.toLocaleString("tr-TR");
@@ -49,42 +56,51 @@ function RankDisplay({ rank }: { rank: number }) {
 }
 
 function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
+    const tier = entry.tier ?? DEFAULT_TIER;
+    const [imgFailed, setImgFailed] = useState(false);
+
     return (
         <div
             className={`
-                group flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-200
+                group flex items-center gap-3 sm:gap-4 rounded-xl px-3 sm:px-4 py-3 transition-all duration-200
                 ${isMe
                     ? "border border-white/10 bg-white/[0.06]"
                     : "hover:bg-white/[0.03]"
                 }
             `}
-            style={isMe ? { borderColor: `${entry.tier.color}30` } : {}}
+            style={isMe ? { borderColor: `${tier.color}30` } : {}}
         >
             {/* Sıra */}
-            <div className="w-8 flex justify-center">
+            <div className="w-8 flex justify-center flex-shrink-0">
                 <RankDisplay rank={entry.rank} />
             </div>
 
             {/* Avatar */}
             <div
-                className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border"
-                style={{ borderColor: `${entry.tier.color}40` }}
+                className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border bg-white/5 flex items-center justify-center text-base"
+                style={{ borderColor: `${tier.color}40` }}
             >
-                {entry.image ? (
-                    <Image src={entry.image} alt={entry.name ?? "Kullanıcı"} fill className="object-cover" />
+                {entry.image && !imgFailed ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={entry.image}
+                        alt={entry.name ?? "Kullanıcı"}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgFailed(true)}
+                    />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-base">
-                        {entry.tier.emoji}
-                    </div>
+                    <span>{tier.emoji}</span>
                 )}
             </div>
 
             {/* Ad / Handle */}
             <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-white truncate">
-                    {entry.name ?? "Gizli Kullanıcı"}
+                <div className="text-sm font-medium text-white truncate flex items-center gap-1.5">
+                    <span className="truncate">{entry.name ?? "Gizli Kullanıcı"}</span>
                     {isMe && (
-                        <span className="ml-2 text-xs text-white/30">(sen)</span>
+                        <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded flex-shrink-0">
+                            sen
+                        </span>
                     )}
                 </div>
                 {entry.handle && (
@@ -94,18 +110,18 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
 
             {/* Tier chip */}
             <div
-                className="hidden sm:flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border"
+                className="hidden sm:flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border flex-shrink-0"
                 style={{
-                    color: entry.tier.color,
-                    borderColor: `${entry.tier.color}30`,
-                    background: `${entry.tier.color}10`,
+                    color: tier.color,
+                    borderColor: `${tier.color}30`,
+                    background: `${tier.color}10`,
                 }}
             >
-                {entry.tier.emoji} {entry.tier.label}
+                {tier.emoji} {tier.label}
             </div>
 
             {/* Momentum */}
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
                 <div className="text-sm font-bold text-white">
                     {formatMomentum(entry.momentum)}
                 </div>
@@ -235,7 +251,7 @@ export default function LeaderboardPage() {
                     </div>
                 ) : !error && (
                     <div className="space-y-1">
-                        {data?.entries?.map(entry => (
+                        {data?.entries?.filter(Boolean).map(entry => (
                             <EntryRow
                                 key={entry.userId}
                                 entry={entry}
@@ -244,7 +260,7 @@ export default function LeaderboardPage() {
                         ))}
 
                         {/* Kullanıcı ilk 50'de değilse */}
-                        {!myEntryInList && myEntry && (
+                        {!myEntryInList && myEntry && myEntry.userId && (
                             <>
                                 <div className="flex items-center gap-2 py-2">
                                     <div className="flex-1 h-px bg-white/10" />
