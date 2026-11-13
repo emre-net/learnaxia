@@ -251,6 +251,9 @@ const en = {
             cardTitle: "New Note",
             cardDesc: "Start typing your notes here. Rich text editor will be added soon.",
             placeholder: "Write your notes here...",
+            titlePlaceholder: "Note title...",
+            errorEmpty: "Note content cannot be empty.",
+            untitled: "Untitled Note",
             saveNote: "Save Note"
         }
     },
@@ -668,6 +671,9 @@ const tr = {
             cardTitle: "Yeni Not",
             cardDesc: "Buraya notlarınızı yazmaya başlayın. Zengin metin editörü yakında eklenecek.",
             placeholder: "Notlarınızı buraya yazın...",
+            titlePlaceholder: "Not başlığı...",
+            errorEmpty: "Not içeriği boş olamaz.",
+            untitled: "İsimsiz Not",
             saveNote: "Notu Kaydet"
         }
     },

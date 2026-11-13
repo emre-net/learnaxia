@@ -118,6 +118,39 @@ export async function GET(req: Request) {
         });
     } catch (error) {
         console.error("[GET /api/scores/me]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        const defaultTier = getTierForScore(0);
+        return NextResponse.json({
+            momentum: { thisMonth: 0, allTime: 0 },
+            tier: {
+                thisMonth: {
+                    key: defaultTier.key,
+                    label: defaultTier.label,
+                    emoji: defaultTier.emoji,
+                    color: defaultTier.color,
+                    progress: 0,
+                    pointsToNext: 100,
+                },
+                allTime: {
+                    key: defaultTier.key,
+                    label: defaultTier.label,
+                    emoji: defaultTier.emoji,
+                    color: defaultTier.color,
+                    progress: 0,
+                    pointsToNext: 100,
+                },
+            },
+            badges: [],
+            metrics: {
+                studyMinutes: 0,
+                cardsReviewed: 0,
+                accuracyRate: 0,
+                modulesCreated: 0,
+                journeyCompletions: 0,
+                activeDays: 0,
+                contentAdoption: 0,
+            },
+            period: new Date().toISOString().slice(0, 7),
+            calculatedAt: null,
+        });
     }
 }

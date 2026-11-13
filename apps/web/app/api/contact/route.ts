@@ -24,3 +24,4 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Mesaj iletilirken bir hata oluştu." }, { status: 500 });
     }
 }
+

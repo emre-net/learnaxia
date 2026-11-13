@@ -120,16 +120,49 @@ export default function LeaderboardPage() {
     const [tierFilter, setTierFilter] = useState("all");
     const [data, setData] = useState<LeaderboardData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
+        let isMounted = true;
         setLoading(true);
-        fetch(`/api/leaderboard?period=${period}&tier=${tierFilter}&limit=50`)
-            .then(r => r.json())
-            .then(setData)
-            .finally(() => setLoading(false));
-    }, [period, tierFilter]);
+        setError(null);
 
-    const myEntryInList = data?.entries.find(e => e.isCurrentUser);
+        fetch(`/api/leaderboard?period=${period}&tier=${tierFilter}&limit=50`)
+            .then(async (r) => {
+                if (r.status === 401) {
+                    window.location.href = "/login?callbackUrl=/dashboard/leaderboard";
+                    return null;
+                }
+                const json = await r.json();
+                if (!r.ok || json.error) {
+                    throw new Error(json.error || "Lider tablosu yüklenemedi");
+                }
+                return json as LeaderboardData;
+            })
+            .then((result) => {
+                if (isMounted && result) {
+                    setData(result);
+                }
+            })
+            .catch((err) => {
+                if (isMounted) {
+                    console.error("[LeaderboardPage]", err);
+                    setError(err.message || "Lider tablosu alınamadı");
+                }
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [period, tierFilter, reloadKey]);
+
+    const myEntryInList = data?.entries?.find(e => e.isCurrentUser);
     const myEntry = myEntryInList ?? data?.myEntry;
 
     return (
@@ -177,6 +210,19 @@ export default function LeaderboardPage() {
                     </select>
                 </div>
 
+                {/* Hata Durumu */}
+                {error && !loading && (
+                    <div className="text-center py-10 space-y-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-6">
+                        <p className="text-sm text-red-300 font-medium">{error}</p>
+                        <button
+                            onClick={() => setReloadKey(k => k + 1)}
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition"
+                        >
+                            Tekrar Dene
+                        </button>
+                    </div>
+                )}
+
                 {/* Liste */}
                 {loading ? (
                     <div className="space-y-2">
@@ -187,9 +233,9 @@ export default function LeaderboardPage() {
                             />
                         ))}
                     </div>
-                ) : (
+                ) : !error && (
                     <div className="space-y-1">
-                        {data?.entries.map(entry => (
+                        {data?.entries?.map(entry => (
                             <EntryRow
                                 key={entry.userId}
                                 entry={entry}
@@ -209,7 +255,7 @@ export default function LeaderboardPage() {
                             </>
                         )}
 
-                        {data?.entries.length === 0 && (
+                        {(!data?.entries || data.entries.length === 0) && (
                             <div className="text-center py-12 text-white/30 text-sm">
                                 Henüz bu dönem için veri yok.
                             </div>
@@ -218,7 +264,7 @@ export default function LeaderboardPage() {
                 )}
 
                 {/* Toplam */}
-                {data && data.total > 0 && (
+                {!error && data && (data.total ?? 0) > 0 && (
                     <p className="text-center text-xs text-white/20">
                         {data.total.toLocaleString("tr-TR")} aktif kullanıcı arasından
                     </p>

@@ -129,9 +129,11 @@ export async function GET(req: Request) {
             // Kullanıcı listede yok — kendi sırasını bul
             const myTotalRank = await prisma.userScore.groupBy({
                 by: ['userId'],
-                where: periodFilter ? { period: periodFilter } : {},
+                where: {
+                    ...(periodFilter ? { period: periodFilter } : {}),
+                    finalScore: { gt: 0 },
+                },
                 _sum: { finalScore: true },
-                having: { finalScore: { _sum: { gt: 0 } } },
             });
             const sorted = myTotalRank.sort((a, b) =>
                 (b._sum.finalScore ?? 0) - (a._sum.finalScore ?? 0)
@@ -161,6 +163,11 @@ export async function GET(req: Request) {
         });
     } catch (error) {
         console.error("[GET /api/leaderboard]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({
+            period: 'monthly',
+            entries: [],
+            myEntry: null,
+            total: 0,
+        });
     }
 }
