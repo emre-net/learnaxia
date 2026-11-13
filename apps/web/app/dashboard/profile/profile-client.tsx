@@ -21,34 +21,33 @@ export function ProfileClient() {
         queryKey: ['profile'],
         queryFn: async () => {
             const res = await fetch('/api/user/profile');
+            if (res.status === 401 || res.status === 404) {
+                window.location.href = "/login?error=SessionExpired";
+                return null;
+            }
             if (!res.ok) throw new Error('Failed to fetch profile');
-            const data = await res.json();
-            return data;
+            return await res.json();
         }
     });
 
-    const { data: myModules, isLoading: isLoadingModules } = useQuery({
-        queryKey: ['library-modules', 'created'], // Reuse or fetch specifically created
+    const { data: myModules = [], isLoading: isLoadingModules } = useQuery({
+        queryKey: ['library-modules', 'created'],
         queryFn: async () => {
-            // We can reuse the existing /api/modules which returns library
-            // But ideally we filter for "created" by me.
-            // Client side filtering of the library response for now is efficient enough for MVP
-            const res = await fetch('/api/modules');
-            if (!res.ok) throw new Error('Failed to fetch modules');
+            const res = await fetch('/api/modules?role=created');
+            if (!res.ok) return [];
             const data = await res.json();
-            // Filter: Created by me (role OWNER and no sourceModule usually, or just sourceModule check)
-            // Actually library returns everything. Let's filter by role='OWNER' and maybe checking if it's a fork?
-            // For "Created" tab, usually means original content.
-            return data.filter((m: any) => m.role === 'OWNER');
+            const list = Array.isArray(data) ? data : (data?.items || []);
+            return list.filter((m: any) => m.role === 'OWNER');
         }
     });
 
-    const { data: myCollections, isLoading: isLoadingCollections } = useQuery({
+    const { data: myCollections = [], isLoading: isLoadingCollections } = useQuery({
         queryKey: ['library-collections'],
         queryFn: async () => {
-            const res = await fetch('/api/collections');
-            if (!res.ok) throw new Error('Failed to fetch collections');
-            return res.json();
+            const res = await fetch('/api/collections?role=created');
+            if (!res.ok) return [];
+            const data = await res.json();
+            return Array.isArray(data) ? data : (data?.items || []);
         }
     });
 
@@ -83,17 +82,19 @@ export function ProfileClient() {
                 <div className="flex items-center gap-6">
                     <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
                         <AvatarImage src={profile?.image} />
-                        <AvatarFallback className="text-2xl">{profile?.handle?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                        <AvatarFallback className="text-2xl">{(profile?.name || profile?.handle || "U").charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">@{profile?.handle || "kullanici"}</h1>
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{profile?.name || `@${profile?.handle || "kullanici"}`}</h1>
                         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                            <span className="font-medium">@{profile?.handle || "kullanici"}</span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
-                                <CalendarDays className="h-3 w-3" />
-                                {new Date(profile?.createdAt).toLocaleDateString("tr-TR")} tarihinde katıldı
-                            </span>
+                            {profile?.handle && <span className="font-medium">@{profile.handle}</span>}
+                            {profile?.handle && profile?.createdAt && <span>•</span>}
+                            {profile?.createdAt && (
+                                <span className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <CalendarDays className="h-3 w-3" />
+                                    {new Date(profile.createdAt).toLocaleDateString("tr-TR")} tarihinde katıldı
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>

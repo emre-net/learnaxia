@@ -388,7 +388,7 @@ export function ItemEditorSheet({
                         disabled={!question || (type !== 'GAP' && !answer)}
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 px-8 rounded-xl transition-all hover:scale-105 active:scale-95"
                     >
-                        <Save className="mr-2 h-4 w-4" /> {initialData ? t('common.save') : t('common.add')}
+                        <Save className="mr-2 h-4 w-4" /> {initialData ? (t('common.save') || "Kaydet") : (t('common.add') === 'common.add' ? "Ekle" : (t('common.add') || "Ekle"))}
                     </Button>
                 </SheetFooter>
             </SheetContent>

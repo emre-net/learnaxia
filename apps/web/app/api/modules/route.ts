@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { ModuleService } from "@/domains/module/module.service";
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -41,6 +42,15 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const dbUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+
+        if (!dbUser) {
+            return NextResponse.json({ error: "Oturum süresi doldu veya kullanıcı bulunamadı. Lütfen tekrar giriş yapın." }, { status: 401 });
+        }
+
         const body = await req.json();
         const validatedData = CreateModuleSchema.parse(body);
 
@@ -71,6 +81,15 @@ export async function GET(req: Request) {
 
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const dbUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+
+        if (!dbUser) {
+            return NextResponse.json({ error: "Oturum süresi doldu veya kullanıcı bulunamadı. Lütfen tekrar giriş yapın." }, { status: 401 });
         }
 
         const { searchParams } = new URL(req.url);

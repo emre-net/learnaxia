@@ -54,7 +54,7 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <Link href="/dashboard/settings">
+                    <Link href="/dashboard/profile">
                         <DropdownMenuItem>
                             {t('settings.profileTab')}
                             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>

@@ -32,6 +32,24 @@ export function GapRenderer({ item }: { item: any }) {
         setUserAnswers(new Array(gapIndices.length).fill(""));
     }, [item.id, gapIndices.length]);
 
+    const correctAnswersList: string[] = useMemo(() => {
+        if (Array.isArray(item.content?.answers) && item.content.answers.length > 0) {
+            return item.content.answers;
+        }
+        const textToSearch = item.content?.text || item.content?.question || "";
+        const matches = textToSearch.match(/\{\{(.*?)\}\}/g);
+        if (matches && matches.length > 0) {
+            return matches.map((m: string) => m.slice(2, -2).trim());
+        }
+        if (item.content?.answer) {
+            return [String(item.content.answer)];
+        }
+        if (item.content?.gap) {
+            return [String(item.content.gap)];
+        }
+        return [];
+    }, [item.content]);
+
     const normalize = (s: string) => {
         return s
             .toLocaleLowerCase('tr')
@@ -46,7 +64,7 @@ export function GapRenderer({ item }: { item: any }) {
         // but user specifically asked to check even if "one box is empty".
         if (userAnswers.every(a => !a.trim())) return;
 
-        const correctAnswers = (item.content.answers || []).map(normalize);
+        const correctAnswers = correctAnswersList.map(normalize);
 
         const results = userAnswers.map((ans, idx) => {
             const input = normalize(ans);
@@ -175,7 +193,7 @@ export function GapRenderer({ item }: { item: any }) {
                             <div className="text-sm opacity-90 mt-2 bg-background/50 p-4 rounded-md inline-block max-w-lg mx-auto">
                                 <span className="block mb-2 font-semibold text-foreground/80">{t('study.correctAnswers')}</span>
                                 <div className="flex flex-wrap gap-2 justify-center">
-                                    {item.content.answers.map((ans: string, i: number) => (
+                                    {correctAnswersList.map((ans: string, i: number) => (
                                         <span key={i} className="px-2 py-1 bg-primary/10 rounded border border-primary/20 text-primary font-mono">
                                             {i + 1}. {ans}
                                         </span>

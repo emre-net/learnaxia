@@ -92,8 +92,8 @@ export function Sidebar({ className }: SidebarProps) {
         {
             label: t('sidebar.profile'),
             icon: User,
-            href: "/dashboard/settings",
-            active: pathname === "/dashboard/settings",
+            href: "/dashboard/profile",
+            active: pathname === "/dashboard/profile",
         },
         {
             label: "Liderboard",

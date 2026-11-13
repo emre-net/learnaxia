@@ -29,6 +29,8 @@ export async function GET(req: Request) {
             where: { id: userId },
             select: {
                 id: true,
+                name: true,
+                email: true,
                 handle: true,
                 image: true,
                 createdAt: true,

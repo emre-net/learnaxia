@@ -24,7 +24,7 @@ type DiscoverItem = {
   createdAt: string;
 };
 
-type TabType = 'MODULE' | 'COLLECTION';
+type TabType = 'MODULE' | 'COLLECTION' | 'NOTE';
 
 export default function ExploreScreen() {
   const router = useRouter();
@@ -80,28 +80,34 @@ export default function ExploreScreen() {
   const tabs: { id: TabType; label: string }[] = [
     { id: 'MODULE', label: t('library.tabs.modules', language) },
     { id: 'COLLECTION', label: t('library.tabs.collections', language) },
+    { id: 'NOTE', label: t('library.tabs.notes', language) },
   ];
 
   const renderItem = ({ item }: { item: DiscoverItem }) => {
     const isModule = activeTab === 'MODULE';
-    const badgeLabel = !isModule
-      ? t('library.types.collection', language)
-      : item.type === 'MC'
-        ? t('library.types.mc', language)
-        : item.type === 'FLASHCARD'
-          ? t('library.types.flashcard', language)
-          : item.type === 'TRUE_FALSE'
-            ? t('library.types.true_false', language)
-            : item.type === 'GAP'
-              ? t('library.types.gap', language)
-              : (item.type || t('library.types.module', language));
+    const isNote = activeTab === 'NOTE';
+    const badgeLabel = isNote
+      ? t('library.tabs.notes', language)
+      : !isModule
+        ? t('library.types.collection', language)
+        : item.type === 'MC'
+          ? t('library.types.mc', language)
+          : item.type === 'FLASHCARD'
+            ? t('library.types.flashcard', language)
+            : item.type === 'TRUE_FALSE'
+              ? t('library.types.true_false', language)
+              : item.type === 'GAP'
+                ? t('library.types.gap', language)
+                : (item.type || t('library.types.module', language));
 
     return (
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.cardContainer}
         onPress={() => {
-          if (isModule) {
+          if (isNote) {
+            router.push(`/notes/${item.id}` as any);
+          } else if (isModule) {
             router.push(`/modules/${item.id}` as any);
           } else {
             router.push(`/collections/${item.id}` as any);
@@ -123,7 +129,7 @@ export default function ExploreScreen() {
 
         <View style={styles.cardFooter}>
           <View style={styles.footerInfo}>
-            <Ionicons name={isModule ? "document-text-outline" : "folder-outline"} size={16} color="#64748B" />
+            <Ionicons name={isNote ? "journal-outline" : isModule ? "document-text-outline" : "folder-outline"} size={16} color="#64748B" />
             <Text style={styles.footerItemsText}>
               {item._count?.items || 0} {t('library.items', language).toLowerCase()}
             </Text>

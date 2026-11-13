@@ -39,8 +39,8 @@ export function MobileBottomNav() {
         },
         {
             icon: User,
-            href: "/dashboard/settings",
-            active: pathname === "/dashboard/settings",
+            href: "/dashboard/profile",
+            active: pathname === "/dashboard/profile",
         },
     ]
 

@@ -17,7 +17,33 @@ export async function GET(req: Request) {
         const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
         const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
-        if (type === "COLLECTION") {
+        if (type === "NOTE") {
+            const where: any = {
+                visibility: 'PUBLIC',
+                ...(search && {
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { content: { contains: search, mode: 'insensitive' } }
+                    ]
+                })
+            };
+
+            const [notes, total] = await Promise.all([
+                prisma.note.findMany({
+                    where,
+                    include: {
+                        user: { select: { handle: true, image: true, id: true, name: true } },
+                        module: { select: { title: true, id: true } }
+                    },
+                    take: limit,
+                    skip: offset,
+                    orderBy: { createdAt: "desc" }
+                }),
+                prisma.note.count({ where })
+            ]);
+
+            return NextResponse.json({ items: notes, total, type: "NOTE" });
+        } else if (type === "COLLECTION") {
             const where: Prisma.CollectionWhereInput = {
                 visibility: 'PUBLIC',
                 ...(category && category !== 'ALL' && {
