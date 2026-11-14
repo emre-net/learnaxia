@@ -14,13 +14,22 @@ const DEFAULT_VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b"
 
 export class OpenAIAIProvider implements AIProvider {
     name = "OpenAI";
-    private client: OpenAI;
+    private client: OpenAI | null = null;
+    private currentKey: string | null = null;
 
-    constructor() {
-        this.client = new OpenAI({
-            apiKey: process.env.GROQ_API_KEY,
-            baseURL: "https://api.groq.com/openai/v1"
-        });
+    private getClient(): OpenAI {
+        const apiKey = process.env.GROQ_API_KEY;
+        if (!apiKey) {
+            throw new AIError('AUTH_ERROR', 'Groq API key is missing. Please add GROQ_API_KEY to your env.');
+        }
+        if (!this.client || this.currentKey !== apiKey) {
+            this.currentKey = apiKey;
+            this.client = new OpenAI({
+                apiKey,
+                baseURL: "https://api.groq.com/openai/v1"
+            });
+        }
+        return this.client;
     }
 
     async generateContent(topic: string, types: string[], count: number, focusMode?: 'detailed' | 'summary' | 'key_concepts' | 'auto', language: string = 'tr'): Promise<AIResponseItem[]> {
@@ -78,7 +87,7 @@ export class OpenAIAIProvider implements AIProvider {
 
             try {
                 // 1. Generator AI
-                const response = await this.client.chat.completions.create({
+                const response = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
@@ -141,7 +150,7 @@ export class OpenAIAIProvider implements AIProvider {
                     }
                 `;
 
-                const evalResponse = await this.client.chat.completions.create({
+                const evalResponse = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
@@ -247,7 +256,7 @@ export class OpenAIAIProvider implements AIProvider {
 
             try {
                 // 1. Generator AI
-                const response = await this.client.chat.completions.create({
+                const response = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
@@ -280,7 +289,7 @@ export class OpenAIAIProvider implements AIProvider {
                     }
                 `;
 
-                const evalResponse = await this.client.chat.completions.create({
+                const evalResponse = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
@@ -341,7 +350,7 @@ export class OpenAIAIProvider implements AIProvider {
         `;
 
         try {
-            const response = await this.client.chat.completions.create({
+            const response = await this.getClient().chat.completions.create({
                 model: DEFAULT_VISION_MODEL, // Groq'un vision-capable modeli
                 messages: [
                     { role: "system", content: systemPrompt },
@@ -417,7 +426,7 @@ export class OpenAIAIProvider implements AIProvider {
 
             try {
                 // 1. Generator AI
-                const response = await this.client.chat.completions.create({
+                const response = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
@@ -451,7 +460,7 @@ export class OpenAIAIProvider implements AIProvider {
                     }
                 `;
 
-                const evalResponse = await this.client.chat.completions.create({
+                const evalResponse = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
@@ -536,7 +545,7 @@ export class OpenAIAIProvider implements AIProvider {
 
             try {
                 // 1. Generator AI
-                const response = await this.client.chat.completions.create({
+                const response = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: systemPrompt },
@@ -567,7 +576,7 @@ export class OpenAIAIProvider implements AIProvider {
                     }
                 `;
 
-                const evalResponse = await this.client.chat.completions.create({
+                const evalResponse = await this.getClient().chat.completions.create({
                     model: DEFAULT_AI_MODEL,
                     messages: [
                         { role: "system", content: evaluatorPrompt },
@@ -619,7 +628,7 @@ export class OpenAIAIProvider implements AIProvider {
         `;
 
         try {
-            const response = await this.client.chat.completions.create({
+            const response = await this.getClient().chat.completions.create({
                 model: DEFAULT_AI_MODEL,
                 messages: [
                     { role: "system", content: systemPrompt },
