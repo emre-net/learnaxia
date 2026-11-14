@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
 import { AIError } from "@/domains/ai/ai.interface";
 import { NextResponse } from "next/server";
@@ -11,12 +12,20 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
         }
 
-        const userId = session.user.id;
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         // 0. Rate Limiting
         const limitDetail = await checkRateLimit({
@@ -49,7 +58,7 @@ export async function POST(req: Request) {
         // Process Request
         let result;
         try {
-            const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+            const user = await prisma.user.findUnique({ where: { id: userId } });
             const language = user?.language || "tr";
 
             result = await AIService.solvePhoto(buffer, file.type, language);

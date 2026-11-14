@@ -56,7 +56,8 @@ function RankDisplay({ rank }: { rank: number }) {
 }
 
 function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
-    const tier = entry.tier ?? DEFAULT_TIER;
+    const tier = { ...DEFAULT_TIER, ...(entry.tier || {}) };
+    const tierColor = tier.color || DEFAULT_TIER.color;
     const [imgFailed, setImgFailed] = useState(false);
 
     return (
@@ -68,7 +69,7 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
                     : "hover:bg-white/[0.03]"
                 }
             `}
-            style={isMe ? { borderColor: `${tier.color}30` } : {}}
+            style={isMe ? { borderColor: `${tierColor}30` } : {}}
         >
             {/* Sıra */}
             <div className="w-8 flex justify-center flex-shrink-0">
@@ -78,7 +79,7 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
             {/* Avatar */}
             <div
                 className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border bg-white/5 flex items-center justify-center text-base"
-                style={{ borderColor: `${tier.color}40` }}
+                style={{ borderColor: `${tierColor}40` }}
             >
                 {entry.image && !imgFailed ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -89,7 +90,7 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
                         onError={() => setImgFailed(true)}
                     />
                 ) : (
-                    <span>{tier.emoji}</span>
+                    <span>{tier.emoji || "🥉"}</span>
                 )}
             </div>
 
@@ -112,12 +113,12 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
             <div
                 className="hidden sm:flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border flex-shrink-0"
                 style={{
-                    color: tier.color,
-                    borderColor: `${tier.color}30`,
-                    background: `${tier.color}10`,
+                    color: tierColor,
+                    borderColor: `${tierColor}30`,
+                    background: `${tierColor}10`,
                 }}
             >
-                {tier.emoji} {tier.label}
+                {tier.emoji || "🥉"} {tier.label || "Bronz"}
             </div>
 
             {/* Momentum */}
@@ -178,7 +179,7 @@ export default function LeaderboardPage() {
         };
     }, [period, tierFilter, reloadKey]);
 
-    const myEntryInList = data?.entries?.find(e => e.isCurrentUser);
+    const myEntryInList = data?.entries?.find(e => e?.isCurrentUser);
     const myEntry = myEntryInList ?? data?.myEntry;
 
     return (

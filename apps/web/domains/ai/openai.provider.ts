@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import crypto from "crypto";
 import { AIProvider, AIResponseItem, VisionResult, AIError, SyllabusItem } from "./ai.interface";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
@@ -73,6 +74,16 @@ export class OpenAIAIProvider implements AIProvider {
                     { "type": "TYPE", "content": { ... }, "sourceContext": "optional short quote/concept source" }
                 ]
             }
+
+            STRICT SCHEMA PER QUESTION TYPE:
+            1. For FLASHCARD:
+               { "type": "FLASHCARD", "content": { "front": "Question / Concept", "back": "Clear, comprehensive explanation / Answer" } }
+            2. For MC (Multiple Choice):
+               { "type": "MC", "content": { "question": "Question stem", "options": ["Option A", "Option B", "Option C", "Option D"], "answer": "Exact text of the correct option", "explanation": "Why this answer is correct" } }
+            3. For TRUE_FALSE:
+               { "type": "TRUE_FALSE", "content": { "statement": "Declarative assertion sentence", "answer": "True" or "False", "explanation": "Brief reasoning" } }
+            4. For GAP (Gap fill):
+               { "type": "GAP", "content": { "text": "Sentence with {{missing_word}} in double curly brackets", "answers": ["missing_word"] } }
         `;
 
         let currentItems: AIResponseItem[] = [];
@@ -122,7 +133,79 @@ export class OpenAIAIProvider implements AIProvider {
                     throw parseError; // Caught by outer catch block
                 }
 
-                currentItems = parsed.items as AIResponseItem[];
+                currentItems = (parsed.items || []).map((it: any) => {
+                    const rawType = String(it.type || types[0] || 'FLASHCARD').toUpperCase();
+                    const itemType = rawType === 'TF' ? 'TRUE_FALSE' : rawType;
+                    let content: any = it.content && typeof it.content === 'object' ? { ...it.content } : { ...it };
+                    delete content.type;
+                    delete content.sourceContext;
+                    delete content.id;
+
+                    if (itemType === 'FLASHCARD') {
+                        content = {
+                            front: String(content.front || content.question || content.prompt || '').trim(),
+                            back: String(content.back || content.answer || content.explanation || '').trim()
+                        };
+                    } else if (itemType === 'MC') {
+                        const question = String(content.question || content.prompt || content.front || '').trim();
+                        let options = Array.isArray(content.options) ? content.options.map((o: any) => String(o).trim()) : (Array.isArray(content.choices) ? content.choices.map((c: any) => String(c).trim()) : []);
+                        while (options.length < 4) {
+                            options.push(`Seçenek ${options.length + 1}`);
+                        }
+                        options = options.slice(0, 4);
+                        let answer = String(content.answer || content.correctAnswer || options[0]).trim();
+                        if (!options.includes(answer)) {
+                            answer = options[0];
+                        }
+                        content = {
+                            question,
+                            options,
+                            answer,
+                            explanation: content.explanation ? String(content.explanation).trim() : undefined
+                        };
+                    } else if (itemType === 'TRUE_FALSE') {
+                        const statement = String(content.statement || content.question || content.prompt || '').trim();
+                        let answer = "True";
+                        if (content.answer !== undefined) {
+                            answer = String(content.answer).toLowerCase() === 'true' ? "True" : "False";
+                        } else if (content.correctAnswer !== undefined) {
+                            answer = content.correctAnswer === true || String(content.correctAnswer).toLowerCase() === 'true' ? "True" : "False";
+                        }
+                        content = {
+                            statement,
+                            answer,
+                            explanation: content.explanation ? String(content.explanation).trim() : undefined
+                        };
+                    } else if (itemType === 'GAP') {
+                        let text = String(content.text || content.sentence || content.question || '').trim();
+                        let answers = Array.isArray(content.answers) ? content.answers.map((a: any) => String(a).trim()) : [];
+                        if (answers.length === 0) {
+                            const gapRegex = /\{\{([^}]+)\}\}/g;
+                            let match = gapRegex.exec(text);
+                            while (match !== null) {
+                                answers.push(match[1].trim());
+                                match = gapRegex.exec(text);
+                            }
+                        }
+                        if (answers.length === 0 && (content.answer || content.correctAnswer)) {
+                            const ans = String(content.answer || content.correctAnswer).trim();
+                            answers = [ans];
+                            if (!text.includes('{{') && text.includes(ans)) {
+                                text = text.replace(ans, `{{${ans}}}`);
+                            }
+                        }
+                        content = {
+                            text,
+                            answers
+                        };
+                    }
+
+                    return {
+                        type: itemType,
+                        content,
+                        sourceContext: it.sourceContext || undefined
+                    } as AIResponseItem;
+                });
 
                 // If this is the last attempt, return the items immediately to avoid a redundant check
                 if (attempt === MAX_RETRIES) {

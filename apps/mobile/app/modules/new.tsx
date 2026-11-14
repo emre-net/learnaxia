@@ -99,6 +99,71 @@ export default function NewModuleScreen() {
     const [subCategoryModalVisible, setSubCategoryModalVisible] = useState(false);
 
     const availableSubCategories = category && CATEGORIES[category] ? CATEGORIES[category] : [];
+    const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+    const handleAiGenerate = async () => {
+        const topicPrompt = title.trim();
+        if (!topicPrompt || topicPrompt.length < 3) {
+            Alert.alert(
+                'Konu Başlığı Gerekli',
+                'Yapay zekanın soru üretebilmesi için lütfen yukarıdaki "Modül Başlığı" alanına konuyu yazın (örn: Mitoz Bölünme Evreleri).'
+            );
+            return;
+        }
+
+        setIsAiGenerating(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        try {
+            const res = await api.post('/ai/generate', {
+                topic: topicPrompt,
+                types: [moduleType],
+                count: 5
+            });
+
+            if (res.data?.items && Array.isArray(res.data.items) && res.data.items.length > 0) {
+                const newItems: NewItem[] = res.data.items.map((it: any) => {
+                    const content = it.content || it;
+                    const def = createDefaultItem();
+                    if (moduleType === 'FLASHCARD') {
+                        def.front = content.front || content.question || '';
+                        def.back = content.back || content.answer || '';
+                    } else if (moduleType === 'MC') {
+                        def.mcQuestion = content.question || '';
+                        def.mcOptions = Array.isArray(content.options) ? content.options.slice(0, 4) : ['', '', '', ''];
+                        while (def.mcOptions.length < 4) def.mcOptions.push('');
+                        def.mcCorrectIndex = def.mcOptions.indexOf(content.answer) !== -1 ? def.mcOptions.indexOf(content.answer) : 0;
+                        def.mcExplanation = content.explanation || '';
+                    } else if (moduleType === 'TRUE_FALSE') {
+                        def.tfStatement = content.statement || content.question || '';
+                        def.tfCorrect = String(content.answer).toLowerCase() === 'true';
+                        def.tfExplanation = content.explanation || '';
+                    } else if (moduleType === 'GAP') {
+                        def.gapText = content.text || '';
+                        def.gapExplanation = content.explanation || '';
+                    }
+                    return def;
+                });
+
+                setItems(prev => {
+                    const isFirstEmpty = prev.length === 1 && !prev[0].front && !prev[0].mcQuestion && !prev[0].tfStatement && !prev[0].gapText;
+                    return isFirstEmpty ? newItems : [...prev, ...newItems];
+                });
+
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                Alert.alert('Tamamlandı', `${newItems.length} adet soru yapay zeka tarafından başarıyla üretildi ve eklendi.`);
+            } else {
+                throw new Error('İçerik üretilemedi.');
+            }
+        } catch (error: any) {
+            console.error('[NewModule] AI generation error:', error);
+            const msg = error.response?.data?.error || 'Yapay zeka ile içerik üretilirken bir hata oluştu.';
+            Alert.alert('Üretim Hatası', msg);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        } finally {
+            setIsAiGenerating(false);
+        }
+    };
 
     const handleAddItem = () => {
         setItems(prev => [...prev, createDefaultItem()]);
@@ -665,18 +730,40 @@ export default function NewModuleScreen() {
                         </View>
                     ))}
 
-                    {/* Tekil ve Net Ekleme Butonu */}
-                    <TouchableOpacity
-                        style={styles.addSingleBtn}
-                        onPress={handleAddItem}
-                        disabled={saving}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="add-circle-outline" size={20} color="#6366F1" />
-                        <Text style={styles.addSingleBtnText}>
-                            {moduleType === 'FLASHCARD' ? 'Yeni Kart Ekle' : 'Yeni Soru Ekle'}
-                        </Text>
-                    </TouchableOpacity>
+                    {/* Kart Ekleme & Yapay Zeka ile Doldurma Butonları */}
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+                        <TouchableOpacity
+                            style={[styles.addSingleBtn, { flex: 1, marginTop: 0 }]}
+                            onPress={handleAddItem}
+                            disabled={saving || isAiGenerating}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="add-circle-outline" size={20} color="#6366F1" />
+                            <Text style={styles.addSingleBtnText}>
+                                {moduleType === 'FLASHCARD' ? 'Yeni Kart' : 'Yeni Soru'}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.addSingleBtn,
+                                {
+                                    flex: 1,
+                                    marginTop: 0,
+                                    borderColor: '#A855F7',
+                                    backgroundColor: 'rgba(168, 85, 247, 0.08)'
+                                }
+                            ]}
+                            onPress={handleAiGenerate}
+                            disabled={saving || isAiGenerating}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="sparkles" size={18} color="#C084FC" />
+                            <Text style={[styles.addSingleBtnText, { color: '#C084FC' }]}>
+                                {isAiGenerating ? 'Üretiliyor...' : 'Yapay Zeka (AI)'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
                 </ScrollView>
             </KeyboardAvoidingView>

@@ -1,19 +1,29 @@
 export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(req: Request, props: { params: Promise<{ journeyId: string }> }) {
     try {
         const params = await props.params;
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const journeyId = params.journeyId;
-        const userId = session.user.id;
 
         // Verify access
         const isOwner = await prisma.userJourneyLibrary.findFirst({

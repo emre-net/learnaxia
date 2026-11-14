@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import prisma from "@/lib/prisma";
 import { NoteService } from "@/domains/note/note.service";
 
@@ -9,11 +10,21 @@ import { NoteService } from "@/domains/note/note.service";
  */
 export async function GET(req: NextRequest) {
     try {
-        const session = await auth();
-        if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
         const history = await prisma.solvedQuestion.findMany({
-            where: { userId: session.user.id },
+            where: { userId },
             orderBy: { createdAt: "desc" },
             include: {
                 notes: true
@@ -29,8 +40,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const session = await auth();
-        if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
         const body = await req.json();
         const { questionText, solution, imageUrl, note } = body;
@@ -42,7 +63,7 @@ export async function POST(req: NextRequest) {
         // 1. Save the solved question
         const savedQuestion = await prisma.solvedQuestion.create({
             data: {
-                userId: session.user.id,
+                userId,
                 questionText,
                 solution,
                 imageUrl: imageUrl || "",
@@ -51,7 +72,7 @@ export async function POST(req: NextRequest) {
 
         // 2. If a note is provided, save it using the NoteService
         if (note && note.trim()) {
-            await NoteService.create(session.user.id, {
+            await NoteService.create(userId, {
                 content: note,
                 solvedQuestionId: savedQuestion.id,
                 title: "AI Çözüm Notu"

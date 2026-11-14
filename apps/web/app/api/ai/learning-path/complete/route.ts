@@ -1,11 +1,22 @@
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        let userId: string | undefined;
+        const mobileUser = await getMobileUser(req);
+        if (mobileUser?.id) {
+            userId = mobileUser.id;
+        } else {
+            const session = await auth();
+            if (session?.user?.id) {
+                userId = session.user.id;
+            }
+        }
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -15,7 +26,7 @@ export async function POST(req: Request) {
         // Verify ownership
         const userLibrary = await prisma.userJourneyLibrary.findFirst({
             where: {
-                userId: session.user.id,
+                userId,
                 journeyId: journeyId,
             }
         });

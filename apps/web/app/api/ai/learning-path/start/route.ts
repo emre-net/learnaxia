@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import crypto from "crypto";
 import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { NextResponse } from "next/server";

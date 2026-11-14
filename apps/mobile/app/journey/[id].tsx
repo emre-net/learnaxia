@@ -11,16 +11,32 @@ import { useLanguage } from '@/hooks/use-language';
 import api from '@/lib/api';
 
 interface JourneySlide {
+    id?: string;
     title: string;
     content: string;
+    order?: number;
     peekingQuestion?: {
         question: string;
+        options?: string[];
+        answer?: string;
+        explanation?: string;
     } | null;
+}
+
+interface SyllabusItem {
+    order: number;
+    title: string;
+    overview?: string;
+    estimatedMinutes?: number;
 }
 
 interface Journey {
     id: string;
     title: string;
+    topic?: string;
+    depth?: string;
+    status?: string;
+    syllabus?: SyllabusItem[];
     slides: JourneySlide[];
 }
 
@@ -56,6 +72,7 @@ export default function JourneyPlayerScreen() {
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [generatingSlide, setGeneratingSlide] = useState(false);
 
     useEffect(() => {
         const fetchJourney = async () => {
@@ -71,6 +88,54 @@ export default function JourneyPlayerScreen() {
         };
         if (id) fetchJourney();
     }, [id]);
+
+    // Live AI Slide Orchestrator for Mobile
+    useEffect(() => {
+        let isMounted = true;
+        if (!journey || !journey.syllabus || journey.syllabus.length === 0) return;
+
+        const currentSlidesCount = journey.slides?.length || 0;
+        const totalExpected = journey.syllabus.length;
+
+        if (currentSlidesCount >= totalExpected) {
+            if (journey.status === 'GENERATING') {
+                api.post('/ai/learning-path/complete', { journeyId: journey.id }).catch(() => {});
+            }
+            return;
+        }
+
+        const nextSyllabusItem = journey.syllabus[currentSlidesCount];
+        if (!nextSyllabusItem) return;
+
+        const generateNext = async () => {
+            setGeneratingSlide(true);
+            try {
+                const res = await api.post('/ai/learning-path/generate-slide', {
+                    journeyId: journey.id,
+                    topic: journey.topic || journey.title,
+                    depth: journey.depth || 'standard',
+                    language: language || 'tr',
+                    item: nextSyllabusItem
+                });
+
+                if (res.status === 200) {
+                    const statusRes = await api.get(`/ai/learning-path/${journey.id}/status`);
+                    if (isMounted && statusRes.data?.journey) {
+                        setJourney(statusRes.data.journey);
+                    }
+                }
+            } catch (err) {
+                console.warn('[JourneyPlayer] Slide generation retry in 4s:', err);
+                await new Promise(resolve => setTimeout(() => resolve(null), 4000));
+            } finally {
+                if (isMounted) setGeneratingSlide(false);
+            }
+        };
+
+        generateNext();
+
+        return () => { isMounted = false; };
+    }, [journey?.id, journey?.slides?.length, journey?.status, language]);
 
     const nextSlide = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -99,6 +164,17 @@ export default function JourneyPlayerScreen() {
         return (
             <Screen style={styles.centered}>
                 <BrandLoader size="lg" label={t('common.loading', language)} />
+            </Screen>
+        );
+    }
+
+    if (!fetchError && journey && (!journey.slides || journey.slides.length === 0) && (journey.syllabus?.length || 0) > 0) {
+        return (
+            <Screen style={styles.centered}>
+                <BrandLoader size="lg" label="Yapay zeka rotanızı hazırlıyor..." />
+                <Text style={[styles.errorDesc, { marginTop: 12 }]}>
+                    İlk adım oluşturuluyor, lütfen bekleyin...
+                </Text>
             </Screen>
         );
     }
