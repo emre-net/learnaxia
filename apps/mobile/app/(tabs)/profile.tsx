@@ -17,7 +17,7 @@ export default function ProfileScreen() {
     const { user, logout } = useAuth();
     const { language, setLanguage } = useLanguage();
     const [profileData, setProfileData] = useState<{
-        stats?: { modules: number; collections: number };
+        stats?: { modules: number; collections: number; notes?: number };
     } | null>(null);
     const [analyticsData, setAnalyticsData] = useState<{
         totalStudyMinutes?: number;
@@ -172,6 +172,11 @@ export default function ProfileScreen() {
             label: t('profile.stats.collections', language),
             value: profileData?.stats?.collections || 0,
             icon: 'folder-outline' as const,
+        },
+        {
+            label: t('profile.stats.notes', language),
+            value: profileData?.stats?.notes || 0,
+            icon: 'book-outline' as const,
         },
     ];
 
@@ -328,13 +333,21 @@ export default function ProfileScreen() {
                 {/* Stats Grid */}
                 <View style={styles.statsGrid}>
                     {statItems.map((stat, i) => (
-                        <View key={i} style={styles.statCard}>
+                        <TouchableOpacity
+                            key={i}
+                            activeOpacity={0.7}
+                            style={styles.statCard}
+                            onPress={() => {
+                                Haptics.selectionAsync();
+                                router.push('/(tabs)/library' as any);
+                            }}
+                        >
                             <View style={styles.statIconCircle}>
                                 <Ionicons name={stat.icon} size={20} color="#6366F1" />
                             </View>
                             <Text style={styles.statValue}>{stat.value}</Text>
                             <Text style={styles.statLabel}>{stat.label}</Text>
-                        </View>
+                        </TouchableOpacity>
                     ))}
                 </View>
 

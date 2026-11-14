@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 const updateNoteSchema = z.object({
     title: z.string().optional(),
     content: z.string().optional(),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
 });
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {

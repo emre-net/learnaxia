@@ -23,6 +23,7 @@ export async function GET(req: Request) {
                     select: {
                         createdModules: true,
                         collections: true,
+                        notes: true,
                     }
                 }
             }
@@ -35,6 +36,7 @@ export async function GET(req: Request) {
         const stats = {
             modules: userData._count.createdModules,
             collections: userData._count.collections,
+            notes: userData._count.notes,
         };
 
         return NextResponse.json({ ...userData, stats });

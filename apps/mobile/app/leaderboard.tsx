@@ -37,7 +37,8 @@ const PERIODS: { key: Period; label: string }[] = [
     { key: 'alltime', label: 'Genel' },
 ];
 
-function formatMomentum(n: number): string {
+function formatMomentum(n?: number): string {
+    if (n == null || isNaN(n)) return '0';
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
     return n.toLocaleString('tr-TR');
@@ -194,7 +195,7 @@ export default function LeaderboardScreen() {
             )}
 
             {/* Pinned My Rank Card (if not in visible top entries) */}
-            {data?.myEntry && (
+            {!data?.entries?.some(e => e.isCurrentUser) && !!data?.myEntry && (
                 <View style={styles.pinnedBar}>
                     <View style={styles.pinnedContent}>
                         <View style={styles.rankContainer}>

@@ -267,7 +267,7 @@ export default function CreateScreen() {
                         </View>
                         <View style={styles.listTextContainer}>
                             <Text style={styles.listTitle}>Manuel Modül Oluştur</Text>
-                            <Text style={styles.listDesc}>Kendi flashcard'larını yaz</Text>
+                            <Text style={styles.listDesc}>Kart, test, D/Y veya boşluk doldurma</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#475569" />
                     </TouchableOpacity>

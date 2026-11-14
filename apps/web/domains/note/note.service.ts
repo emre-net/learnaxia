@@ -6,11 +6,13 @@ export type CreateNoteDto = {
     solvedQuestionId?: string;
     title?: string;
     content: string;
+    visibility?: "PUBLIC" | "PRIVATE";
 };
 
 export type UpdateNoteDto = {
     title?: string;
     content?: string;
+    visibility?: "PUBLIC" | "PRIVATE";
 };
 
 export class NoteService {
@@ -50,6 +52,7 @@ export class NoteService {
                 solvedQuestionId: dto.solvedQuestionId,
                 title: dto.title,
                 content: dto.content,
+                visibility: dto.visibility ?? "PRIVATE",
             }
         });
     }
@@ -122,6 +125,7 @@ export class NoteService {
             data: {
                 ...(dto.title !== undefined && { title: dto.title }),
                 ...(dto.content !== undefined && { content: dto.content }),
+                ...(dto.visibility !== undefined && { visibility: dto.visibility }),
             }
         });
     }

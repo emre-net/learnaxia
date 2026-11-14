@@ -19,6 +19,7 @@ import { AnalyticsSection } from "./analytics-section";
 
 interface SettingsContentProps {
     user: {
+        name?: string | null;
         email?: string | null;
         image?: string | null;
         handle?: string | null;

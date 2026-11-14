@@ -6,6 +6,7 @@ import { z } from "zod";
 const updateNoteSchema = z.object({
     title: z.string().optional(),
     content: z.string().min(1, "Note content cannot be empty").optional(),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

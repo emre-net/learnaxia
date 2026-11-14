@@ -233,14 +233,39 @@ export default function LibraryScreen() {
 
             {(() => {
                 if (!item.content) return null;
+                let hasDrawing = false;
                 try {
                     const parsed = JSON.parse(item.content);
+                    if (parsed?.drawing) hasDrawing = true;
                     if (Array.isArray(parsed)) {
-                        const txt = parsed.map((b: any) => Array.isArray(b.content) ? b.content.map((c: any) => c.text || '').join('') : '').filter(Boolean).join(' ');
-                        return txt ? <Text style={styles.cardDescription} numberOfLines={2}>{txt}</Text> : null;
+                        const txt = parsed.map((b: any) => {
+                            if (b.type === 'drawing') hasDrawing = true;
+                            return Array.isArray(b.content) ? b.content.map((c: any) => c.text || '').join('') : '';
+                        }).filter(Boolean).join(' ');
+                        return (
+                            <>
+                                {hasDrawing && (
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                                        <Ionicons name="create-outline" size={13} color="#F59E0B" />
+                                        <Text style={{ fontSize: 11, color: '#F59E0B', fontWeight: '600' }}>El Yazısı / Çizim</Text>
+                                    </View>
+                                )}
+                                {txt ? <Text style={styles.cardDescription} numberOfLines={2}>{txt}</Text> : null}
+                            </>
+                        );
                     }
                     if (parsed && typeof parsed === 'object') {
-                        return parsed.text ? <Text style={styles.cardDescription} numberOfLines={2}>{parsed.text}</Text> : null;
+                        return (
+                            <>
+                                {hasDrawing && (
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                                        <Ionicons name="create-outline" size={13} color="#F59E0B" />
+                                        <Text style={{ fontSize: 11, color: '#F59E0B', fontWeight: '600' }}>El Yazısı / Çizim</Text>
+                                    </View>
+                                )}
+                                {parsed.text ? <Text style={styles.cardDescription} numberOfLines={2}>{parsed.text}</Text> : null}
+                            </>
+                        );
                     }
                 } catch { }
                 const clean = item.content.replace(/<[^>]*>?/gm, '').trim();

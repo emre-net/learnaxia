@@ -19,12 +19,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
-      // Kullanıcı profil fotoğrafları için genel HTTPS — avatar URL'leri DB'den geliyor.
-      // Wildcard yerine spesifik domain eklemek daha güvenli olduğundan
-      // ileride kullanıcılar kendi CDN URL'lerini profile photo olarak eklemeye başlarsa
-      // buraya eklenmeli. Şu an sadece bilinen provider'lar destekleniyor.
       { protocol: 'https', hostname: 'imagedelivery.net' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
+      // Wildcard HTTPS pattern to ensure arbitrary CDN/user avatars never crash Next.js
+      { protocol: 'https', hostname: '**' },
     ],
   },
 

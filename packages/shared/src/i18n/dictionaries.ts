@@ -413,7 +413,8 @@ const en = {
         stats: {
             studyTime: "Study Time",
             modules: "Modules",
-            collections: "Collections"
+            collections: "Collections",
+            notes: "Notes"
         },
         settings: {
             title: "Account Settings",
@@ -1002,7 +1003,8 @@ const tr = {
         stats: {
             studyTime: "Çalışma Süresi",
             modules: "Modüller",
-            collections: "Koleksiyonlar"
+            collections: "Koleksiyonlar",
+            notes: "Notlar"
         },
         settings: {
             title: "Hesap Ayarları",

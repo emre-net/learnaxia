@@ -9,6 +9,7 @@ const createNoteSchema = z.object({
     moduleId: z.string().optional(),
     itemId: z.string().optional(),
     solvedQuestionId: z.string().optional(),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
 });
 
 export async function GET(req: Request) {

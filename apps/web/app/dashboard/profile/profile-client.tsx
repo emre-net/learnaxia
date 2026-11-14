@@ -214,9 +214,29 @@ export function ProfileClient() {
                                     <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">
                                         <CardHeader className="p-4 pb-2">
                                             <div className="flex items-center justify-between">
-                                                <Badge variant="secondary" className="text-[10px]">
-                                                    {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
-                                                </Badge>
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <Badge variant="secondary" className="text-[10px]">
+                                                        {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
+                                                    </Badge>
+                                                    {note.visibility === "PUBLIC" && (
+                                                        <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                                                            Herkese Açık
+                                                        </Badge>
+                                                    )}
+                                                    {(() => {
+                                                        try {
+                                                            const parsed = JSON.parse(note.content);
+                                                            if (parsed?.drawing || (Array.isArray(parsed) && parsed.some((b: any) => b.type === "drawing"))) {
+                                                                return (
+                                                                    <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">
+                                                                        ✏️ Çizim
+                                                                    </Badge>
+                                                                );
+                                                            }
+                                                        } catch {}
+                                                        return null;
+                                                    })()}
+                                                </div>
                                                 <span className="text-[10px] text-muted-foreground">
                                                     {new Date(note.updatedAt).toLocaleDateString()}
                                                 </span>

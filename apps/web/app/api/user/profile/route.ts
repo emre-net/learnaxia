@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const profileSchema = z.object({
+    name: z.string().min(1, "Ad Soyad en az 1 karakter olmalıdır.").max(60, "Ad Soyad en fazla 60 karakter olabilir.").optional(),
     handle: z.string()
         .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
         .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
@@ -39,6 +40,7 @@ export async function GET(req: Request) {
                     select: {
                         createdModules: true,
                         collections: true,
+                        notes: true,
                     }
                 }
             }
@@ -53,6 +55,7 @@ export async function GET(req: Request) {
         const stats = {
             modules: user._count.createdModules,
             collections: user._count.collections,
+            notes: user._count.notes,
         };
 
         return NextResponse.json({ ...user, stats });
@@ -72,7 +75,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { handle, image, language } = profileSchema.parse(body);
+        const { name, handle, image, language } = profileSchema.parse(body);
 
         // Check handle uniqueness if provided
         if (handle) {
@@ -88,6 +91,7 @@ export async function PATCH(req: Request) {
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
+                ...(name !== undefined && { name }),
                 ...(handle && { handle }),
                 ...(image !== undefined && { image }),
                 ...(language && { language }),

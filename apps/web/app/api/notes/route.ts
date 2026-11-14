@@ -10,6 +10,7 @@ const createNoteSchema = z.object({
     solvedQuestionId: z.string().optional(),
     title: z.string().optional(),
     content: z.string().min(1, "Note content cannot be empty"),
+    visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
 });
 
 export async function GET(req: NextRequest) {

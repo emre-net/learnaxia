@@ -10,6 +10,7 @@ import { useTranslation } from "@/lib/i18n/i18n";
 
 interface ProfileHeaderProps {
     user: {
+        name?: string | null;
         handle?: string | null;
         image?: string | null;
     };
@@ -55,14 +56,14 @@ export function ProfileHeader({ user, analyticsData }: ProfileHeaderProps) {
                     <Avatar className="h-32 w-32 border-4 border-background shadow-xl rounded-2xl">
                         <AvatarImage src={user.image || ""} alt={user.handle || ""} className="object-cover" />
                         <AvatarFallback className="text-4xl bg-muted rounded-2xl">
-                            {user.handle?.charAt(0).toUpperCase() || "U"}
+                            {(user.name || user.handle || "U").charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                 </div>
 
                 <div className="mb-4 flex-1 md:flex-none">
                     <div className="flex items-center gap-3 mb-1">
-                        <h2 className="text-3xl font-bold tracking-tight text-foreground">{user.handle}</h2>
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">{user.name || user.handle || "Kullanıcı"}</h2>
                         <EditProfileDialog user={user} trigger={
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                                 <Pencil className="h-4 w-4" />

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 interface EditProfileDialogProps {
     user: {
+        name?: string | null;
         handle?: string | null;
         image?: string | null;
     };
@@ -20,6 +21,7 @@ interface EditProfileDialogProps {
 
 export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
     const [open, setOpen] = useState(false);
+    const [name, setName] = useState(user.name || "");
     const [handle, setHandle] = useState(user.handle || "");
     const [image, setImage] = useState(user.image || "");
     const [isLoading, setIsLoading] = useState(false);
@@ -28,9 +30,10 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
 
     // Sync state with prop when user data loads
     useEffect(() => {
+        if (user.name) setName(user.name);
         if (user.handle) setHandle(user.handle);
         if (user.image) setImage(user.image);
-    }, [user.handle, user.image]);
+    }, [user.name, user.handle, user.image]);
 
     const handleSave = async () => {
         setIsLoading(true);
@@ -38,7 +41,7 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
             const res = await fetch("/api/user/profile", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ handle, image }),
+                body: JSON.stringify({ name, handle, image }),
             });
 
             if (!res.ok) {
@@ -74,6 +77,16 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Ad Soyad</Label>
+                        <Input
+                            id="name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Adınız ve Soyadınız"
+                        />
+                    </div>
                     <div className="grid gap-2">
                         <Label htmlFor="handle">Kullanıcı Adı (Handle)</Label>
                         <div className="relative">
