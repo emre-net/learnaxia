@@ -140,6 +140,7 @@ const en = {
         startLearning: "Start Learning",
         manualTitle: "Manual Module Creation",
         editTitle: "Edit Module",
+        editDescription: "Update module title, description, and questions.",
         newTitle: "Create New Module",
         next: "Next",
         step1Label: "Basic Info",
@@ -249,12 +250,14 @@ const en = {
             title: "Note Workshop",
             description: "Take notes manually and save them to your system.",
             cardTitle: "New Note",
-            cardDesc: "Start typing your notes here. Rich text editor will be added soon.",
-            placeholder: "Write your notes here...",
+            cardDesc: "Start typing your notes here.",
+            placeholder: "Start writing your thoughts here...",
             titlePlaceholder: "Note title...",
             errorEmpty: "Note content cannot be empty.",
             untitled: "Untitled Note",
-            saveNote: "Save Note"
+            saveNote: "Save Note",
+            successMessage: "Your note has been saved successfully.",
+            saveFailed: "An error occurred while saving the note."
         }
     },
     sidebar: {
@@ -560,6 +563,7 @@ const tr = {
         startLearning: "Öğrenmeye Başla",
         manualTitle: "Atölye: Manuel Modül",
         editTitle: "Modülü Düzenle",
+        editDescription: "Modül başlığını, açıklamasını ve sorularını güncelleyin.",
         newTitle: "Yeni Modül Üret",
         next: "İleri",
         step1Label: "Temel Bilgiler",
@@ -666,15 +670,17 @@ const tr = {
             step4: "Üretilen notları düzenleyip kütüphanenize kaydedebilirsiniz."
         },
         manualNote: {
-            title: "Not Atölyesi",
-            description: "Elle not alın ve sisteminize kaydedin.",
+            title: "Yeni Serbest Not",
+            description: "Fikirlerinizi, özetlerinizi veya çalışma notlarınızı kaleme alın.",
             cardTitle: "Yeni Not",
-            cardDesc: "Buraya notlarınızı yazmaya başlayın. Zengin metin editörü yakında eklenecek.",
-            placeholder: "Notlarınızı buraya yazın...",
+            cardDesc: "Buraya notlarınızı yazmaya başlayın.",
+            placeholder: "Düşüncelerinizi buraya yazmaya başlayın...",
             titlePlaceholder: "Not başlığı...",
             errorEmpty: "Not içeriği boş olamaz.",
             untitled: "İsimsiz Not",
-            saveNote: "Notu Kaydet"
+            saveNote: "Notu Kaydet",
+            successMessage: "Notunuz başarıyla kaydedildi.",
+            saveFailed: "Not kaydedilirken bir hata oluştu."
         }
     },
     sidebar: {

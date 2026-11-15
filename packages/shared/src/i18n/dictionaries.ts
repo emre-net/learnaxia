@@ -246,6 +246,7 @@ const en = {
         syllabusCondense: "Make it Shorter",
         syllabusTechnical: "Make it More Technical",
         startLearning: "Start Learning",
+        editDescription: "Update module title, description, and questions.",
         manualTitle: "Manual Module Creation",
         editTitle: "Edit Module",
         newTitle: "Create New Module",
@@ -361,9 +362,14 @@ const en = {
             title: "Note Workshop",
             description: "Take notes manually and save them to your system.",
             cardTitle: "New Note",
-            cardDesc: "Start typing your notes here. Rich text editor will be added soon.",
-            placeholder: "Write your notes here...",
-            saveNote: "Save Note"
+            cardDesc: "Start typing your notes here.",
+            titlePlaceholder: "Note title...",
+            placeholder: "Start writing your thoughts here...",
+            untitled: "Untitled Note",
+            saveNote: "Save Note",
+            errorEmpty: "Note content cannot be empty.",
+            successMessage: "Your note has been saved successfully.",
+            saveFailed: "An error occurred while saving the note."
         }
     },
     sidebar: {
@@ -457,6 +463,9 @@ const en = {
             statusReady: "Ready / Break",
             settingsTitle: "Timer Settings",
             preset15: "15 Minutes (Short Focus)",
+            preset25: "25 Minutes (Pomodoro)",
+            preset45: "45 Minutes (Intense Study)",
+            preset60: "60 Minutes (Deep Focus)"
         }
     },
     discover: {
@@ -471,6 +480,7 @@ const en = {
         allSubCategories: "All Topics"
     },
     common: {
+        add: "Add",
         cancel: "Cancel",
         exit: "Exit",
         confirmExit: "Are you sure you want to exit?",
@@ -836,6 +846,7 @@ const tr = {
         syllabusCondense: "Daha Kısa Yap",
         syllabusTechnical: "Daha Teknik Yap",
         startLearning: "Öğrenmeye Başla",
+        editDescription: "Modül başlığını, açıklamasını ve sorularını güncelleyin.",
         manualTitle: "Atölye: Manuel Modül",
         editTitle: "Modülü Düzenle",
         newTitle: "Yeni Modül Üret",
@@ -948,12 +959,17 @@ const tr = {
             }
         },
         manualNote: {
-            title: "Not Atölyesi",
-            description: "Elle not alın ve sisteminize kaydedin.",
+            title: "Yeni Serbest Not",
+            description: "Fikirlerinizi, özetlerinizi veya çalışma notlarınızı kaleme alın.",
             cardTitle: "Yeni Not",
-            cardDesc: "Buraya notlarınızı yazmaya başlayın. Zengin metin editörü yakında eklenecek.",
-            placeholder: "Notlarınızı buraya yazın...",
-            saveNote: "Notu Kaydet"
+            cardDesc: "Buraya notlarınızı yazmaya başlayın.",
+            titlePlaceholder: "Not başlığı...",
+            placeholder: "Düşüncelerinizi buraya yazmaya başlayın...",
+            untitled: "İsimsiz Not",
+            saveNote: "Notu Kaydet",
+            errorEmpty: "Not içeriği boş olamaz.",
+            successMessage: "Notunuz başarıyla kaydedildi.",
+            saveFailed: "Not kaydedilirken bir hata oluştu."
         }
     },
     sidebar: {
@@ -1064,6 +1080,7 @@ const tr = {
         allSubCategories: "Tüm Konular"
     },
     common: {
+        add: "Ekle",
         cancel: "Vazgeç",
         exit: "Çıkış Yap",
         confirmExit: "Çıkmak istediğine emin misin?",
