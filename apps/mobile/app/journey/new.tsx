@@ -17,7 +17,7 @@ export default function NewJourneyScreen() {
     const router = useRouter();
     const { language } = useLanguage();
     const [topic, setTopic] = useState('');
-    const [depth, setDepth] = useState<'basic' | 'standard' | 'deep'>('standard');
+    const [depth, setDepth] = useState<'shallow' | 'standard' | 'deep'>('standard');
     const [saving, setSaving] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
@@ -110,7 +110,7 @@ export default function NewJourneyScreen() {
 
                     <Text style={[styles.sectionLabel, { marginTop: 24 }]}>DERİNLİK (ZORLUK SEVİYESİ)</Text>
                     <View style={styles.depthContainer}>
-                        {(['basic', 'standard', 'deep'] as const).map((d) => (
+                        {(['shallow', 'standard', 'deep'] as const).map((d) => (
                             <TouchableOpacity
                                 key={d}
                                 onPress={() => setDepth(d)}
@@ -124,7 +124,7 @@ export default function NewJourneyScreen() {
                                     styles.depthBtnText,
                                     depth === d && styles.depthBtnTextActive
                                 ]}>
-                                    {d === 'basic' ? 'Temel' : d === 'standard' ? 'Standart' : 'Derinlemesine'}
+                                    {d === 'shallow' ? 'Temel' : d === 'standard' ? 'Standart' : 'Derinlemesine'}
                                 </Text>
                             </TouchableOpacity>
                         ))}

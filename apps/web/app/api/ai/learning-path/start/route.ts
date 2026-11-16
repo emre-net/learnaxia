@@ -10,7 +10,7 @@ import { AIService } from "@/domains/ai/ai.service";
 
 const StartJourneySchema = z.object({
     topic: z.string().min(2),
-    depth: z.enum(["shallow", "standard", "deep"]).default("standard"),
+    depth: z.enum(["shallow", "standard", "deep", "basic"]).default("standard").transform(val => val === "basic" ? "shallow" : val),
     syllabus: z.array(z.object({
         order: z.number(),
         title: z.string(),

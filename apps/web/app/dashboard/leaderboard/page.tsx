@@ -81,10 +81,10 @@ function EntryRow({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
                 className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border bg-white/5 flex items-center justify-center text-base"
                 style={{ borderColor: `${tierColor}40` }}
             >
-                {entry.image && !imgFailed ? (
+                {Boolean(entry.image?.trim()) && !imgFailed ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                        src={entry.image}
+                        src={entry.image!}
                         alt={entry.name ?? "Kullanıcı"}
                         className="w-full h-full object-cover"
                         onError={() => setImgFailed(true)}
@@ -252,9 +252,9 @@ export default function LeaderboardPage() {
                     </div>
                 ) : !error && (
                     <div className="space-y-1">
-                        {data?.entries?.filter(Boolean).map(entry => (
+                        {data?.entries?.filter(Boolean).map((entry, idx) => (
                             <EntryRow
-                                key={entry.userId}
+                                key={entry.userId || `entry-${idx}`}
                                 entry={entry}
                                 isMe={entry.isCurrentUser}
                             />

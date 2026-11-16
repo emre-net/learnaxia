@@ -50,6 +50,7 @@ export default function LeaderboardScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState<LeaderboardResponse | null>(null);
+    const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
     const fetchLeaderboard = useCallback(async (selectedPeriod: Period) => {
         try {
@@ -98,8 +99,12 @@ export default function LeaderboardScreen() {
                     {renderRankBadge(item.rank)}
                 </View>
 
-                {item.image ? (
-                    <Image source={{ uri: item.image }} style={[styles.avatar, { borderColor: `${tierColor}50` }]} />
+                {Boolean(item.image) && !failedImages[item.userId] ? (
+                    <Image
+                        source={{ uri: item.image! }}
+                        style={[styles.avatar, { borderColor: `${tierColor}50` }]}
+                        onError={() => setFailedImages(prev => ({ ...prev, [item.userId]: true }))}
+                    />
                 ) : (
                     <View style={[styles.avatarFallback, { borderColor: `${tierColor}50` }]}>
                         <Text style={styles.avatarEmoji}>{item.tier?.emoji || '⚡'}</Text>

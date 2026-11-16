@@ -9,7 +9,7 @@ import { z } from "zod";
 
 const ModifySyllabusSchema = z.object({
     topic: z.string(),
-    depth: z.enum(["shallow", "standard", "comprehensive"]).default("standard"),
+    depth: z.enum(["shallow", "standard", "comprehensive", "deep", "basic"]).default("standard").transform(val => val === "basic" ? "shallow" : val === "deep" ? "comprehensive" : val),
     instruction: z.string(),
     syllabus: z.array(z.any()), // The existing syllabus to modify
     language: z.string().default("tr")

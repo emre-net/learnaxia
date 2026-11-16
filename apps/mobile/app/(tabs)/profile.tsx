@@ -30,6 +30,7 @@ export default function ProfileScreen() {
     } | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [deletingAccount, setDeletingAccount] = useState(false);
+    const [avatarFailed, setAvatarFailed] = useState(false);
 
     const fetchProfile = useCallback(async () => {
         try {
@@ -195,8 +196,12 @@ export default function ProfileScreen() {
                 {/* Profile Hero */}
                 <View style={styles.profileHero}>
                     <View style={styles.heroAvatarRow}>
-                        {user?.image ? (
-                            <Image source={{ uri: user.image }} style={styles.heroAvatarImage} />
+                        {Boolean(user?.image) && !avatarFailed ? (
+                            <Image
+                                source={{ uri: user!.image! }}
+                                style={styles.heroAvatarImage}
+                                onError={() => setAvatarFailed(true)}
+                            />
                         ) : (
                             <View style={styles.heroAvatar}>
                                 <Text style={styles.heroInitials}>{initials}</Text>
