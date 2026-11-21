@@ -9,6 +9,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (email: string, password?: string) => Promise<void>;
     register: (name: string, email: string, password?: string, handle?: string) => Promise<void>;
+    loginWithTokens: (accessToken: string, refreshToken?: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshProfile: () => Promise<void>;
 }
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
     isLoading: true,
     login: async () => { },
     register: async () => { },
+    loginWithTokens: async () => { },
     logout: async () => { },
     refreshProfile: async () => { },
 });
@@ -145,8 +147,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const loginWithTokens = async (accessToken: string, refreshToken?: string) => {
+        try {
+            await setAuthToken(accessToken, refreshToken);
+            const res = await api.get('/mobile/user/profile');
+            if (res.data) {
+                setUser(res.data);
+            }
+            router.replace('/(tabs)');
+        } catch (error) {
+            if (__DEV__) console.error('loginWithTokens error', error);
+            throw error;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout: logoutWithConfirm, refreshProfile }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, loginWithTokens, logout: logoutWithConfirm, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );

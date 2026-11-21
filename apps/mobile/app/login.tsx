@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView, StatusBar, StyleSheet } from 'react-native';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useAuth } from '../context/AuthContext';
 import * as Haptics from 'expo-haptics';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { t, MobileLoginSchema, MobileRegisterSchema } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
+import { GoogleIcon } from '@/components/ui/google-icon';
 
 export default function LoginScreen() {
     const [name, setName] = useState('');
@@ -14,10 +17,79 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [isLogin, setIsLogin] = useState(true);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
-    const { login, register } = useAuth();
+    const { login, register, loginWithTokens } = useAuth();
     const { language: currentLang } = useLanguage();
+
+    useEffect(() => {
+        const handleDeepLink = async (url: string) => {
+            if (url.includes('auth/callback')) {
+                const parsed = Linking.parse(url);
+                const accessToken = parsed.queryParams?.accessToken as string | undefined;
+                const refreshToken = parsed.queryParams?.refreshToken as string | undefined;
+                const error = parsed.queryParams?.error as string | undefined;
+
+                if (error) {
+                    Alert.alert(t('auth.errorTitle', currentLang), 'Google ile giriş başarısız: ' + error);
+                    return;
+                }
+
+                if (accessToken) {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    await loginWithTokens(accessToken, refreshToken);
+                }
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', (event) => {
+            handleDeepLink(event.url);
+        });
+
+        Linking.getInitialURL().then((initialUrl) => {
+            if (initialUrl) handleDeepLink(initialUrl);
+        });
+
+        return () => subscription.remove();
+    }, [loginWithTokens, currentLang]);
+
+    const handleGoogleLogin = async () => {
+        try {
+            setGoogleLoading(true);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+            // Clean up any stale WebBrowser auth session
+            WebBrowser.maybeCompleteAuthSession();
+
+            const redirectUri = Linking.createURL('auth/callback');
+            const webBaseUrl = API_BASE_URL.replace(/\/api\/?$/, '');
+            const authUrl = `${webBaseUrl}/auth/mobile-google?redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+            const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+            if (result.type === 'success' && result.url) {
+                const parsed = Linking.parse(result.url);
+                const accessToken = parsed.queryParams?.accessToken as string | undefined;
+                const refreshToken = parsed.queryParams?.refreshToken as string | undefined;
+                const error = parsed.queryParams?.error as string | undefined;
+
+                if (error) {
+                    Alert.alert(t('auth.errorTitle', currentLang), 'Google ile giriş başarısız: ' + error);
+                    return;
+                }
+
+                if (accessToken) {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    await loginWithTokens(accessToken, refreshToken);
+                }
+            }
+        } catch (err: any) {
+            Alert.alert(t('auth.errorTitle', currentLang), err?.message || 'Google ile giriş sırasında bir hata oluştu.');
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
 
     const handleSubmit = async () => {
         const formData = isLogin
@@ -214,8 +286,34 @@ export default function LoginScreen() {
                             )}
                         </TouchableOpacity>
 
+                        {/* Social Divider & Google Sign In */}
+                        <View style={styles.socialContainer}>
+                            <View style={styles.divider}>
+                                <View style={styles.dividerLine} />
+                                <Text style={styles.dividerText}>
+                                    {t('auth.emailOr', currentLang) || 'veya'}
+                                </Text>
+                                <View style={styles.dividerLine} />
+                            </View>
 
-
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={handleGoogleLogin}
+                                disabled={loading || googleLoading}
+                                style={[styles.socialButton, (loading || googleLoading) && styles.socialButtonDisabled]}
+                            >
+                                {googleLoading ? (
+                                    <BrandLoader size={20} showBlur={false} />
+                                ) : (
+                                    <View style={styles.socialButtonContent}>
+                                        <GoogleIcon size={19} />
+                                        <Text style={styles.socialButtonText}>
+                                            {t('auth.googleLogin', currentLang) || 'Google ile Devam Et'}
+                                        </Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </Animated.View>
 
                     {/* Footer */}
@@ -337,7 +435,7 @@ const styles = StyleSheet.create({
     divider: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 24
+        marginBottom: 20
     },
     dividerLine: {
         flex: 1,
@@ -355,28 +453,23 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#27272A',
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#121215'
     },
+    socialButtonDisabled: {
+        opacity: 0.6
+    },
+    socialButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12
+    },
     socialButtonText: {
         color: '#F4F4F5',
         fontSize: 15,
-        fontWeight: '500'
-    },
-    soonBadge: {
-        marginLeft: 8,
-        backgroundColor: '#18181B',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 6
-    },
-    soonText: {
-        color: '#A1A1AA',
-        fontSize: 10,
-        fontWeight: '700',
-        letterSpacing: 0.5
+        fontWeight: '600'
     },
     footer: {
         flexDirection: 'row',
