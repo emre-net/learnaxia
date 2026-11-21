@@ -41,6 +41,8 @@ export async function GET(req: Request) {
                         createdModules: true,
                         collections: true,
                         notes: true,
+                        learningJourneys: true,
+                        solvedQuestions: true,
                     }
                 }
             }
@@ -50,12 +52,13 @@ export async function GET(req: Request) {
             return new NextResponse("User not found", { status: 404 });
         }
 
-        // Calculate simple stats
-        // In a real app, we might aggregate forks/likes here
+        // Calculate simple stats for all 5 library entities
         const stats = {
             modules: user._count.createdModules,
             collections: user._count.collections,
             notes: user._count.notes,
+            journeys: user._count.learningJourneys,
+            solvedQuestions: user._count.solvedQuestions,
         };
 
         return NextResponse.json({ ...user, stats });

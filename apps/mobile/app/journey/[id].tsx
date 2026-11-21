@@ -291,7 +291,7 @@ export default function JourneyPlayerScreen() {
                     <Text style={styles.nextBtnText}>
                         {currentIndex === journey.slides.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
                     </Text>
-                    <Ionicons name="arrow-forward" size={18} color="#000000" />
+                    <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <View style={[styles.navBtn, { opacity: 0 }]} />
@@ -303,11 +303,11 @@ export default function JourneyPlayerScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     centered: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,
@@ -324,15 +324,15 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     journeyTitle: {
         flex: 1,
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 13,
         fontWeight: '700',
         textAlign: 'center',
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
     },
     progressText: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         fontWeight: '700',
         minWidth: 32,
@@ -356,16 +356,16 @@ const styles = StyleSheet.create({
     storySegment: {
         height: 4,
         borderRadius: 2,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#27272A',
         overflow: 'hidden',
     },
     storySegmentFill: {
         height: '100%',
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         borderRadius: 2,
     },
     slideTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 28,
         fontWeight: '700',
         marginBottom: 24,
@@ -373,23 +373,23 @@ const styles = StyleSheet.create({
         lineHeight: 36,
     },
     slideContentCard: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         borderRadius: 24,
         padding: 24,
         marginBottom: 24,
     },
     slideContent: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 17,
         lineHeight: 28,
         fontWeight: '400',
     },
     peekingCard: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         borderRadius: 24,
         padding: 24,
     },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     peekingBadge: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 11,
         fontWeight: '700',
         textTransform: 'uppercase',
@@ -407,14 +407,14 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     peekingQuestion: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 18,
         fontWeight: '600',
         marginBottom: 16,
         lineHeight: 26,
     },
     peekingHint: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         fontWeight: '600',
         textTransform: 'uppercase',
@@ -432,14 +432,14 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
     },
     nextBtn: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         paddingHorizontal: 32,
         height: 56,
         borderRadius: 99,
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     nextBtnText: {
-        color: '#000000',
+        color: '#FFFFFF',
         fontWeight: '700',
         textTransform: 'uppercase',
         letterSpacing: 1,
@@ -458,22 +458,22 @@ const styles = StyleSheet.create({
         width: 64,
         height: 64,
         borderRadius: 32,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     errorTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 18,
         fontWeight: '700',
         marginBottom: 6,
         textAlign: 'center',
     },
     errorDesc: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 13,
         marginBottom: 24,
         textAlign: 'center',
@@ -481,15 +481,15 @@ const styles = StyleSheet.create({
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         paddingHorizontal: 24,
         paddingVertical: 16,
         borderRadius: 99,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     backButtonText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontWeight: '600',
         fontSize: 15,
         marginLeft: 8,

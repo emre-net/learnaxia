@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -7,13 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Layers, Edit, CalendarDays, Share2 } from "lucide-react";
+import { BookOpen, Layers, Edit, CalendarDays, FileText, Map, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleCard } from "@/components/module/module-card";
 import { CollectionCard } from "@/components/collection/collection-card";
-import { EditProfileDialog } from "@/components/settings/edit-profile-dialog"; // Reuse existing
+import { EditProfileDialog } from "@/components/settings/edit-profile-dialog";
 import { ShareButton } from "@/components/shared/share-button";
-import { FileText } from "lucide-react";
 import Link from "next/link";
 
 export function ProfileClient() {
@@ -63,34 +61,78 @@ export function ProfileClient() {
     const myNotes = myNotesPayload?.items || [];
 
     if (isLoadingProfile) {
-        return <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-                <Skeleton className="h-20 w-20 rounded-full" />
-                <div className="space-y-2">
-                    <Skeleton className="h-8 w-[200px]" />
-                    <Skeleton className="h-4 w-[150px]" />
+        return (
+            <div className="space-y-6 max-w-5xl mx-auto">
+                <div className="flex items-center space-x-4">
+                    <Skeleton className="h-20 w-20 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-8 w-[200px]" />
+                        <Skeleton className="h-4 w-[150px]" />
+                    </div>
                 </div>
+                <Skeleton className="h-[200px] w-full" />
             </div>
-            <Skeleton className="h-[200px] w-full" />
-        </div>
+        );
     }
+
+    const statItems = [
+        {
+            title: "Modüller",
+            value: profile?.stats?.modules || 0,
+            icon: BookOpen,
+            color: "text-indigo-400",
+            bg: "bg-indigo-500/10",
+        },
+        {
+            title: "Koleksiyonlar",
+            value: profile?.stats?.collections || 0,
+            icon: Layers,
+            color: "text-sky-400",
+            bg: "bg-sky-500/10",
+        },
+        {
+            title: "Notlar",
+            value: profile?.stats?.notes || 0,
+            icon: FileText,
+            color: "text-amber-400",
+            bg: "bg-amber-500/10",
+        },
+        {
+            title: "Rotalar",
+            value: profile?.stats?.journeys || 0,
+            icon: Map,
+            color: "text-purple-400",
+            bg: "bg-purple-500/10",
+        },
+        {
+            title: "AI Çözümleri",
+            value: profile?.stats?.solvedQuestions || 0,
+            icon: Sparkles,
+            color: "text-rose-400",
+            bg: "bg-rose-500/10",
+        },
+    ];
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto">
             {/* Header */}
             <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                <div className="flex items-center gap-6">
-                    <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                <div className="flex items-center gap-4 sm:gap-6">
+                    <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-background shadow-lg">
                         <AvatarImage src={profile?.image} />
-                        <AvatarFallback className="text-2xl">{(profile?.name || profile?.handle || "U").charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="text-xl sm:text-2xl bg-indigo-600 font-bold text-white">
+                            {(profile?.name || profile?.handle || "U").charAt(0).toUpperCase()}
+                        </AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{profile?.name || `@${profile?.handle || "kullanici"}`}</h1>
-                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                            {profile?.handle && <span className="font-medium">@{profile.handle}</span>}
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+                            {profile?.name || `@${profile?.handle || "kullanici"}`}
+                        </h1>
+                        <div className="flex flex-wrap items-center gap-2 text-slate-600 dark:text-slate-300">
+                            {profile?.handle && <span className="font-medium text-sm text-[#818cf8]">@{profile.handle}</span>}
                             {profile?.handle && profile?.createdAt && <span>•</span>}
                             {profile?.createdAt && (
-                                <span className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+                                <span className="flex items-center gap-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                                     <CalendarDays className="h-3 w-3" />
                                     {new Date(profile.createdAt).toLocaleDateString("tr-TR")} tarihinde katıldı
                                 </span>
@@ -98,11 +140,12 @@ export function ProfileClient() {
                         </div>
                     </div>
                 </div>
+
                 <div className="flex gap-2">
                     <EditProfileDialog
                         user={{ handle: profile?.handle, image: profile?.image }}
                         trigger={
-                            <Button variant="outline">
+                            <Button variant="outline" className="border-white/10 hover:bg-white/5">
                                 <Edit className="h-4 w-4 mr-2" /> Profili Düzenle
                             </Button>
                         }
@@ -113,45 +156,29 @@ export function ProfileClient() {
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Atölye Üretimleri</CardTitle>
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{profile?.stats?.modules || 0}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Koleksiyonlar</CardTitle>
-                        <Layers className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{profile?.stats?.collections || 0}</div>
-                    </CardContent>
-                </Card>
-                {/* Achievement Score */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Başarı Puanı</CardTitle>
-                        <Badge variant="secondary">Beta</Badge>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">-</div>
-                        <p className="text-xs text-muted-foreground">Çok yakında...</p>
-                    </CardContent>
-                </Card>
+            {/* 5 Library Entities Stats — Akıcı Yatay Kaydırma (Mobil / Tablet / Masaüstü Paritesi) */}
+            <div className="w-full">
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 sm:grid sm:grid-cols-3 lg:grid-cols-5">
+                    {statItems.map((item) => (
+                        <Card key={item.title} className="bg-[#121215] border-white/10 shrink-0 min-w-[130px] sm:min-w-0">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1">
+                                <CardTitle className="text-xs font-medium text-[#a1a1aa]">{item.title}</CardTitle>
+                                <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
+                            </CardHeader>
+                            <CardContent className="p-3 pt-1">
+                                <div className="text-xl md:text-2xl font-bold text-[#f4f4f5]">{item.value}</div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
 
             {/* Content Tabs */}
             <Tabs defaultValue="modules" className="w-full">
-                <TabsList className="mb-4">
-                    <TabsTrigger value="modules">Üretimlerim</TabsTrigger>
-                    <TabsTrigger value="collections">Koleksiyonlarım</TabsTrigger>
-                    <TabsTrigger value="notes">Notlarım</TabsTrigger>
+                <TabsList className="mb-4 w-full flex justify-start overflow-x-auto whitespace-nowrap h-auto p-1 pb-2 no-scrollbar">
+                    <TabsTrigger value="modules" className="shrink-0">Üretimlerim ({myModules.length})</TabsTrigger>
+                    <TabsTrigger value="collections" className="shrink-0">Koleksiyonlarım ({myCollections.length})</TabsTrigger>
+                    <TabsTrigger value="notes" className="shrink-0">Notlarım ({myNotes.length})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="modules" className="space-y-4">
@@ -160,10 +187,10 @@ export function ProfileClient() {
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[250px]" />)}
                         </div>
                     ) : myModules?.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground border border-dashed rounded-lg">
+                        <div className="text-center py-12 text-muted-foreground border border-dashed border-white/10 rounded-xl">
                             Henüz modül oluşturmadınız.
                             <br />
-                            <Button variant="link" asChild className="mt-2">
+                            <Button variant="link" asChild className="mt-2 text-indigo-400">
                                 <Link href="/dashboard/create">Atölye'ye Git</Link>
                             </Button>
                         </div>
@@ -182,7 +209,7 @@ export function ProfileClient() {
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[250px]" />)}
                         </div>
                     ) : myCollections?.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground border border-dashed rounded-lg">
+                        <div className="text-center py-12 text-muted-foreground border border-dashed border-white/10 rounded-xl">
                             Henüz koleksiyon oluşturmadınız.
                         </div>
                     ) : (
@@ -200,10 +227,10 @@ export function ProfileClient() {
                             {[1, 2, 3].map(i => <Skeleton key={i} className="h-[150px]" />)}
                         </div>
                     ) : myNotes?.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground border border-dashed rounded-lg flex flex-col items-center justify-center">
+                        <div className="text-center py-12 text-muted-foreground border border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center">
                             <FileText className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
                             <p>Henüz not almadınız.</p>
-                            <Button variant="link" asChild className="mt-2">
+                            <Button variant="link" asChild className="mt-2 text-indigo-400">
                                 <Link href="/dashboard/create/manual-note">Not Yaz</Link>
                             </Button>
                         </div>
@@ -211,11 +238,11 @@ export function ProfileClient() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {myNotes?.map((note: any) => (
                                 <Link href={`/dashboard/notes/${note.id}`} key={note.id} className="block group">
-                                    <Card className="hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">
+                                    <Card className="bg-[#121215] border-white/10 hover:border-indigo-500/50 transition-all hover:shadow-md cursor-pointer">
                                         <CardHeader className="p-4 pb-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <Badge variant="secondary" className="text-[10px]">
+                                                    <Badge variant="secondary" className="text-[10px] bg-white/5 border border-white/10">
                                                         {note.moduleId ? "Modül Notu" : "Serbest / AI Not"}
                                                     </Badge>
                                                     {note.visibility === "PUBLIC" && (
@@ -241,10 +268,12 @@ export function ProfileClient() {
                                                     {new Date(note.updatedAt).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <CardTitle className="text-sm mt-2 group-hover:text-primary transition-colors">{note.title || "Adsız Not"}</CardTitle>
+                                            <CardTitle className="text-sm mt-2 group-hover:text-indigo-400 transition-colors text-[#f4f4f5]">
+                                                {note.title || "Adsız Not"}
+                                            </CardTitle>
                                         </CardHeader>
                                         <CardContent className="p-4 pt-0">
-                                            <p className="text-sm text-muted-foreground line-clamp-3">
+                                            <p className="text-sm text-[#a1a1aa] line-clamp-3">
                                                 {(() => {
                                                     try {
                                                         const parsed = JSON.parse(note.content);

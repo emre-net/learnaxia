@@ -19,35 +19,40 @@ export function MobileBottomNav() {
         {
             icon: LayoutDashboard,
             href: "/dashboard",
+            label: "Ana Sayfa",
             active: pathname === "/dashboard",
         },
         {
             icon: Library,
             href: "/dashboard/library",
+            label: "Kütüphane",
             active: pathname === "/dashboard/library" || pathname.startsWith("/dashboard/modules"),
         },
         {
             icon: Sparkles, // Central Create / AI Action
             href: "/dashboard/create",
+            label: "Üret",
             active: pathname.startsWith("/dashboard/create"),
             primary: true
         },
         {
             icon: Compass,
             href: "/dashboard/discover",
+            label: "Keşfet",
             active: pathname === "/dashboard/discover",
         },
         {
             icon: User,
             href: "/dashboard/profile",
+            label: "Profil",
             active: pathname === "/dashboard/profile",
         },
     ]
 
     return (
-        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md">
-            <nav className="glass rounded-[2.5rem] px-4 py-3 sea-glow flex items-center justify-between border-white/10 shadow-2xl shadow-primary/10">
-                {routes.map((route, i) => {
+        <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg">
+            <nav className="bg-[#121215]/95 backdrop-blur-xl rounded-[2.5rem] px-5 py-3 flex items-center justify-between border border-white/10 shadow-2xl shadow-black/60">
+                {routes.map((route) => {
                     const isActive = route.active
                     const Icon = route.icon
 
@@ -56,7 +61,8 @@ export function MobileBottomNav() {
                             <Link
                                 key={route.href}
                                 href={route.href}
-                                className="relative flex items-center justify-center -top-8 w-14 h-14 rounded-full bg-gradient-to-tr from-primary via-secondary to-accent shadow-xl shadow-primary/40 border-4 border-background group active:scale-90 transition-transform"
+                                aria-label={route.label}
+                                className="relative flex items-center justify-center -top-7 w-14 h-14 rounded-full bg-[#6366f1] text-white shadow-xl shadow-indigo-500/40 border-4 border-[#09090b] group active:scale-90 transition-transform"
                             >
                                 <Icon className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
                             </Link>
@@ -67,24 +73,25 @@ export function MobileBottomNav() {
                         <Link
                             key={route.href}
                             href={route.href}
+                            aria-label={route.label}
                             className="flex flex-col items-center justify-center py-1 px-3 relative group active:scale-95 transition-all"
                         >
                             {isActive && (
                                 <motion.div 
                                     layoutId="nav-active"
-                                    className="absolute inset-0 bg-primary/10 dark:bg-primary/20 rounded-2xl -z-10"
+                                    className="absolute inset-0 bg-indigo-500/15 rounded-2xl -z-10"
                                     transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
                                 />
                             )}
                             <Icon
                                 className={cn(
                                     "h-6 w-6 transition-colors duration-200",
-                                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                    isActive ? "text-[#818cf8]" : "text-[#71717a] group-hover:text-[#f4f4f5]"
                                 )}
                                 strokeWidth={isActive ? 2.5 : 2}
                             />
                             {isActive && (
-                                <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary" />
+                                <span className="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-[#6366f1]" />
                             )}
                         </Link>
                     )

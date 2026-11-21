@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { StudyHeader } from "@/components/study/study-header";
 import { FlashcardRenderer } from "@/components/study/flashcard-renderer";
 import { QuizRenderer } from "@/components/study/quiz-renderer";
+import { TrueFalseRenderer } from "@/components/study/true-false-renderer";
 import { GapRenderer } from "@/components/study/gap-renderer";
 import { StudyControls } from "@/components/study/study-controls";
 import { StudySummary } from "@/components/study/study-summary";
@@ -45,25 +46,25 @@ function DailyStudyInterface() {
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-4 bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center min-h-screen p-4 bg-[#09090b] text-[#f4f4f5]">
             <StudyHeader />
 
             {/* Context Badge for Mixed Review */}
             <div className="w-full max-w-5xl flex justify-center mt-4">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300 gap-1.5 py-1 px-3">
+                <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/30 gap-1.5 py-1 px-3">
                     <Sparkles className="w-3.5 h-3.5" />
                     Karma Günlük Tekrar
                 </Badge>
             </div>
 
             <div className="flex-1 w-full flex flex-col items-center justify-center max-w-5xl -mt-6">
-                {mode === 'QUIZ' || currentItem.type === 'MC' ? (
-                    <QuizRenderer item={currentItem} />
-                ) : currentItem.type === 'GAP' ? (
-                    <GapRenderer item={currentItem} />
-                ) : (
-                    <FlashcardRenderer item={currentItem} />
-                )}
+                {(() => {
+                    const itemType = currentItem.type as string;
+                    if (mode === 'QUIZ' || itemType === 'MC') return <QuizRenderer item={currentItem} />;
+                    if (itemType === 'TRUE_FALSE' || itemType === 'TF') return <TrueFalseRenderer item={currentItem} />;
+                    if (itemType === 'GAP') return <GapRenderer item={currentItem} />;
+                    return <FlashcardRenderer item={currentItem} />;
+                })()}
 
                 <StudyControls onNext={handleNext} />
             </div>

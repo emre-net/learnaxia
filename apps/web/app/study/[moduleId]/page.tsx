@@ -63,7 +63,7 @@ function StudyInterface() {
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-4 bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center min-h-screen p-4 bg-[#09090b] text-[#f4f4f5]">
             <StudyHeader />
 
             <div className="flex-1 w-full flex flex-col items-center justify-center max-w-5xl">

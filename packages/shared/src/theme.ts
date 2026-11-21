@@ -1,42 +1,62 @@
+/**
+ * LearnAxia — Design System Tokens
+ * Human-Centered Dark Zinc Design Standard (Anti-AI Generated Look).
+ * Avoids harsh #000000 / #FFFFFF halation.
+ */
+
 export const Theme = {
     colors: {
-        // Ultimate Black & White Minimalism (Apple/Vercel Style)
-        background: '#000000', // Pure Black
-        foreground: '#FFFFFF', // Pure White
-        card: '#0A0A0A', // Almost black for slight elevation
-        cardForeground: '#FFFFFF',
-        popover: '#0A0A0A',
-        popoverForeground: '#FFFFFF',
+        // Human-Centered Deep Dark Zinc (Linear / Apple / Notion Aesthetic)
+        background: '#09090b', // Deep dark zinc canvas (not pitch black)
+        foreground: '#f4f4f5', // Soft off-white text (no halation)
         
-        // Accents (Blue and Red as requested)
-        primary: '#2563EB', // Sharp Tech Blue
-        primaryForeground: '#FFFFFF',
-        secondary: '#171717', // Very Dark Gray
-        secondaryForeground: '#FFFFFF',
-        muted: '#171717',
-        mutedForeground: '#A3A3A3', // Neutral Gray for text
-        accent: '#2563EB', // Primary Blue Accent
-        accentForeground: '#FFFFFF',
-        destructive: '#DC2626', // Sharp Red
-        destructiveForeground: '#FFFFFF',
+        // Surface Elevation (Z-Space Layering)
+        card: '#121215', // Base card elevation
+        cardSecondary: '#18181b', // Nested/hover elevation
+        cardForeground: '#f4f4f5',
+        popover: '#18181b',
+        popoverForeground: '#f4f4f5',
         
-        // Borders and Inputs
-        border: '#262626', // Dark Gray Border
-        input: '#262626',
-        ring: '#2563EB',
+        // Brand & Accents (Subtly Desaturated for Comfort)
+        primary: '#38bdf8', // Sky Cyan
+        primaryForeground: '#09090b',
+        secondary: '#18181b',
+        secondaryForeground: '#f4f4f5',
+        muted: '#18181b',
+        mutedForeground: '#a1a1aa', // High-legibility neutral gray
+        accent: '#6366f1', // Linear Indigo Accent
+        accentForeground: '#f4f4f5',
+        destructive: '#ef4444', // Softened Red
+        destructiveForeground: '#f4f4f5',
+        success: '#10b981', // Emerald
+        warning: '#f59e0b', // Amber
+        
+        // Crisp 1px Borders
+        border: '#27272a', // Subtle crisp border
+        borderSubtle: '#1f1f23',
+        input: '#18181b',
+        ring: '#38bdf8',
 
-        // Custom Learnaxia Colors
-        brandBlue: '#2563EB',
-        brandRed: '#DC2626',
+        // Brand Accents
+        brandBlue: '#38bdf8',
+        brandIndigo: '#6366f1',
     },
     typography: {
         fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
         }
     },
+    radii: {
+        sm: 6,
+        md: 10,
+        lg: 16,
+        xl: 24,
+        pill: 9999,
+    },
     gradients: {
-        primary: ['#171717', '#0A0A0A'], // Minimalist dark gradient
-        blue: ['#3B82F6', '#2563EB'],
-        red: ['#EF4444', '#DC2626'],
+        primary: ['#121215', '#09090b'],
+        surface: ['#18181b', '#121215'],
+        blue: ['#38bdf8', '#0284c7'],
+        indigo: ['#818cf8', '#6366f1'],
     }
 };

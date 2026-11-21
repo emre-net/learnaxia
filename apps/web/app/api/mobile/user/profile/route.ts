@@ -24,6 +24,8 @@ export async function GET(req: Request) {
                         createdModules: true,
                         collections: true,
                         notes: true,
+                        learningJourneys: true,
+                        solvedQuestions: true,
                     }
                 }
             }
@@ -37,6 +39,8 @@ export async function GET(req: Request) {
             modules: userData._count.createdModules,
             collections: userData._count.collections,
             notes: userData._count.notes,
+            journeys: userData._count.learningJourneys,
+            solvedQuestions: userData._count.solvedQuestions,
         };
 
         return NextResponse.json({ ...userData, stats });

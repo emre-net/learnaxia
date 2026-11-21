@@ -217,7 +217,7 @@ export default function StudyScreen() {
 
     if (loading) {
         return (
-            <Screen style={{ backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center' }}>
+            <Screen style={{ backgroundColor: '#09090B', justifyContent: 'center', alignItems: 'center' }}>
                 <BrandLoader size="lg" label={t('common.loading', language)} />
             </Screen>
         );
@@ -225,19 +225,19 @@ export default function StudyScreen() {
 
     if (!studyModule || !studyModule.items || studyModule.items.length === 0) {
         return (
-            <Screen style={{ backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
-                <MaterialIcons name="menu-book" size={64} color="#1E293B" style={{ marginBottom: 16 }} />
-                <Text style={{ color: '#F8FAFC', fontSize: 20, textAlign: 'center', marginBottom: 8, fontWeight: '700' }}>
+            <Screen style={{ backgroundColor: '#09090B', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+                <MaterialIcons name="menu-book" size={64} color="#27272A" style={{ marginBottom: 16 }} />
+                <Text style={{ color: '#F4F4F5', fontSize: 20, textAlign: 'center', marginBottom: 8, fontWeight: '700' }}>
                     Modül içeriği bulunamadı
                 </Text>
-                <Text style={{ color: '#64748B', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
+                <Text style={{ color: '#A1A1AA', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
                     Bu modüle henüz kart eklenmemiş olabilir.
                 </Text>
                 <TouchableOpacity
                     onPress={() => router.back()}
-                    style={{ paddingHorizontal: 32, paddingVertical: 16, backgroundColor: '#0A0A0A', borderRadius: 99, borderWidth: 1, borderColor: '#111111' }}
+                    style={{ paddingHorizontal: 32, paddingVertical: 16, backgroundColor: '#121215', borderRadius: 99, borderWidth: 1, borderColor: '#27272A' }}
                 >
-                    <Text style={{ color: '#F8FAFC', fontWeight: '600' }}>Geri Dön</Text>
+                    <Text style={{ color: '#F4F4F5', fontWeight: '600' }}>Geri Dön</Text>
                 </TouchableOpacity>
             </Screen>
         );
@@ -247,26 +247,26 @@ export default function StudyScreen() {
         const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
         
         return (
-            <Screen style={{ backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+            <Screen style={{ backgroundColor: '#09090B', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
                 <StatusBar barStyle="light-content" />
                 <Animated.View entering={FadeInDown.duration(600)} style={{ alignItems: 'center', width: '100%' }}>
                     <View style={{
                         width: 80, height: 80, borderRadius: 40,
-                        backgroundColor: '#0A0A0A',
-                        borderWidth: 1, borderColor: '#111111',
+                        backgroundColor: '#121215',
+                        borderWidth: 1, borderColor: '#27272A',
                         alignItems: 'center', justifyContent: 'center', marginBottom: 24
                     }}>
                         <MaterialIcons
                             name="check"
                             size={40}
-                            color="#F8FAFC"
+                            color="#10B981"
                         />
                     </View>
 
-                    <Text style={{ color: '#F8FAFC', fontSize: 28, fontWeight: '700', marginBottom: 8, letterSpacing: -0.5 }}>
+                    <Text style={{ color: '#F4F4F5', fontSize: 28, fontWeight: '700', marginBottom: 8, letterSpacing: -0.5 }}>
                         Oturum Tamamlandı
                     </Text>
-                    <Text style={{ color: '#64748B', fontSize: 14, marginBottom: 40, textAlign: 'center' }}>
+                    <Text style={{ color: '#A1A1AA', fontSize: 14, marginBottom: 40, textAlign: 'center' }}>
                         {studyModule.title}
                     </Text>
 
@@ -319,7 +319,7 @@ export default function StudyScreen() {
     const progress = ((currentIndex + 1) / studyModule.items.length) * 100;
 
     return (
-        <Screen style={{ backgroundColor: '#000000' }}>
+        <Screen style={{ backgroundColor: '#09090B' }}>
             <StatusBar barStyle="light-content" />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -516,7 +516,7 @@ export default function StudyScreen() {
                         <Text style={styles.nextBtnText}>
                             {currentIndex === studyModule.items.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
                         </Text>
-                        <Ionicons name="arrow-forward" size={18} color="#000000" />
+                        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
                     </TouchableOpacity>
                 ) : !isInteractive ? (
                     <TouchableOpacity
@@ -527,7 +527,7 @@ export default function StudyScreen() {
                         <Text style={styles.nextBtnText}>
                             {currentIndex === studyModule.items.length - 1 ? 'BİTİR' : 'SIRADAKİ'}
                         </Text>
-                        <Ionicons name="arrow-forward" size={18} color="#000000" />
+                        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
                     </TouchableOpacity>
                 ) : null}
 
@@ -551,11 +551,11 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     headerCenter: {
         flex: 1,
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
     },
     moduleName: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '700',
         textTransform: 'uppercase',
@@ -577,18 +577,18 @@ const styles = StyleSheet.create({
     progressTrack: {
         height: 4,
         width: 80,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#27272A',
         borderRadius: 99,
         overflow: 'hidden',
         marginRight: 8,
     },
     progressFill: {
         height: '100%',
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         borderRadius: 99,
     },
     progressText: {
-        color: '#475569',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '600',
     },
@@ -601,9 +601,9 @@ const styles = StyleSheet.create({
         width: '100%',
         minHeight: 460,
         borderRadius: 32,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         overflow: 'hidden',
     },
     cardFace: {
@@ -613,24 +613,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 32,
         backfaceVisibility: 'hidden',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
     },
     label: {
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 99,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
         marginBottom: 32,
     },
     labelText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontWeight: '700',
         fontSize: 11,
         textTransform: 'uppercase',
         letterSpacing: 2,
     },
     cardText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 26,
         fontWeight: '600',
         textAlign: 'center',
@@ -644,13 +646,13 @@ const styles = StyleSheet.create({
         bottom: 32,
     },
     tapHintText: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 8,
     },
     noteText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 18,
         fontWeight: '500',
         lineHeight: 28,
@@ -668,9 +670,9 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -685,7 +687,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     nextBtn: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         paddingHorizontal: 32,
         height: 56,
         borderRadius: 99,
@@ -694,56 +696,56 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     nextBtnText: {
-        color: '#000000',
+        color: '#FFFFFF',
         fontWeight: '700',
         fontSize: 14,
         marginRight: 8,
     },
     resultCard: {
         flex: 1,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 24,
         padding: 24,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     resultValue: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 32,
         fontWeight: '700',
         marginBottom: 8,
         letterSpacing: -1,
     },
     resultLabel: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         fontWeight: '600',
     },
     primaryBtn: {
         width: '100%',
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
         paddingVertical: 18,
         borderRadius: 99,
         alignItems: 'center',
         marginBottom: 12,
     },
     primaryBtnText: {
-        color: '#000000',
+        color: '#FFFFFF',
         fontWeight: '700',
         fontSize: 15,
     },
     secondaryBtn: {
         width: '100%',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         paddingVertical: 18,
         borderRadius: 99,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     secondaryBtnText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontWeight: '600',
         fontSize: 15,
     },

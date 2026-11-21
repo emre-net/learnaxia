@@ -100,7 +100,7 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#000000" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -245,7 +245,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000000', // Pure Black minimalism
+        backgroundColor: '#09090B',
     },
     keyboardView: {
         flex: 1
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
         marginTop: 20
     },
     brandText: {
-        color: '#FFFFFF',
+        color: '#F4F4F5',
         fontSize: 14,
         fontWeight: '700',
         letterSpacing: 2,
@@ -270,14 +270,14 @@ const styles = StyleSheet.create({
         opacity: 0.8
     },
     title: {
-        color: '#FFFFFF',
+        color: '#F4F4F5',
         fontSize: 32,
         fontWeight: '600',
         letterSpacing: -0.5,
         marginBottom: 8
     },
     subtitle: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 15,
         fontWeight: '400'
     },
@@ -286,11 +286,11 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         borderBottomWidth: 1,
-        borderBottomColor: '#262626',
+        borderBottomColor: '#27272A',
         paddingBottom: 8
     },
     inputGroupFocused: {
-        borderBottomColor: '#2563EB', // Tech Blue accent when focused
+        borderBottomColor: '#6366F1',
     },
     labelRow: {
         flexDirection: 'row',
@@ -299,24 +299,24 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     label: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 13,
         fontWeight: '500',
         marginBottom: 8
     },
     forgotPasswordText: {
-        color: '#2563EB',
+        color: '#818CF8',
         fontSize: 13,
         fontWeight: '600'
     },
     input: {
-        color: '#FFFFFF',
+        color: '#F4F4F5',
         fontSize: 16,
         height: 32,
         padding: 0
     },
     submitButton: {
-        backgroundColor: '#2563EB', // Tech Blue
+        backgroundColor: '#6366F1',
         height: 56,
         borderRadius: 14,
         alignItems: 'center',
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
         opacity: 0.7
     },
     submitButtonText: {
-        color: '#FFFFFF', // White text on blue
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '700'
     },
@@ -342,10 +342,10 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#1E293B'
+        backgroundColor: '#27272A'
     },
     dividerText: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         paddingHorizontal: 16,
         fontWeight: '500'
@@ -354,26 +354,26 @@ const styles = StyleSheet.create({
         height: 56,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'transparent'
+        backgroundColor: '#121215'
     },
     socialButtonText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 15,
         fontWeight: '500'
     },
     soonBadge: {
         marginLeft: 8,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         paddingHorizontal: 8,
         paddingVertical: 3,
         borderRadius: 6
     },
     soonText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 10,
         fontWeight: '700',
         letterSpacing: 0.5
@@ -386,14 +386,14 @@ const styles = StyleSheet.create({
         gap: 6
     },
     footerText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 14
     },
     footerAction: {
         paddingVertical: 8
     },
     footerActionText: {
-        color: '#FFFFFF',
+        color: '#F4F4F5',
         fontSize: 14,
         fontWeight: '600'
     }

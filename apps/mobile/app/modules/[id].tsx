@@ -403,7 +403,7 @@ export default function ModuleDetailScreen() {
                                 router.push(`/study/${module.id}` as any);
                             }}
                         >
-                            <MaterialIcons name="play-arrow" size={22} color="#000000" />
+                            <MaterialIcons name="play-arrow" size={22} color="#FFFFFF" />
                             <Text style={styles.primaryStudyBtnText}>Çalışmayı Başlat</Text>
                         </TouchableOpacity>
 
@@ -490,11 +490,11 @@ export default function ModuleDetailScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     centerContainer: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 24,
@@ -507,17 +507,17 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#111111',
+        borderBottomColor: '#18181B',
     },
     iconButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     topBarActions: {
         flexDirection: 'row',
@@ -541,12 +541,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 8,
-        backgroundColor: '#1E293B',
+        backgroundColor: 'rgba(99, 102, 241, 0.15)',
     },
     typeBadgeText: {
         fontSize: 11,
         fontWeight: '700',
-        color: '#38BDF8',
+        color: '#818CF8',
         textTransform: 'uppercase',
     },
     visibilityBadge: {
@@ -556,26 +556,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     visibilityText: {
         fontSize: 11,
-        color: '#64748B',
+        color: '#71717A',
         fontWeight: '600',
     },
     title: {
         fontSize: 26,
         fontWeight: '800',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         letterSpacing: -0.5,
         marginBottom: 8,
         lineHeight: 34,
     },
     description: {
         fontSize: 14,
-        color: '#94A3B8',
+        color: '#A1A1AA',
         lineHeight: 22,
         marginBottom: 16,
     },
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         marginBottom: 20,
     },
     creatorRow: {
@@ -598,17 +598,19 @@ const styles = StyleSheet.create({
         width: 24,
         height: 24,
         borderRadius: 12,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#27272A',
     },
     avatarText: {
-        color: '#38BDF8',
+        color: '#818CF8',
         fontSize: 11,
         fontWeight: '700',
     },
     creatorText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 13,
         fontWeight: '600',
     },
@@ -618,7 +620,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     itemCountText: {
-        color: '#60A5FA',
+        color: '#818CF8',
         fontSize: 13,
         fontWeight: '700',
     },
@@ -626,14 +628,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#6366F1',
         paddingVertical: 14,
         borderRadius: 14,
         gap: 8,
         marginBottom: 28,
     },
     primaryStudyBtnText: {
-        color: '#000000',
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '700',
     },
@@ -646,17 +648,17 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
     },
     sectionSub: {
         fontSize: 12,
-        color: '#64748B',
+        color: '#71717A',
     },
     cardItem: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         padding: 16,
         marginBottom: 12,
     },
@@ -667,7 +669,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     cardBadge: {
-        backgroundColor: '#111827',
+        backgroundColor: '#18181B',
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 6,
@@ -675,7 +677,7 @@ const styles = StyleSheet.create({
     cardNumber: {
         fontSize: 11,
         fontWeight: '700',
-        color: '#64748B',
+        color: '#71717A',
     },
     revealHintRow: {
         flexDirection: 'row',
@@ -684,12 +686,12 @@ const styles = StyleSheet.create({
     },
     revealHintText: {
         fontSize: 11,
-        color: '#64748B',
+        color: '#71717A',
     },
     cardQuestion: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         lineHeight: 24,
     },
     mcOptionsContainer: {
@@ -699,34 +701,34 @@ const styles = StyleSheet.create({
     mcOptionRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#050505',
-        borderRadius: 8,
+        backgroundColor: '#18181B',
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#27272A',
         paddingHorizontal: 10,
-        paddingVertical: 8,
+        paddingVertical: 9,
     },
     mcOptionCorrect: {
         borderColor: '#10B981',
         backgroundColor: 'rgba(16, 185, 129, 0.08)',
     },
     mcOptionLetter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        backgroundColor: '#1E293B',
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        backgroundColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 8,
     },
     mcOptionLetterText: {
-        color: '#94A3B8',
-        fontSize: 10,
+        color: '#A1A1AA',
+        fontSize: 11,
         fontWeight: '700',
     },
     mcOptionText: {
         flex: 1,
-        color: '#CBD5E1',
+        color: '#D4D4D8',
         fontSize: 13,
     },
     mcOptionTextCorrect: {
@@ -737,7 +739,7 @@ const styles = StyleSheet.create({
         marginTop: 14,
         paddingTop: 14,
         borderTopWidth: 1,
-        borderTopColor: '#182234',
+        borderTopColor: '#27272A',
     },
     answerHeader: {
         flexDirection: 'row',
@@ -754,13 +756,13 @@ const styles = StyleSheet.create({
     answerText: {
         fontSize: 15,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         lineHeight: 22,
     },
     explanationText: {
         marginTop: 6,
         fontSize: 13,
-        color: '#64748B',
+        color: '#A1A1AA',
         lineHeight: 20,
     },
     emptyContainer: {
@@ -771,35 +773,37 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#94A3B8',
+        color: '#A1A1AA',
         marginTop: 12,
         marginBottom: 4,
     },
     emptyDesc: {
         fontSize: 13,
-        color: '#475569',
+        color: '#71717A',
         textAlign: 'center',
     },
     errorTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         marginBottom: 8,
     },
     errorDesc: {
         fontSize: 14,
-        color: '#64748B',
+        color: '#A1A1AA',
         textAlign: 'center',
         marginBottom: 24,
     },
     retryBtn: {
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
     },
     retryBtnText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontWeight: '600',
     },
     modalOverlay: {
@@ -811,10 +815,10 @@ const styles = StyleSheet.create({
     },
     modalCard: {
         width: '100%',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         padding: 20,
     },
     modalHeader: {
@@ -826,7 +830,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
     },
     collectionRow: {
         flexDirection: 'row',
@@ -834,26 +838,28 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#182234',
+        borderBottomColor: '#27272A',
     },
     colTitle: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
     },
     colItems: {
         fontSize: 12,
-        color: '#64748B',
+        color: '#71717A',
         marginTop: 2,
     },
     createColBtn: {
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 12,
     },
     createColBtnText: {
-        color: '#38BDF8',
+        color: '#818CF8',
         fontWeight: '700',
     },
 });

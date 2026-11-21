@@ -62,11 +62,21 @@ export async function GET(req: Request) {
             orderBy: { createdAt: 'desc' }
         });
 
+        // Get user's solved questions (AI solutions from camera / upload)
+        const solvedQuestions = await prisma.solvedQuestion.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                notes: { select: { id: true, title: true } }
+            }
+        });
+
         return NextResponse.json({
             modules,
             collections,
             notes,
-            journeys
+            journeys,
+            solvedQuestions
         });
     } catch (error) {
         console.error('Mobile Library Error:', error);

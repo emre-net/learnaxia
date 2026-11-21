@@ -77,18 +77,31 @@ export default function ExploreScreen() {
     fetchDiscover();
   }, [fetchDiscover]);
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'MODULE', label: t('library.tabs.modules', language) },
-    { id: 'COLLECTION', label: t('library.tabs.collections', language) },
-    { id: 'NOTE', label: t('library.tabs.notes', language) },
+  const tabs: { id: TabType; label: string; icon: 'document-text' | 'folder' | 'book' }[] = [
+    { id: 'MODULE', label: t('library.tabs.modules', language), icon: 'document-text' },
+    { id: 'COLLECTION', label: t('library.tabs.collections', language), icon: 'folder' },
+    { id: 'NOTE', label: t('library.tabs.notes', language), icon: 'book' },
   ];
+
+  const getTypeBadgeStyle = (itemType?: string, isNoteTab?: boolean, isCollTab?: boolean) => {
+    if (isNoteTab) return { bg: 'rgba(139, 92, 246, 0.15)', text: '#A78BFA' };
+    if (isCollTab) return { bg: 'rgba(14, 165, 233, 0.15)', text: '#38BDF8' };
+    switch (itemType) {
+      case 'FLASHCARD': return { bg: 'rgba(99, 102, 241, 0.15)', text: '#818CF8' };
+      case 'MC': return { bg: 'rgba(16, 185, 129, 0.15)', text: '#34D399' };
+      case 'TRUE_FALSE': return { bg: 'rgba(245, 158, 11, 0.15)', text: '#FBBF24' };
+      case 'GAP': return { bg: 'rgba(244, 63, 94, 0.15)', text: '#FB7185' };
+      default: return { bg: 'rgba(99, 102, 241, 0.15)', text: '#818CF8' };
+    }
+  };
 
   const renderItem = ({ item }: { item: DiscoverItem }) => {
     const isModule = activeTab === 'MODULE';
     const isNote = activeTab === 'NOTE';
+    const isCollection = activeTab === 'COLLECTION';
     const badgeLabel = isNote
       ? t('library.tabs.notes', language)
-      : !isModule
+      : isCollection
         ? t('library.types.collection', language)
         : item.type === 'MC'
           ? t('library.types.mc', language)
@@ -99,6 +112,8 @@ export default function ExploreScreen() {
               : item.type === 'GAP'
                 ? t('library.types.gap', language)
                 : (item.type || t('library.types.module', language));
+
+    const badgeStyle = getTypeBadgeStyle(item.type, isNote, isCollection);
 
     return (
       <TouchableOpacity
@@ -115,7 +130,9 @@ export default function ExploreScreen() {
         }}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.badgeText}>{badgeLabel}</Text>
+          <View style={[styles.badgePill, { backgroundColor: badgeStyle.bg }]}>
+            <Text style={[styles.badgeText, { color: badgeStyle.text }]}>{badgeLabel}</Text>
+          </View>
           {item.owner?.handle && (
             <Text style={styles.ownerText}>@{item.owner.handle}</Text>
           )}
@@ -129,13 +146,13 @@ export default function ExploreScreen() {
 
         <View style={styles.cardFooter}>
           <View style={styles.footerInfo}>
-            <Ionicons name={isNote ? "journal-outline" : isModule ? "document-text-outline" : "folder-outline"} size={16} color="#64748B" />
+            <Ionicons name={isNote ? "journal-outline" : isModule ? "document-text-outline" : "folder-outline"} size={16} color="#71717A" />
             <Text style={styles.footerItemsText}>
               {item._count?.items || 0} {t('library.items', language).toLowerCase()}
             </Text>
           </View>
           <View style={styles.footerInfo}>
-            <Ionicons name="time-outline" size={14} color="#475569" />
+            <Ionicons name="time-outline" size={14} color="#71717A" />
             <Text style={styles.footerDateText}>
               {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
             </Text>
@@ -183,9 +200,9 @@ export default function ExploreScreen() {
                 }}
               >
                 <Ionicons
-                  name={tab.id === 'MODULE' ? 'document-text' : 'folder'}
+                  name={tab.icon}
                   size={14}
-                  color={isActive ? '#0F172A' : '#94A3B8'}
+                  color={isActive ? '#FFFFFF' : '#A1A1AA'}
                   style={{ marginRight: 6 }}
                 />
                 <Text style={[styles.segmentBtnText, isActive && styles.segmentBtnTextActive]}>
@@ -316,7 +333,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#09090B',
   },
   header: {
     paddingHorizontal: 24,
@@ -326,27 +343,27 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: '#F4F4F5',
     letterSpacing: -0.5,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#121215',
     marginHorizontal: 24,
-    marginBottom: 20,
+    marginBottom: 16,
     paddingHorizontal: 16,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#111111',
+    borderColor: '#27272A',
   },
   searchIcon: {
     marginRight: 10,
   },
   searchInput: {
     flex: 1,
-    color: '#F8FAFC',
+    color: '#F4F4F5',
     fontSize: 15,
     fontWeight: '500',
   },
@@ -356,11 +373,11 @@ const styles = StyleSheet.create({
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#121215',
     borderRadius: 14,
     padding: 4,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#27272A',
   },
   segmentBtn: {
     flex: 1,
@@ -371,22 +388,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   segmentBtnActive: {
-    backgroundColor: '#38BDF8',
+    backgroundColor: '#6366F1',
   },
   segmentBtnText: {
-    color: '#94A3B8',
+    color: '#A1A1AA',
     fontSize: 13,
     fontWeight: '600',
   },
   segmentBtnTextActive: {
-    color: '#0F172A',
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: '#09090B',
   },
   list: {
     flex: 1,
@@ -397,11 +414,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardContainer: {
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#121215',
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#111111',
+    borderColor: '#27272A',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -409,28 +426,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
+  badgePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
   badgeText: {
-    color: '#64748B',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   ownerText: {
-    color: '#475569',
+    color: '#71717A',
     fontSize: 12,
     fontWeight: '500',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#F8FAFC',
+    color: '#F4F4F5',
     marginBottom: 8,
     letterSpacing: -0.3,
   },
   cardDescription: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#A1A1AA',
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -440,20 +461,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#111111',
+    borderTopColor: '#27272A',
   },
   footerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   footerItemsText: {
-    color: '#64748B',
+    color: '#71717A',
     fontSize: 13,
     fontWeight: '500',
     marginLeft: 6,
   },
   footerDateText: {
-    color: '#475569',
+    color: '#71717A',
     fontSize: 12,
     fontWeight: '500',
     marginLeft: 4,
@@ -468,9 +489,9 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#18181B',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#27272A',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -478,14 +499,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#F8FAFC',
+    color: '#F4F4F5',
     marginBottom: 8,
     textAlign: 'center',
     letterSpacing: -0.3,
   },
   emptyDesc: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#A1A1AA',
     lineHeight: 20,
     marginBottom: 20,
     textAlign: 'center',
@@ -494,13 +515,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#38BDF8',
+    backgroundColor: '#6366F1',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 99,
   },
   emptyActionBtnText: {
-    color: '#0F172A',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -510,11 +531,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 99,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#18181B',
+    borderWidth: 1,
+    borderColor: '#27272A',
     gap: 8,
   },
   retryText: {
-    color: '#000000',
+    color: '#F4F4F5',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -523,7 +546,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   totalResultsText: {
-    color: '#475569',
+    color: '#71717A',
     fontSize: 11,
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -533,23 +556,23 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   categoryScrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     gap: 8,
   },
   categoryChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#121215',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#27272A',
   },
   categoryChipActive: {
     backgroundColor: '#6366F1',
     borderColor: '#6366F1',
   },
   categoryChipText: {
-    color: '#94A3B8',
+    color: '#A1A1AA',
     fontSize: 12,
     fontWeight: '600',
   },

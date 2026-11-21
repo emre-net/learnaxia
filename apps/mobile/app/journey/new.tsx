@@ -68,7 +68,7 @@ export default function NewJourneyScreen() {
     return (
         <Screen style={styles.screen}>
             <StatusBar barStyle="light-content" />
-            <LinearGradient colors={['#050A14', '#090F1D']} style={StyleSheet.absoluteFillObject} />
+            <LinearGradient colors={['#09090B', '#121215']} style={StyleSheet.absoluteFillObject} />
 
             {/* Header */}
             <View style={styles.header}>
@@ -158,17 +158,17 @@ export default function NewJourneyScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#050A14' },
+    screen: { flex: 1, backgroundColor: '#09090B' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 24, paddingTop: 64, paddingBottom: 16,
-        borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomWidth: 1, borderBottomColor: '#18181B',
     },
     closeBtn: {
-        width: 40, height: 40, borderRadius: 20, backgroundColor: '#090F1D',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#182234',
+        width: 40, height: 40, borderRadius: 20, backgroundColor: '#121215',
+        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#27272A',
     },
-    headerTitle: { color: '#F8FAFC', fontWeight: '600', fontSize: 18 },
+    headerTitle: { color: '#F4F4F5', fontWeight: '600', fontSize: 18 },
     placeholderBtn: { width: 40, height: 40 },
     scrollContent: { paddingHorizontal: 24, paddingVertical: 24, paddingBottom: 100 },
     iconWrapper: { alignItems: 'center', marginBottom: 24 },
@@ -176,32 +176,32 @@ const styles = StyleSheet.create({
         width: 96, height: 96, borderRadius: 32, backgroundColor: 'rgba(99, 102, 241, 0.1)',
         borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.3)', alignItems: 'center', justifyContent: 'center',
     },
-    pageTitle: { color: '#F8FAFC', fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 12 },
-    pageDesc: { color: '#94A3B8', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 32, paddingHorizontal: 16 },
-    sectionLabel: { color: '#64748B', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 12, marginLeft: 4 },
+    pageTitle: { color: '#F4F4F5', fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 12 },
+    pageDesc: { color: '#A1A1AA', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 32, paddingHorizontal: 16 },
+    sectionLabel: { color: '#71717A', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 12, marginLeft: 4 },
     inputContainer: {
-        backgroundColor: '#0A0A0A', borderWidth: 1, borderColor: '#111111', borderRadius: 16,
+        backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A', borderRadius: 16,
         paddingHorizontal: 16, paddingVertical: 18, marginBottom: 12,
     },
     inputFocused: { borderColor: '#6366f1' },
-    input: { color: '#F8FAFC', fontSize: 16, fontWeight: '600' },
+    input: { color: '#F4F4F5', fontSize: 16, fontWeight: '600' },
     depthContainer: { flexDirection: 'row', gap: 8, marginTop: 4 },
     depthBtn: {
         flex: 1, paddingVertical: 14, alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#0A0A0A', borderWidth: 1, borderColor: '#111111', borderRadius: 12,
+        backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A', borderRadius: 12,
     },
     depthBtnActive: { backgroundColor: 'rgba(99, 102, 241, 0.15)', borderColor: '#6366f1' },
-    depthBtnText: { color: '#64748B', fontSize: 13, fontWeight: '600' },
+    depthBtnText: { color: '#71717A', fontSize: 13, fontWeight: '600' },
     depthBtnTextActive: { color: '#6366f1', fontWeight: '700' },
     bottomArea: {
         paddingHorizontal: 24, paddingVertical: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', backgroundColor: '#050A14',
+        borderTopWidth: 1, borderTopColor: '#18181B', backgroundColor: '#09090B',
     },
     generateBtn: {
         backgroundColor: '#6366f1', height: 60, borderRadius: 16, flexDirection: 'row',
         alignItems: 'center', justifyContent: 'center', gap: 8, shadowColor: '#6366f1',
         shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
     },
-    generateBtnDisabled: { backgroundColor: '#1E293B', shadowOpacity: 0, elevation: 0 },
+    generateBtnDisabled: { backgroundColor: '#18181B', shadowOpacity: 0, elevation: 0 },
     generateBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' },
 });

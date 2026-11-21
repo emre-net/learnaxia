@@ -41,6 +41,15 @@ Welcome to **LearnAxia**. This is a large-scale, dual-platform educational monor
    - Respect root `package.json` overrides: `apps/mobile` strictly uses React 18.3.1 for Expo SDK 52 compatibility.
 9. **No Dropped Mobile Fields / Full Feature Parity:**
    - When an entity or form has fields (e.g., `visibility`, `category`, `subCategory`, `description`), Mobile must NEVER drop them or hardcode them; full functional parity is mandatory.
+10. **5 Library Entities Integrity:**
+   - LearnAxia Library across BOTH Web and Mobile strictly consists of 5 entities: `Modules`, `Collections`, `Notes`, `Journeys (Rotalar)`, and `Solved Questions (AI Çözümleri)`. Never omit Solved Questions from Mobile.
+11. **Human-Centered Dark Design Standard (Anti-AI Generated Look):**
+   - Strictly avoid pure `#000000` pitch black / stark `#FFFFFF` text vibration (halation). Use deep dark zinc (`#09090b` canvas, `#121215`/`#18181b` card elevation, `#f4f4f5` text).
+   - Never dump raw empty telemetry counters ("0 dk", "%100", "1 Çözüm") as the dashboard hero. Lead with Content, Jump Back In (Kaldığın Yerden Devam Et), and Quick Discovery Story Bubbles.
+   - Never squeeze horizontal tab bars with `flex: 1` causing text clipping ("Koleksiyo..."). Use fluid horizontal scrollable pill tracks.
+   - Read and strictly adhere to `.ai/DESIGN_SYSTEM_AND_UX_SPEC.md` before touching any UI components.
+12. **Shared Scoring Tiers & Translations Contract:**
+   - Tier logic (`bronze`, `silver`, `gold`, `platinum`, `diamond`) and dictionaries must strictly live in `packages/shared`. Never maintain duplicate isolated copies in `apps/web`.
 
 ---
 

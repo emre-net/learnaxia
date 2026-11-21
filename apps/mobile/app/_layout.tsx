@@ -25,14 +25,14 @@ export default function RootLayout() {
   const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#000000' }}>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#09090B' }}>
       <AuthProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack
             screenOptions={{
               headerShown: false,
               animation: 'fade',
-              contentStyle: { backgroundColor: '#000000' }
+              contentStyle: { backgroundColor: '#09090B' }
             }}
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -55,7 +55,7 @@ export default function RootLayout() {
             <AnimatedSplash onComplete={() => setIsSplashComplete(true)} />
           )}
 
-          <StatusBar style="light" backgroundColor="#000000" />
+          <StatusBar style="light" backgroundColor="#09090B" />
         </ThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>

@@ -24,8 +24,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#F8FAFC', // Saf Beyaz
-        tabBarInactiveTintColor: '#475569', // Koyu Gri (Slate 600)
+        tabBarActiveTintColor: '#F4F4F5',
+        tabBarInactiveTintColor: '#71717A',
         headerShown: false,
         tabBarShowLabel: false,
         tabBarButton: HapticTab,
@@ -33,7 +33,7 @@ export default function TabLayout() {
           Platform.OS === 'ios' ? (
             <BlurView intensity={90} tint="dark" style={StyleSheet.absoluteFill} />
           ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0A0A0A', borderTopWidth: 1, borderTopColor: '#1E293B' }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#121215', borderTopWidth: 1, borderTopColor: '#27272A' }]} />
           )
         ),
         tabBarStyle: {
@@ -44,7 +44,7 @@ export default function TabLayout() {
           backgroundColor: 'transparent',
           elevation: 0,
           borderTopWidth: Platform.OS === 'ios' ? 1 : 0,
-          borderTopColor: '#1E293B',
+          borderTopColor: '#27272A',
           height: Platform.OS === 'ios' ? 88 : 64,
           paddingBottom: Platform.OS === 'ios' ? 24 : 8,
           paddingTop: 8,
@@ -80,7 +80,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: () => (
             <View style={styles.floatingButton}>
-              <Ionicons name="add" size={28} color="#000000" />
+              <Ionicons name="add" size={28} color="#FFFFFF" />
             </View>
           ),
           tabBarButton: (props) => (
@@ -136,19 +136,19 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#6366F1',
   },
   floatingButton: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#F8FAFC', // Beyaz minimal buton
+    backgroundColor: '#6366F1',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#6366F1',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 6,
   },
 });

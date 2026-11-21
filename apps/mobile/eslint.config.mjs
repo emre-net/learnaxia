@@ -1,14 +1,25 @@
-// https://docs.expo.dev/guides/using-eslint/
-import expoConfig from "eslint-config-expo/flat.js";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
 import globals from "globals";
 
-const expo = Array.isArray(expoConfig) ? expoConfig : [expoConfig];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
 
 export default [
   {
     ignores: ["dist/**", ".expo/**", "node_modules/**", "nativewind-env.d.ts"],
   },
-  ...expo,
+  ...compat.extends("expo"),
+  {
+    rules: {
+      "react-hooks/exhaustive-deps": "off",
+    },
+  },
   {
     files: ["**/metro.config.cjs", "**/*.config.cjs"],
     languageOptions: {

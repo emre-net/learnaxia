@@ -322,30 +322,30 @@ export default function NoteEditorScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#000000' },
-    loadingScreen: { flex: 1, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center' },
+    screen: { flex: 1, backgroundColor: '#09090B' },
+    loadingScreen: { flex: 1, backgroundColor: '#09090B', alignItems: 'center', justifyContent: 'center' },
     header: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14,
-        borderBottomWidth: 1, borderBottomColor: '#111111',
+        borderBottomWidth: 1, borderBottomColor: '#18181B',
     },
     backBtn: {
         flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4,
     },
-    backBtnText: { color: '#94A3B8', fontSize: 14, fontWeight: '600', marginLeft: 2 },
+    backBtnText: { color: '#A1A1AA', fontSize: 14, fontWeight: '600', marginLeft: 2 },
     headerStatus: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     savedBadge: {
-        flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#0A0A0A',
-        borderWidth: 1, borderColor: '#1E293B',
+        flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#121215',
+        borderWidth: 1, borderColor: '#27272A',
         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
     },
-    savedText: { color: '#94A3B8', fontSize: 11, fontWeight: '600' },
+    savedText: { color: '#A1A1AA', fontSize: 11, fontWeight: '600' },
     drawingToggleBtn: {
-        width: 36, height: 36, borderRadius: 10, backgroundColor: '#0A0A0A',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E293B',
+        width: 36, height: 36, borderRadius: 10, backgroundColor: '#121215',
+        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#27272A',
     },
     drawingToggleBtnActive: {
-        backgroundColor: '#1E293B', borderColor: '#38BDF8',
+        backgroundColor: '#18181B', borderColor: '#6366F1',
     },
     offlineStrip: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -355,8 +355,8 @@ const styles = StyleSheet.create({
     offlineStripText: { color: '#FCD34D', fontSize: 11, fontWeight: '600' },
     scrollContent: { paddingHorizontal: 18, paddingVertical: 16, paddingBottom: 100 },
     titleInput: {
-        color: '#F8FAFC', fontSize: 22, fontWeight: '700', paddingVertical: 8,
-        borderBottomWidth: 1, borderBottomColor: '#1E293B', marginBottom: 14,
+        color: '#F4F4F5', fontSize: 22, fontWeight: '700', paddingVertical: 8,
+        borderBottomWidth: 1, borderBottomColor: '#27272A', marginBottom: 14,
     },
     contentInput: {
         color: '#E2E8F0', fontSize: 15, lineHeight: 24, minHeight: 180,
@@ -368,13 +368,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     drawingSectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    drawingSectionTitle: { color: '#38BDF8', fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+    drawingSectionTitle: { color: '#818CF8', fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
     hideDrawingBtn: { padding: 4 },
-    hideDrawingText: { color: '#94A3B8', fontSize: 11, fontWeight: '600' },
+    hideDrawingText: { color: '#A1A1AA', fontSize: 11, fontWeight: '600' },
     addDrawingBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: '#111827', borderWidth: 1, borderColor: '#1E293B',
+        backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A',
         borderRadius: 14, paddingVertical: 14, marginTop: 24,
     },
-    addDrawingBtnText: { color: '#38BDF8', fontSize: 13, fontWeight: '600' },
+    addDrawingBtnText: { color: '#818CF8', fontSize: 13, fontWeight: '600' },
 });

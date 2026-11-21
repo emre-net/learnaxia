@@ -10,18 +10,18 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="h-full relative">
+        <div className="h-full relative bg-[#09090b]">
             <GuestDataSyncTrigger />
-            {/* Desktop & Tablet Sidebar */}
-            <div className="hidden h-full md:flex md:w-64 lg:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-background border-r border-white/[0.07]">
+            {/* Desktop Sidebar (Only >= 1024px) */}
+            <div className="hidden h-full lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 z-[80] bg-[#09090b] border-r border-white/[0.07]">
                 <Sidebar className="h-full" />
             </div>
 
-            {/* Main content — pb-36 mobile için bottom nav boşluğu */}
-            <main className="md:pl-64 lg:pl-72 flex-1 min-h-screen overflow-y-auto pb-36 md:pb-0">
+            {/* Main content — pb-36 mobile/tablet (<1024px) için bottom nav boşluğu, lg:pb-0 desktop */}
+            <main className="lg:pl-72 flex-1 min-h-screen overflow-y-auto pb-36 lg:pb-0 bg-[#09090b]">
                 <div className="h-full">
-                    {/* Mobile top header */}
-                    <div className="flex items-center gap-3 px-4 py-3 md:hidden border-b border-white/[0.07] bg-background/80 backdrop-blur-md sticky top-0 z-50">
+                    {/* Mobile & Tablet top header (< 1024px) */}
+                    <div className="flex items-center gap-3 px-4 py-3 lg:hidden border-b border-white/[0.07] bg-[#09090b]/85 backdrop-blur-md sticky top-0 z-50">
                         <MobileSidebar />
                         <Link href="/dashboard" className="font-black text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase">
                             LRX
@@ -38,7 +38,7 @@ export default function DashboardLayout({
                 </div>
             </main>
 
-            {/* Mobile Bottom Navigation */}
+            {/* Mobile & Tablet Bottom Navigation (< 1024px) */}
             <MobileBottomNav />
         </div>
     )

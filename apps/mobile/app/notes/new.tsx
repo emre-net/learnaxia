@@ -90,7 +90,7 @@ export default function NewNoteScreen() {
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" backgroundColor="#000000" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
 
             {/* Header */}
             <View style={styles.header}>
@@ -201,7 +201,7 @@ export default function NewNoteScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     header: {
         flexDirection: 'row',
@@ -211,38 +211,38 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 14,
         borderBottomWidth: 1,
-        borderBottomColor: '#111111',
+        borderBottomColor: '#18181B',
     },
     closeBtn: {
         width: 38,
         height: 38,
         borderRadius: 19,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     headerTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 16,
         fontWeight: '700',
     },
     saveBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#38BDF8',
+        backgroundColor: '#6366F1',
         paddingHorizontal: 16,
         paddingVertical: 9,
         borderRadius: 20,
         gap: 6,
     },
     saveBtnDisabled: {
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         opacity: 0.5,
     },
     saveBtnText: {
-        color: '#09090b',
+        color: '#FFFFFF',
         fontSize: 13,
         fontWeight: '700',
     },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     titleInput: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 22,
         fontWeight: '700',
         paddingVertical: 10,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#27272A',
         marginVertical: 12,
     },
     contentInput: {
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     drawingSectionTitle: {
-        color: '#38BDF8',
+        color: '#818CF8',
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 0.8,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     hideDrawingText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 11,
         fontWeight: '600',
     },
@@ -306,15 +306,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         borderRadius: 14,
         paddingVertical: 14,
         marginTop: 24,
     },
     addDrawingBtnText: {
-        color: '#38BDF8',
+        color: '#818CF8',
         fontSize: 13,
         fontWeight: '600',
     },

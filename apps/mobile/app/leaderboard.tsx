@@ -226,7 +226,7 @@ export default function LeaderboardScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#030712',
+        backgroundColor: '#09090B',
     },
     header: {
         flexDirection: 'row',
@@ -236,13 +236,15 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'ios' ? 12 : 24,
         paddingBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+        borderBottomColor: '#18181B',
     },
     backButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: '#121215',
+        borderWidth: 1,
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -252,12 +254,12 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         letterSpacing: -0.3,
     },
     headerSubtitle: {
         fontSize: 12,
-        color: '#64748B',
+        color: '#71717A',
         marginTop: 2,
     },
     periodRow: {
@@ -271,21 +273,21 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         alignItems: 'center',
         borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.04)',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.06)',
+        borderColor: '#27272A',
     },
     periodChipActive: {
-        backgroundColor: 'rgba(56, 189, 248, 0.12)',
-        borderColor: '#38BDF8',
+        backgroundColor: '#6366F1',
+        borderColor: '#6366F1',
     },
     periodText: {
         fontSize: 13,
         fontWeight: '500',
-        color: '#94A3B8',
+        color: '#A1A1AA',
     },
     periodTextActive: {
-        color: '#38BDF8',
+        color: '#FFFFFF',
         fontWeight: '700',
     },
     listContent: {
@@ -297,12 +299,12 @@ const styles = StyleSheet.create({
     entryCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#0B0F19',
+        backgroundColor: '#121215',
         borderRadius: 16,
         paddingVertical: 12,
         paddingHorizontal: 14,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.06)',
+        borderColor: '#27272A',
     },
     rankContainer: {
         width: 34,
@@ -315,7 +317,7 @@ const styles = StyleSheet.create({
     rankNumber: {
         fontSize: 15,
         fontWeight: '700',
-        color: '#64748B',
+        color: '#71717A',
     },
     avatar: {
         width: 42,
@@ -328,7 +330,7 @@ const styles = StyleSheet.create({
         width: 42,
         height: 42,
         borderRadius: 21,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: '#18181B',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1.5,
@@ -349,21 +351,21 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#F1F5F9',
+        color: '#F4F4F5',
         maxWidth: 160,
     },
     currentUserName: {
-        color: '#38BDF8',
+        color: '#818CF8',
         fontWeight: '700',
     },
     youBadge: {
         fontSize: 11,
-        color: '#38BDF8',
+        color: '#818CF8',
         fontWeight: '600',
     },
     userHandle: {
         fontSize: 12,
-        color: '#64748B',
+        color: '#71717A',
         marginTop: 2,
     },
     tierPill: {
@@ -381,13 +383,13 @@ const styles = StyleSheet.create({
     momentumValue: {
         fontSize: 15,
         fontWeight: '800',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontVariant: ['tabular-nums'],
     },
     momentumLabel: {
         fontSize: 10,
         fontWeight: '600',
-        color: '#64748B',
+        color: '#71717A',
         textTransform: 'uppercase',
     },
     centered: {
@@ -407,12 +409,12 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         marginBottom: 6,
     },
     emptySubtitle: {
         fontSize: 13,
-        color: '#64748B',
+        color: '#71717A',
         textAlign: 'center',
         paddingHorizontal: 32,
     },
@@ -424,9 +426,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingBottom: Platform.OS === 'ios' ? 28 : 16,
         paddingTop: 12,
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(56, 189, 248, 0.3)',
+        borderTopColor: '#27272A',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.3,
@@ -440,16 +442,16 @@ const styles = StyleSheet.create({
     pinnedTitle: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#38BDF8',
+        color: '#818CF8',
     },
     pinnedSubtitle: {
         fontSize: 12,
-        color: '#94A3B8',
+        color: '#A1A1AA',
         marginTop: 1,
     },
     pinnedScore: {
         fontSize: 17,
         fontWeight: '800',
-        color: '#38BDF8',
+        color: '#818CF8',
     },
 });

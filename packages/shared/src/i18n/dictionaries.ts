@@ -172,7 +172,8 @@ const en = {
         tabs: {
             modules: "Modules",
             collections: "Collections",
-            learnings: "Learnings",
+            journeys: "Journeys",
+            learnings: "Journeys",
             aiSolutions: "AI Solutions",
             notes: "Notes"
         },
@@ -183,6 +184,7 @@ const en = {
             gap: "Gap Fill",
             module: "Module",
             collection: "Collection",
+            journey: "Learning Journey",
             note: "Note"
         },
         items: "Items",
@@ -772,7 +774,8 @@ const tr = {
         tabs: {
             modules: "Modüller",
             collections: "Koleksiyonlar",
-            learnings: "Öğrenmeler",
+            journeys: "Rotalar",
+            learnings: "Rotalar",
             aiSolutions: "AI Çözümleri",
             notes: "Notlar"
         },
@@ -783,6 +786,7 @@ const tr = {
             gap: "Boşluk Doldurma",
             module: "Modül",
             collection: "Koleksiyon",
+            journey: "Öğrenme Rotası",
             note: "Not"
         },
         items: "Öğe",

@@ -83,7 +83,7 @@ export default function NewCollectionScreen() {
         <Screen style={styles.screen}>
             <StatusBar barStyle="light-content" />
             <LinearGradient
-                colors={['#050A14', '#090F1D']}
+                colors={['#09090B', '#121215']}
                 style={StyleSheet.absoluteFillObject}
             />
 
@@ -357,7 +357,7 @@ export default function NewCollectionScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#050A14',
+        backgroundColor: '#09090B',
     },
     header: {
         flexDirection: 'row',
@@ -367,25 +367,25 @@ const styles = StyleSheet.create({
         paddingTop: 24,
         paddingBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
+        borderBottomColor: '#18181B',
     },
     closeBtn: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#090F1D',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#27272A',
     },
     headerTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontWeight: '600',
         fontSize: 18,
     },
     saveBtn: {
-        backgroundColor: '#A855F7',
+        backgroundColor: '#6366F1',
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 20,
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     saveBtnDisabled: {
-        backgroundColor: '#182234',
+        backgroundColor: '#18181B',
         opacity: 0.5,
     },
     saveBtnText: {
@@ -417,14 +417,14 @@ const styles = StyleSheet.create({
         width: 88,
         height: 88,
         borderRadius: 28,
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
         borderWidth: 1,
-        borderColor: 'rgba(168, 85, 247, 0.3)',
+        borderColor: 'rgba(99, 102, 241, 0.3)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     fieldLabel: {
-        color: 'rgba(255,255,255,0.5)',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '700',
         textTransform: 'uppercase',
@@ -435,9 +435,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#090F1D',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#27272A',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -447,11 +447,11 @@ const styles = StyleSheet.create({
         paddingTop: 14,
     },
     inputFocused: {
-        borderColor: '#A855F7',
+        borderColor: '#6366F1',
     },
     input: {
         flex: 1,
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 18,
         fontWeight: '600',
     },
@@ -475,15 +475,15 @@ const styles = StyleSheet.create({
     },
     visibilityCard: {
         flex: 1,
-        backgroundColor: '#090F1D',
+        backgroundColor: '#121215',
         borderWidth: 1.5,
-        borderColor: '#182234',
+        borderColor: '#27272A',
         borderRadius: 16,
         padding: 14,
     },
     visibilityCardActive: {
-        borderColor: '#A855F7',
-        backgroundColor: 'rgba(168, 85, 247, 0.08)',
+        borderColor: '#6366F1',
+        backgroundColor: 'rgba(99, 102, 241, 0.08)',
     },
     visibilityHeader: {
         flexDirection: 'row',
@@ -492,15 +492,15 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     visibilityTitle: {
-        color: '#94A3B8',
+        color: '#71717A',
         fontSize: 14,
         fontWeight: '700',
     },
     visibilityTitleActive: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
     },
     visibilityDesc: {
-        color: '#64748B',
+        color: '#52525B',
         fontSize: 11,
         lineHeight: 15,
     },
@@ -513,9 +513,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#090F1D',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#182234',
+        borderColor: '#27272A',
         borderRadius: 14,
         paddingHorizontal: 12,
         paddingVertical: 12,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     },
     pickerTriggerText: {
         flex: 1,
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 13,
         fontWeight: '600',
     },
@@ -534,10 +534,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
     },
     modalContent: {
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         maxHeight: '70%',
         paddingVertical: 16,
     },
@@ -548,10 +548,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 14,
         borderBottomWidth: 1,
-        borderBottomColor: '#1E293B',
+        borderBottomColor: '#27272A',
     },
     modalTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 16,
         fontWeight: '700',
     },
@@ -562,18 +562,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 14,
         borderBottomWidth: 1,
-        borderBottomColor: '#1E293B',
+        borderBottomColor: '#27272A',
     },
     modalItemActive: {
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
     },
     modalItemText: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 14,
         fontWeight: '500',
     },
     modalItemTextActive: {
-        color: '#60A5FA',
+        color: '#818CF8',
         fontWeight: '700',
     },
 });

@@ -17,7 +17,7 @@ export default function ProfileScreen() {
     const { user, logout } = useAuth();
     const { language, setLanguage } = useLanguage();
     const [profileData, setProfileData] = useState<{
-        stats?: { modules: number; collections: number; notes?: number };
+        stats?: { modules: number; collections: number; notes?: number; journeys?: number; solvedQuestions?: number };
     } | null>(null);
     const [analyticsData, setAnalyticsData] = useState<{
         totalStudyMinutes?: number;
@@ -179,6 +179,16 @@ export default function ProfileScreen() {
             value: profileData?.stats?.notes || 0,
             icon: 'book-outline' as const,
         },
+        {
+            label: language === 'tr' ? 'Rotalar' : 'Journeys',
+            value: profileData?.stats?.journeys || 0,
+            icon: 'map-outline' as const,
+        },
+        {
+            label: language === 'tr' ? 'AI Çözümleri' : 'AI Solutions',
+            value: profileData?.stats?.solvedQuestions || 0,
+            icon: 'sparkles-outline' as const,
+        },
     ];
 
     return (
@@ -335,25 +345,32 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
 
-                {/* Stats Grid */}
-                <View style={styles.statsGrid}>
-                    {statItems.map((stat, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            activeOpacity={0.7}
-                            style={styles.statCard}
-                            onPress={() => {
-                                Haptics.selectionAsync();
-                                router.push('/(tabs)/library' as any);
-                            }}
-                        >
-                            <View style={styles.statIconCircle}>
-                                <Ionicons name={stat.icon} size={20} color="#6366F1" />
-                            </View>
-                            <Text style={styles.statValue}>{stat.value}</Text>
-                            <Text style={styles.statLabel}>{stat.label}</Text>
-                        </TouchableOpacity>
-                    ))}
+                {/* 5 Library Entities Stats Track */}
+                <View style={{ marginBottom: 28 }}>
+                    <Text style={styles.sectionTitle}>{language === 'tr' ? 'KÜTÜPHANEM' : 'MY LIBRARY'}</Text>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.statsScroll}
+                    >
+                        {statItems.map((stat, i) => (
+                            <TouchableOpacity
+                                key={i}
+                                activeOpacity={0.7}
+                                style={styles.statCard}
+                                onPress={() => {
+                                    Haptics.selectionAsync();
+                                    router.push('/(tabs)/library' as any);
+                                }}
+                            >
+                                <View style={styles.statIconCircle}>
+                                    <Ionicons name={stat.icon} size={20} color="#818CF8" />
+                                </View>
+                                <Text style={styles.statValue}>{stat.value}</Text>
+                                <Text style={styles.statLabel} numberOfLines={1}>{stat.label}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
                 </View>
 
                 {/* Settings */}
@@ -442,7 +459,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     header: {
         paddingHorizontal: 24,
@@ -452,7 +469,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 28,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         letterSpacing: -0.5,
     },
     profileHero: {
@@ -467,10 +484,12 @@ const styles = StyleSheet.create({
         width: 72,
         height: 72,
         borderRadius: 36,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
+        borderWidth: 1,
+        borderColor: '#27272A',
     },
     heroAvatarImage: {
         width: 72,
@@ -479,7 +498,7 @@ const styles = StyleSheet.create({
         marginRight: 16,
     },
     heroInitials: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 24,
         fontWeight: '700',
         letterSpacing: 1,
@@ -488,32 +507,32 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     heroName: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 24,
         fontWeight: '700',
         letterSpacing: -0.5,
     },
     heroEmail: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 14,
         marginBottom: 4,
     },
     handleText: {
-        color: '#475569',
+        color: '#71717A',
         fontSize: 13,
         fontWeight: '500',
     },
     levelBadge: {
         marginLeft: 8,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: '#334155',
+        borderColor: '#27272A',
     },
     levelBadgeText: {
-        color: '#F8FAFC',
+        color: '#818CF8',
         fontSize: 10,
         fontWeight: '800',
         textTransform: 'uppercase',
@@ -522,7 +541,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     sectionTitle: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 2,
@@ -541,9 +560,9 @@ const styles = StyleSheet.create({
         width: 64,
         height: 64,
         borderRadius: 32,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
@@ -552,7 +571,7 @@ const styles = StyleSheet.create({
         fontSize: 28,
     },
     badgeLabel: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 10,
         fontWeight: '600',
         textAlign: 'center',
@@ -563,9 +582,9 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         borderRadius: 20,
         padding: 24,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     momentumHeader: {
         flexDirection: 'row',
@@ -574,7 +593,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     momentumLabel: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 2,
@@ -583,36 +602,38 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 99,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
     },
     tierChipText: {
         fontSize: 11,
         fontWeight: '600',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
     momentumScore: {
         fontSize: 48,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         letterSpacing: -1,
         marginBottom: 12,
     },
     momentumProgressBg: {
-        height: 4,
+        height: 5,
         borderRadius: 99,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#27272A',
         marginBottom: 8,
         overflow: 'hidden',
     },
     momentumProgressFill: {
         height: '100%',
         borderRadius: 99,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: '#6366F1',
     },
     momentumProgressLabel: {
-        color: '#475569',
+        color: '#A1A1AA',
         fontSize: 12,
         marginBottom: 24,
     },
@@ -622,57 +643,55 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingTop: 20,
         borderTopWidth: 1,
-        borderTopColor: '#111111',
+        borderTopColor: '#27272A',
     },
     momentumMetricItem: {
         flex: 1,
         alignItems: 'center',
     },
     momentumMetricVal: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 4,
     },
     momentumMetricLabel: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 11,
         fontWeight: '500',
     },
-    statsGrid: {
-        flexDirection: 'row',
-        marginHorizontal: 24,
-        marginBottom: 32,
+    statsScroll: {
+        paddingHorizontal: 24,
         gap: 12,
     },
     statCard: {
-        flex: 1,
-        backgroundColor: '#0A0A0A',
-        borderRadius: 20,
-        padding: 16,
+        width: 104,
+        backgroundColor: '#121215',
+        borderRadius: 18,
+        padding: 14,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         alignItems: 'center',
     },
     statIconCircle: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: '#1E1B4B',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(99, 102, 241, 0.12)',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 10,
+        marginBottom: 8,
     },
     statValue: {
-        color: '#F8FAFC',
-        fontSize: 22,
+        color: '#F4F4F5',
+        fontSize: 20,
         fontWeight: '700',
         letterSpacing: -0.5,
         marginBottom: 2,
     },
     statLabel: {
-        color: '#64748B',
-        fontSize: 12,
+        color: '#A1A1AA',
+        fontSize: 11,
         fontWeight: '600',
     },
     settingsSection: {
@@ -680,7 +699,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     settingsTitle: {
-        color: '#64748B',
+        color: '#71717A',
         fontWeight: '600',
         fontSize: 13,
         marginBottom: 12,
@@ -689,10 +708,10 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     },
     settingsGroup: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         overflow: 'hidden',
     },
     settingsItem: {
@@ -702,12 +721,12 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     settingsItemText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 15,
         fontWeight: '500',
     },
     settingsItemSubtext: {
-        color: '#64748B',
+        color: '#71717A',
         fontSize: 12,
         marginTop: 2,
     },
@@ -716,14 +735,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     settingsItemValue: {
-        color: '#64748B',
+        color: '#A1A1AA',
         marginRight: 8,
         fontSize: 14,
         fontWeight: '500',
     },
     settingsDivider: {
         height: 1,
-        backgroundColor: '#111111',
+        backgroundColor: '#27272A',
         marginLeft: 20,
     },
     logoutContainer: {
@@ -734,12 +753,12 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 99,
         alignItems: 'center',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     logoutText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontWeight: '600',
         fontSize: 15,
     },
@@ -754,9 +773,9 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         paddingHorizontal: 16,
         borderRadius: 16,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     actionIconCircle: {
         width: 38,
@@ -772,11 +791,11 @@ const styles = StyleSheet.create({
     actionTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
     },
     actionSubtitle: {
         fontSize: 11,
-        color: '#64748B',
+        color: '#A1A1AA',
         marginTop: 2,
     },
 });

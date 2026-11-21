@@ -314,7 +314,7 @@ export default function CreateScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     header: {
         paddingHorizontal: 24,
@@ -325,11 +325,11 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     content: {
         flex: 1,
@@ -345,12 +345,12 @@ const styles = StyleSheet.create({
     heroTitle: {
         fontSize: 32,
         fontWeight: '700',
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         letterSpacing: -1,
         marginBottom: 8,
     },
     heroSubtitle: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 15,
         lineHeight: 22,
     },
@@ -360,10 +360,10 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     bentoCard: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         padding: 20,
     },
     bentoLarge: {
@@ -460,14 +460,14 @@ const styles = StyleSheet.create({
         marginTop: 'auto',
     },
     bentoTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 20,
         fontWeight: '700',
         marginBottom: 4,
         letterSpacing: -0.5,
     },
     bentoDesc: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 13,
         lineHeight: 18,
     },
@@ -480,29 +480,29 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     bentoTitleSmall: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 2,
     },
     bentoDescSmall: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 12,
     },
     sectionTitle: {
         fontSize: 13,
         fontWeight: '600',
-        color: '#64748B',
+        color: '#71717A',
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginBottom: 16,
         marginLeft: 8,
     },
     listContainer: {
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#121215',
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
         overflow: 'hidden',
     },
     listItem: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
@@ -523,18 +523,18 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     listTitle: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 2,
     },
     listDesc: {
-        color: '#64748B',
+        color: '#A1A1AA',
         fontSize: 13,
     },
     listDivider: {
         height: 1,
-        backgroundColor: '#111111',
+        backgroundColor: '#27272A',
         marginLeft: 76,
     },
 });
