@@ -261,6 +261,27 @@ export default function CreateScreen() {
 
                     <View style={styles.listDivider} />
 
+                    <TouchableOpacity
+                        style={styles.listItem}
+                        onPress={() => router.push({ pathname: '/modules/new', params: { ai: 'true' } } as any)}
+                    >
+                        <View style={[styles.listIconWrapper, { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
+                            <Ionicons name="sparkles" size={20} color="#A855F7" />
+                        </View>
+                        <View style={styles.listTextContainer}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <Text style={styles.listTitle}>AI ile Modül Üret</Text>
+                                <View style={styles.aiBadgePill}>
+                                    <Text style={styles.aiBadgePillText}>OTOMATİK</Text>
+                                </View>
+                            </View>
+                            <Text style={styles.listDesc}>Konudan anında Flashcard, Test veya Soru üret</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color="#475569" />
+                    </TouchableOpacity>
+
+                    <View style={styles.listDivider} />
+
                     <TouchableOpacity style={styles.listItem} onPress={() => router.push('/modules/new')}>
                         <View style={styles.listIconWrapper}>
                             <Ionicons name="add-circle" size={20} color="#F8FAFC" />
@@ -536,5 +557,17 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#27272A',
         marginLeft: 76,
+    },
+    aiBadgePill: {
+        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 6,
+    },
+    aiBadgePillText: {
+        fontSize: 9,
+        fontWeight: '700',
+        color: '#C084FC',
+        letterSpacing: 0.5,
     },
 });

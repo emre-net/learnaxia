@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
@@ -83,6 +83,9 @@ function createDefaultItem(): NewItem {
 
 export default function NewModuleScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{ ai?: string }>();
+    const isAiMode = params?.ai === 'true';
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [moduleType, setModuleType] = useState<QuestionType>('FLASHCARD');
@@ -354,6 +357,20 @@ export default function NewModuleScreen() {
                     contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                 >
+                    {isAiMode && (
+                        <View style={styles.aiModeBanner}>
+                            <View style={styles.aiModeBannerIcon}>
+                                <Ionicons name="sparkles" size={18} color="#C084FC" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.aiModeBannerTitle}>Yapay Zeka Asistanı Aktif</Text>
+                                <Text style={styles.aiModeBannerDesc}>
+                                    Modül başlığını yazıp soru tipini belirleyin; ardından alttaki &quot;Yapay Zeka (AI)&quot; butonuna basarak tüm kartları otomatik oluşturun.
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+
                     {/* Soru / Modül Türü Seçimi */}
                     <Text style={styles.sectionLabel}>MODÜL TÜRÜ (TÜM KARTLAR BU TÜRDE OLUR)</Text>
                     <View style={styles.typeGrid}>
@@ -1042,4 +1059,36 @@ const styles = StyleSheet.create({
     modalItemSelected: { backgroundColor: 'rgba(99, 102, 241, 0.1)' },
     modalItemText: { color: '#D4D4D8', fontSize: 14, fontWeight: '500' },
     modalItemTextSelected: { color: '#FFFFFF', fontWeight: '700' },
+
+    // AI Mode Banner
+    aiModeBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(168, 85, 247, 0.25)',
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 20,
+    },
+    aiModeBannerIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(168, 85, 247, 0.15)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    aiModeBannerTitle: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#C084FC',
+        marginBottom: 2,
+    },
+    aiModeBannerDesc: {
+        fontSize: 12,
+        color: '#D4D4D8',
+        lineHeight: 16,
+    },
 });

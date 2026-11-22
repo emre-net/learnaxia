@@ -25,6 +25,15 @@ type DiscoverItem = {
 };
 
 type TabType = 'MODULE' | 'COLLECTION' | 'NOTE';
+type ModuleTypeFilter = 'ALL' | 'FLASHCARD' | 'MC' | 'TRUE_FALSE' | 'GAP';
+
+const MODULE_TYPE_FILTERS: { id: ModuleTypeFilter; label: string; icon: 'layers-outline' | 'radio-button-on-outline' | 'checkmark-circle-outline' | 'create-outline' | 'apps-outline' }[] = [
+  { id: 'ALL', label: 'Tüm Tipler', icon: 'apps-outline' },
+  { id: 'FLASHCARD', label: 'Flashcard', icon: 'layers-outline' },
+  { id: 'MC', label: 'Çoktan Seçmeli', icon: 'radio-button-on-outline' },
+  { id: 'TRUE_FALSE', label: 'Doğru / Yanlış', icon: 'checkmark-circle-outline' },
+  { id: 'GAP', label: 'Boşluk Doldurma', icon: 'create-outline' },
+];
 
 export default function ExploreScreen() {
   const router = useRouter();
@@ -35,6 +44,7 @@ export default function ExploreScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedModuleType, setSelectedModuleType] = useState<ModuleTypeFilter>('ALL');
   const [total, setTotal] = useState(0);
   const [fetchError, setFetchError] = useState(false);
 
@@ -53,6 +63,9 @@ export default function ExploreScreen() {
       if (selectedCategory && selectedCategory !== 'ALL') {
         params.set('category', selectedCategory);
       }
+      if (activeTab === 'MODULE' && selectedModuleType !== 'ALL') {
+        params.set('moduleType', selectedModuleType);
+      }
 
       const res = await api.get(`/mobile/discover?${params.toString()}`);
       setItems(res.data.items || []);
@@ -65,7 +78,7 @@ export default function ExploreScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeTab, debouncedSearch, selectedCategory]);
+  }, [activeTab, debouncedSearch, selectedCategory, selectedModuleType]);
 
   useEffect(() => {
     setLoading(true);
@@ -268,6 +281,49 @@ export default function ExploreScreen() {
           })}
         </ScrollView>
       </View>
+
+      {/* 4 Question Type Filter Chips (Only for Modules) */}
+      {activeTab === 'MODULE' && (
+        <View style={styles.typeFilterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScrollContent}
+          >
+            {MODULE_TYPE_FILTERS.map((tf) => {
+              const isActive = selectedModuleType === tf.id;
+              return (
+                <TouchableOpacity
+                  key={tf.id}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedModuleType(tf.id);
+                  }}
+                  style={[
+                    styles.typeChip,
+                    isActive && styles.typeChipActive
+                  ]}
+                >
+                  <Ionicons
+                    name={tf.icon}
+                    size={13}
+                    color={isActive ? '#38BDF8' : '#71717A'}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    style={[
+                      styles.typeChipText,
+                      isActive && styles.typeChipTextActive
+                    ]}
+                  >
+                    {tf.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -578,6 +634,32 @@ const styles = StyleSheet.create({
   },
   categoryChipTextActive: {
     color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  typeFilterContainer: {
+    paddingBottom: 12,
+  },
+  typeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#121215',
+    borderWidth: 1,
+    borderColor: '#27272A',
+  },
+  typeChipActive: {
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderColor: '#38BDF8',
+  },
+  typeChipText: {
+    color: '#71717A',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  typeChipTextActive: {
+    color: '#38BDF8',
     fontWeight: '700',
   },
 });

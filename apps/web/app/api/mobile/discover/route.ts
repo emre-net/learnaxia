@@ -14,6 +14,8 @@ export async function GET(req: Request) {
         const type = searchParams.get("type") || "MODULE";
         const search = searchParams.get("search");
         const category = searchParams.get("category");
+        const subCategory = searchParams.get("subCategory");
+        const moduleType = searchParams.get("moduleType");
         const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
         const offset = Math.max(parseInt(searchParams.get("offset") || "0"), 0);
 
@@ -49,6 +51,9 @@ export async function GET(req: Request) {
                 ...(category && category !== 'ALL' && {
                     category: { equals: category, mode: 'insensitive' as const }
                 }),
+                ...(subCategory && subCategory !== 'ALL' && {
+                    subCategory: { equals: subCategory, mode: 'insensitive' as const }
+                }),
                 ...(search && {
                     OR: [
                         { title: { contains: search, mode: 'insensitive' as const } },
@@ -80,6 +85,12 @@ export async function GET(req: Request) {
                 status: "ACTIVE",
                 ...(category && category !== 'ALL' && {
                     category: { equals: category, mode: 'insensitive' as const }
+                }),
+                ...(subCategory && subCategory !== 'ALL' && {
+                    subCategory: { equals: subCategory, mode: 'insensitive' as const }
+                }),
+                ...(moduleType && moduleType !== 'ALL' && {
+                    type: { equals: moduleType as any }
                 }),
                 ...(search && {
                     OR: [

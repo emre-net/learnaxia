@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView, RefreshControl, StyleSheet, Linking, Alert, ActionSheetIOS, Platform } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+    View, Text, TouchableOpacity, Image, ScrollView,
+    RefreshControl, StyleSheet, Linking, Alert, ActionSheetIOS,
+    Platform, Modal, TextInput, KeyboardAvoidingView
+} from 'react-native';
 import { Screen } from '@/components/ui/screen';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,23 +19,76 @@ import { useFocusEffect, useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { user, logout } = useAuth();
+    const { user, logout, refreshProfile } = useAuth();
     const { language, setLanguage } = useLanguage();
     const [profileData, setProfileData] = useState<{
         stats?: { modules: number; collections: number; notes?: number; journeys?: number; solvedQuestions?: number };
-    } | null>(null);
-    const [analyticsData, setAnalyticsData] = useState<{
-        totalStudyMinutes?: number;
     } | null>(null);
     const [scoreData, setScoreData] = useState<{
         momentum: { thisMonth: number; allTime: number };
         tier: { thisMonth: { key: string; label: string; emoji: string; color: string; progress: number; pointsToNext: number | null } };
         metrics: { studyMinutes: number; cardsReviewed: number; accuracyRate: number; activeDays: number };
-        badges: Array<{ key: string; emoji: string; label: string }>;
+        badges: { key: string; emoji: string; label: string }[];
     } | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [deletingAccount, setDeletingAccount] = useState(false);
     const [avatarFailed, setAvatarFailed] = useState(false);
+
+    // Edit Profile Modal States
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editName, setEditName] = useState('');
+    const [editHandle, setEditHandle] = useState('');
+    const [editImage, setEditImage] = useState('');
+    const [savingProfile, setSavingProfile] = useState(false);
+
+    const openEditModal = () => {
+        setEditName(user?.name || '');
+        setEditHandle(user?.handle || '');
+        setEditImage(user?.image || '');
+        setEditModalVisible(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    };
+
+    const handleSaveProfile = async () => {
+        const trimmedName = editName.trim();
+        const trimmedHandle = editHandle.trim().replace(/^@/, '');
+
+        if (!trimmedName) {
+            Alert.alert('Hata', 'Ad Soyad alanı boş bırakılamaz.');
+            return;
+        }
+
+        if (trimmedHandle && (trimmedHandle.length < 3 || trimmedHandle.length > 20)) {
+            Alert.alert('Hata', 'Kullanıcı adı 3 ile 20 karakter arasında olmalıdır.');
+            return;
+        }
+
+        if (trimmedHandle && !/^[a-zA-Z0-9_-]+$/.test(trimmedHandle)) {
+            Alert.alert('Hata', 'Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir.');
+            return;
+        }
+
+        setSavingProfile(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        try {
+            await api.patch('/mobile/user/profile', {
+                name: trimmedName,
+                handle: trimmedHandle || undefined,
+                image: editImage.trim() || undefined,
+            });
+
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            await refreshProfile();
+            setEditModalVisible(false);
+            Alert.alert('Başarılı', 'Profil bilgileriniz güncellendi.');
+        } catch (error: any) {
+            const msg = error?.response?.data?.error || 'Profil güncellenirken bir hata oluştu.';
+            Alert.alert('Hata', msg);
+        } finally {
+            setSavingProfile(false);
+        }
+    };
 
     const fetchProfile = useCallback(async () => {
         try {
@@ -234,6 +292,14 @@ export default function ProfileScreen() {
                             )}
                         </View>
                     </View>
+                    <TouchableOpacity
+                        style={styles.editProfileBtn}
+                        onPress={openEditModal}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons name="pencil" size={13} color="#F4F4F5" style={{ marginRight: 6 }} />
+                        <Text style={styles.editProfileBtnText}>Profili Düzenle</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Momentum Score */}
@@ -378,6 +444,16 @@ export default function ProfileScreen() {
                     <Text style={styles.settingsTitle}>{t('profile.settings.title', language)}</Text>
 
                     <View style={styles.settingsGroup}>
+                        <TouchableOpacity style={styles.settingsItem} onPress={openEditModal}>
+                            <Text style={styles.settingsItemText}>Profili Düzenle</Text>
+                            <View style={styles.settingsItemRight}>
+                                <Text style={styles.settingsItemValue}>{user?.handle ? `@${user.handle}` : 'Ad & Handle'}</Text>
+                                <Ionicons name="chevron-forward" size={18} color="#475569" />
+                            </View>
+                        </TouchableOpacity>
+
+                        <View style={styles.settingsDivider} />
+
                         <TouchableOpacity style={styles.settingsItem} onPress={handleLanguageChange}>
                             <Text style={styles.settingsItemText}>{t('profile.settings.language', language)}</Text>
                             <View style={styles.settingsItemRight}>
@@ -452,6 +528,96 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Edit Profile Modal */}
+            <Modal
+                visible={editModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    style={styles.modalOverlay}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Profili Düzenle</Text>
+                            <TouchableOpacity
+                                onPress={() => setEditModalVisible(false)}
+                                style={styles.modalCloseBtn}
+                            >
+                                <Ionicons name="close" size={20} color="#A1A1AA" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 16 }}>
+                            <View style={styles.modalInputGroup}>
+                                <Text style={styles.modalLabel}>Ad Soyad</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Adınız ve Soyadınız"
+                                    placeholderTextColor="#52525B"
+                                    value={editName}
+                                    onChangeText={setEditName}
+                                    autoCapitalize="words"
+                                />
+                            </View>
+
+                            <View style={styles.modalInputGroup}>
+                                <Text style={styles.modalLabel}>Kullanıcı Adı (Handle)</Text>
+                                <View style={styles.handleInputWrapper}>
+                                    <Text style={styles.handlePrefix}>@</Text>
+                                    <TextInput
+                                        style={[styles.modalInput, styles.handleInputText]}
+                                        placeholder="kullanici_adi"
+                                        placeholderTextColor="#52525B"
+                                        value={editHandle}
+                                        onChangeText={(t) => setEditHandle(t.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.modalInputGroup}>
+                                <Text style={styles.modalLabel}>Profil Resmi URL (İsteğe Bağlı)</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="https://example.com/avatar.jpg"
+                                    placeholderTextColor="#52525B"
+                                    value={editImage}
+                                    onChangeText={setEditImage}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            </View>
+
+                            <View style={styles.modalActionRow}>
+                                <TouchableOpacity
+                                    style={styles.modalCancelBtn}
+                                    onPress={() => setEditModalVisible(false)}
+                                    disabled={savingProfile}
+                                >
+                                    <Text style={styles.modalCancelText}>Vazgeç</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.modalSaveBtn, savingProfile && { opacity: 0.7 }]}
+                                    onPress={handleSaveProfile}
+                                    disabled={savingProfile}
+                                >
+                                    {savingProfile ? (
+                                        <BrandLoader size={18} showBlur={false} />
+                                    ) : (
+                                        <Text style={styles.modalSaveText}>Kaydet</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
         </Screen>
     );
 }
@@ -797,5 +963,132 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: '#A1A1AA',
         marginTop: 2,
+    },
+    editProfileBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 14,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 20,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        alignSelf: 'flex-start',
+    },
+    editProfileBtnText: {
+        color: '#F4F4F5',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    },
+    modalContent: {
+        backgroundColor: '#121215',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        borderWidth: 1,
+        borderColor: '#27272A',
+        padding: 24,
+        maxHeight: '85%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#F4F4F5',
+        letterSpacing: -0.5,
+    },
+    modalCloseBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#18181B',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalInputGroup: {
+        marginBottom: 16,
+    },
+    modalLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#A1A1AA',
+        marginBottom: 6,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    modalInput: {
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        fontSize: 14,
+        color: '#F4F4F5',
+    },
+    handleInputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        borderRadius: 12,
+        paddingLeft: 14,
+    },
+    handlePrefix: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#71717A',
+        marginRight: 4,
+    },
+    handleInputText: {
+        flex: 1,
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        paddingLeft: 0,
+    },
+    modalActionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginTop: 12,
+    },
+    modalCancelBtn: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 12,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        alignItems: 'center',
+    },
+    modalCancelText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#A1A1AA',
+    },
+    modalSaveBtn: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 12,
+        backgroundColor: '#6366F1',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalSaveText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#FFFFFF',
     },
 });
