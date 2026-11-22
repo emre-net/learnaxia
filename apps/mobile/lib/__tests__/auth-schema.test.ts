@@ -21,35 +21,52 @@ describe('Shared Auth Validation Schema Contract Tests', () => {
             }
         });
 
-        it('should fail if password is shorter than 8 characters', () => {
+        it('should fail if password is shorter than 6 characters', () => {
             const result = MobileLoginSchema.safeParse({
                 email: 'test@learnaxia.com',
                 password: '123',
             });
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.issues[0].message).toContain('Şifre en az 8 karakter olmalıdır');
+                expect(result.error.issues[0].message).toContain('Şifre en az 6 karakter olmalıdır');
             }
         });
     });
 
     describe('MobileRegisterSchema', () => {
-        it('should pass on valid registration data', () => {
+        it('should pass on valid registration data with name and optional handle', () => {
             const result = MobileRegisterSchema.safeParse({
-                name: 'john_doe',
+                name: 'John Doe',
+                handle: 'john_doe',
                 email: 'john@learnaxia.com',
                 password: 'securePassword123',
             });
             expect(result.success).toBe(true);
         });
 
-        it('should fail if username contains spaces or special characters', () => {
+        it('should fail if name contains special characters or numbers', () => {
             const result = MobileRegisterSchema.safeParse({
-                name: 'john doe!',
+                name: 'John Doe 123!',
                 email: 'john@learnaxia.com',
                 password: 'securePassword123',
             });
             expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues[0].message).toContain('Ad Soyad yalnızca harf ve boşluk içerebilir');
+            }
+        });
+
+        it('should fail if handle contains invalid characters or spaces', () => {
+            const result = MobileRegisterSchema.safeParse({
+                name: 'John Doe',
+                handle: 'john doe!',
+                email: 'john@learnaxia.com',
+                password: 'securePassword123',
+            });
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues[0].message).toContain('Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir');
+            }
         });
     });
 });

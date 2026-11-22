@@ -92,13 +92,11 @@ export default function ProfileScreen() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const [profileRes, analyticsRes, scoreRes] = await Promise.all([
+            const [profileRes, scoreRes] = await Promise.all([
                 api.get('/mobile/user/profile').catch(() => ({ data: null })),
-                api.get('/mobile/analytics').catch(() => ({ data: { stats: {} } })),
                 api.get('/scores/me').catch(() => ({ data: null })),
             ]);
             setProfileData(profileRes.data);
-            setAnalyticsData(analyticsRes.data?.stats || {});
             setScoreData(scoreRes.data);
         } catch (error) {
             console.error('[ProfileScreen] Error fetching profile:', error);
