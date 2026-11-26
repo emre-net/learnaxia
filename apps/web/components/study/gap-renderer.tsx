@@ -113,12 +113,12 @@ export function GapRenderer({ item }: { item: any }) {
 
                             if (feedback) {
                                 const normalizedInput = normalize(answer);
-                                const normalizedTarget = normalize(item.content.answers?.[gapIndex] || "");
-                                const isCorrect = normalizedInput === normalizedTarget;
+                                const normalizedTarget = normalize(correctAnswersList[gapIndex] || "");
+                                const isCorrect = normalizedInput === normalizedTarget && normalizedTarget.length > 0;
 
-                                borderColor = isCorrect ? "border-green-500" : "border-red-500";
-                                bgColor = isCorrect ? "bg-green-50" : "bg-red-50";
-                                textColor = isCorrect ? "text-green-700" : "text-red-700";
+                                borderColor = isCorrect ? "border-emerald-500/70" : "border-rose-500/70";
+                                bgColor = isCorrect ? "bg-emerald-500/15" : "bg-rose-500/15";
+                                textColor = isCorrect ? "text-emerald-300" : "text-rose-300";
                             }
 
                             return (
@@ -174,27 +174,27 @@ export function GapRenderer({ item }: { item: any }) {
 
             {feedback && (
                 <div className={cn(
-                    "p-6 rounded-lg text-center font-medium animate-in fade-in slide-in-from-bottom-2 border-2",
+                    "p-6 rounded-2xl text-center font-medium animate-in fade-in slide-in-from-bottom-2 border",
                     feedback === 'CORRECT'
-                        ? "bg-green-100/50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400"
-                        : "bg-red-100/50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400"
+                        ? "bg-emerald-500/12 border-emerald-500/35 text-emerald-300"
+                        : "bg-rose-500/12 border-rose-500/35 text-rose-300"
                 )}>
                     {feedback === 'CORRECT' ? (
                         <div className="flex flex-col gap-2 items-center">
-                            <CheckCircle2 className="h-8 w-8 text-green-600 mb-1" />
+                            <CheckCircle2 className="h-8 w-8 text-emerald-400 mb-1" />
                             <span className="text-xl font-bold">{t('study.correct')}</span>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            <div className="flex items-center justify-center gap-2 text-xl font-bold text-red-600">
+                            <div className="flex items-center justify-center gap-2 text-xl font-bold text-rose-400">
                                 <XCircle className="h-6 w-6" />
                                 <span>{t('study.partialWrong')}</span>
                             </div>
-                            <div className="text-sm opacity-90 mt-2 bg-background/50 p-4 rounded-md inline-block max-w-lg mx-auto">
-                                <span className="block mb-2 font-semibold text-foreground/80">{t('study.correctAnswers')}</span>
+                            <div className="text-sm mt-1 bg-[#121215] border border-white/[0.08] p-4 rounded-xl inline-block max-w-lg mx-auto">
+                                <span className="block mb-2 font-semibold text-zinc-300">{t('study.correctAnswers')}</span>
                                 <div className="flex flex-wrap gap-2 justify-center">
                                     {correctAnswersList.map((ans: string, i: number) => (
-                                        <span key={i} className="px-2 py-1 bg-primary/10 rounded border border-primary/20 text-primary font-mono">
+                                        <span key={i} className="px-2.5 py-1 bg-sky-500/15 rounded-lg border border-sky-500/30 text-sky-300 font-mono">
                                             {i + 1}. {ans}
                                         </span>
                                     ))}

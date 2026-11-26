@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/lib/i18n/i18n";
 import { useSettingsStore } from "@/stores/settings-store";
 import { EmptyState } from "@/components/shared/empty-state";
-import { sanitizeHtml } from "@/lib/sanitize-html";
+import { parseNoteContent } from "@learnaxia/shared";
 import {
     Sheet,
     SheetContent,
@@ -373,9 +373,9 @@ export function DiscoverClient() {
                                                     visibility={item.visibility || "PUBLIC"}
                                                     title={item.title || "İsimsiz Not"}
                                                     description={
-                                                        <div className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2 min-h-[40px] leading-relaxed break-words"
-                                                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.content) }}
-                                                        />
+                                                        <p className="text-[14px] font-medium text-zinc-400 line-clamp-2 min-h-[40px] leading-relaxed break-words">
+                                                            {parseNoteContent(item.content).plainText || "Çizim veya zengin içerikli not"}
+                                                        </p>
                                                     }
                                                     owner={item.owner}
                                                     viewMode="grid"

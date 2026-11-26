@@ -13,9 +13,9 @@ function CustomTooltip({ active, payload, label }: any) {
     const date = new Date(label);
     const formatted = `${date.getDate()} ${date.toLocaleString('tr-TR', { month: 'short' })}`;
     return (
-        <div className="rounded-xl border border-white/10 bg-slate-900/95 px-3 py-2 shadow-xl backdrop-blur-md text-sm">
-            <p className="text-slate-400 text-xs mb-1">{formatted}</p>
-            <p className="font-bold text-cyan-400">{payload[0].value} dk</p>
+        <div className="rounded-xl border border-white/10 bg-[#18181b]/95 px-3 py-2 shadow-xl backdrop-blur-md text-sm">
+            <p className="text-zinc-400 text-xs mb-1">{formatted}</p>
+            <p className="font-bold text-sky-400">{payload[0].value} dk</p>
         </div>
     );
 }

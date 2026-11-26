@@ -54,15 +54,15 @@ export default function MobileEditor() {
 
     if (!isReady) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[#04101A]">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent"></div>
+            <div className="flex h-screen w-screen items-center justify-center bg-[#09090b]">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-400 border-t-transparent"></div>
             </div>
         );
     }
 
     // A completely blank canvas that fills the WebView
     return (
-        <div className="min-h-screen bg-[#04101A] px-4 py-4 sm:px-0 text-white">
+        <div className="min-h-screen bg-[#09090b] px-4 py-4 sm:px-0 text-zinc-100">
             <BlockEditor
                 initialContent={initialContent}
                 onChange={handleChange}

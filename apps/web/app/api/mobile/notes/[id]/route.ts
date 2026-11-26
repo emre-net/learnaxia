@@ -19,14 +19,27 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
         const resolvedParams = await params;
         const note = await prisma.note.findUnique({
-            where: { id: resolvedParams.id }
+            where: { id: resolvedParams.id },
+            include: {
+                user: { select: { id: true, name: true, handle: true, image: true } },
+                module: { select: { id: true, title: true } }
+            }
         });
 
-        if (!note || note.userId !== user.id) {
-            return NextResponse.json({ message: 'Not found' }, { status: 404 });
+        if (!note) {
+            return NextResponse.json({ message: 'Not bulunamadı' }, { status: 404 });
         }
 
-        return NextResponse.json(note);
+        const isOwner = note.userId === user.id;
+        if (note.visibility !== 'PUBLIC' && !isOwner) {
+            return NextResponse.json({ message: 'Bu notu görüntüleme yetkiniz yok' }, { status: 403 });
+        }
+
+        return NextResponse.json({
+            ...note,
+            owner: note.user,
+            isOwner,
+        });
     } catch (error) {
         console.error("Failed to fetch mobile note details:", error);
         return NextResponse.json({ error: "Failed to fetch note" }, { status: 500 });
@@ -46,10 +59,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
         const updatedNote = await NoteService.update(user.id, resolvedParams.id, validated);
         return NextResponse.json(updatedNote);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to update mobile note:", error);
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Invalid data", details: error.issues }, { status: 400 });
+        }
+        const msg = String(error?.message || "");
+        if (msg.toLowerCase().includes("not found")) {
+            return NextResponse.json({ message: "Not bulunamadı" }, { status: 404 });
+        }
+        if (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("unauthorized")) {
+            return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 403 });
         }
         return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
     }
@@ -65,7 +85,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         const resolvedParams = await params;
         await NoteService.delete(user.id, resolvedParams.id);
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
+        const msg = String(error?.message || "");
+        if (msg.toLowerCase().includes("not found")) {
+            return NextResponse.json({ message: "Not bulunamadı" }, { status: 404 });
+        }
+        if (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("unauthorized")) {
+            return NextResponse.json({ message: "Yetkisiz işlem" }, { status: 403 });
+        }
         console.error("Failed to delete mobile note:", error);
         return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
     }

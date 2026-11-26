@@ -45,17 +45,17 @@ export function EmptyState({
             </div>
 
             {/* Border container */}
-            <div className="relative w-full max-w-md mx-auto border border-white/[0.06] rounded-3xl p-10 bg-[#080e1c]/60 backdrop-blur-sm">
+            <div className="relative w-full max-w-md mx-auto border border-white/[0.08] rounded-3xl p-10 bg-[#121215]/90 backdrop-blur-sm">
                 {/* Icon */}
-                <div className={`w-20 h-20 rounded-2xl ${iconBg} border border-white/[0.07] flex items-center justify-center mx-auto mb-6 shadow-lg`}>
+                <div className={`w-20 h-20 rounded-2xl ${iconBg} border border-white/[0.08] flex items-center justify-center mx-auto mb-6 shadow-lg`}>
                     <Icon className={`w-9 h-9 ${iconColor}`} strokeWidth={1.5} />
                 </div>
 
                 {/* Text */}
-                <h3 className="text-xl font-black text-white mb-2 tracking-tight">
+                <h3 className="text-xl font-bold text-zinc-100 mb-2 tracking-tight">
                     {title}
                 </h3>
-                <p className="text-white/45 leading-relaxed text-sm mb-8 max-w-xs mx-auto">
+                <p className="text-zinc-400 leading-relaxed text-sm mb-8 max-w-xs mx-auto">
                     {description}
                 </p>
 
@@ -66,7 +66,7 @@ export function EmptyState({
                             primaryAction.href ? (
                                 <Button
                                     asChild
-                                    className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-blue-900/30 rounded-xl px-6"
+                                    className="gap-2 bg-[#f4f4f5] hover:bg-zinc-200 text-zinc-950 font-bold rounded-xl px-6"
                                 >
                                     <Link href={primaryAction.href}>{primaryAction.label}</Link>
                                 </Button>

@@ -15,6 +15,7 @@ export async function POST(req: Request) {
 
         const formData = await req.formData();
         const file = formData.get("file") as File;
+        const thumbnailRaw = formData.get("thumbnail");
 
         if (!file) {
             return NextResponse.json({ message: 'No file provided' }, { status: 400 });
@@ -25,7 +26,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'File is too large (max 10MB)' }, { status: 413 });
         }
 
-        // Rate Limiting: Max 5 requests per minute
         const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
         const recentRequests = await prisma.solvedQuestion.count({
             where: {
@@ -46,21 +46,31 @@ export async function POST(req: Request) {
 
         const result = await AIService.solvePhoto(buffer, file.type, language);
 
-        // Optional: Save to SolvedQuestion history
-        await prisma.solvedQuestion.create({
+        const validThumbnail =
+            typeof thumbnailRaw === "string" &&
+            thumbnailRaw.startsWith("data:image/") &&
+            thumbnailRaw.length <= 350_000
+                ? thumbnailRaw
+                : "";
+
+        const savedQuestion = await prisma.solvedQuestion.create({
             data: {
                 userId: user.id,
-                imageUrl: "mobile_upload", // In a real app, you'd upload to S3/Cloudinary first
+                imageUrl: validThumbnail,
                 questionText: result.questionText,
                 solution: result.solution
             }
         });
 
-        return NextResponse.json(result);
+        return NextResponse.json({
+            id: savedQuestion.id,
+            imageUrl: savedQuestion.imageUrl,
+            questionText: result.questionText,
+            solution: result.solution,
+        });
     } catch (error: any) {
         console.error('Mobile Vision API Error:', error);
         if (error instanceof AIError) {
-            // Kullanıcıya gösterilecek güvenli mesajlar — raw AI hatası sankılandır
             const safeMessages: Record<string, string> = {
                 'VISION_FAILED': 'Görüntü analiz edilemedi. Lütfen net bir fotoğraf yükleyin.',
                 'AUTH_ERROR': 'AI servisine erişilemedi. Lütfen tekrar deneyin.',

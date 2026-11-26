@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { ResetPasswordSchema } from "@learnaxia/shared";
+import { z } from "zod";
 
 export async function POST(req: Request) {
     try {
-        const { token, password } = await req.json();
+        const body = await req.json();
+        const { token, password } = ResetPasswordSchema.parse(body);
 
-        if (!token || typeof token !== "string" || !password || typeof password !== "string") {
-            return NextResponse.json({ error: "Geçersiz istek. Token ve yeni şifre gereklidir." }, { status: 400 });
-        }
-
-        if (password.length < 6) {
-            return NextResponse.json({ error: "Şifre en az 6 karakter olmalıdır." }, { status: 400 });
-        }
-
-        // Token'ı bul
         const verificationToken = await prisma.verificationToken.findUnique({
             where: { token }
         });
@@ -41,7 +35,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Kullanıcı bulunamadı." }, { status: 404 });
         }
 
-        // Şifreyi güncelle
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await prisma.user.update({
@@ -52,13 +45,15 @@ export async function POST(req: Request) {
             }
         });
 
-        // Token'ı sil
         await prisma.verificationToken.delete({
             where: { token }
         });
 
         return NextResponse.json({ success: "Şifreniz başarıyla güncellendi!" });
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ error: error.issues[0]?.message || "Geçersiz veri" }, { status: 400 });
+        }
         console.error("Reset password error:", error);
         return NextResponse.json({ error: "Bir hata oluştu." }, { status: 500 });
     }

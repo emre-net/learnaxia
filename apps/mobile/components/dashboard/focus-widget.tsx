@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, Dimensions, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { t } from '@learnaxia/shared';
-import { LinearGradient } from 'expo-linear-gradient';
-
-const currentLang = 'tr'; // Default to Turkish for now
+import { useLanguage } from '@/hooks/use-language';
 
 export function FocusWidget() {
+    const { language: currentLang } = useLanguage();
     const [activeTab, setActiveTab] = useState<'POMODORO' | 'STOPWATCH'>('POMODORO');
     const [isRunning, setIsRunning] = useState(false);
     const [pomodoroDuration, setPomodoroDuration] = useState(25 * 60);
@@ -361,15 +360,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   settingsModal: {
-    backgroundColor: '#050505',
-    borderRadius: 24,
+    backgroundColor: '#121215',
+    borderRadius: 20,
     padding: 24,
     width: '80%',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: '#27272A',
   },
   settingsTitle: {
-    color: '#F8FAFC',
+    color: '#F4F4F5',
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
@@ -378,10 +377,10 @@ const styles = StyleSheet.create({
   settingsItem: {
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
   },
   settingsItemText: {
-    color: '#94A3B8',
+    color: '#A1A1AA',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
@@ -391,13 +390,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   settingsCloseText: {
-    color: '#60A5FA',
+    color: '#38BDF8',
     textAlign: 'center',
     fontWeight: '700',
   },
   fullscreenContainer: {
     flex: 1,
-    backgroundColor: '#000000', // Pure black
+    backgroundColor: '#09090B',
   },
   fullscreenContent: {
     flex: 1,
@@ -411,15 +410,13 @@ const styles = StyleSheet.create({
     right: 24,
     padding: 8,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#18181B',
   },
   fullscreenSubtitle: {
-    color: '#94A3B8', // slate-400
-    fontSize: 18,
-    fontWeight: '500',
+    color: '#A1A1AA',
+    fontSize: 16,
+    fontWeight: '600',
     marginBottom: 40,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
   },
   fullscreenTime: {
     fontWeight: '900',

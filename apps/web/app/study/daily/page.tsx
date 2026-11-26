@@ -19,7 +19,7 @@ import { StudySummary } from "@/components/study/study-summary";
 import { Badge } from "@/components/ui/badge";
 
 function DailyStudyInterface() {
-    const { items, currentIndex, mode, nextItem, sessionId } = useStudyStore();
+    const { items, currentIndex, mode, nextItem, sessionId, sessionMap } = useStudyStore();
     const currentItem = items[currentIndex];
 
     if (!currentItem) {
@@ -28,14 +28,18 @@ function DailyStudyInterface() {
 
     const handleNext = async (result: any) => {
         try {
+            const targetSessionId =
+                (currentItem?.moduleId && sessionMap?.[currentItem.moduleId]) ||
+                currentItem?.sessionId ||
+                sessionId;
             await fetch('/api/study/log', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sessionId,
+                    sessionId: targetSessionId,
                     itemId: result.itemId,
                     quality: result.quality,
-                    durationMs: 1500 // Basic estimation for mixed mode
+                    durationMs: 1500
                 })
             });
         } catch (error) {
@@ -103,7 +107,7 @@ export default function DailyStudyPage() {
                     return;
                 }
 
-                initSession("DAILY_MIXED", data.items, 'SM2', data.resumedFromIndex);
+                initSession("DAILY_MIXED", data.items, 'SM2', data.resumedFromIndex, data.sessionId, false, data.sessionMap || {});
             } catch (err: any) {
                 console.error(err);
                 setError(err.message || dict.errorStarting);

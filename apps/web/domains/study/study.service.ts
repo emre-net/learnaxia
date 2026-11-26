@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { ItemType, StudyMode } from "@/lib/types";
+import { resolveTrueFalseAnswer } from "@learnaxia/shared";
 
 export class StudyService {
     static async startSession(userId: string | null, moduleId: string, mode: StudyMode) {
@@ -47,7 +48,8 @@ export class StudyService {
                     moduleId: 'tutorial',
                     type: 'GAP' as const,
                     content: {
-                        text: 'Learnaxia, yapay zeka ile notlarınızı saniyeler içinde [bilimsel] çalışma kartlarına dönüştürür.',
+                        text: 'Learnaxia, yapay zeka ile notlarınızı saniyeler içinde {{bilimsel}} çalışma kartlarına dönüştürür.',
+                        answers: ['bilimsel'],
                         gap: 'bilimsel',
                         answer: 'bilimsel',
                         question: 'Boşluğu doldurunuz:'
@@ -61,11 +63,13 @@ export class StudyService {
                 {
                     id: 'tut-4',
                     moduleId: 'tutorial',
-                    type: 'MC' as const,
+                    type: 'TRUE_FALSE' as const,
                     content: {
-                        question: 'Düzenli kısa aralıklı tekrarlar, tek seferlik yoğun ezbere göre bilginin akılda kalıcılığını 3 kata kadar artırır.',
-                        options: ['Doğru', 'Yanlış'],
-                        answer: 'Doğru'
+                        statement: 'Düzenli kısa aralıklı tekrarlar, tek seferlik yoğun ezbere göre bilginin akılda kalıcılığını artırır.',
+                        question: 'Düzenli kısa aralıklı tekrarlar, tek seferlik yoğun ezbere göre bilginin akılda kalıcılığını artırır.',
+                        isTrue: true,
+                        answer: 'True',
+                        explanation: 'Aralıklı tekrar (SM-2), bilginin unutulmaya yaklaştığı anda hatırlanmasını sağlayarak uzun süreli belleği güçlendirir.'
                     },
                     hash: 'tut-4-hash',
                     strengthScore: 1,
@@ -122,10 +126,12 @@ export class StudyService {
                 }
 
                 if (type === 'TRUE_FALSE') {
-                    type = 'MC';
-                    const tfQuestion = content.question || content.Question || content.statement || content.Statement || content.text;
-                    if (!content.question && tfQuestion) content.question = tfQuestion;
-                    if (!content.options || content.options.length === 0) content.options = ["True", "False"];
+                    const tfQuestion = content.statement || content.Statement || content.question || content.Question || content.text || '';
+                    const tfBool = resolveTrueFalseAnswer(content);
+                    content.statement = tfQuestion;
+                    content.question = tfQuestion;
+                    content.isTrue = tfBool;
+                    content.answer = tfBool ? 'True' : 'False';
                 }
 
                 return {
@@ -157,12 +163,24 @@ export class StudyService {
             };
         }
 
-        // Permissive Access Check for Authenticated Users
+        // Strictly enforce visibility & explicit library/access membership for authenticated users
         const isPublic = dbModule.visibility === 'PUBLIC';
         const isOwner = dbModule.ownerId === userId;
-        const isPrivateLinked = dbModule.visibility === 'PRIVATE';
+        let hasAccess = isPublic || isOwner;
 
-        let hasAccess = isPublic || isOwner || isPrivateLinked;
+        if (!hasAccess) {
+            const [libraryAccess, contentAccess] = await Promise.all([
+                prisma.userModuleLibrary.findUnique({
+                    where: { userId_moduleId: { userId, moduleId } },
+                    select: { userId: true }
+                }),
+                prisma.userContentAccess.findUnique({
+                    where: { userId_resourceId: { userId, resourceId: moduleId } },
+                    select: { userId: true }
+                })
+            ]);
+            hasAccess = Boolean(libraryAccess || contentAccess);
+        }
 
         if (!hasAccess) {
             throw new Error("Unauthorized Study Access");
@@ -197,16 +215,12 @@ export class StudyService {
             }
 
             if (type === 'TRUE_FALSE') {
-                type = 'MC'; // Render TF as Multiple Choice (Quiz)
-                // Tolerate AI JSON casing
-                const tfQuestion = content.question || content.Question || content.statement || content.Statement || content.text;
-                if (!content.question && tfQuestion) {
-                    content.question = tfQuestion;
-                }
-                // Ensure options exist for TF
-                if (!content.options || content.options.length === 0) {
-                    content.options = ["True", "False"];
-                }
+                const tfQuestion = content.statement || content.Statement || content.question || content.Question || content.text || '';
+                const tfBool = resolveTrueFalseAnswer(content);
+                content.statement = tfQuestion;
+                content.question = tfQuestion;
+                content.isTrue = tfBool;
+                content.answer = tfBool ? 'True' : 'False';
             }
 
             return {

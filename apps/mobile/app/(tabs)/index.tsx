@@ -13,18 +13,12 @@ import { BrandLoader } from '@/components/ui/brand-loader';
 import { FocusWidget } from '@/components/dashboard/focus-widget';
 import { DailyReviewWidget } from '@/components/dashboard/daily-review-widget';
 
-interface DashboardStats {
-  totalStudyMinutes: number;
-  modulesStarted: number;
-  totalSolved: number;
-  averageAccuracy: number;
-}
-
 interface RecentModule {
   id: string;
   title: string;
   type: string;
   lastStudied: string;
+  itemCount?: number;
 }
 
 export default function HomeScreen() {
@@ -32,7 +26,6 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { language } = useLanguage();
 
-  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentModules, setRecentModules] = useState<RecentModule[]>([]);
   const [scoreData, setScoreData] = useState<any>(null);
   const [journeys, setJourneys] = useState<{ id: string; title: string; _count: { slides: number } }[]>([]);
@@ -41,32 +34,17 @@ export default function HomeScreen() {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const [analyticsRes, recentRes, scoreRes, journeysRes] = await Promise.all([
-        api.get('/mobile/analytics').catch(() => ({ data: { stats: {} } })),
+      const [recentRes, scoreRes, journeysRes] = await Promise.all([
         api.get('/mobile/library/recent').catch(() => ({ data: { modules: [] } })),
         api.get('/scores/me').catch(() => ({ data: null })),
         api.get('/mobile/journeys').catch(() => ({ data: { journeys: [] } })),
       ]);
 
-      const data = analyticsRes.data?.stats || {};
       setScoreData(scoreRes.data || null);
-      setStats({
-        totalStudyMinutes: data.totalStudyMinutes || 0,
-        modulesStarted: data.modulesStarted || 0,
-        totalSolved: data.totalSolved || 0,
-        averageAccuracy: data.averageAccuracy || 0,
-      });
       setRecentModules(recentRes.data?.modules || []);
       setJourneys(journeysRes.data?.journeys || []);
     } catch (error) {
-      console.error('[HomeScreen] Error fetching dashboard data:', error);
-      setScoreData(null);
-      setStats({
-        totalStudyMinutes: 0,
-        modulesStarted: 0,
-        totalSolved: 0,
-        averageAccuracy: 0,
-      });
+      if (__DEV__) console.error('[HomeScreen] Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -80,7 +58,7 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') fetchDashboardData();
     });
     return () => subscription.remove();
@@ -102,6 +80,16 @@ export default function HomeScreen() {
   const firstName = user?.name?.split(' ')[0] || user?.handle || 'Kullanıcı';
   const initials = firstName.slice(0, 2).toUpperCase();
   const mostRecentModule = recentModules[0] || null;
+  const isTr = language === 'tr';
+
+  const getTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'GAP': return t('library.types.gap', language);
+      case 'MC': return t('library.types.mc', language);
+      case 'TRUE_FALSE': return t('library.types.true_false', language);
+      default: return t('library.types.flashcard', language);
+    }
+  };
 
   return (
     <Screen style={styles.container} tabScreen>
@@ -111,18 +99,20 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71717A" />}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. ÜST BAR: Sıcak Karşılama ve Profil Geçişi */}
+        {/* 1. Üst Bar */}
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
-            <Text style={styles.greetingSub}>Öğrenme Alanın</Text>
-            <Text style={styles.greetingTitle}>İyi çalışmalar, {firstName}! ✨</Text>
+            <Text style={styles.greetingSub}>{isTr ? 'Öğrenme Alanın' : 'Learning Hub'}</Text>
+            <Text style={styles.greetingTitle}>
+              {isTr ? `İyi çalışmalar, ${firstName}` : `Welcome back, ${firstName}`}
+            </Text>
           </View>
 
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/profile');
+              router.push('/(tabs)/profile' as any);
             }}
             style={styles.avatarButton}
           >
@@ -130,7 +120,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 2. KEŞİF BALONLARI (Story Bubbles - Yeni & Aktif Kullanıcı Keşif Akışı) */}
+        {/* 2. Hızlı Keşif Balonları (Web ile %100 ortak aksiyon şeridi) */}
         <View style={styles.storySection}>
           <ScrollView
             horizontal
@@ -148,7 +138,7 @@ export default function HomeScreen() {
               <View style={[styles.storyIconCircle, { borderColor: '#38BDF8' }]}>
                 <Ionicons name="camera" size={20} color="#38BDF8" />
               </View>
-              <Text style={styles.storyLabel}>Soru Çöz</Text>
+              <Text style={styles.storyLabel}>{isTr ? 'Soru Çöz' : 'Solve Photo'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -162,7 +152,7 @@ export default function HomeScreen() {
               <View style={[styles.storyIconCircle, { borderColor: '#A855F7' }]}>
                 <Ionicons name="sparkles" size={20} color="#A855F7" />
               </View>
-              <Text style={styles.storyLabel}>AI Rotası</Text>
+              <Text style={styles.storyLabel}>{isTr ? 'AI Rotası' : 'AI Journey'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -173,10 +163,10 @@ export default function HomeScreen() {
                 router.push('/(tabs)/explore' as any);
               }}
             >
-              <View style={[styles.storyIconCircle, { borderColor: '#34D399' }]}>
-                <Ionicons name="compass" size={20} color="#34D399" />
+              <View style={[styles.storyIconCircle, { borderColor: '#10B981' }]}>
+                <Ionicons name="compass" size={20} color="#10B981" />
               </View>
-              <Text style={styles.storyLabel}>Keşfet</Text>
+              <Text style={styles.storyLabel}>{isTr ? 'Keşfet' : 'Explore'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -190,7 +180,7 @@ export default function HomeScreen() {
               <View style={[styles.storyIconCircle, { borderColor: '#F59E0B' }]}>
                 <Ionicons name="create" size={20} color="#F59E0B" />
               </View>
-              <Text style={styles.storyLabel}>Yeni Not</Text>
+              <Text style={styles.storyLabel}>{isTr ? 'Yeni Not' : 'New Note'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -204,21 +194,23 @@ export default function HomeScreen() {
               <View style={[styles.storyIconCircle, { borderColor: '#FB7185' }]}>
                 <Ionicons name="trophy" size={20} color="#FB7185" />
               </View>
-              <Text style={styles.storyLabel}>Sıralama</Text>
+              <Text style={styles.storyLabel}>{isTr ? 'Sıralama' : 'Ranking'}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
 
-        {/* 3. HERO: KALDIĞIN YERDEN DEVAM ET (İçerik Odaklı) */}
+        {/* 3. Hero: Kaldığın Yerden Devam Et */}
         {mostRecentModule ? (
           <View style={styles.heroCard}>
             <View style={styles.heroCardHeader}>
               <View style={styles.heroBadge}>
                 <Ionicons name="play" size={12} color="#38BDF8" style={{ marginRight: 4 }} />
-                <Text style={styles.heroBadgeText}>KALDIĞIN YERDEN DEVAM ET</Text>
+                <Text style={styles.heroBadgeText}>
+                  {isTr ? 'Kaldığın Yerden Devam Et' : 'Jump Back In'}
+                </Text>
               </View>
               <Text style={styles.heroDate}>
-                {new Date(mostRecentModule.lastStudied).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                {new Date(mostRecentModule.lastStudied).toLocaleDateString(isTr ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
               </Text>
             </View>
 
@@ -227,16 +219,17 @@ export default function HomeScreen() {
             </Text>
 
             <View style={styles.heroActionRow}>
-              <View style={styles.heroTypeTag}>
-                <Text style={styles.heroTypeTagText}>
-                  {mostRecentModule.type === 'GAP'
-                    ? 'Boşluk Doldurma'
-                    : mostRecentModule.type === 'MC'
-                    ? 'Çoktan Seçmeli'
-                    : mostRecentModule.type === 'TRUE_FALSE'
-                    ? 'Doğru / Yanlış'
-                    : 'Flashcard'}
-                </Text>
+              <View style={styles.heroTagGroup}>
+                <View style={styles.heroTypeTag}>
+                  <Text style={styles.heroTypeTagText}>{getTypeLabel(mostRecentModule.type)}</Text>
+                </View>
+                {typeof mostRecentModule.itemCount === 'number' && (
+                  <View style={styles.heroTypeTag}>
+                    <Text style={styles.heroTypeTagText}>
+                      {mostRecentModule.itemCount} {isTr ? 'içerik' : 'items'}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               <TouchableOpacity
@@ -248,16 +241,20 @@ export default function HomeScreen() {
                 }}
               >
                 <Ionicons name="play" size={16} color="#09090B" />
-                <Text style={styles.heroPlayButtonText}>Hemen Çalış</Text>
+                <Text style={styles.heroPlayButtonText}>{isTr ? 'Hemen Çalış' : 'Study Now'}</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : (
           <View style={styles.emptyHeroCard}>
             <View style={styles.emptyHeroLeft}>
-              <Text style={styles.emptyHeroTitle}>Bugün Yeni Bir Şey Öğren</Text>
+              <Text style={styles.emptyHeroTitle}>
+                {isTr ? 'Bugün Yeni Bir Şey Öğren' : 'Learn Something New Today'}
+              </Text>
               <Text style={styles.emptyHeroDesc}>
-                İlk modülünü oluşturabilir, kamerayla soru çözdürebilir veya topluluk setlerini keşfedebilirsin.
+                {isTr
+                  ? 'İlk modülünü oluşturabilir, kamerayla soru çözdürebilir veya topluluk setlerini keşfedebilirsin.'
+                  : 'Create your first module, solve a photo question with AI, or explore public sets.'}
               </Text>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -265,14 +262,14 @@ export default function HomeScreen() {
                 onPress={() => router.push('/create')}
               >
                 <Ionicons name="add" size={16} color="#09090B" />
-                <Text style={styles.emptyHeroBtnText}>İçerik Üret</Text>
+                <Text style={styles.emptyHeroBtnText}>{isTr ? 'İçerik Üret' : 'Create Content'}</Text>
               </TouchableOpacity>
             </View>
             <Ionicons name="school-outline" size={48} color="#27272A" />
           </View>
         )}
 
-        {/* 4. ZARİF MOMENTUM ŞERİDİ (Minimalist Lig & Puan Göstergesi) */}
+        {/* 4. Zarif Momentum Şeridi */}
         {scoreData?.tier?.thisMonth && (
           <TouchableOpacity
             activeOpacity={0.8}
@@ -286,29 +283,33 @@ export default function HomeScreen() {
               <Text style={styles.momentumEmoji}>{scoreData.tier.thisMonth.emoji || '⚡'}</Text>
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.momentumTierTitle}>{scoreData.tier.thisMonth.label} Ligi</Text>
+                  <Text style={styles.momentumTierTitle}>
+                    {scoreData.tier.thisMonth.label} {isTr ? 'Ligi' : 'League'}
+                  </Text>
                   <View style={styles.momentumPointsPill}>
                     <Text style={styles.momentumPointsText}>
-                      {(scoreData.momentum?.thisMonth || 0).toLocaleString('tr-TR')} pts
+                      {(scoreData.momentum?.thisMonth || 0).toLocaleString(isTr ? 'tr-TR' : 'en-US')} pts
                     </Text>
                   </View>
                 </View>
                 <Text style={styles.momentumSubtitle}>
                   {scoreData.tier.thisMonth.pointsToNext != null
-                    ? `Sonraki seviyeye ${scoreData.tier.thisMonth.pointsToNext.toLocaleString('tr-TR')} pts kaldı`
-                    : 'En yüksek seviyedesin!'}
+                    ? (isTr
+                        ? `Sonraki seviyeye ${scoreData.tier.thisMonth.pointsToNext.toLocaleString('tr-TR')} pts kaldı`
+                        : `${scoreData.tier.thisMonth.pointsToNext.toLocaleString('en-US')} pts to next tier`)
+                    : (isTr ? 'En yüksek seviyedesin!' : 'Top tier achieved!')}
                 </Text>
               </View>
             </View>
 
             <View style={styles.momentumRight}>
-              <Text style={styles.momentumLinkText}>Sıralama</Text>
+              <Text style={styles.momentumLinkText}>{isTr ? 'Sıralama' : 'Ranking'}</Text>
               <Ionicons name="chevron-forward" size={14} color="#38BDF8" />
             </View>
           </TouchableOpacity>
         )}
 
-        {/* 5. AKILLI TEKRAR & ODAK BİLEŞENLERİ */}
+        {/* 5. Akıllı Tekrar & Odak Bileşenleri */}
         <View style={styles.widgetWrapper}>
           <DailyReviewWidget />
         </View>
@@ -316,11 +317,11 @@ export default function HomeScreen() {
           <FocusWidget />
         </View>
 
-        {/* 6. SON AKTİVİTELER */}
+        {/* 6. Son Aktiviteler */}
         {recentModules.length > 0 && (
           <View style={styles.recentSection}>
             <View style={styles.recentHeader}>
-              <Text style={styles.recentTitle}>Son Aktiviteler</Text>
+              <Text style={styles.recentTitle}>{isTr ? 'Son Aktiviteler' : 'Recent Activity'}</Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/library' as any)}>
                 <Ionicons name="arrow-forward" size={18} color="#71717A" />
               </TouchableOpacity>
@@ -333,7 +334,7 @@ export default function HomeScreen() {
                   activeOpacity={0.6}
                   style={[
                     styles.recentRow,
-                    index === recentModules.slice(0, 4).length - 1 && { borderBottomWidth: 0 }
+                    index === recentModules.slice(0, 4).length - 1 && { borderBottomWidth: 0 },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -344,7 +345,10 @@ export default function HomeScreen() {
                   <View style={styles.recentTextContainer}>
                     <Text style={styles.recentItemTitle} numberOfLines={1}>{mod.title}</Text>
                     <Text style={styles.recentItemDate}>
-                      {new Date(mod.lastStudied).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                      {getTypeLabel(mod.type)}
+                      {typeof mod.itemCount === 'number' ? ` • ${mod.itemCount} ${isTr ? 'içerik' : 'items'}` : ''}
+                      {' • '}
+                      {new Date(mod.lastStudied).toLocaleDateString(isTr ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={15} color="#3F3F46" />
@@ -354,11 +358,11 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* 7. ÖĞRENME YOLCULUKLARI */}
+        {/* 7. Öğrenme Yolculukları */}
         {journeys.length > 0 && (
           <View style={styles.recentSection}>
             <View style={styles.recentHeader}>
-              <Text style={styles.recentTitle}>Öğrenme Yolculukları</Text>
+              <Text style={styles.recentTitle}>{isTr ? 'Öğrenme Yolculukları' : 'Learning Journeys'}</Text>
               <View style={styles.journeyBadge}>
                 <Text style={styles.journeyBadgeText}>{journeys.length}</Text>
               </View>
@@ -370,7 +374,7 @@ export default function HomeScreen() {
                   activeOpacity={0.6}
                   style={[
                     styles.recentRow,
-                    index === Math.min(journeys.length, 3) - 1 && { borderBottomWidth: 0 }
+                    index === Math.min(journeys.length, 3) - 1 && { borderBottomWidth: 0 },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -380,7 +384,9 @@ export default function HomeScreen() {
                   <View style={[styles.recentDot, { backgroundColor: '#A855F7' }]} />
                   <View style={styles.recentTextContainer}>
                     <Text style={styles.recentItemTitle} numberOfLines={1}>{journey.title}</Text>
-                    <Text style={styles.recentItemDate}>{journey._count.slides} slayt</Text>
+                    <Text style={styles.recentItemDate}>
+                      {journey._count.slides} {isTr ? 'slayt' : 'slides'}
+                    </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={15} color="#3F3F46" />
                 </TouchableOpacity>
@@ -421,8 +427,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#71717A',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
     marginBottom: 2,
   },
   greetingTitle: {
@@ -495,10 +499,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   heroBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '600',
     color: '#38BDF8',
-    letterSpacing: 0.5,
   },
   heroDate: {
     fontSize: 11,
@@ -516,6 +519,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 8,
+  },
+  heroTagGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
   },
   heroTypeTag: {
     backgroundColor: '#18181B',

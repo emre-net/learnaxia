@@ -1,91 +1,106 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { NativeRichText } from '@/components/ui/rich-math-text';
 
 interface MCCardProps {
     question: string;
     options: string[];
     correctAnswer: string;
     explanation?: string;
+    imageUrl?: string;
     onAnswer: (isCorrect: boolean) => void;
 }
 
-export function MCCard({ question, options, correctAnswer, explanation, onAnswer }: MCCardProps) {
+export function MCCard({ question, options, correctAnswer, explanation, imageUrl, onAnswer }: MCCardProps) {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [revealed, setRevealed] = useState(false);
 
-    const handleSelect = useCallback((index: number) => {
-        if (revealed) return;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setSelectedIndex(index);
-    }, [revealed]);
+    useEffect(() => {
+        setSelectedIndex(null);
+        setRevealed(false);
+    }, [question, correctAnswer]);
+
+    const handleSelect = useCallback(
+        (index: number) => {
+            if (revealed) return;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSelectedIndex(index);
+        },
+        [revealed]
+    );
 
     const handleConfirm = useCallback(() => {
-        if (selectedIndex === null) return;
+        if (selectedIndex === null || revealed) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setRevealed(true);
-        const isCorrect = options[selectedIndex] === correctAnswer;
+        const isCorrect = String(options[selectedIndex]) === String(correctAnswer);
         if (isCorrect) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } else {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
         onAnswer(isCorrect);
-    }, [selectedIndex, options, correctAnswer, onAnswer]);
+    }, [selectedIndex, revealed, options, correctAnswer, onAnswer]);
 
     const getOptionStyle = (index: number) => {
         if (!revealed) {
             return selectedIndex === index ? styles.optionSelected : styles.option;
         }
-        if (options[index] === correctAnswer) return styles.optionCorrect;
+        if (String(options[index]) === String(correctAnswer)) return styles.optionCorrect;
         if (index === selectedIndex) return styles.optionWrong;
         return styles.option;
     };
 
     const getOptionIcon = (index: number): string | null => {
         if (!revealed) return null;
-        if (options[index] === correctAnswer) return 'check-circle';
+        if (String(options[index]) === String(correctAnswer)) return 'check-circle';
         if (index === selectedIndex) return 'cancel';
         return null;
     };
 
     const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const hasValidImage = Boolean(imageUrl && (imageUrl.startsWith('data:') || imageUrl.startsWith('http')));
 
     return (
         <View style={styles.container}>
-            {/* Soru Etiketi */}
             <View style={styles.label}>
-                <Text style={styles.labelText}>ÇOKTAN SEÇMELİ</Text>
+                <Text style={styles.labelText}>Çoktan Seçmeli</Text>
             </View>
 
-            {/* Soru Metni */}
-            <Text style={styles.questionText}>{question}</Text>
+            {hasValidImage && (
+                <View style={styles.imageWrap}>
+                    <Image source={{ uri: imageUrl }} style={styles.cardImage} resizeMode="contain" />
+                </View>
+            )}
 
-            {/* Seçenekler */}
+            <View style={styles.questionBox}>
+                <NativeRichText text={question} style={styles.questionText} />
+            </View>
+
             <View style={styles.optionsContainer}>
                 {options.map((option, index) => (
-                    <Animated.View
-                        key={index}
-                        entering={FadeInDown.delay(index * 80).duration(300)}
-                    >
+                    <Animated.View key={index} entering={FadeInDown.delay(index * 60).duration(250)}>
                         <TouchableOpacity
-                            activeOpacity={0.7}
+                            activeOpacity={0.75}
                             onPress={() => handleSelect(index)}
                             disabled={revealed}
                             style={getOptionStyle(index)}
                         >
                             <View style={styles.optionLetterBadge}>
-                                <Text style={styles.optionLetter}>{optionLetters[index]}</Text>
+                                <Text style={styles.optionLetter}>{optionLetters[index] || String(index + 1)}</Text>
                             </View>
-                            <Text style={styles.optionText}>{option}</Text>
+                            <View style={{ flex: 1 }}>
+                                <NativeRichText text={String(option)} style={styles.optionText} compact />
+                            </View>
                             {getOptionIcon(index) && (
                                 <MaterialIcons
                                     name={getOptionIcon(index) as any}
                                     size={20}
-                                    color={options[index] === correctAnswer ? '#10B981' : '#EF4444'}
-                                    style={{ marginLeft: 'auto' }}
+                                    color={String(options[index]) === String(correctAnswer) ? '#10B981' : '#EF4444'}
+                                    style={{ marginLeft: 8 }}
                                 />
                             )}
                         </TouchableOpacity>
@@ -93,20 +108,20 @@ export function MCCard({ question, options, correctAnswer, explanation, onAnswer
                 ))}
             </View>
 
-            {/* Açıklama (cevap sonrası) */}
             {revealed && explanation && (
-                <Animated.View entering={FadeIn.duration(400)} style={styles.explanationBox}>
+                <Animated.View entering={FadeIn.duration(300)} style={styles.explanationBox}>
                     <MaterialIcons name="lightbulb-outline" size={16} color="#F59E0B" />
-                    <Text style={styles.explanationText}>{explanation}</Text>
+                    <View style={{ flex: 1 }}>
+                        <NativeRichText text={explanation} style={styles.explanationText} compact />
+                    </View>
                 </Animated.View>
             )}
 
-            {/* Onayla Butonu */}
             {!revealed && (
                 <TouchableOpacity
                     onPress={handleConfirm}
                     disabled={selectedIndex === null}
-                    style={[styles.confirmBtn, selectedIndex === null && { opacity: 0.3 }]}
+                    style={[styles.confirmBtn, selectedIndex === null && { opacity: 0.35 }]}
                 >
                     <Text style={styles.confirmBtnText}>Cevabı Onayla</Text>
                 </TouchableOpacity>
@@ -117,75 +132,90 @@ export function MCCard({ question, options, correctAnswer, explanation, onAnswer
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         width: '100%',
-        paddingHorizontal: 24,
-        paddingVertical: 24,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
     },
     label: {
         alignSelf: 'center',
         paddingHorizontal: 12,
-        paddingVertical: 6,
+        paddingVertical: 5,
         borderRadius: 99,
-        backgroundColor: '#1E293B',
-        marginBottom: 24,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        marginBottom: 18,
     },
     labelText: {
-        color: '#94A3B8',
+        color: '#38BDF8',
         fontWeight: '700',
-        fontSize: 11,
-        textTransform: 'uppercase',
-        letterSpacing: 2,
+        fontSize: 12,
+    },
+    imageWrap: {
+        height: 160,
+        width: '100%',
+        borderRadius: 14,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        marginBottom: 16,
+        overflow: 'hidden',
+    },
+    cardImage: {
+        width: '100%',
+        height: '100%',
+    },
+    questionBox: {
+        marginBottom: 22,
+        alignItems: 'center',
     },
     questionText: {
-        color: '#F8FAFC',
-        fontSize: 22,
-        fontWeight: '600',
+        color: '#F4F4F5',
+        fontSize: 20,
+        fontWeight: '700',
         textAlign: 'center',
-        lineHeight: 32,
-        letterSpacing: -0.3,
-        marginBottom: 32,
+        lineHeight: 28,
     },
     optionsContainer: {
-        gap: 12,
+        gap: 10,
     },
     option: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        backgroundColor: '#0F0F0F',
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     optionSelected: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        backgroundColor: '#0F172A',
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        backgroundColor: 'rgba(56, 189, 248, 0.1)',
         borderWidth: 1,
-        borderColor: '#2563EB',
+        borderColor: '#38BDF8',
     },
     optionCorrect: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        backgroundColor: '#052E16',
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        backgroundColor: 'rgba(16, 185, 129, 0.12)',
         borderWidth: 1,
         borderColor: '#10B981',
     },
     optionWrong: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        backgroundColor: '#1C0A0A',
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        backgroundColor: 'rgba(239, 68, 68, 0.12)',
         borderWidth: 1,
         borderColor: '#EF4444',
     },
@@ -193,50 +223,50 @@ const styles = StyleSheet.create({
         width: 28,
         height: 28,
         borderRadius: 8,
-        backgroundColor: '#1E293B',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
     },
     optionLetter: {
-        color: '#94A3B8',
+        color: '#A1A1AA',
         fontSize: 13,
         fontWeight: '700',
     },
     optionText: {
-        color: '#F8FAFC',
+        color: '#F4F4F5',
         fontSize: 15,
         fontWeight: '500',
-        flex: 1,
+        lineHeight: 21,
     },
     explanationBox: {
         flexDirection: 'row',
         alignItems: 'flex-start',
         gap: 8,
-        marginTop: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
+        marginTop: 18,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: '#1A1400',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderWidth: 1,
-        borderColor: '#422006',
+        borderColor: 'rgba(245, 158, 11, 0.28)',
     },
     explanationText: {
-        color: '#FCD34D',
+        color: '#FDE68A',
         fontSize: 13,
-        fontWeight: '500',
-        lineHeight: 20,
-        flex: 1,
+        lineHeight: 19,
     },
     confirmBtn: {
-        marginTop: 24,
-        backgroundColor: '#2563EB',
-        paddingVertical: 16,
-        borderRadius: 99,
+        marginTop: 22,
+        backgroundColor: '#38BDF8',
+        paddingVertical: 15,
+        borderRadius: 16,
         alignItems: 'center',
     },
     confirmBtnText: {
-        color: '#FFFFFF',
+        color: '#09090B',
         fontSize: 15,
         fontWeight: '700',
     },

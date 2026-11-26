@@ -12,63 +12,40 @@ import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawingCanvas } from '@/components/drawing';
-import { DrawingCanvasData } from '@learnaxia/shared';
+import {
+    DrawingCanvasData,
+    parseNoteContent,
+    serializeNoteContent,
+    ParsedNoteContent,
+} from '@learnaxia/shared';
+import { useAuth } from '@/context/AuthContext';
 
 const NOTE_CACHE_PREFIX = 'learnaxia_note_';
-
-function parseNotePayload(rawContent: string): { text: string; drawing: DrawingCanvasData | null } {
-    if (!rawContent) return { text: '', drawing: null };
-    try {
-        const parsed = JSON.parse(rawContent);
-        // 1. Mobile hybrid format: { text: "...", drawing: ... }
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            return {
-                text: typeof parsed.text === 'string' ? parsed.text : '',
-                drawing: parsed.drawing || null,
-            };
-        }
-        // 2. Web BlockNote array format: [ { type: "paragraph", content: [ { type: "text", text: "..." } ] } ]
-        if (Array.isArray(parsed)) {
-            const extractedText = parsed
-                .map((block: any) => {
-                    if (block.content && Array.isArray(block.content)) {
-                        return block.content.map((c: any) => c.text || '').join('');
-                    }
-                    return '';
-                })
-                .filter(Boolean)
-                .join('\n\n');
-            return { text: extractedText, drawing: null };
-        }
-    } catch {
-        // Plain text or legacy HTML
-    }
-    return { text: rawContent, drawing: null };
-}
 
 export default function NoteEditorScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const { user } = useAuth();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PRIVATE');
     const [drawingData, setDrawingData] = useState<DrawingCanvasData | null>(null);
     const [showDrawing, setShowDrawing] = useState(false);
+    const [isOwner, setIsOwner] = useState(true);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isOffline, setIsOffline] = useState(false);
     const [savedIndicator, setSavedIndicator] = useState<string | null>(null);
 
+    const parsedOriginalRef = useRef<ParsedNoteContent | null>(null);
+    const textWasEditedRef = useRef(false);
     const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // 1. Fetch Note Data with Offline Fallback
     useEffect(() => {
         const fetchNote = async () => {
-            if (!id || id === 'new') {
-                setTitle('');
-                setContent('');
-                setDrawingData(null);
+            if (!id) {
                 setIsLoading(false);
                 return;
             }
@@ -77,11 +54,14 @@ export default function NoteEditorScreen() {
                 const res = await api.get(`/mobile/notes/${id}`);
                 const data = res.data;
                 setTitle(data.title || '');
+                setVisibility(data.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE');
+                const noteOwnerId = data.userId || data.owner?.id;
+                setIsOwner(!user?.id || !noteOwnerId || noteOwnerId === user.id);
 
-                // Parse content: supports Mobile hybrid { text, drawing } and Web BlockNote blocks
                 if (typeof data.content === 'string') {
-                    const parsed = parseNotePayload(data.content);
-                    setContent(parsed.text);
+                    const parsed = parseNoteContent(data.content);
+                    parsedOriginalRef.current = parsed;
+                    setContent(parsed.plainText);
                     if (parsed.drawing) {
                         setDrawingData(parsed.drawing);
                         setShowDrawing(true);
@@ -89,18 +69,18 @@ export default function NoteEditorScreen() {
                 }
 
                 setIsOffline(false);
-                // Cache note locally
                 await AsyncStorage.setItem(`${NOTE_CACHE_PREFIX}${id}`, JSON.stringify(data));
             } catch (error) {
-                console.warn('[NoteEditor] Network fetch failed, checking offline cache:', error);
-                // Fallback to offline cache
+                if (__DEV__) console.warn('[NoteEditor] Offline cache fallback:', error);
                 const cached = await AsyncStorage.getItem(`${NOTE_CACHE_PREFIX}${id}`);
                 if (cached) {
                     const data = JSON.parse(cached);
                     setTitle(data.title || '');
+                    setVisibility(data.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE');
                     if (typeof data.content === 'string') {
-                        const parsed = parseNotePayload(data.content);
-                        setContent(parsed.text);
+                        const parsed = parseNoteContent(data.content);
+                        parsedOriginalRef.current = parsed;
+                        setContent(parsed.plainText);
                         if (parsed.drawing) {
                             setDrawingData(parsed.drawing);
                             setShowDrawing(true);
@@ -114,145 +94,193 @@ export default function NoteEditorScreen() {
         };
 
         fetchNote();
-    }, [id]);
+    }, [id, user?.id]);
 
-    // 2. Debounced Auto-Save
-    const triggerAutoSave = useCallback((newTitle: string, newContent: string, newDrawing: DrawingCanvasData | null) => {
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
+    const saveNote = useCallback(
+        async (
+            newTitle: string,
+            newText: string,
+            newDrawing: DrawingCanvasData | null,
+            newVisibility: 'PUBLIC' | 'PRIVATE'
+        ) => {
+            if (!id || !isOwner) return;
+            setIsSaving(true);
 
-        setIsSaving(true);
-        setSavedIndicator('Kaydediliyor...');
-
-        saveTimeoutRef.current = setTimeout(async () => {
-            // Bundle text and drawing
-            let finalContent: string;
-            if (newDrawing && newDrawing.paths && newDrawing.paths.length > 0) {
-                finalContent = JSON.stringify({
-                    text: newContent,
-                    drawing: newDrawing,
-                });
-            } else {
-                finalContent = newContent;
-            }
-
-            const payload = {
-                title: newTitle.trim() || 'İsimsiz Not',
-                content: finalContent,
-            };
-
-            // Always update local cache immediately
-            if (id && id !== 'new') {
-                await AsyncStorage.setItem(`${NOTE_CACHE_PREFIX}${id}`, JSON.stringify({ id, ...payload }));
-            }
+            const serializedContent = serializeNoteContent({
+                editedText: newText,
+                parsedOriginal: parsedOriginalRef.current,
+                textWasEdited: textWasEditedRef.current,
+                drawing: newDrawing,
+            });
 
             try {
-                if (id === 'new') {
-                    const res = await api.post('/mobile/notes', payload);
-                    if (res.data?.id) {
-                        router.setParams({ id: res.data.id });
-                    }
-                } else {
-                    await api.patch(`/mobile/notes/${id}`, payload);
-                }
+                await api.patch(`/mobile/notes/${id}`, {
+                    title: newTitle || 'İsimsiz Not',
+                    content: serializedContent,
+                    visibility: newVisibility,
+                });
+
+                await AsyncStorage.setItem(
+                    `${NOTE_CACHE_PREFIX}${id}`,
+                    JSON.stringify({ id, title: newTitle, content: serializedContent, visibility: newVisibility })
+                );
+
                 setIsOffline(false);
                 setSavedIndicator('Kaydedildi');
-            } catch (err) {
-                console.warn('[NoteEditor] Save failed remotely, stored locally:', err);
+                setTimeout(() => setSavedIndicator(null), 2000);
+            } catch {
+                await AsyncStorage.setItem(
+                    `${NOTE_CACHE_PREFIX}${id}`,
+                    JSON.stringify({ id, title: newTitle, content: serializedContent, visibility: newVisibility })
+                );
                 setIsOffline(true);
-                setSavedIndicator('Cihaza Kaydedildi (Çevrimdışı)');
+                setSavedIndicator('Cihazda Kaydedildi');
             } finally {
                 setIsSaving(false);
-                setTimeout(() => setSavedIndicator(null), 3000);
             }
-        }, 1200);
-    }, [id, router]);
+        },
+        [id, isOwner]
+    );
 
-    const handleTitleChange = (val: string) => {
-        setTitle(val);
-        triggerAutoSave(val, content, drawingData);
+    const scheduleSave = useCallback(
+        (
+            newTitle: string,
+            newText: string,
+            newDrawing: DrawingCanvasData | null,
+            newVisibility: 'PUBLIC' | 'PRIVATE'
+        ) => {
+            if (!isOwner) return;
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            setSavedIndicator('Yazılıyor...');
+            saveTimeoutRef.current = setTimeout(() => {
+                saveNote(newTitle, newText, newDrawing, newVisibility);
+            }, 900);
+        },
+        [isOwner, saveNote]
+    );
+
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        };
+    }, []);
+
+    const handleTitleChange = (text: string) => {
+        if (!isOwner) return;
+        setTitle(text);
+        scheduleSave(text, content, drawingData, visibility);
     };
 
-    const handleContentChange = (val: string) => {
-        setContent(val);
-        triggerAutoSave(title, val, drawingData);
+    const handleContentChange = (text: string) => {
+        if (!isOwner) return;
+        textWasEditedRef.current = true;
+        setContent(text);
+        scheduleSave(title, text, drawingData, visibility);
     };
 
     const handleDrawingChange = (data: DrawingCanvasData) => {
+        if (!isOwner) return;
         setDrawingData(data);
-        triggerAutoSave(title, content, data);
+        scheduleSave(title, content, data, visibility);
+    };
+
+    const toggleVisibility = () => {
+        if (!isOwner) return;
+        const nextVis = visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setVisibility(nextVis);
+        scheduleSave(title, content, drawingData, nextVis);
+    };
+
+    const handleDeleteNote = () => {
+        if (!id || !isOwner) return;
+        Alert.alert(
+            'Notu Sil',
+            'Bu notu kalıcı olarak silmek istediğinizden emin misiniz?',
+            [
+                { text: 'Vazgeç', style: 'cancel' },
+                {
+                    text: 'Sil',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await api.delete(`/mobile/notes/${id}`);
+                            await AsyncStorage.removeItem(`${NOTE_CACHE_PREFIX}${id}`);
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            router.back();
+                        } catch {
+                            Alert.alert('Hata', 'Not silinemedi.');
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     const toggleDrawingArea = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setShowDrawing(prev => !prev);
+        setShowDrawing((prev) => !prev);
     };
 
     if (isLoading) {
         return (
-            <Screen style={styles.loadingScreen}>
-                <BrandLoader size={70} label="Not Yükleniyor..." />
+            <Screen style={styles.centerContainer}>
+                <BrandLoader size="lg" label="Not yükleniyor..." />
             </Screen>
         );
     }
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" backgroundColor="#000000" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
 
-            {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.backBtn}
-                >
-                    <MaterialIcons name="arrow-back-ios" size={18} color="#94A3B8" />
-                    <Text style={styles.backBtnText}>Notlar</Text>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                    <MaterialIcons name="arrow-back" size={20} color="#E4E4E7" />
                 </TouchableOpacity>
 
-                {/* Auto-save & Offline Indicator */}
-                <View style={styles.headerStatus}>
-                    {savedIndicator ? (
-                        <View style={styles.savedBadge}>
-                            {isSaving ? (
-                                <BrandLoader size={12} showBlur={false} />
-                            ) : (
-                                <MaterialIcons
-                                    name={isOffline ? 'cloud-off' : 'cloud-done'}
-                                    size={14}
-                                    color={isOffline ? '#F59E0B' : '#10B981'}
-                                />
-                            )}
-                            <Text style={[styles.savedText, isOffline && { color: '#FCD34D' }]}>
-                                {savedIndicator}
-                            </Text>
+                <View style={styles.headerCenter}>
+                    {isOffline ? (
+                        <View style={styles.offlineBadge}>
+                            <MaterialIcons name="cloud-off" size={14} color="#F59E0B" />
+                            <Text style={styles.offlineText}>Çevrimdışı</Text>
                         </View>
-                    ) : null}
+                    ) : (
+                        <Text style={styles.saveStatusText}>
+                            {isSaving ? 'Kaydediliyor...' : savedIndicator || (isOwner ? 'Otomatik Kayıt' : 'Salt Okunur')}
+                        </Text>
+                    )}
                 </View>
 
-                {/* Drawing Toggle Button */}
-                <TouchableOpacity
-                    onPress={toggleDrawingArea}
-                    style={[styles.drawingToggleBtn, showDrawing && styles.drawingToggleBtnActive]}
-                >
-                    <MaterialIcons
-                        name="gesture"
-                        size={20}
-                        color={showDrawing ? '#38BDF8' : '#94A3B8'}
-                    />
-                </TouchableOpacity>
+                <View style={styles.headerRight}>
+                    {isOwner && (
+                        <>
+                            <TouchableOpacity onPress={toggleVisibility} style={styles.iconPillBtn}>
+                                <Ionicons
+                                    name={visibility === 'PUBLIC' ? 'globe-outline' : 'lock-closed-outline'}
+                                    size={17}
+                                    color={visibility === 'PUBLIC' ? '#10B981' : '#A1A1AA'}
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    saveNote(title, content, drawingData, visibility);
+                                }}
+                                style={styles.doneBtn}
+                                disabled={isSaving}
+                            >
+                                <Text style={styles.doneBtnText}>Kaydet</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={handleDeleteNote} style={styles.deleteBtn}>
+                                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                            </TouchableOpacity>
+                        </>
+                    )}
+                </View>
             </View>
-
-            {/* Offline Alert Strip */}
-            {isOffline && (
-                <View style={styles.offlineStrip}>
-                    <MaterialIcons name="cloud-off" size={13} color="#F59E0B" />
-                    <Text style={styles.offlineStripText}>
-                        Çevrimdışı — Not yerel belleğe kaydediliyor
-                    </Text>
-                </View>
-            )}
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -263,57 +291,61 @@ export default function NoteEditorScreen() {
                     contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Note Title */}
                     <TextInput
                         style={styles.titleInput}
-                        placeholder="Başlık..."
-                        placeholderTextColor="rgba(255,255,255,0.25)"
+                        placeholder="Başlıksız Not"
+                        placeholderTextColor="#52525B"
                         value={title}
                         onChangeText={handleTitleChange}
-                        returnKeyType="next"
+                        editable={isOwner}
                         maxLength={120}
                     />
 
-                    {/* Note Text Content */}
+                    <View style={styles.divider} />
+
                     <TextInput
                         style={styles.contentInput}
-                        placeholder="Notunuzu yazın..."
-                        placeholderTextColor="rgba(255,255,255,0.2)"
+                        placeholder={isOwner ? 'Notlarınızı buraya yazmaya başlayın...' : 'Not içeriği boş.'}
+                        placeholderTextColor="#52525B"
                         value={content}
                         onChangeText={handleContentChange}
+                        editable={isOwner}
                         multiline
                         textAlignVertical="top"
                     />
 
-                    {/* Native Vector Drawing Canvas */}
                     {showDrawing ? (
                         <View style={styles.drawingSection}>
-                            <View style={styles.drawingSectionHeader}>
-                                <View style={styles.drawingSectionTitleRow}>
+                            <View style={styles.drawingHeader}>
+                                <View style={styles.drawingTitleRow}>
                                     <MaterialIcons name="brush" size={16} color="#38BDF8" />
-                                    <Text style={styles.drawingSectionTitle}>EL YAZISI VE ÇİZİM</Text>
+                                    <Text style={styles.drawingSectionTitle}>El Yazısı ve Çizim Alanı</Text>
                                 </View>
-                                <TouchableOpacity onPress={toggleDrawingArea} style={styles.hideDrawingBtn}>
-                                    <Text style={styles.hideDrawingText}>Gizle</Text>
-                                </TouchableOpacity>
+                                {isOwner && (
+                                    <TouchableOpacity onPress={toggleDrawingArea} style={styles.hideDrawingBtn}>
+                                        <Text style={styles.hideDrawingText}>Gizle</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
 
                             <DrawingCanvas
                                 initialData={drawingData || undefined}
                                 onChange={handleDrawingChange}
-                                height={320}
+                                readOnly={!isOwner}
+                                height={340}
                             />
                         </View>
                     ) : (
-                        <TouchableOpacity
-                            onPress={toggleDrawingArea}
-                            style={styles.addDrawingBtn}
-                        >
-                            <MaterialIcons name="gesture" size={18} color="#38BDF8" />
-                            <Text style={styles.addDrawingBtnText}>
-                                {drawingData && drawingData.paths.length > 0 ? 'Çizimi Görüntüle / Düzenle' : '+ El Yazısı veya Çizim Alanı Ekle'}
-                            </Text>
-                        </TouchableOpacity>
+                        isOwner && (
+                            <TouchableOpacity onPress={toggleDrawingArea} style={styles.addDrawingBtn}>
+                                <MaterialIcons name="gesture" size={18} color="#38BDF8" />
+                                <Text style={styles.addDrawingBtnText}>
+                                    {drawingData && drawingData.paths.length > 0
+                                        ? 'Çizimi Görüntüle / Düzenle'
+                                        : '+ El Yazısı veya Çizim Alanı Ekle'}
+                                </Text>
+                            </TouchableOpacity>
+                        )
                     )}
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -322,59 +354,164 @@ export default function NoteEditorScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#09090B' },
-    loadingScreen: { flex: 1, backgroundColor: '#09090B', alignItems: 'center', justifyContent: 'center' },
+    screen: {
+        flex: 1,
+        backgroundColor: '#09090B',
+    },
+    centerContainer: {
+        flex: 1,
+        backgroundColor: '#09090B',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     header: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14,
-        borderBottomWidth: 1, borderBottomColor: '#18181B',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#18181B',
     },
     backBtn: {
-        flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 4,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: '#121215',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#27272A',
     },
-    backBtnText: { color: '#A1A1AA', fontSize: 14, fontWeight: '600', marginLeft: 2 },
-    headerStatus: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    savedBadge: {
-        flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#121215',
-        borderWidth: 1, borderColor: '#27272A',
-        paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
+    headerCenter: {
+        flex: 1,
+        alignItems: 'center',
     },
-    savedText: { color: '#A1A1AA', fontSize: 11, fontWeight: '600' },
-    drawingToggleBtn: {
-        width: 36, height: 36, borderRadius: 10, backgroundColor: '#121215',
-        alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#27272A',
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
-    drawingToggleBtnActive: {
-        backgroundColor: '#18181B', borderColor: '#6366F1',
+    iconPillBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: '#121215',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    offlineStrip: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-        backgroundColor: 'rgba(245, 158, 11, 0.1)', paddingVertical: 5,
-        borderBottomWidth: 1, borderBottomColor: 'rgba(245, 158, 11, 0.25)',
+    deleteBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(239, 68, 68, 0.25)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    offlineStripText: { color: '#FCD34D', fontSize: 11, fontWeight: '600' },
-    scrollContent: { paddingHorizontal: 18, paddingVertical: 16, paddingBottom: 100 },
+    offlineBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    offlineText: {
+        color: '#F59E0B',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    saveStatusText: {
+        color: '#71717A',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    doneBtn: {
+        backgroundColor: '#38BDF8',
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 14,
+    },
+    doneBtnText: {
+        color: '#09090B',
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    scrollContent: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 60,
+    },
     titleInput: {
-        color: '#F4F4F5', fontSize: 22, fontWeight: '700', paddingVertical: 8,
-        borderBottomWidth: 1, borderBottomColor: '#27272A', marginBottom: 14,
+        color: '#F4F4F5',
+        fontSize: 24,
+        fontWeight: '800',
+        paddingVertical: 8,
+        letterSpacing: -0.3,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#18181B',
+        marginVertical: 14,
     },
     contentInput: {
-        color: '#E2E8F0', fontSize: 15, lineHeight: 24, minHeight: 180,
-        textAlignVertical: 'top', paddingVertical: 8,
+        color: '#E4E4E7',
+        fontSize: 16,
+        lineHeight: 24,
+        minHeight: 180,
     },
-    drawingSection: { marginTop: 16 },
-    drawingSectionHeader: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    drawingSection: {
+        marginTop: 24,
+    },
+    drawingHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: 8,
     },
-    drawingSectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    drawingSectionTitle: { color: '#818CF8', fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
-    hideDrawingBtn: { padding: 4 },
-    hideDrawingText: { color: '#A1A1AA', fontSize: 11, fontWeight: '600' },
-    addDrawingBtn: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A',
-        borderRadius: 14, paddingVertical: 14, marginTop: 24,
+    drawingTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
-    addDrawingBtnText: { color: '#818CF8', fontSize: 13, fontWeight: '600' },
+    drawingSectionTitle: {
+        color: '#38BDF8',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    hideDrawingBtn: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        backgroundColor: '#18181B',
+    },
+    hideDrawingText: {
+        color: '#A1A1AA',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    addDrawingBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: 'rgba(56, 189, 248, 0.08)',
+        borderWidth: 1,
+        borderColor: 'rgba(56, 189, 248, 0.25)',
+        borderStyle: 'dashed',
+        borderRadius: 14,
+        paddingVertical: 16,
+        marginTop: 24,
+    },
+    addDrawingBtnText: {
+        color: '#38BDF8',
+        fontSize: 14,
+        fontWeight: '600',
+    },
 });

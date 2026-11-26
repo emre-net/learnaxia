@@ -51,7 +51,7 @@ export function DailyReviewWidget() {
 
     if (loading) {
         return (
-            <Card className="glass border-blue-500/20 sea-glow">
+            <Card className="bg-[#121215] border border-white/[0.06] rounded-2xl shadow-none">
                 <CardContent className="flex items-center justify-center p-12">
                     <BrandLoader size="lg" />
                 </CardContent>
@@ -66,32 +66,31 @@ export function DailyReviewWidget() {
     // Success State - No reviews pending!
     if (data.totalDue === 0) {
         return (
-            <Card className="glass border-cyan-500/20 sea-glow overflow-hidden">
-                <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-3 relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 pointer-events-none" />
-                    <div className="w-16 h-16 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center mb-2 z-10">
-                        <BrainCircuit className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
+            <Card className="bg-[#121215] border border-white/[0.06] rounded-2xl shadow-none overflow-hidden">
+                <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-3">
+                    <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-1">
+                        <BrainCircuit className="w-7 h-7 text-sky-400" />
                     </div>
-                    <h3 className="text-xl font-bold tracking-tight z-10">{t('dashboard.dailyReview.completedTitle')}</h3>
-                    <p className="text-muted-foreground text-sm max-w-sm z-10">{t('dashboard.dailyReview.completedDesc')}</p>
+                    <h3 className="text-xl font-bold tracking-tight text-[#f4f4f5]">{t('dashboard.dailyReview.completedTitle')}</h3>
+                    <p className="text-zinc-400 text-sm max-w-sm">{t('dashboard.dailyReview.completedDesc')}</p>
                 </CardContent>
             </Card>
         );
     }
 
     return (
-        <Card className="glass border-blue-500/20 sea-glow relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500" />
+        <Card className="bg-[#121215] border border-white/[0.06] rounded-2xl shadow-none relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-0.5 bg-sky-500/60" />
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                     <div>
-                        <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                            <BrainCircuit className="w-6 h-6 text-blue-500" />
+                        <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-[#f4f4f5]">
+                            <BrainCircuit className="w-6 h-6 text-sky-400" />
                             {t('dashboard.dailyReview.title')}
                         </CardTitle>
-                        <CardDescription className="mt-1 flex items-center gap-2">
+                        <CardDescription className="mt-1 flex flex-wrap items-center gap-2 text-zinc-400">
                             {t('dashboard.dailyReview.duePrefix')}
-                            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400">
+                            <Badge variant="outline" className="bg-sky-500/10 text-sky-400 border-sky-500/20">
                                 {data.totalDue} {t('dashboard.dailyReview.dueCards')}
                             </Badge> {t('dashboard.dailyReview.dueSuffix')}
                         </CardDescription>
@@ -99,7 +98,7 @@ export function DailyReviewWidget() {
 
                     {/* Optional: Mix All Button */}
                     <div className="hidden sm:block">
-                        <Button variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-50" asChild>
+                        <Button variant="outline" className="bg-[#18181b] border-white/[0.08] text-sky-400 hover:bg-zinc-800 hover:text-sky-300 rounded-xl" asChild>
                             <Link href={`/study/daily`}>
                                 {t('dashboard.mixAll')} <ArrowRight className="w-4 h-4 ml-2" />
                             </Link>
@@ -110,27 +109,27 @@ export function DailyReviewWidget() {
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
                     {data.modules.map((m) => (
-                        <div key={m.module.id} className="group relative flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-blue-500/50 hover:shadow-md transition-all">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="space-y-1">
-                                    <h4 className="font-semibold line-clamp-1 group-hover:text-blue-600 transition-colors" title={m.module.title}>
+                        <div key={m.module.id} className="group relative flex flex-col justify-between p-4 rounded-xl border border-white/[0.06] bg-[#18181b] hover:border-sky-500/40 transition-colors">
+                            <div className="flex justify-between items-start mb-4 gap-2">
+                                <div className="space-y-1 min-w-0">
+                                    <h4 className="font-semibold line-clamp-1 text-[#f4f4f5] group-hover:text-sky-400 transition-colors" title={m.module.title}>
                                         {m.module.title}
                                     </h4>
                                     {m.module.category && (
-                                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <div className="text-xs text-zinc-400 flex items-center gap-1">
                                             <BookType className="w-3 h-3" /> {m.module.category}
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-shrink-0">
-                                    <Badge variant="secondary" className="font-mono bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                    <Badge variant="secondary" className="font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                         {m.dueCount} Due
                                     </Badge>
                                 </div>
                             </div>
 
                             <Button
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm gap-2"
+                                className="w-full bg-sky-500 hover:bg-sky-400 text-[#09090b] font-semibold shadow-none gap-2 rounded-xl"
                                 size="sm"
                                 asChild
                             >
@@ -144,7 +143,7 @@ export function DailyReviewWidget() {
 
                 {/* Mobile Mix All Fallback */}
                 <div className="mt-6 sm:hidden">
-                    <Button className="w-full" variant="outline" asChild>
+                    <Button className="w-full bg-[#18181b] border-white/[0.08] text-sky-400 hover:bg-zinc-800 rounded-xl" variant="outline" asChild>
                         <Link href={`/study/daily`}>
                             {t('dashboard.mixAll')} <ArrowRight className="w-4 h-4 ml-2" />
                         </Link>

@@ -30,4 +30,32 @@ test.describe('API Security', () => {
         expect(response.status()).toBe(401);
     });
 
+    test('user settings and password require auth (GET/PATCH/POST)', async ({ request }) => {
+        const getRes = await request.get('http://localhost:3000/api/user/settings');
+        expect(getRes.status()).toBe(401);
+
+        const patchRes = await request.patch('http://localhost:3000/api/user/settings', {
+            data: { showStudyTimer: true },
+        });
+        expect(patchRes.status()).toBe(401);
+
+        const passRes = await request.post('http://localhost:3000/api/user/password', {
+            data: { currentPassword: 'old', newPassword: 'newpassword123' },
+        });
+        expect(passRes.status()).toBe(401);
+    });
+
+    test('admin module patch, fork, and mobile start-daily require auth', async ({ request }) => {
+        const adminRes = await request.patch('http://localhost:3000/api/admin/modules/fake-id', {
+            data: { status: 'ARCHIVED' },
+        });
+        expect(adminRes.status()).toBe(401);
+
+        const forkRes = await request.post('http://localhost:3000/api/modules/fake-id/fork');
+        expect(forkRes.status()).toBe(401);
+
+        const dailyRes = await request.post('http://localhost:3000/api/mobile/study/start-daily');
+        expect(dailyRes.status()).toBe(401);
+    });
+
 });

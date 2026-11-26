@@ -201,7 +201,7 @@ export async function calculateMomentum(
 export async function saveAndRecalculate(
     userId: string,
     period: Date = periodStart()
-): Promise<void> {
+) {
     const result = await calculateMomentum(userId, period);
 
     // Period puanını kaydet
@@ -253,9 +253,7 @@ export async function saveAndRecalculate(
     const cumulativeScore = allTimeScore._sum.finalScore ?? 0;
     const allTimeTier = getTierForScore(cumulativeScore).key;
 
-    // User modelinde tüm zamanlar tier'ı saklamak için settings alanını kullan
-    // NOT: settings bir JSON alanıdır — direkt atama tüm mevcut ayarları siler.
-    // Bu yüzden önce mevcut settings okunup merge yapılır.
+    // User modelinde tüm zamanlar tier'ı ve rozetleri saklamak için settings alanını merge et
     const currentUser = await prisma.user.findUnique({
         where: { id: userId },
         select: { settings: true },
@@ -269,8 +267,11 @@ export async function saveAndRecalculate(
                 ...existingSettings,
                 allTimeMomentum: cumulativeScore,
                 allTimeTier,
+                earnedBadges: result.earnedBadges,
                 lastScoreCalculatedAt: new Date().toISOString(),
             },
         },
     });
+
+    return result;
 }

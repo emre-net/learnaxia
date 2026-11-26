@@ -35,8 +35,8 @@ export default function NewCollectionScreen() {
             Alert.alert('Hata', 'Koleksiyon adı boş olamaz.');
             return;
         }
-        if (trimmedTitle.length < 2) {
-            Alert.alert('Hata', 'Koleksiyon adı en az 2 karakter olmalıdır.');
+        if (trimmedTitle.length < 3) {
+            Alert.alert('Hata', 'Koleksiyon adı en az 3 karakter olmalıdır.');
             return;
         }
 
@@ -77,7 +77,7 @@ export default function NewCollectionScreen() {
         }
     };
 
-    const isDisabled = saving || title.trim().length < 2;
+    const isDisabled = saving || title.trim().length < 3;
 
     return (
         <Screen style={styles.screen}>

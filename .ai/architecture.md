@@ -9,11 +9,12 @@ Learnaxia is a unified monorepo containing a modern web application (Next.js) an
 - **packages/shared**: Shared TypeScript types, validation schemas (Zod), and theme tokens.
 
 ## Tech Stack Matrix
-- **Web Runtime**: Next.js 15.2.x, React 19.0.0, Tailwind CSS 4.1.x, Lucide React, Framer Motion.
-- **Mobile Runtime**: Expo SDK ~52.0.49, React 18.3.1, React Native 0.76.9, NativeWind 2.0.11, Expo Router ~4.0.15.
-- **Database**: Prisma ORM with PostgreSQL (hosted on Railway).
-- **Authentication**:
+- **Shared Core (`@learnaxia/shared`)**: Single source of truth for Zod auth/domain schemas (`LoginSchema`, `RegisterSchema`, `ProfileUpdateSchema`, `ChangePasswordSchema`), 4 homogeneous module/question types (`FLASHCARD`, `MC`, `TRUE_FALSE`, `GAP`), `CATEGORIES`, `TIERS`, `BADGE_DEFINITIONS`, `i18n` (`DEFAULT_LANGUAGE = 'tr'`), `DrawingCanvasData`, `parseNoteContent`/`serializeNoteContent`, `parseGapSegments`/`evaluateGapAnswers`/`resolveTrueFalseAnswer`, and `formatLatexToUnicode`/`parseRichContentBlocks`.
+- **Web Runtime**: Next.js 15.2.x, React 19.0.0, Tailwind CSS 4.1.x, Lucide React, Framer Motion (`ignoreDuringBuilds: false`).
+- **Mobile Runtime**: Expo SDK ~52.0.49, React 18.3.1, React Native 0.76.9, NativeWind 2.0.11, Expo Router ~4.0.15, Reanimated + Gesture Handler, `OfflineStorageService` (`withLock` write mutex + dead-letter queue + `clearAllUserData`), SVG `viewBox` `DrawingCanvas`, `<NativeRichText />`.
+- **Database**: Prisma ORM with PostgreSQL (hosted on Railway); dormant Admin panel models (`Exam`, `ExamAttempt`, `WeaknessReport`) retained for Admin operations.
+- **Authentication & User Sync**:
   - Web: NextAuth.js v5 with Google OAuth & Credentials provider (JWT cookie strategy).
-  - Mobile: Custom access JWT & refresh token flow, securely stored via `expo-secure-store`.
-  - Unified Guard: Centralized `auth()` handler in `apps/web/auth.ts` validating both NextAuth sessions and Bearer JWTs with active session versioning (`sessionVersion`).
+  - Mobile: Custom access JWT & refresh token flow stored via `expo-secure-store` with automatic cleanup (`clearAllUserData`) on logout/refresh expiry.
+  - Unified API & Guard: Centralized `auth()` / `getMobileUser(req)` across Web & Mobile routes including shared `/api/user/settings` and `/api/user/password`.
 - **Monorepo Engine**: Turborepo v2 with npm workspaces.

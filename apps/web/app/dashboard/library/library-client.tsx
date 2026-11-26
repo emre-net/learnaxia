@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/lib/i18n/i18n";
@@ -25,11 +26,27 @@ type NoteWithSource = PrismaNote & {
 };
 
 export function LibraryClient() {
+    const searchParams = useSearchParams();
+    const resolveTabFromParam = (raw: string | null) => {
+        if (!raw) return "modules";
+        if (raw === "journeys" || raw === "learnings") return "learnings";
+        if (raw === "ai-solutions" || raw === "solutions") return "ai-solutions";
+        if (raw === "collections" || raw === "notes" || raw === "modules") return raw;
+        return "modules";
+    };
+
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedType, setSelectedType] = useState<string>("ALL");
     const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-    const [activeTab, setActiveTab] = useState("modules");
+    const [activeTab, setActiveTab] = useState(() => resolveTabFromParam(searchParams.get("tab")));
+
+    useEffect(() => {
+        const param = searchParams.get("tab");
+        if (param) {
+            setActiveTab(resolveTabFromParam(param));
+        }
+    }, [searchParams]);
 
     const { t, language } = useTranslation();
     const dictionary = getDictionary(language);

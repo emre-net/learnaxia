@@ -17,13 +17,12 @@ export async function POST(req: Request) {
   try {
     let json;
     try {
-        json = await req.json();
-    } catch (e) {
-        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+      json = await req.json();
+    } catch {
+      return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
     }
 
     const { refreshToken: oldRefreshToken } = json;
-
     if (!oldRefreshToken) {
       return NextResponse.json({ message: 'Refresh token is required' }, { status: 400 });
     }
@@ -33,25 +32,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid or expired refresh token' }, { status: 401 });
     }
 
-    // 1. Rotate tokens and revoke old one properly
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        status: true,
+        deletedAt: true,
+        sessionVersion: true,
+      },
+    });
+
+    if (!user || user.deletedAt || user.status !== 'ACTIVE') {
+      return NextResponse.json({ message: 'Account unavailable' }, { status: 401 });
+    }
+
     const rotationResult = await MobileRefreshService.rotate(oldRefreshToken);
     if (!rotationResult) {
       return NextResponse.json({ message: 'Invalid or expired refresh token' }, { status: 401 });
     }
 
     const { refreshToken: newRefreshToken } = rotationResult;
-    
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
 
-    // 2. Generate new access token with correct expiration
     const accessToken = await new SignJWT({
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      tokenVersion: user.sessionVersion ?? 1,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -62,8 +72,7 @@ export async function POST(req: Request) {
       accessToken,
       refreshToken: newRefreshToken,
     });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error('Mobile Refresh Error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }

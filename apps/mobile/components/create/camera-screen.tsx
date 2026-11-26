@@ -64,7 +64,7 @@ export function CameraScreen({ cameraRef, isGenerating, onCapture, onClose }: Ca
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#09090B',
     },
     overlay: {
         flex: 1,
@@ -81,12 +81,12 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(9, 9, 11, 0.65)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     title: {
-        color: '#FFFFFF',
+        color: '#F4F4F5',
         fontWeight: '700',
         fontSize: 18,
     },

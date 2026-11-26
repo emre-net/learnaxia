@@ -6,7 +6,6 @@ import Constants from 'expo-constants';
 // For Android emulator, localhost is 10.0.2.2.
 // For physical Android devices, use the computer's LAN IP.
 // For iOS Simulator, localhost is localhost.
-const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const getDevBaseUrl = () => {
     if (Platform.OS === 'ios') return 'http://localhost:3000/api';
@@ -84,6 +83,21 @@ apiClient.interceptors.request.use(async (config) => {
 // Manage refreshing state to prevent multiple refresh calls simultaneously
 let isRefreshing = false;
 let failedQueue: { resolve: (token: string | null) => void; reject: (err: unknown) => void }[] = [];
+let onAuthFailureHandler: (() => void) | null = null;
+
+export const setOnAuthFailure = (handler: (() => void) | null) => {
+    onAuthFailureHandler = handler;
+};
+
+const notifyAuthFailure = () => {
+    if (onAuthFailureHandler) {
+        try {
+            onAuthFailureHandler();
+        } catch {
+            // Ignore handler failure
+        }
+    }
+};
 
 const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach(prom => {
@@ -123,6 +137,7 @@ apiClient.interceptors.response.use(
         if (isAuthEndpoint) {
             if (originalRequest.url.includes('/mobile/refresh')) {
                 await clearAuthToken();
+                notifyAuthFailure();
             }
             return Promise.reject(error);
         }
@@ -179,6 +194,7 @@ apiClient.interceptors.response.use(
             // If refresh fails, clear everything and fail the queue
             processQueue(refreshError, null);
             await clearAuthToken();
+            notifyAuthFailure();
 
             return Promise.reject(refreshError);
         } finally {

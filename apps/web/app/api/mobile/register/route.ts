@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { MobileRegisterSchema } from '@learnaxia/shared';
+import { RegisterSchema } from '@learnaxia/shared';
 import { SignJWT } from 'jose';
 import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
-
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const JWT_EXPIRY_DAYS = 1;
 
@@ -21,52 +20,50 @@ export async function POST(req: Request) {
   try {
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
 
-    // 0. Rate Limiting for account creation
     const ipLimit = await checkRateLimit({
-        key: `register-ip:${ip}`,
-        limit: 3, // 3 registrations per hour per IP
-        windowMs: 60 * 60 * 1000
+      key: `register-ip:${ip}`,
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
     });
 
     if (!ipLimit.allowed) {
-        return NextResponse.json({ 
-            message: 'Çok fazla hesap oluşturdunuz. Lütfen 1 saat bekleyin.' 
-        }, { status: 429 });
+      return NextResponse.json(
+        { message: 'Çok fazla hesap oluşturdunuz. Lütfen 1 saat bekleyin.' },
+        { status: 429 }
+      );
     }
 
     let json;
     try {
-        json = await req.json();
-    } catch (e) {
-        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+      json = await req.json();
+    } catch {
+      return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
     }
-    const validatedData = MobileRegisterSchema.safeParse(json);
 
+    const validatedData = RegisterSchema.safeParse(json);
     if (!validatedData.success) {
-      return NextResponse.json({ 
-        message: 'Validation error', 
-        errors: validatedData.error.flatten().fieldErrors 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: validatedData.error.issues[0]?.message || 'Validation error',
+          errors: validatedData.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
     }
 
-    const { name, email, password, handle } = validatedData.data;
+    const email = validatedData.data.email.trim().toLowerCase();
+    const handle = validatedData.data.handle.trim().toLowerCase();
+    const name = validatedData.data.name?.trim() ? validatedData.data.name.trim() : null;
+    const password = validatedData.data.password;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ message: 'User already exists' }, { status: 409 });
+      return NextResponse.json({ message: 'Bu e-posta adresi ile zaten kayıt olunmuş.' }, { status: 409 });
     }
 
-    // Handle benzersizlik kontrolü (opsiyonel alan)
-    if (handle) {
-      const existingHandle = await prisma.user.findUnique({
-        where: { handle },
-      });
-      if (existingHandle) {
-        return NextResponse.json({ message: 'Bu kullanıcı adı zaten alınmış' }, { status: 409 });
-      }
+    const existingHandle = await prisma.user.findUnique({ where: { handle } });
+    if (existingHandle) {
+      return NextResponse.json({ message: 'Bu kullanıcı adı zaten alınmış.' }, { status: 409 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -75,11 +72,10 @@ export async function POST(req: Request) {
       data: {
         name,
         email,
-        handle: handle || null,
+        handle,
         password: hashedPassword,
-        // S8: Mobil kayıtta e-posta otomatik doğrulanmış kabul edilir.
-        // Mobil uygulama üzerinden kayıt olan kullanıcılar zaten doğrudan
-        // kendi cihazlarından kayıt yaptığından ek bir e-posta adımı gerekmez.
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${handle}`,
+        // Mobil kayıtta e-posta doğrulaması cihaz üzerinden otomatik onaylanır
         emailVerified: new Date(),
       },
     });
@@ -88,26 +84,32 @@ export async function POST(req: Request) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      tokenVersion: user.sessionVersion ?? 1,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
       .sign(getJwtSecret());
 
-    // Use secure refresh token with rotation & revocation support
     const refreshToken = await MobileRefreshService.generate(user.id);
 
-    return NextResponse.json({
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image
-      }
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          handle: user.handle,
+          image: user.image,
+          language: user.language,
+          role: user.role,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Mobile Register Error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

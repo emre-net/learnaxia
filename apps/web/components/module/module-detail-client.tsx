@@ -298,14 +298,22 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex-1 min-w-0 w-full py-1">
-                                    <h4 className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-zinc-100 mb-2 leading-snug break-words">
-                                        {item.content?.question || item.content?.front || item.content?.statement || "Başlıksız Öğe"}
+                                <div className="flex-1 min-w-0 w-full py-1 space-y-2">
+                                    {item.content?.image && (item.content.image.startsWith("http") || item.content.image.startsWith("data:image/")) && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={item.content.image} alt="Kart görseli" className="max-h-36 rounded-xl border border-zinc-800 object-contain" />
+                                    )}
+                                    <h4 className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-zinc-100 leading-snug break-words">
+                                        {item.content?.question || item.content?.front || item.content?.statement || item.content?.text || "Başlıksız Öğe"}
                                     </h4>
                                     <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400 font-medium bg-zinc-50 dark:bg-zinc-800/30 w-full sm:w-fit px-3 py-2 sm:py-1.5 rounded-xl border border-zinc-100 dark:border-zinc-800 break-words">
-                                        <ArrowRight className="h-4 w-4 text-indigo-500 shrink-0" />
+                                        <ArrowRight className="h-4 w-4 text-sky-400 shrink-0" />
                                         <span className="line-clamp-2 sm:line-clamp-1 break-words">
-                                            {item.content?.answer || item.content?.back || (item.type === 'MC' ? 'Seçenekler' : 'İçerik')}
+                                            {item.type === 'TRUE_FALSE'
+                                                ? ((item.content?.isTrue === true || String(item.content?.answer ?? item.content?.correctAnswer).toLowerCase() === 'true') ? 'Doğru' : 'Yanlış')
+                                                : item.type === 'GAP'
+                                                ? ((Array.isArray(item.content?.answers) && item.content.answers.length > 0) ? item.content.answers.join(', ') : (item.content?.answer || 'Boşluk'))
+                                                : (item.content?.answer || item.content?.back || (item.type === 'MC' ? 'Seçenekler' : 'İçerik'))}
                                         </span>
                                     </div>
                                 </div>
@@ -318,9 +326,11 @@ export function ModuleDetailClient({ moduleId }: { moduleId: string }) {
                                             }}>
                                                 <Edit className="h-5 w-5" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 text-zinc-400" onClick={() => handleDeleteItem(item.id)}>
-                                                <Trash2 className="h-5 w-5" />
-                                            </Button>
+                                            {isOwner && (
+                                                <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 text-zinc-400" onClick={() => handleDeleteItem(item.id)}>
+                                                    <Trash2 className="h-5 w-5" />
+                                                </Button>
+                                            )}
                                         </>
                                     )}
                                 </div>

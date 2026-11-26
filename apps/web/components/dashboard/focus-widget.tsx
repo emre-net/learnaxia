@@ -71,28 +71,22 @@ export function FocusWidget() {
 
     return (
         <Card className={cn(
-            "relative overflow-hidden bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 transition-all duration-500 group",
+            "relative overflow-hidden bg-[#121215] border border-white/[0.08] transition-all duration-300 group",
             isFullscreen
-                ? "fixed inset-0 z-[100] m-0 rounded-none w-screen h-screen flex flex-col justify-center items-center shadow-none bg-white/90 dark:bg-slate-950/90"
-                : "w-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]"
+                ? "fixed inset-0 z-[100] m-0 rounded-none w-screen h-screen flex flex-col justify-center items-center shadow-none bg-[#09090b]"
+                : "w-full shadow-xl"
         )}>
-
-            {/* Ambient Background Glow */}
-            <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none transition-colors duration-1000 ${activeTab === 'POMODORO'
-                    ? (timer.isRunning ? 'bg-rose-500' : 'bg-orange-500')
-                    : (timer.isRunning ? 'bg-blue-500' : 'bg-slate-500')
-                }`} />
 
             <CardContent className={cn("p-6 relative z-10 flex flex-col pointer-events-auto", isFullscreen ? "w-full max-w-2xl h-[500px]" : "h-full")}>
 
                 {/* Header & Mode Switcher */}
                 <div className="flex justify-between items-center mb-6">
-                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-[200px]">
-                        <TabsList className="grid w-full grid-cols-2 bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-md">
-                            <TabsTrigger value="POMODORO" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-[210px]">
+                        <TabsList className="grid w-full grid-cols-2 bg-[#18181b] border border-white/[0.06]">
+                            <TabsTrigger value="POMODORO" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100">
                                 <Hourglass className="w-3 h-3 mr-1.5" /> {t('dashboard.focus.pomodoro')}
                             </TabsTrigger>
-                            <TabsTrigger value="STOPWATCH" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+                            <TabsTrigger value="STOPWATCH" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100">
                                 <Timer className="w-3 h-3 mr-1.5" /> {t('dashboard.focus.stopwatch')}
                             </TabsTrigger>
                         </TabsList>
@@ -102,7 +96,7 @@ export function FocusWidget() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60"
                         title={isFullscreen ? "Tam ekrandan çık (Esc)" : "Tam ekran"}
                     >
                         {isFullscreen ? (
@@ -116,18 +110,15 @@ export function FocusWidget() {
                 {/* Main Timer Display */}
                 <div className="flex flex-col items-center justify-center flex-1 py-4">
                     <div className="relative">
-                        <span className={`text-6xl font-black tracking-tighter tabular-nums transition-colors duration-500 ${timer.isRunning
-                            ? (activeTab === 'POMODORO' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400')
-                            : 'text-slate-800 dark:text-slate-100'
+                        <span className={`text-6xl font-bold tracking-tighter tabular-nums transition-colors duration-300 ${timer.isRunning
+                            ? (activeTab === 'POMODORO' ? 'text-rose-400' : 'text-sky-400')
+                            : 'text-zinc-100'
                             }`}>
                             {timer.displayTime}
                         </span>
-
-                        {/* Status Dots */}
-                        <div className="absolute -right-4 top-2 h-2 w-2 rounded-full hidden" />
                     </div>
 
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
+                    <span className="text-sm font-medium text-zinc-400 mt-2">
                         {activeTab === 'POMODORO' ? (timer.isRunning ? t('dashboard.focus.modePomodoro') : t('dashboard.focus.statusReady')) : t('dashboard.focus.modeStopwatch')}
                     </span>
                 </div>
@@ -138,7 +129,7 @@ export function FocusWidget() {
                         variant="outline"
                         size="icon"
                         onClick={handleReset}
-                        className="h-10 w-10 rounded-full border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="h-10 w-10 rounded-full border-zinc-800 bg-[#18181b] text-zinc-300 hover:bg-zinc-800"
                     >
                         <RotateCcw className="h-4 w-4" />
                     </Button>
@@ -147,9 +138,9 @@ export function FocusWidget() {
                         size="icon"
                         onClick={timer.toggle}
                         className={`h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${timer.isRunning
-                            ? 'bg-slate-800 hover:bg-slate-900 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900'
-                            : (activeTab === 'POMODORO' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700')
-                            } text-white`}
+                            ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-950'
+                            : (activeTab === 'POMODORO' ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-sky-500 hover:bg-sky-400 text-zinc-950')
+                            }`}
                     >
                         {timer.isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
                     </Button>
@@ -159,13 +150,13 @@ export function FocusWidget() {
                             <Button
                                 variant="outline"
                                 size="icon"
-                                className="h-10 w-10 rounded-full border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                className="h-10 w-10 rounded-full border-zinc-800 bg-[#18181b] text-zinc-300 hover:bg-zinc-800"
                                 title="Ayarlar"
                             >
                                 <Settings2 className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+                        <DropdownMenuContent align="end" className="w-48 bg-[#18181b] border-zinc-800 text-zinc-100 backdrop-blur-md">
                         <DropdownMenuLabel>{t('dashboard.focus.settingsTitle')}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => changePomodoroDuration(15)}>

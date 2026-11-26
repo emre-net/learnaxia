@@ -80,7 +80,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: () => (
             <View style={styles.floatingButton}>
-              <Ionicons name="add" size={28} color="#FFFFFF" />
+              <Ionicons name="add" size={28} color="#09090B" />
             </View>
           ),
           tabBarButton: (props) => (
@@ -136,18 +136,18 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#38BDF8',
   },
   floatingButton: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#38BDF8',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 6,
   },

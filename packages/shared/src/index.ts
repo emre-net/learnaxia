@@ -3,3 +3,4 @@ export * from './i18n';
 export * from './domain-types';
 export * from './theme';
 export * from './constants';
+export * from './utils';

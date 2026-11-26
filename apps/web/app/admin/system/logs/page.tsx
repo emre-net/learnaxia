@@ -67,7 +67,6 @@ export default function LogsPage() {
         if (isAdmin) {
             fetchLogs();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, level, isAdmin]);
 
     const getLevelBadge = (level: string) => {

@@ -183,28 +183,27 @@ export default function LeaderboardPage() {
     const myEntry = myEntryInList ?? data?.myEntry;
 
     return (
-        <div className="min-h-screen bg-[#08080F] text-white">
+        <div className="min-h-screen bg-[#09090b] text-zinc-100">
             {/* Header */}
-            <div className="border-b border-white/5 px-6 py-6">
-                <h1 className="text-2xl font-black tracking-tight">🏆 Liderboard</h1>
-                <p className="text-sm text-white/40 mt-1">
+            <div className="border-b border-white/[0.06] px-4 sm:px-6 py-6">
+                <h1 className="text-2xl font-bold tracking-tight">🏆 Sıralama</h1>
+                <p className="text-sm text-zinc-400 mt-1">
                     En yüksek Momentum puanına sahip öğrenciler
                 </p>
             </div>
 
-            <div className="px-6 py-5 space-y-5 max-w-2xl mx-auto">
-                {/* Filtreler */}
+            <div className="px-4 sm:px-6 py-5 space-y-5 max-w-2xl mx-auto">
+                {/* Filtreler — fluid scrollable pill track (no flex-1 squeezing) */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                    {/* Periyot */}
-                    <div className="flex rounded-xl overflow-hidden border border-white/10 text-sm flex-1">
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar rounded-xl border border-white/10 bg-[#121215] p-1 text-sm">
                         {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
                             <button
                                 key={p}
                                 onClick={() => setPeriod(p)}
-                                className={`flex-1 px-3 py-2 transition-colors ${
+                                className={`shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-lg transition-colors ${
                                     period === p
-                                        ? "bg-white/10 text-white font-medium"
-                                        : "text-white/40 hover:text-white/70"
+                                        ? "bg-zinc-800 text-zinc-100 font-medium"
+                                        : "text-zinc-400 hover:text-zinc-200"
                                 }`}
                             >
                                 {PERIOD_LABELS[p]}
@@ -216,11 +215,11 @@ export default function LeaderboardPage() {
                     <select
                         value={tierFilter}
                         onChange={e => setTierFilter(e.target.value)}
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 focus:outline-none"
+                        className="rounded-xl border border-white/10 bg-[#121215] px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-sky-500/50"
                     >
-                        <option value="all">Tüm Tierlar</option>
+                        <option value="all" className="bg-[#121215]">Tüm Ligler</option>
                         {TIERS.map(t => (
-                            <option key={t.key} value={t.key}>
+                            <option key={t.key} value={t.key} className="bg-[#121215]">
                                 {t.emoji} {t.label}
                             </option>
                         ))}

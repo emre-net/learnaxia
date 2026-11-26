@@ -94,28 +94,28 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
 
     return (
         <div
-            className="relative overflow-hidden rounded-2xl border p-6"
+            className="relative overflow-hidden rounded-2xl border p-5 sm:p-6 bg-[#121215]"
             style={{
-                borderColor: `${tierObj.color}25`,
-                background: `radial-gradient(ellipse at top left, ${tierObj.color}0D 0%, transparent 60%), #0E0E14`,
+                borderColor: `${tierObj.color}28`,
+                background: `radial-gradient(ellipse at top left, ${tierObj.color}0C 0%, transparent 60%), #121215`,
             }}
         >
             {/* Arka plan glow */}
             <div
-                className="pointer-events-none absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-20"
+                className="pointer-events-none absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-15"
                 style={{ background: tierObj.gradientFrom }}
             />
 
             {/* Periyot seçici */}
-            <div className="flex items-center justify-between mb-5">
-                <span className="text-xs text-white/40 uppercase tracking-widest">Momentum</span>
-                <div className="flex rounded-lg overflow-hidden border border-white/10 text-xs">
+            <div className="flex items-center justify-between gap-2 mb-5">
+                <span className="text-sm font-medium text-zinc-400">Momentum</span>
+                <div className="flex rounded-xl overflow-hidden border border-white/10 bg-[#18181b] text-xs p-0.5">
                     {(["thisMonth", "allTime"] as const).map(p => (
                         <button
                             key={p}
                             onClick={() => setView(p)}
-                            className={`px-3 py-1.5 transition-colors ${
-                                view === p ? "bg-white/10 text-white" : "text-white/40 hover:text-white/70"
+                            className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                                view === p ? "bg-zinc-800 text-zinc-100 font-semibold" : "text-zinc-400 hover:text-zinc-200"
                             }`}
                         >
                             {p === "thisMonth" ? "Bu Ay" : "Tüm Zamanlar"}
@@ -134,31 +134,23 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
                     score={momentum}
                 />
                 <div>
-                    <div className="text-4xl font-black text-white tracking-tight">
+                    <div className="text-4xl font-extrabold text-zinc-100 tracking-tight">
                         {formatMomentum(momentum)}
                     </div>
-                    <div className="text-sm text-white/40 mt-0.5">
+                    <div className="text-sm text-zinc-400 mt-0.5">
                         {tier.pointsToNext != null
                             ? `${formatMomentum(tier.pointsToNext)} puan → ${getTierForScore(momentum + tier.pointsToNext).label}`
-                            : "Maksimum tier 🏆"
+                            : "Maksimum lig"
                         }
                     </div>
                 </div>
             </div>
 
-            {/* Metrikler */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 rounded-xl bg-white/[0.03] border border-white/5 p-3 sm:p-4">
+            {/* Özet İlerleme (Yalnızca 3 sade gösterge — tam veriler Analiz sayfasında) */}
+            <div className="grid grid-cols-3 gap-3 mb-5 rounded-xl bg-[#18181b]/80 border border-white/[0.06] p-3 sm:p-4">
                 <MetricItem
                     label="Çalışma"
                     value={`${data.metrics.studyMinutes} dk`}
-                />
-                <MetricItem
-                    label="Kart"
-                    value={data.metrics.cardsReviewed.toLocaleString("tr-TR")}
-                />
-                <MetricItem
-                    label="Doğruluk"
-                    value={`%${Math.round(data.metrics.accuracyRate * 100)}`}
                 />
                 <MetricItem
                     label="Aktif Gün"
@@ -166,27 +158,15 @@ export function ScoreCard({ compact = false }: { compact?: boolean }) {
                     sub={`/ ${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} gün`}
                 />
                 <MetricItem
-                    label="Modül"
-                    value={data.metrics.modulesCreated}
-                />
-                <MetricItem
-                    label="Journey"
-                    value={data.metrics.journeyCompletions}
-                />
-                <MetricItem
-                    label="İçerik Takipçi"
-                    value={data.metrics.contentAdoption}
-                />
-                <MetricItem
-                    label="Dönem"
-                    value={data.period}
+                    label="Doğruluk"
+                    value={`%${Math.round(data.metrics.accuracyRate * 100)}`}
                 />
             </div>
 
             {/* Rozetler */}
             {data.badges.length > 0 && (
                 <div>
-                    <div className="text-xs text-white/30 mb-2 uppercase tracking-widest">Rozetler</div>
+                    <div className="text-xs font-medium text-zinc-400 mb-2">Rozetler</div>
                     <BadgeList earnedKeys={data.badges.map(b => b.key)} />
                 </div>
             )}

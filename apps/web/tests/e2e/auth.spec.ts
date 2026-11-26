@@ -30,4 +30,11 @@ test.describe('Authentication Flow', () => {
         await page.goto('/login');
         await expect(page).toHaveTitle(/Giriş Yap/i);
     });
+
+    test('register tab enforces handle required and display name optional', async ({ page }) => {
+        await page.goto('/login?tab=register');
+
+        await expect(page.getByPlaceholder('Kullanıcı adı (zorunlu)')).toBeVisible();
+        await expect(page.getByPlaceholder('Görünen isim (isteğe bağlı)')).toBeVisible();
+    });
 });

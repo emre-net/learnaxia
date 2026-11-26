@@ -6,10 +6,15 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        // Simple security check - only allow a specific handle or admin
-        if (!session || session.user?.handle !== 'learnaxia') {
-            // return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-            // For now, let's allow it if search param has a secret key or just for this fix
+        const userRole = (session?.user as any)?.role;
+        const userEmail = session?.user?.email;
+        const isAdmin =
+            session?.user?.handle === 'learnaxia' ||
+            userRole === 'ADMIN' ||
+            (process.env.ADMIN_EMAIL && userEmail === process.env.ADMIN_EMAIL);
+
+        if (!session?.user || !isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { searchParams } = new URL(req.url);

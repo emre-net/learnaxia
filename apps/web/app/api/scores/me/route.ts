@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { calculateMomentum, saveAndRecalculate } from "@/lib/scoring/engine";
 import { getTierForScore, getTierProgress, getPointsToNextTier } from "@/lib/scoring/tiers";
-import { getBadgeDetails } from "@/lib/scoring/badges";
+import { getBadgeDetails, type BadgeKey } from "@/lib/scoring/badges";
 import { periodStart } from "@/lib/scoring/signals";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -10,18 +10,15 @@ import { NextResponse } from "next/server";
 /**
  * GET /api/scores/me
  * Kullanıcının güncel Momentum skoru, tier, rozetler ve görünür metrikler.
- * Gizli sinyal ağırlıkları asla dönmez.
  */
 export async function GET(req: Request) {
     try {
         let userId: string | undefined;
 
-        // 1. Mobile Bearer token
         const mobileUser = await getMobileUser(req);
         if (mobileUser?.id) {
             userId = mobileUser.id;
         } else {
-            // 2. Web session
             const session = await auth();
             if (session?.user?.id) {
                 userId = session.user.id;
@@ -32,27 +29,51 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Bu ay için skor hesapla (DB'den cache'li değer varsa kullan)
         const period = periodStart();
-        const cached = await prisma.userScore.findUnique({
-            where: { userId_period: { userId, period } },
-        });
+        const [cached, userRow] = await Promise.all([
+            prisma.userScore.findUnique({
+                where: { userId_period: { userId, period } },
+            }),
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: { settings: true },
+            }),
+        ]);
 
-        // Cache 4 saatten eskiyse veya hiç yoksa yeniden hesapla
         const needsRecalc =
             !cached ||
             !cached.calculatedAt ||
             Date.now() - cached.calculatedAt.getTime() > 4 * 60 * 60 * 1000;
 
         let score = cached;
+        let badgeKeys: BadgeKey[] = [];
+
         if (needsRecalc) {
-            await saveAndRecalculate(userId, period);
+            const recalcResult = await saveAndRecalculate(userId, period);
             score = await prisma.userScore.findUnique({
                 where: { userId_period: { userId, period } },
             });
+            badgeKeys = recalcResult.earnedBadges;
+        } else {
+            const settings = (userRow?.settings as Record<string, unknown>) ?? {};
+            if (Array.isArray(settings.earnedBadges)) {
+                badgeKeys = settings.earnedBadges as BadgeKey[];
+            } else {
+                // Eski cache kayıtlarında earnedBadges yoksa bir kere hesapla ve settings'e yaz
+                const computed = await calculateMomentum(userId, period);
+                badgeKeys = computed.earnedBadges;
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        settings: {
+                            ...settings,
+                            earnedBadges: badgeKeys,
+                        },
+                    },
+                });
+            }
         }
 
-        // Tüm zamanlar kümülatif skor
         const allTimeAgg = await prisma.userScore.aggregate({
             where: { userId },
             _sum: { finalScore: true },
@@ -60,25 +81,15 @@ export async function GET(req: Request) {
         const allTimeMomentum = Math.round(allTimeAgg._sum.finalScore ?? 0);
         const allTimeTier = getTierForScore(allTimeMomentum);
 
-        // Bu aydaki tier
         const monthScore = score?.finalScore ?? 0;
         const monthTier = getTierForScore(monthScore);
-
-        // Rozetler (engine'dan gelen badge key'leri → detay)
-        const result = needsRecalc
-            ? await calculateMomentum(userId, period)
-            : null;
-        const badgeKeys = result?.earnedBadges ?? [];
         const badges = getBadgeDetails(badgeKeys);
 
         return NextResponse.json({
-            // Momentum skoru
             momentum: {
                 thisMonth: Math.round(monthScore),
                 allTime: allTimeMomentum,
             },
-
-            // Tier bilgisi
             tier: {
                 thisMonth: {
                     key: monthTier.key,
@@ -97,11 +108,7 @@ export async function GET(req: Request) {
                     pointsToNext: getPointsToNextTier(allTimeMomentum),
                 },
             },
-
-            // Rozetler
             badges,
-
-            // Görünür metrikler (gizli ağırlıklar yok)
             metrics: {
                 studyMinutes:       score?.studyMinutes ?? 0,
                 cardsReviewed:      score?.cardsReviewed ?? 0,
@@ -111,9 +118,7 @@ export async function GET(req: Request) {
                 activeDays:         score?.activeDays ?? 0,
                 contentAdoption:    score?.contentAdoption ?? 0,
             },
-
-            // Meta
-            period: period.toISOString().slice(0, 7), // "2026-06"
+            period: period.toISOString().slice(0, 7),
             calculatedAt: score?.calculatedAt ?? null,
         });
     } catch (error) {

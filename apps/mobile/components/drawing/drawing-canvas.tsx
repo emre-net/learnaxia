@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
     View, Text, TouchableOpacity, StyleSheet,
-    PanResponder, GestureResponderEvent, Alert
+    PanResponder, GestureResponderEvent, Alert, LayoutChangeEvent
 } from 'react-native';
 import Svg, { Path, G, Rect } from 'react-native-svg';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { DrawingPath, DrawingCanvasData } from '@learnaxia/shared';
 
@@ -16,12 +16,12 @@ interface DrawingCanvasProps {
 }
 
 const PRESET_COLORS = [
-    '#F8FAFC', // White
-    '#38BDF8', // Cyan / Light Blue
-    '#A855F7', // Purple
-    '#34D399', // Emerald
-    '#F59E0B', // Amber
-    '#EF4444', // Red
+    '#F4F4F5',
+    '#38BDF8',
+    '#A855F7',
+    '#34D399',
+    '#F59E0B',
+    '#EF4444',
 ];
 
 const STROKE_WIDTHS = [
@@ -40,40 +40,93 @@ export function DrawingCanvas({
     const [redoStack, setRedoStack] = useState<DrawingPath[]>([]);
     const [currentPath, setCurrentPath] = useState<DrawingPath | null>(null);
 
-    // Active Tool State
     const [activeTool, setActiveTool] = useState<'pen' | 'highlighter' | 'eraser'>('pen');
     const [selectedColor, setSelectedColor] = useState<string>('#38BDF8');
     const [selectedWidth, setSelectedWidth] = useState<number>(4);
+    const [measuredWidth, setMeasuredWidth] = useState<number>(initialData?.canvasWidth || 340);
 
-    const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+    // Coordinate space width/height used for SVG viewBox parity across Mobile & Web
+    const baseWidth = initialData?.canvasWidth || measuredWidth || 340;
+    const baseHeight = initialData?.canvasHeight || height;
+
+    // Mutable refs so PanResponder never captures stale tool/path/handler closures
     const pathsRef = useRef<DrawingPath[]>(paths);
     pathsRef.current = paths;
 
+    const currentPathRef = useRef<DrawingPath | null>(currentPath);
+    currentPathRef.current = currentPath;
+
+    const activeToolRef = useRef(activeTool);
+    activeToolRef.current = activeTool;
+
+    const selectedColorRef = useRef(selectedColor);
+    selectedColorRef.current = selectedColor;
+
+    const selectedWidthRef = useRef(selectedWidth);
+    selectedWidthRef.current = selectedWidth;
+
+    const readOnlyRef = useRef(readOnly);
+    readOnlyRef.current = readOnly;
+
+    const baseWidthRef = useRef(baseWidth);
+    baseWidthRef.current = baseWidth;
+
+    const baseHeightRef = useRef(baseHeight);
+    baseHeightRef.current = baseHeight;
+
+    const measuredWidthRef = useRef(measuredWidth);
+    measuredWidthRef.current = measuredWidth;
+
+    const heightRef = useRef(height);
+    heightRef.current = height;
+
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
+    const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+
+    useEffect(() => {
+        if (initialData?.paths) {
+            setPaths(initialData.paths);
+        }
+    }, [initialData]);
+
+    const handleSurfaceLayout = useCallback((e: LayoutChangeEvent) => {
+        const w = Math.round(e.nativeEvent.layout.width);
+        if (w > 0) setMeasuredWidth(w);
+    }, []);
+
+    const toSvgCoords = useCallback((locationX: number, locationY: number) => {
+        const w = Math.max(measuredWidthRef.current, 1);
+        const h = Math.max(heightRef.current, 1);
+        return {
+            x: (locationX / w) * baseWidthRef.current,
+            y: (locationY / h) * baseHeightRef.current,
+        };
+    }, []);
+
     const notifyChange = useCallback((updatedPaths: DrawingPath[]) => {
-        if (onChange) {
-            onChange({
+        if (onChangeRef.current) {
+            onChangeRef.current({
                 version: 1,
                 paths: updatedPaths,
-                canvasHeight: height,
+                canvasWidth: baseWidthRef.current,
+                canvasHeight: baseHeightRef.current,
                 updatedAt: Date.now(),
             });
         }
-    }, [onChange, height]);
+    }, []);
 
-    // Handle Eraser hit detection
     const handleEraseAt = useCallback((x: number, y: number) => {
-        // Approximate distance check to strokes
-        const threshold = 18;
-        const remaining = pathsRef.current.filter(p => {
-            // Simple bounding box or coord check from SVG path string
+        const threshold = Math.max(18, (baseWidthRef.current / Math.max(measuredWidthRef.current, 1)) * 18);
+        const remaining = pathsRef.current.filter((p) => {
             const coords = p.d.match(/[-+]?[0-9]*\.?[0-9]+/g);
             if (!coords) return true;
             for (let i = 0; i < coords.length; i += 2) {
                 const px = parseFloat(coords[i]);
                 const py = parseFloat(coords[i + 1]);
-                const dist = Math.hypot(px - x, py - y);
-                if (dist < threshold) {
-                    return false; // Erase this path
+                if (Math.hypot(px - x, py - y) < threshold) {
+                    return false;
                 }
             }
             return true;
@@ -81,6 +134,7 @@ export function DrawingCanvas({
 
         if (remaining.length !== pathsRef.current.length) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            pathsRef.current = remaining;
             setPaths(remaining);
             notifyChange(remaining);
         }
@@ -88,76 +142,91 @@ export function DrawingCanvas({
 
     const panResponder = useRef(
         PanResponder.create({
-            onStartShouldSetPanResponder: () => !readOnly,
-            onMoveShouldSetPanResponder: () => !readOnly,
-            onStartShouldSetPanResponderCapture: () => !readOnly,
-            onMoveShouldSetPanResponderCapture: () => !readOnly,
+            onStartShouldSetPanResponder: () => !readOnlyRef.current,
+            onMoveShouldSetPanResponder: () => !readOnlyRef.current,
+            onStartShouldSetPanResponderCapture: () => !readOnlyRef.current,
+            onMoveShouldSetPanResponderCapture: () => !readOnlyRef.current,
             onPanResponderTerminationRequest: () => false,
 
             onPanResponderGrant: (evt: GestureResponderEvent) => {
-                if (readOnly) return;
-                const { locationX, locationY } = evt.nativeEvent;
-                lastPointRef.current = { x: locationX, y: locationY };
+                if (readOnlyRef.current) return;
+                const { x, y } = toSvgCoords(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+                lastPointRef.current = { x, y };
 
-                if (activeTool === 'eraser') {
-                    handleEraseAt(locationX, locationY);
+                const tool = activeToolRef.current;
+                if (tool === 'eraser') {
+                    handleEraseAt(x, y);
                     return;
                 }
 
                 const newPath: DrawingPath = {
                     id: `p_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-                    d: `M ${locationX.toFixed(1)} ${locationY.toFixed(1)}`,
-                    color: selectedColor,
-                    strokeWidth: activeTool === 'highlighter' ? selectedWidth * 3.5 : selectedWidth,
-                    tool: activeTool,
-                    opacity: activeTool === 'highlighter' ? 0.35 : 1.0,
+                    d: `M ${x.toFixed(1)} ${y.toFixed(1)}`,
+                    color: selectedColorRef.current,
+                    strokeWidth: tool === 'highlighter' ? selectedWidthRef.current * 3.5 : selectedWidthRef.current,
+                    tool,
+                    opacity: tool === 'highlighter' ? 0.35 : 1.0,
                 };
+                currentPathRef.current = newPath;
                 setCurrentPath(newPath);
             },
 
             onPanResponderMove: (evt: GestureResponderEvent) => {
-                if (readOnly) return;
-                const { locationX, locationY } = evt.nativeEvent;
+                if (readOnlyRef.current) return;
+                const { x, y } = toSvgCoords(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
 
-                if (activeTool === 'eraser') {
-                    handleEraseAt(locationX, locationY);
+                if (activeToolRef.current === 'eraser') {
+                    handleEraseAt(x, y);
                     return;
                 }
 
-                if (!lastPointRef.current) {
-                    lastPointRef.current = { x: locationX, y: locationY };
+                if (!lastPointRef.current || !currentPathRef.current) {
+                    lastPointRef.current = { x, y };
                     return;
                 }
 
                 const prev = lastPointRef.current;
-                const midX = ((prev.x + locationX) / 2).toFixed(1);
-                const midY = ((prev.y + locationY) / 2).toFixed(1);
+                const midX = ((prev.x + x) / 2).toFixed(1);
+                const midY = ((prev.y + y) / 2).toFixed(1);
+                const updatedPath: DrawingPath = {
+                    ...currentPathRef.current,
+                    d: `${currentPathRef.current.d} Q ${prev.x.toFixed(1)} ${prev.y.toFixed(1)}, ${midX} ${midY}`,
+                };
 
-                setCurrentPath(prevPath => {
-                    if (!prevPath) return null;
-                    // Quadratic bezier curve to midpoint
-                    const newD = `${prevPath.d} Q ${prev.x.toFixed(1)} ${prev.y.toFixed(1)}, ${midX} ${midY}`;
-                    return { ...prevPath, d: newD };
-                });
-
-                lastPointRef.current = { x: locationX, y: locationY };
+                currentPathRef.current = updatedPath;
+                setCurrentPath(updatedPath);
+                lastPointRef.current = { x, y };
             },
 
             onPanResponderRelease: () => {
-                if (readOnly) return;
-                if (activeTool === 'eraser') {
+                if (readOnlyRef.current) return;
+                if (activeToolRef.current === 'eraser') {
                     lastPointRef.current = null;
                     return;
                 }
 
-                if (currentPath) {
-                    setPaths(prev => {
-                        const updated = [...prev, currentPath];
-                        notifyChange(updated);
-                        return updated;
-                    });
-                    setRedoStack([]); // Clear redo after new stroke
+                const finishedPath = currentPathRef.current;
+                if (finishedPath) {
+                    const updated = [...pathsRef.current, finishedPath];
+                    pathsRef.current = updated;
+                    setPaths(updated);
+                    setRedoStack([]);
+                    currentPathRef.current = null;
                     setCurrentPath(null);
+                    notifyChange(updated);
+                }
+                lastPointRef.current = null;
+            },
+
+            onPanResponderTerminate: () => {
+                const finishedPath = currentPathRef.current;
+                if (finishedPath && activeToolRef.current !== 'eraser') {
+                    const updated = [...pathsRef.current, finishedPath];
+                    pathsRef.current = updated;
+                    setPaths(updated);
+                    currentPathRef.current = null;
+                    setCurrentPath(null);
+                    notifyChange(updated);
                 }
                 lastPointRef.current = null;
             },
@@ -170,7 +239,7 @@ export function DrawingCanvas({
         const last = paths[paths.length - 1];
         const newPaths = paths.slice(0, -1);
         setPaths(newPaths);
-        setRedoStack(prev => [...prev, last]);
+        setRedoStack((prev) => [...prev, last]);
         notifyChange(newPaths);
     }, [paths, notifyChange]);
 
@@ -208,10 +277,8 @@ export function DrawingCanvas({
 
     return (
         <View style={styles.container}>
-            {/* Toolbar (Only in edit mode) */}
             {!readOnly && (
                 <View style={styles.toolbar}>
-                    {/* Tool Chooser */}
                     <View style={styles.toolGroup}>
                         <TouchableOpacity
                             onPress={() => {
@@ -223,7 +290,7 @@ export function DrawingCanvas({
                             <MaterialIcons
                                 name="edit"
                                 size={18}
-                                color={activeTool === 'pen' ? '#38BDF8' : '#64748B'}
+                                color={activeTool === 'pen' ? '#38BDF8' : '#71717A'}
                             />
                         </TouchableOpacity>
 
@@ -234,10 +301,10 @@ export function DrawingCanvas({
                             }}
                             style={[styles.toolBtn, activeTool === 'highlighter' && styles.toolBtnActive]}
                         >
-                            <FontAwesome5
-                                name="highlighter"
-                                size={15}
-                                color={activeTool === 'highlighter' ? '#F59E0B' : '#64748B'}
+                            <MaterialIcons
+                                name="border-color"
+                                size={17}
+                                color={activeTool === 'highlighter' ? '#F59E0B' : '#71717A'}
                             />
                         </TouchableOpacity>
 
@@ -251,15 +318,14 @@ export function DrawingCanvas({
                             <MaterialIcons
                                 name="auto-fix-normal"
                                 size={18}
-                                color={activeTool === 'eraser' ? '#EF4444' : '#64748B'}
+                                color={activeTool === 'eraser' ? '#EF4444' : '#71717A'}
                             />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Width Selector */}
                     {activeTool !== 'eraser' && (
                         <View style={styles.widthGroup}>
-                            {STROKE_WIDTHS.map(w => (
+                            {STROKE_WIDTHS.map((w) => (
                                 <TouchableOpacity
                                     key={w.value}
                                     onPress={() => {
@@ -273,7 +339,7 @@ export function DrawingCanvas({
                                             width: w.value * 2.2,
                                             height: w.value * 2.2,
                                             borderRadius: (w.value * 2.2) / 2,
-                                            backgroundColor: selectedWidth === w.value ? '#F8FAFC' : '#64748B',
+                                            backgroundColor: selectedWidth === w.value ? '#F4F4F5' : '#71717A',
                                         }}
                                     />
                                 </TouchableOpacity>
@@ -281,14 +347,13 @@ export function DrawingCanvas({
                         </View>
                     )}
 
-                    {/* Undo / Redo / Clear */}
                     <View style={styles.actionGroup}>
                         <TouchableOpacity
                             onPress={handleUndo}
                             disabled={paths.length === 0}
                             style={[styles.actionBtn, paths.length === 0 && styles.btnDisabled]}
                         >
-                            <Ionicons name="arrow-undo" size={17} color={paths.length > 0 ? '#CBD5E1' : '#334155'} />
+                            <Ionicons name="arrow-undo" size={17} color={paths.length > 0 ? '#E4E4E7' : '#3F3F46'} />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -296,7 +361,7 @@ export function DrawingCanvas({
                             disabled={redoStack.length === 0}
                             style={[styles.actionBtn, redoStack.length === 0 && styles.btnDisabled]}
                         >
-                            <Ionicons name="arrow-redo" size={17} color={redoStack.length > 0 ? '#CBD5E1' : '#334155'} />
+                            <Ionicons name="arrow-redo" size={17} color={redoStack.length > 0 ? '#E4E4E7' : '#3F3F46'} />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -304,16 +369,15 @@ export function DrawingCanvas({
                             disabled={paths.length === 0}
                             style={[styles.actionBtn, paths.length === 0 && styles.btnDisabled]}
                         >
-                            <Ionicons name="trash-outline" size={17} color={paths.length > 0 ? '#EF4444' : '#334155'} />
+                            <Ionicons name="trash-outline" size={17} color={paths.length > 0 ? '#EF4444' : '#3F3F46'} />
                         </TouchableOpacity>
                     </View>
                 </View>
             )}
 
-            {/* Color Palette (When Pen or Highlighter is active) */}
             {!readOnly && activeTool !== 'eraser' && (
                 <View style={styles.colorPalette}>
-                    {PRESET_COLORS.map(c => {
+                    {PRESET_COLORS.map((c) => {
                         const isSelected = selectedColor === c;
                         return (
                             <TouchableOpacity
@@ -333,17 +397,22 @@ export function DrawingCanvas({
                 </View>
             )}
 
-            {/* Interactive SVG Canvas Surface */}
             <View
                 style={[styles.canvasSurface, { height }]}
+                onLayout={handleSurfaceLayout}
                 {...panResponder.panHandlers}
             >
-                <Svg style={StyleSheet.absoluteFillObject} width="100%" height={height}>
-                    {/* Grid dots background for drafting */}
-                    <Rect width="100%" height="100%" fill="#0C1019" />
+                <Svg
+                    style={StyleSheet.absoluteFillObject}
+                    width="100%"
+                    height={height}
+                    viewBox={`0 0 ${baseWidth} ${baseHeight}`}
+                    preserveAspectRatio="xMidYMid meet"
+                >
+                    <Rect width={baseWidth} height={baseHeight} fill="#09090B" />
 
                     <G>
-                        {paths.map(p => (
+                        {paths.map((p) => (
                             <Path
                                 key={p.id}
                                 d={p.d}
@@ -356,7 +425,6 @@ export function DrawingCanvas({
                             />
                         ))}
 
-                        {/* Stroke currently being drawn */}
                         {currentPath && (
                             <Path
                                 d={currentPath.d}
@@ -373,7 +441,7 @@ export function DrawingCanvas({
 
                 {paths.length === 0 && !currentPath && !readOnly && (
                     <View style={styles.emptyPlaceholder} pointerEvents="none">
-                        <Ionicons name="finger-print-outline" size={26} color="#334155" />
+                        <Ionicons name="finger-print-outline" size={26} color="#3F3F46" />
                         <Text style={styles.placeholderText}>
                             Parmağınız veya Stylus kaleminizle çizim yapın
                         </Text>
@@ -387,10 +455,10 @@ export function DrawingCanvas({
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         overflow: 'hidden',
         marginVertical: 10,
     },
@@ -400,9 +468,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 12,
         paddingVertical: 10,
-        backgroundColor: '#141E33',
+        backgroundColor: '#18181B',
         borderBottomWidth: 1,
-        borderBottomColor: '#1E293B',
+        borderBottomColor: '#27272A',
     },
     toolGroup: {
         flexDirection: 'row',
@@ -413,79 +481,80 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     toolBtnActive: {
-        backgroundColor: '#1E293B',
         borderColor: '#38BDF8',
+        backgroundColor: 'rgba(56, 189, 248, 0.14)',
     },
     widthGroup: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: '#0F172A',
+        backgroundColor: '#121215',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     widthBtn: {
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
+        borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 12,
     },
     widthBtnActive: {
-        backgroundColor: '#1E293B',
+        backgroundColor: '#27272A',
     },
     actionGroup: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 4,
     },
     actionBtn: {
-        width: 32,
-        height: 32,
+        width: 34,
+        height: 34,
         borderRadius: 8,
+        backgroundColor: '#121215',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#0F172A',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
     },
     btnDisabled: {
-        opacity: 0.35,
+        opacity: 0.4,
     },
     colorPalette: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12,
+        gap: 14,
         paddingVertical: 8,
-        backgroundColor: '#0C1322',
+        backgroundColor: '#18181B',
         borderBottomWidth: 1,
-        borderBottomColor: '#1E293B',
+        borderBottomColor: '#27272A',
     },
     colorDot: {
         width: 22,
         height: 22,
         borderRadius: 11,
+        borderWidth: 2,
+        borderColor: 'transparent',
     },
     colorDotSelected: {
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
+        borderColor: '#38BDF8',
         transform: [{ scale: 1.2 }],
     },
     canvasSurface: {
         width: '100%',
-        backgroundColor: '#0C1019',
         position: 'relative',
+        backgroundColor: '#09090B',
     },
     emptyPlaceholder: {
         ...StyleSheet.absoluteFillObject,
@@ -494,8 +563,9 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     placeholderText: {
-        color: '#475569',
+        color: '#52525B',
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '600',
+        letterSpacing: 0.2,
     },
 });

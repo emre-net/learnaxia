@@ -44,7 +44,13 @@ export async function GET(req: Request) {
                 prisma.note.count({ where })
             ]);
 
-            return NextResponse.json({ items: notes, total, type: "NOTE" });
+            const normalizedNotes = notes.map((n: any) => ({
+                ...n,
+                owner: n.user,
+                user: undefined,
+            }));
+
+            return NextResponse.json({ items: normalizedNotes, total, type: "NOTE" });
         } else if (type === "COLLECTION") {
             const where: Prisma.CollectionWhereInput = {
                 visibility: 'PUBLIC',

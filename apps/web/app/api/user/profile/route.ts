@@ -1,39 +1,26 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { ProfileUpdateSchema } from "@learnaxia/shared";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-const profileSchema = z.object({
-    name: z.string().min(1, "Ad Soyad en az 1 karakter olmalıdır.").max(60, "Ad Soyad en fazla 60 karakter olabilir.").optional(),
-    handle: z.string()
-        .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
-        .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
-        .regex(/^[a-zA-Z0-9_-]+$/, "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir.")
-        .optional(),
-    image: z.string().url("Geçersiz profil resmi URL'si.").optional().or(z.literal("")),
-    language: z.enum(["tr", "en"]).optional(),
-});
-
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const session = await auth();
-        // Allow fetching other users' profiles via query param in future, 
-        // for now just current user or simple check
-        const { searchParams } = new URL(req.url);
-        const userId = searchParams.get("userId") || session?.user?.id;
-
-        if (!userId) {
+        if (!session?.user?.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: session.user.id },
             select: {
                 id: true,
                 name: true,
                 email: true,
                 handle: true,
                 image: true,
+                language: true,
+                role: true,
                 createdAt: true,
                 settings: true,
                 _count: {
@@ -52,7 +39,6 @@ export async function GET(req: Request) {
             return new NextResponse("User not found", { status: 404 });
         }
 
-        // Calculate simple stats for all 5 library entities
         const stats = {
             modules: user._count.createdModules,
             collections: user._count.collections,
@@ -78,12 +64,13 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { name, handle, image, language } = profileSchema.parse(body);
+        const { name, handle, image, language } = ProfileUpdateSchema.parse(body);
 
-        // Check handle uniqueness if provided
-        if (handle) {
+        // Check handle uniqueness if provided (case-insensitive normalization)
+        const normalizedHandle = handle ? handle.trim().toLowerCase() : undefined;
+        if (normalizedHandle) {
             const existingUser = await prisma.user.findUnique({
-                where: { handle },
+                where: { handle: normalizedHandle },
             });
 
             if (existingUser && existingUser.id !== session.user.id) {
@@ -91,21 +78,31 @@ export async function PATCH(req: Request) {
             }
         }
 
+        const trimmedName = typeof name === "string" ? name.trim() : name;
+
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
-                ...(name !== undefined && { name }),
-                ...(handle && { handle }),
-                ...(image !== undefined && { image }),
+                ...(name !== undefined && { name: trimmedName ? trimmedName : null }),
+                ...(normalizedHandle && { handle: normalizedHandle }),
+                ...(image !== undefined && { image: image === "" ? null : image }),
                 ...(language && { language }),
             },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                handle: true,
+                image: true,
+                language: true,
+                role: true,
+            }
         });
 
         return NextResponse.json(updatedUser);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            // Explicitly cast to any to avoid TS build errors with ZodError types
-            return new NextResponse((error as any).errors[0].message, { status: 400 });
+            return new NextResponse(error.issues[0]?.message || "Geçersiz veri", { status: 400 });
         }
         console.error("[PROFILE_PATCH]", error);
         return new NextResponse("Internal Error", { status: 500 });

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { MobileLoginSchema } from '@/lib/validations/mobile-auth';
+import { LoginSchema } from '@learnaxia/shared';
 import { SignJWT } from 'jose';
 import { MobileRefreshService } from '@/lib/auth/mobile-refresh';
-
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const JWT_EXPIRY_DAYS = 1;
 
@@ -20,66 +19,82 @@ function getJwtSecret(): Uint8Array {
 export async function POST(req: Request) {
   try {
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
-    
+
     let json;
     try {
-        json = await req.json();
-    } catch (e) {
-        return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
+      json = await req.json();
+    } catch {
+      return NextResponse.json({ message: 'Invalid JSON request body' }, { status: 400 });
     }
-    const validatedData = MobileLoginSchema.safeParse(json);
 
+    const validatedData = LoginSchema.safeParse(json);
     if (!validatedData.success) {
-      return NextResponse.json({ 
-        message: 'Validation error', 
-        errors: validatedData.error.flatten().fieldErrors 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: validatedData.error.issues[0]?.message || 'Validation error',
+          errors: validatedData.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
     }
 
-    const { email, password } = validatedData.data;
+    const email = validatedData.data.email.trim().toLowerCase();
+    const password = validatedData.data.password;
 
-    // 0. Rate Limiting (Hardened)
-    // Limit by IP
     const ipLimit = await checkRateLimit({
-        key: `login-ip:${ip}`,
-        limit: 20,
-        windowMs: 15 * 60 * 1000 // 15 mins
+      key: `login-ip:${ip}`,
+      limit: 20,
+      windowMs: 15 * 60 * 1000,
     });
 
-    // Limit by Email (more strict)
     const emailLimit = await checkRateLimit({
-        key: `login-email:${email}`,
-        limit: 5,
-        windowMs: 15 * 60 * 1000 // 15 mins
+      key: `login-email:${email}`,
+      limit: 5,
+      windowMs: 15 * 60 * 1000,
     });
 
     if (!ipLimit.allowed || !emailLimit.allowed) {
-        return NextResponse.json({ 
-            message: 'Çok fazla giriş denemesi yaptınız. Lütfen 15 dakika bekleyin.' 
-        }, { status: 429 });
+      return NextResponse.json(
+        { message: 'Çok fazla giriş denemesi yaptınız. Lütfen 15 dakika bekleyin.' },
+        { status: 429 }
+      );
     }
 
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, name: true, image: true, password: true, role: true, emailVerified: true, deletedAt: true, sessionVersion: true }
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        handle: true,
+        image: true,
+        password: true,
+        role: true,
+        language: true,
+        status: true,
+        emailVerified: true,
+        deletedAt: true,
+        sessionVersion: true,
+      },
     });
 
-    if (!user || !user.password || user.deletedAt) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    if (!user || !user.password || user.deletedAt || user.status !== 'ACTIVE') {
+      return NextResponse.json({ message: 'Geçersiz e-posta veya şifre' }, { status: 401 });
     }
 
-    // S7: E-posta doğrulama kontrolü
     if (!user.emailVerified) {
-      return NextResponse.json({
-        message: 'E-posta adresiniz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.',
-        code: 'EMAIL_NOT_VERIFIED'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          message: 'E-posta adresiniz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.',
+          code: 'EMAIL_NOT_VERIFIED',
+        },
+        { status: 403 }
+      );
     }
 
     const isValid = await bcrypt.compare(password, user.password);
-
     if (!isValid) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Geçersiz e-posta veya şifre' }, { status: 401 });
     }
 
     const accessToken = await new SignJWT({
@@ -94,7 +109,6 @@ export async function POST(req: Request) {
       .setExpirationTime(`${JWT_EXPIRY_DAYS}d`)
       .sign(getJwtSecret());
 
-    // Provide a SECURE refresh token mechanism
     const refreshToken = await MobileRefreshService.generate(user.id);
 
     return NextResponse.json({
@@ -104,10 +118,13 @@ export async function POST(req: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: user.image
-      }
+        handle: user.handle,
+        image: user.image,
+        language: user.language,
+        role: user.role,
+      },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Mobile Login Error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }

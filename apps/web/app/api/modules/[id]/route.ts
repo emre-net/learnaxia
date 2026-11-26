@@ -25,6 +25,7 @@ const UpdateModuleSchema = z.object({
     description: z.string().optional(),
     type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']).optional(),
     isForkable: z.boolean().optional(),
+    visibility: z.enum(['PUBLIC', 'PRIVATE']).optional(),
     status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional(),
     category: z.string().optional(),
     subCategory: z.string().optional(),

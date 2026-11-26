@@ -1,6 +1,6 @@
 "use client";
 
-import { TIERS, getTierProgress, getPointsToNextTier, type Tier } from "@/lib/scoring/tiers";
+import { TIERS, getTierProgress, getPointsToNextTier } from "@/lib/scoring/tiers";
 
 interface TierBadgeProps {
     tierKey: string;
@@ -38,14 +38,14 @@ export function TierBadge({
                 style={{
                     background: `conic-gradient(${tier.gradientFrom} 0%, ${tier.gradientTo} 100%)`,
                     padding: 2,
-                    boxShadow: `0 0 12px ${tier.color}40`,
+                    boxShadow: `0 0 12px ${tier.color}35`,
                 }}
             >
-                <div className="flex items-center justify-center w-full h-full rounded-full bg-[#0E0E14]">
+                <div className="flex items-center justify-center w-full h-full rounded-full bg-[#121215]">
                     <span className={sizes.emoji}>{tier.emoji}</span>
                 </div>
 
-                {/* Progress ring (sadece score verilmişse) */}
+                {/* Progress ring */}
                 {showProgress && progress != null && (
                     <svg
                         className="absolute inset-0 w-full h-full -rotate-90"
@@ -58,13 +58,12 @@ export function TierBadge({
                             strokeWidth="2.5"
                             strokeDasharray={`${(progress / 100) * 100} 100`}
                             strokeLinecap="round"
-                            opacity={0.8}
+                            opacity={0.85}
                         />
                     </svg>
                 )}
             </div>
 
-            {/* Tier label */}
             {showLabel && (
                 <span
                     className={`font-semibold ${sizes.label}`}
@@ -74,9 +73,8 @@ export function TierBadge({
                 </span>
             )}
 
-            {/* Sonraki tier */}
             {showProgress && pointsToNext != null && size === "lg" && (
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-zinc-400">
                     {pointsToNext.toLocaleString("tr-TR")} kaldı
                 </span>
             )}

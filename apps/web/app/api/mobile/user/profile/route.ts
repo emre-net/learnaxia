@@ -1,18 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
-import { z } from "zod";
-
-const mobileProfileUpdateSchema = z.object({
-    name: z.string().min(1, "Ad Soyad en az 1 karakter olmalıdır.").max(60, "Ad Soyad en fazla 60 karakter olabilir.").optional(),
-    handle: z.string()
-        .min(3, "Kullanıcı adı en az 3 karakter olmalıdır.")
-        .max(20, "Kullanıcı adı en fazla 20 karakter olabilir.")
-        .regex(/^[a-zA-Z0-9_-]+$/, "Kullanıcı adı sadece harf, rakam, tire ve alt çizgi içerebilir.")
-        .optional(),
-    image: z.string().url("Geçersiz profil resmi URL'si.").optional().or(z.literal("")).or(z.null()),
-    language: z.enum(["tr", "en"]).optional(),
-});
+import { ProfileUpdateSchema } from "@learnaxia/shared";
 
 export async function GET(req: Request) {
     try {
@@ -30,6 +19,9 @@ export async function GET(req: Request) {
                 email: true,
                 handle: true,
                 image: true,
+                language: true,
+                role: true,
+                settings: true,
                 createdAt: true,
                 _count: {
                     select: {
@@ -72,18 +64,18 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const parsed = mobileProfileUpdateSchema.safeParse(body);
+        const parsed = ProfileUpdateSchema.safeParse(body);
 
         if (!parsed.success) {
             return NextResponse.json({ error: parsed.error.issues[0]?.message || "Geçersiz veri" }, { status: 400 });
         }
 
         const { name, handle, image, language } = parsed.data;
+        const normalizedHandle = handle ? handle.trim().toLowerCase() : undefined;
 
-        // Check handle uniqueness if provided and changed
-        if (handle) {
+        if (normalizedHandle) {
             const existingUser = await prisma.user.findUnique({
-                where: { handle },
+                where: { handle: normalizedHandle },
             });
 
             if (existingUser && existingUser.id !== user.id) {
@@ -91,11 +83,13 @@ export async function PATCH(req: Request) {
             }
         }
 
+        const trimmedName = typeof name === "string" ? name.trim() : name;
+
         const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
-                ...(name !== undefined && { name: name.trim() }),
-                ...(handle !== undefined && { handle: handle.trim().toLowerCase() }),
+                ...(name !== undefined && { name: trimmedName ? trimmedName : null }),
+                ...(normalizedHandle !== undefined && { handle: normalizedHandle }),
                 ...(image !== undefined && { image: image === "" ? null : image }),
                 ...(language && { language }),
             },
@@ -105,6 +99,9 @@ export async function PATCH(req: Request) {
                 email: true,
                 handle: true,
                 image: true,
+                language: true,
+                role: true,
+                settings: true,
                 createdAt: true,
                 _count: {
                     select: {

@@ -10,68 +10,72 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get user's modules (created and saved/learned)
-        const modules = await prisma.module.findMany({
-            where: {
-                OR: [
-                    { ownerId: user.id },
-                    { userLibrary: { some: { userId: user.id } } }
-                ]
-            },
-            include: {
-                owner: { select: { name: true, image: true } },
-                _count: { select: { items: true, userLibrary: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const { searchParams } = new URL(req.url);
+        const typeFilter = searchParams.get('type')?.toUpperCase();
 
-        // Get user's collections
-        const collections = await prisma.collection.findMany({
-            where: {
-                OR: [
-                    { ownerId: user.id },
-                    { userLibrary: { some: { userId: user.id } } }
-                ]
-            },
-            include: {
-                owner: { select: { name: true, image: true } },
-                _count: { select: { items: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const [modules, collections, notes, journeys, solvedQuestions] = await Promise.all([
+            prisma.module.findMany({
+                where: {
+                    status: { not: 'ARCHIVED' },
+                    OR: [
+                        { ownerId: user.id },
+                        { userLibrary: { some: { userId: user.id } } }
+                    ]
+                },
+                include: {
+                    owner: { select: { id: true, name: true, handle: true, image: true } },
+                    _count: { select: { items: true, userLibrary: true } }
+                },
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.collection.findMany({
+                where: {
+                    OR: [
+                        { ownerId: user.id },
+                        { userLibrary: { some: { userId: user.id } } }
+                    ]
+                },
+                include: {
+                    owner: { select: { id: true, name: true, handle: true, image: true } },
+                    _count: { select: { items: true } }
+                },
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.note.findMany({
+                where: { userId: user.id },
+                orderBy: { updatedAt: 'desc' }
+            }),
+            prisma.learningJourney.findMany({
+                where: {
+                    OR: [
+                        { userId: user.id },
+                        { userLibrary: { some: { userId: user.id } } }
+                    ]
+                },
+                include: {
+                    _count: { select: { slides: true } }
+                },
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.solvedQuestion.findMany({
+                where: { userId: user.id },
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    notes: { select: { id: true, title: true } }
+                }
+            })
+        ]);
 
-        // Get user's notes
-        const notes = await prisma.note.findMany({
-            where: {
-                userId: user.id
-            },
-            orderBy: { updatedAt: 'desc' }
-        });
-
-        // Get user's learning journeys
-        const journeys = await prisma.learningJourney.findMany({
-            where: {
-                OR: [
-                    { userId: user.id },
-                    { userLibrary: { some: { userId: user.id } } }
-                ]
-            },
-            include: {
-                _count: { select: { slides: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-
-        // Get user's solved questions (AI solutions from camera / upload)
-        const solvedQuestions = await prisma.solvedQuestion.findMany({
-            where: { userId: user.id },
-            orderBy: { createdAt: 'desc' },
-            include: {
-                notes: { select: { id: true, title: true } }
-            }
-        });
+        const typeItemsMap: Record<string, unknown[]> = {
+            MODULE: modules,
+            COLLECTION: collections,
+            NOTE: notes,
+            JOURNEY: journeys,
+            SOLUTION: solvedQuestions,
+        };
 
         return NextResponse.json({
+            ...(typeFilter && typeItemsMap[typeFilter] ? { items: typeItemsMap[typeFilter] } : {}),
             modules,
             collections,
             notes,

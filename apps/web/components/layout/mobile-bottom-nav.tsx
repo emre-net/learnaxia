@@ -62,9 +62,9 @@ export function MobileBottomNav() {
                                 key={route.href}
                                 href={route.href}
                                 aria-label={route.label}
-                                className="relative flex items-center justify-center -top-7 w-14 h-14 rounded-full bg-[#6366f1] text-white shadow-xl shadow-indigo-500/40 border-4 border-[#09090b] group active:scale-90 transition-transform"
+                                className="relative flex items-center justify-center -top-6 w-14 h-14 rounded-full bg-sky-500 hover:bg-sky-400 text-zinc-950 shadow-xl shadow-sky-500/25 border-4 border-[#09090b] group active:scale-90 transition-transform"
                             >
-                                <Icon className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
+                                <Icon className="h-6 w-6 text-zinc-950 group-hover:rotate-12 transition-transform" />
                             </Link>
                         )
                     }
@@ -79,19 +79,19 @@ export function MobileBottomNav() {
                             {isActive && (
                                 <motion.div 
                                     layoutId="nav-active"
-                                    className="absolute inset-0 bg-indigo-500/15 rounded-2xl -z-10"
+                                    className="absolute inset-0 bg-sky-500/12 rounded-2xl -z-10"
                                     transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
                                 />
                             )}
                             <Icon
                                 className={cn(
                                     "h-6 w-6 transition-colors duration-200",
-                                    isActive ? "text-[#818cf8]" : "text-[#71717a] group-hover:text-[#f4f4f5]"
+                                    isActive ? "text-sky-400" : "text-zinc-500 group-hover:text-zinc-100"
                                 )}
                                 strokeWidth={isActive ? 2.5 : 2}
                             />
                             {isActive && (
-                                <span className="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-[#6366f1]" />
+                                <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-sky-400" />
                             )}
                         </Link>
                     )

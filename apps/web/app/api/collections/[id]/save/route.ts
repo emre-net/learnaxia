@@ -1,18 +1,23 @@
-
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+async function resolveUserId(req: Request): Promise<string | null> {
+    const mobileUser = await getMobileUser(req);
+    if (mobileUser?.id) return mobileUser.id;
+    const session = await auth();
+    return session?.user?.id || null;
+}
+
 export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await resolveUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { id: collectionId } = await props.params;
-        const userId = session.user.id;
 
         await prisma.userCollectionLibrary.upsert({
             where: { userId_collectionId: { userId, collectionId } },
@@ -28,15 +33,13 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
 }
 
 export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const userId = await resolveUserId(req);
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { id: collectionId } = await props.params;
-        const userId = session.user.id;
 
         const entry = await prisma.userCollectionLibrary.findUnique({
             where: { userId_collectionId: { userId, collectionId } }

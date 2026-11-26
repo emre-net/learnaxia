@@ -14,11 +14,13 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Save, Trash2, CheckCircle2, FileText, UploadCloud, BookOpen, Filter } from "lucide-react";
+import { Sparkles, Save, Trash2, CheckCircle2, FileText, UploadCloud, BookOpen, Globe, Lock, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n";
+import { CATEGORIES, MAIN_CATEGORIES } from "@learnaxia/shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
 
 // --- Schema ---
@@ -43,6 +45,9 @@ export function AICreationWizard() {
     const [isUploading, setIsUploading] = useState(false);
     const [inputType, setInputType] = useState<"TEXT" | "FILE">("TEXT");
     const [isAutoCount, setIsAutoCount] = useState(false);
+    const [visibility, setVisibility] = useState<"PRIVATE" | "PUBLIC">("PRIVATE");
+    const [category, setCategory] = useState<string>("");
+    const [subCategory, setSubCategory] = useState<string>("");
 
     const onFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -158,36 +163,51 @@ export function AICreationWizard() {
     };
 
     const onSaveModule = async () => {
+        if (visibility === 'PUBLIC' && (!category || !subCategory)) {
+            toast({
+                title: "Eksik Bilgi",
+                description: "Herkese açık modüller için kategori ve alt kategori seçimi zorunludur.",
+                variant: "destructive"
+            });
+            return;
+        }
         setIsSaving(true);
         try {
+            const normalizedType = config.type === 'TF' ? 'TRUE_FALSE' : config.type;
             const res = await fetch("/api/modules", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: config.topic.substring(0, 50) + (config.topic.length > 50 ? "..." : ""),
-                    description: `AI Generated module from ${inputType === 'FILE' ? 'Document' : 'Text'}`,
-                    type: config.type === 'TF' ? 'TRUE_FALSE' : config.type, // Standardized question type
+                    description: `AI ile oluşturulan ${inputType === 'FILE' ? 'belge' : 'metin'} modülü`,
+                    type: normalizedType,
+                    visibility,
+                    category: category || undefined,
+                    subCategory: subCategory || undefined,
                     isForkable: true,
                     status: 'ACTIVE',
                     items: generatedItems.map(item => ({
                         ...item,
-                        type: item.type === 'TF' ? 'TRUE_FALSE' : item.type
+                        type: normalizedType
                     }))
                 })
             });
 
-            if (!res.ok) throw new Error("Failed to save module");
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || "Failed to save module");
+            }
 
             const newModule = await res.json();
             toast({
-                title: "Success! 🎉",
-                description: "Module created successfully.",
+                title: "Başarılı! 🎉",
+                description: "Modül başarıyla oluşturuldu.",
             });
             router.push(`/dashboard/modules/${newModule.id}`);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast({ title: "Error", description: "Failed to save module", variant: "destructive" });
+            toast({ title: "Hata", description: error.message || "Modül kaydedilemedi", variant: "destructive" });
             setIsSaving(false);
         }
     };
@@ -440,13 +460,62 @@ export function AICreationWizard() {
                         ))}
                     </div>
 
-                    <div className="flex justify-end gap-4 py-8 border-t">
-                        <div className="flex-1 text-muted-foreground text-sm flex items-center">
-                            <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#121215] p-5 space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h3 className="text-sm font-semibold text-zinc-100">Görünürlük &amp; Kategori</h3>
+                                <p className="text-xs text-zinc-400">Herkese açık paylaşımlar için kategori seçimi zorunludur.</p>
+                            </div>
+                            <div className="flex rounded-xl border border-zinc-800 bg-[#18181b] p-0.5 text-xs">
+                                <button
+                                    type="button"
+                                    onClick={() => setVisibility("PRIVATE")}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors ${visibility === "PRIVATE" ? "bg-zinc-800 text-zinc-100" : "text-zinc-400 hover:text-zinc-200"}`}
+                                >
+                                    <Lock className="h-3.5 w-3.5" /> Gizli
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setVisibility("PUBLIC")}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors ${visibility === "PUBLIC" ? "bg-sky-500/20 text-sky-300 border border-sky-500/40" : "text-zinc-400 hover:text-zinc-200"}`}
+                                >
+                                    <Globe className="h-3.5 w-3.5" /> Herkese Açık
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <Select value={category} onValueChange={(val) => { setCategory(val); setSubCategory(""); }}>
+                                <SelectTrigger className="bg-[#18181b] border-zinc-800 text-zinc-100">
+                                    <SelectValue placeholder="Ana kategori seçin" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#18181b] border-zinc-800 text-zinc-100">
+                                    {MAIN_CATEGORIES.map((cat) => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={subCategory} onValueChange={setSubCategory} disabled={!category}>
+                                <SelectTrigger className="bg-[#18181b] border-zinc-800 text-zinc-100">
+                                    <SelectValue placeholder="Alt kategori seçin" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#18181b] border-zinc-800 text-zinc-100">
+                                    {(CATEGORIES[category] || []).map((sub) => (
+                                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-4 py-6 border-t border-zinc-800">
+                        <div className="flex-1 text-zinc-400 text-sm flex items-center">
+                            <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />
                             {t("creation.itemsReady", { count: generatedItems.length.toString() })}
                         </div>
                         <Button variant="ghost" onClick={() => setStep("CONFIG")}>{t("common.cancel")}</Button>
-                        <Button onClick={onSaveModule} disabled={isSaving || generatedItems.length === 0} className="bg-green-600 hover:bg-green-700 text-white min-w-[150px]">
+                        <Button onClick={onSaveModule} disabled={isSaving || generatedItems.length === 0} className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold min-w-[150px] rounded-xl">
                             {isSaving ? <BrandLoader size="sm" className="mr-2" /> : <Save className="mr-2 h-4 w-4" />}
                             {t("creation.save")}
                         </Button>

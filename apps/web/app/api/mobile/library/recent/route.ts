@@ -9,12 +9,10 @@ export async function GET(req: Request) {
     try {
         let userId: string | undefined;
 
-        // 1. Mobile JWT
         const mobileUser = await getMobileUser(req);
         if (mobileUser?.id) {
             userId = mobileUser.id;
         } else {
-            // 2. Web session
             const session = await auth();
             if (session?.user?.id) {
                 userId = session.user.id;
@@ -25,7 +23,6 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        // 1. Get recent learning sessions
         const recentSessions = await prisma.learningSession.findMany({
             where: { userId },
             orderBy: { startedAt: 'desc' },
@@ -39,32 +36,33 @@ export async function GET(req: Request) {
                         title: true,
                         type: true,
                         createdAt: true,
-                    }
-                }
-            }
+                        _count: { select: { items: true } },
+                    },
+                },
+            },
         });
 
         const seenModuleIds = new Set<string>();
-        const modules: { id: string; title: string; type: string; lastStudied: string }[] = [];
+        const modules: { id: string; title: string; type: string; lastStudied: string; itemCount: number }[] = [];
 
-        for (const session of recentSessions) {
-            if (session.module && !seenModuleIds.has(session.moduleId)) {
-                seenModuleIds.add(session.moduleId);
+        for (const s of recentSessions) {
+            if (s.module && !seenModuleIds.has(s.moduleId)) {
+                seenModuleIds.add(s.moduleId);
                 modules.push({
-                    id: session.module.id,
-                    title: session.module.title,
-                    type: session.module.type,
-                    lastStudied: session.startedAt.toISOString(),
+                    id: s.module.id,
+                    title: s.module.title,
+                    type: s.module.type,
+                    lastStudied: s.startedAt.toISOString(),
+                    itemCount: s.module._count.items,
                 });
             }
         }
 
-        // 2. Also check userModuleLibrary for recently interacted modules
         if (modules.length < 5) {
             const libraryEntries = await prisma.userModuleLibrary.findMany({
                 where: {
                     userId,
-                    moduleId: { notIn: Array.from(seenModuleIds) }
+                    moduleId: { notIn: Array.from(seenModuleIds) },
                 },
                 take: 5 - modules.length,
                 orderBy: { lastInteractionAt: 'desc' },
@@ -76,9 +74,10 @@ export async function GET(req: Request) {
                             title: true,
                             type: true,
                             createdAt: true,
-                        }
-                    }
-                }
+                            _count: { select: { items: true } },
+                        },
+                    },
+                },
             });
 
             for (const entry of libraryEntries) {
@@ -89,17 +88,18 @@ export async function GET(req: Request) {
                         title: entry.module.title,
                         type: entry.module.type,
                         lastStudied: entry.lastInteractionAt.toISOString(),
+                        itemCount: entry.module._count.items,
                     });
                 }
             }
         }
 
-        // 3. Fallback: User's owned modules
         if (modules.length < 5) {
             const ownedModules = await prisma.module.findMany({
                 where: {
                     ownerId: userId,
-                    id: { notIn: Array.from(seenModuleIds) }
+                    status: { not: 'ARCHIVED' },
+                    id: { notIn: Array.from(seenModuleIds) },
                 },
                 take: 5 - modules.length,
                 orderBy: { createdAt: 'desc' },
@@ -108,7 +108,8 @@ export async function GET(req: Request) {
                     title: true,
                     type: true,
                     createdAt: true,
-                }
+                    _count: { select: { items: true } },
+                },
             });
 
             for (const mod of ownedModules) {
@@ -117,6 +118,7 @@ export async function GET(req: Request) {
                     title: mod.title,
                     type: mod.type,
                     lastStudied: mod.createdAt.toISOString(),
+                    itemCount: mod._count.items,
                 });
             }
         }

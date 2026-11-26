@@ -1,44 +1,48 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { StudyMode } from '@learnaxia/shared';
 
-// Types
-export type StudyMode = 'NORMAL' | 'WRONG_ONLY' | 'SM2' | 'REVIEW' | 'QUIZ' | 'AI_SMART';
+export type { StudyMode };
 
 export interface StudyItem {
     id: string;
     moduleId: string;
+    sessionId?: string;
     type: 'FLASHCARD' | 'MC' | 'GAP' | 'TRUE_FALSE';
-    content: any; // JSONB content
+    content: any;
     hash: string;
-    // Progress snapshot
-    box?: number; // 0-5 for SM2
+    box?: number;
     lastInterval?: number;
 }
 
 interface StudyState {
-    // Session Config
     sessionId: string | null;
+    sessionMap: Record<string, string>;
     moduleId: string | null;
     mode: StudyMode;
     startTime: Date | null;
     isGuest: boolean;
 
-    // Data
     items: StudyItem[];
     currentIndex: number;
 
-    // Runtime State
-    isFlipped: boolean; // For flashcards
-    selectedOption: string | null; // For Quiz
-    feedback: 'CORRECT' | 'WRONG' | null; // For Quiz / Feedback state
+    isFlipped: boolean;
+    selectedOption: string | null;
+    feedback: 'CORRECT' | 'WRONG' | null;
 
-    // Stats for this session
     correctCount: number;
     wrongCount: number;
     skipped: number;
 
-    // Actions
-    initSession: (moduleId: string, items: StudyItem[], mode: StudyMode, startIndex?: number, sessionId?: string, isGuest?: boolean) => void;
+    initSession: (
+        moduleId: string,
+        items: StudyItem[],
+        mode: StudyMode,
+        startIndex?: number,
+        sessionId?: string,
+        isGuest?: boolean,
+        sessionMap?: Record<string, string>
+    ) => void;
     setIsFlipped: (value: boolean) => void;
     setSelectedOption: (option: string | null) => void;
     setFeedback: (feedback: 'CORRECT' | 'WRONG' | null) => void;
@@ -52,6 +56,7 @@ export const useStudyStore = create<StudyState>()(
     persist(
         (set, get) => ({
             sessionId: null,
+            sessionMap: {},
             moduleId: null,
             mode: 'NORMAL',
             startTime: null,
@@ -67,9 +72,10 @@ export const useStudyStore = create<StudyState>()(
             wrongCount: 0,
             skipped: 0,
 
-            initSession: (moduleId, items, mode, startIndex = 0, sessionId, isGuest = false) => {
+            initSession: (moduleId, items, mode, startIndex = 0, sessionId, isGuest = false, sessionMap = {}) => {
                 set({
                     sessionId: sessionId || crypto.randomUUID(),
+                    sessionMap,
                     moduleId,
                     items,
                     mode,
@@ -79,7 +85,7 @@ export const useStudyStore = create<StudyState>()(
                     isFlipped: false,
                     selectedOption: null,
                     feedback: null,
-                    correctCount: startIndex,
+                    correctCount: 0,
                     wrongCount: 0,
                     skipped: 0
                 });
@@ -93,7 +99,6 @@ export const useStudyStore = create<StudyState>()(
 
             nextItem: () => {
                 const { currentIndex, items } = get();
-                // Allow going past the last item to trigger "completion" state
                 if (currentIndex < items.length) {
                     set({
                         currentIndex: currentIndex + 1,
@@ -107,6 +112,7 @@ export const useStudyStore = create<StudyState>()(
             endSession: () => {
                 set({
                     sessionId: null,
+                    sessionMap: {},
                     moduleId: null,
                     items: [],
                     currentIndex: 0,
@@ -121,6 +127,7 @@ export const useStudyStore = create<StudyState>()(
             name: 'study-store',
             partialize: (state) => ({
                 sessionId: state.sessionId,
+                sessionMap: state.sessionMap,
                 moduleId: state.moduleId,
                 mode: state.mode,
                 startTime: state.startTime,
@@ -128,7 +135,6 @@ export const useStudyStore = create<StudyState>()(
                 currentIndex: state.currentIndex,
                 correctCount: state.correctCount,
                 wrongCount: state.wrongCount
-                // Don't persist UI states like flipped/feedback across reloads necessarily, or do if needed.
             }),
         }
     )

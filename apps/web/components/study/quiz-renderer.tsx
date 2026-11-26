@@ -8,8 +8,9 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo } from "react";
-import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 import { playStudySound } from "@/lib/audio";
+import { RichMathText } from "@/components/shared/rich-math-text";
 
 export function QuizRenderer({ item }: { item: any }) {
     const {
@@ -20,122 +21,114 @@ export function QuizRenderer({ item }: { item: any }) {
         setCorrectCount,
         correctCount,
         setWrongCount,
-        wrongCount
+        wrongCount,
     } = useStudyStore();
 
     const { t } = useTranslation();
 
-    // Safely extract content with fallbacks for various AI JSON formats
     const c = item?.content || {};
-    const actualC = c.content || c; // Backward compatibility for nested {content: {question}} DB leak
+    const actualC = c.content || c;
     let questionText = actualC.question || actualC.Question || actualC.front || actualC.text || actualC.Text || "";
     let answerText = actualC.answer || actualC.Answer || actualC.correct || actualC.Correct || actualC.back || "";
+    const imageUrl = actualC.image || actualC.imageUrl || "";
 
-    if (typeof questionText === 'object') questionText = JSON.stringify(questionText);
-    if (typeof answerText === 'object') answerText = JSON.stringify(answerText);
+    if (typeof questionText === "object") questionText = JSON.stringify(questionText);
+    if (typeof answerText === "object") answerText = JSON.stringify(answerText);
 
-    questionText = questionText || "🤔 Soru Metni Bulunamadı";
-    answerText = answerText || "Cevap Bulunamadı";
+    questionText = questionText || "Soru metni bulunamadı";
+    answerText = answerText || "Cevap bulunamadı";
 
-    // Ensure options exist and can handle 'Options' vs 'options'
     const options = useMemo(() => {
         const rawOptions = actualC.options || actualC.Options || [];
         return Array.isArray(rawOptions) ? rawOptions : Object.values(rawOptions);
     }, [actualC.options, actualC.Options]);
 
-    // Keyboard support for 1-4
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (feedback) return; // Disable input during feedback
-            const index = parseInt(e.key) - 1;
+            if (feedback) return;
+            const index = parseInt(e.key, 10) - 1;
             if (!isNaN(index) && index >= 0 && index < options.length) {
-                setSelectedOption(options[index]);
+                const chosen = String(options[index]);
+                const isCorrect = chosen === String(answerText);
+                setSelectedOption(chosen);
+                setFeedback(isCorrect ? "CORRECT" : "WRONG");
+                playStudySound(isCorrect ? "SUCCESS" : "FAILURE");
+                if (isCorrect) setCorrectCount(correctCount + 1);
+                else setWrongCount(wrongCount + 1);
             }
         };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [options, setSelectedOption, feedback]);
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [options, answerText, feedback, correctCount, wrongCount, setSelectedOption, setFeedback, setCorrectCount, setWrongCount]);
 
     return (
-        <div className="w-full max-w-2xl flex flex-col gap-8">
-            <Card className="p-8 text-center border-2 shadow-sm prose dark:prose-invert max-w-none">
-                <div className="text-3xl font-bold prose dark:prose-invert max-w-none">
-                    <ReactMarkdown>{String(questionText)}</ReactMarkdown>
+        <div className="w-full max-w-2xl flex flex-col gap-6">
+            <Card className="p-6 sm:p-8 text-center bg-[#121215] border border-white/[0.06] rounded-2xl shadow-none space-y-5">
+                {imageUrl && (imageUrl.startsWith("data:") || imageUrl.startsWith("http")) && (
+                    <div className="relative h-56 w-full overflow-hidden rounded-xl bg-[#18181b] border border-white/[0.06]">
+                        <Image unoptimized fill src={imageUrl} alt="Soru görseli" className="object-contain" />
+                    </div>
+                )}
+                <div className="text-xl sm:text-2xl font-bold text-[#f4f4f5] leading-relaxed">
+                    <RichMathText text={String(questionText)} />
                 </div>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {options.map((option: any, idx: number) => {
                     const optText = String(option);
                     const isSelected = selectedOption === optText;
                     const isCorrect = optText === String(answerText);
 
-                    let variant = "outline";
-                    if (feedback) {
-                        if (isCorrect) variant = "default"; // Show correct answer
-                        else if (isSelected && !isCorrect) variant = "destructive"; // Show wrong selection
-                        else variant = "outline";
-                    } else {
-                        variant = isSelected ? "secondary" : "outline";
-                    }
+                    const displayOpt =
+                        item.type === "TRUE_FALSE" || item.type === "TF"
+                            ? optText === "True"
+                                ? t("study.true")
+                                : optText === "False"
+                                    ? t("study.false")
+                                    : optText
+                            : optText;
 
                     return (
                         <motion.div
                             key={idx}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
+                            transition={{ delay: idx * 0.05 }}
                         >
                             <Button
-                                variant={variant as any}
+                                variant="outline"
                                 className={cn(
-                                    "w-full h-auto py-6 text-lg justify-start px-6 relative transition-all duration-300",
-                                    isSelected && !feedback && "ring-2 ring-primary scale-[1.02]",
-                                    feedback && isCorrect && "bg-green-600 hover:bg-green-700 text-white border-green-600",
-                                    feedback && isSelected && !isCorrect && "bg-red-600 hover:bg-red-700 text-white border-red-600"
+                                    "w-full h-auto min-h-[4.25rem] py-4 text-base justify-start px-5 relative transition-all duration-200 rounded-xl bg-[#121215] border-white/[0.08] text-[#f4f4f5] hover:bg-[#18181b] hover:border-sky-500/40 whitespace-normal",
+                                    isSelected && !feedback && "ring-2 ring-sky-500 border-sky-500/60 bg-[#18181b]",
+                                    feedback && isCorrect && "bg-emerald-500/15 hover:bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+                                    feedback && isSelected && !isCorrect && "bg-rose-500/15 hover:bg-rose-500/15 text-rose-300 border-rose-500/40",
+                                    feedback && !isSelected && !isCorrect && "opacity-45"
                                 )}
                                 onClick={() => {
                                     if (feedback) return;
                                     setSelectedOption(optText);
-
-                                    // Immediate Check Logic
-                                    setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
-                                    playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
-
+                                    setFeedback(isCorrect ? "CORRECT" : "WRONG");
+                                    playStudySound(isCorrect ? "SUCCESS" : "FAILURE");
                                     if (isCorrect) setCorrectCount(correctCount + 1);
                                     else setWrongCount(wrongCount + 1);
                                 }}
                                 disabled={!!feedback}
                             >
-                                <span className="mr-4 text-xs font-mono text-muted-foreground opacity-50 border rounded w-6 h-6 flex items-center justify-center shrink-0">
+                                <span className="mr-3.5 text-xs font-mono text-zinc-400 bg-[#18181b] border border-white/[0.08] rounded-md w-6 h-6 flex items-center justify-center shrink-0">
                                     {idx + 1}
                                 </span>
-                                <div className="mr-auto text-left prose dark:prose-invert prose-sm">
-                                    {/* Robust T/F Localization */}
-                                    {item.type === 'TRUE_FALSE' || item.type === 'TF' ? (
-                                        <ReactMarkdown>
-                                            {optText === 'True' ? t('study.true') : optText === 'False' ? t('study.false') : optText}
-                                        </ReactMarkdown>
-                                    ) : (
-                                        <ReactMarkdown>{optText}</ReactMarkdown>
-                                    )}
+                                <div className="mr-6 text-left flex-1">
+                                    <RichMathText text={displayOpt} compact />
                                 </div>
                                 {feedback && isCorrect && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        className="absolute right-4"
-                                    >
-                                        <CheckCircle2 className="h-6 w-6 text-white" />
+                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute right-4">
+                                        <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                                     </motion.div>
                                 )}
                                 {feedback && isSelected && !isCorrect && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        className="absolute right-4"
-                                    >
-                                        <XCircle className="h-6 w-6 text-white" />
+                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute right-4">
+                                        <XCircle className="h-5 w-5 text-rose-400" />
                                     </motion.div>
                                 )}
                             </Button>
@@ -147,30 +140,31 @@ export function QuizRenderer({ item }: { item: any }) {
             <AnimatePresence>
                 {feedback && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 12, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
                         className={cn(
-                            "p-6 rounded-xl text-center font-bold text-lg shadow-lg border-2",
-                            feedback === 'CORRECT'
-                                ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800"
-                                : "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800"
+                            "p-5 rounded-2xl text-center font-semibold text-base border",
+                            feedback === "CORRECT"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                                : "bg-rose-500/10 text-rose-300 border-rose-500/30"
                         )}
                     >
                         <div className="flex items-center justify-center gap-3">
-                            {feedback === 'CORRECT' ? (
+                            {feedback === "CORRECT" ? (
                                 <>
-                                    <CheckCircle2 className="h-8 w-8" />
-                                    <span>{t('study.correct')}</span>
+                                    <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
+                                    <span>{t("study.correct")}</span>
                                 </>
                             ) : (
                                 <>
-                                    <XCircle className="h-8 w-8" />
+                                    <XCircle className="h-6 w-6 text-rose-400 shrink-0" />
                                     <span>
-                                        {t('study.wrong', {
-                                            answer: (String(answerText) === 'True' || String(answerText) === 'False')
-                                                ? t(`study.${String(answerText).toLowerCase()}`)
-                                                : String(answerText)
+                                        {t("study.wrong", {
+                                            answer:
+                                                String(answerText) === "True" || String(answerText) === "False"
+                                                    ? t(`study.${String(answerText).toLowerCase()}`)
+                                                    : String(answerText),
                                         })}
                                     </span>
                                 </>

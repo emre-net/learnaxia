@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { t, MobileLoginSchema, MobileRegisterSchema } from '@learnaxia/shared';
+import { t, LoginSchema, RegisterSchema, extractApiErrorMessage } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
 import api, { API_BASE_URL } from '@/lib/api';
 import { GoogleIcon } from '@/components/ui/google-icon';
@@ -59,7 +59,6 @@ export default function LoginScreen() {
             setGoogleLoading(true);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-            // Clean up any stale WebBrowser auth session
             WebBrowser.maybeCompleteAuthSession();
 
             const redirectUri = Linking.createURL('auth/callback');
@@ -84,46 +83,52 @@ export default function LoginScreen() {
                     await loginWithTokens(accessToken, refreshToken);
                 }
             }
-        } catch (err: any) {
-            Alert.alert(t('auth.errorTitle', currentLang), err?.message || 'Google ile giriş sırasında bir hata oluştu.');
+        } catch (err) {
+            Alert.alert(t('auth.errorTitle', currentLang), extractApiErrorMessage(err, 'Google ile giriş sırasında bir hata oluştu.'));
         } finally {
             setGoogleLoading(false);
         }
     };
 
     const handleSubmit = async () => {
-        const formData = isLogin
-            ? { email: email.trim(), password: password.trim() }
-            : { name: name.trim(), handle: handle.trim() || undefined, email: email.trim(), password: password.trim() };
+        const trimmedEmail = email.trim();
+        const trimmedName = name.trim();
+        const trimmedHandle = handle.trim();
 
-        const schema = isLogin ? MobileLoginSchema : MobileRegisterSchema;
-        const result = schema.safeParse(formData);
-
-        if (!result.success) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            const firstError = result.error.issues[0].message;
-            Alert.alert(t('auth.error', currentLang), firstError);
-            return;
+        if (isLogin) {
+            const parsed = LoginSchema.safeParse({ email: trimmedEmail, password });
+            if (!parsed.success) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                Alert.alert(t('auth.errorTitle', currentLang), parsed.error.issues[0].message);
+                return;
+            }
+        } else {
+            const parsed = RegisterSchema.safeParse({
+                name: trimmedName || undefined,
+                handle: trimmedHandle,
+                email: trimmedEmail,
+                password,
+            });
+            if (!parsed.success) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                Alert.alert(t('auth.errorTitle', currentLang), parsed.error.issues[0].message);
+                return;
+            }
         }
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setLoading(true);
         try {
             if (isLogin) {
-                await login(formData.email, formData.password);
+                await login(trimmedEmail, password);
             } else {
-                await register(formData.name!, formData.email, formData.password, (formData as any).handle);
+                await register(trimmedName || undefined, trimmedEmail, password, trimmedHandle);
             }
         } catch (error) {
-            let message = isLogin
+            const fallback = isLogin
                 ? t('auth.loginErrorMessage', currentLang)
                 : t('auth.registerErrorMessage', currentLang);
-
-            if (error && typeof error === 'object' && 'response' in error) {
-                const axiosError = error as { response?: { data?: { message?: string } } };
-                message = axiosError.response?.data?.message || message;
-            }
-            Alert.alert(t('auth.errorTitle', currentLang), message);
+            Alert.alert(t('auth.errorTitle', currentLang), extractApiErrorMessage(error, fallback));
         } finally {
             setLoading(false);
         }
@@ -139,7 +144,7 @@ export default function LoginScreen() {
                     text: t('auth.send', currentLang),
                     onPress: async () => {
                         if (!email.trim()) {
-                            Alert.alert(t('auth.error', currentLang), t('auth.enterEmailFirst', currentLang));
+                            Alert.alert(t('auth.errorTitle', currentLang), t('auth.enterEmailFirst', currentLang));
                             return;
                         }
                         setLoading(true);
@@ -149,18 +154,11 @@ export default function LoginScreen() {
                                 t('auth.passwordResetSent', currentLang),
                                 `${email.trim()} adresine şifre sıfırlama bağlantısı gönderildi.`
                             );
-                        } catch (err: unknown) {
-                            const serverMessage =
-                                err &&
-                                typeof err === 'object' &&
-                                'response' in err
-                                    ? (err as { response?: { data?: { message?: unknown } } }).response?.data?.message
-                                    : undefined;
-                            const message =
-                                typeof serverMessage === 'string' && serverMessage.length < 300
-                                    ? serverMessage
-                                    : t('auth.passwordResetError', currentLang);
-                            Alert.alert(t('auth.error', currentLang), message);
+                        } catch (err) {
+                            Alert.alert(
+                                t('auth.errorTitle', currentLang),
+                                extractApiErrorMessage(err, t('auth.passwordResetError', currentLang))
+                            );
                         } finally {
                             setLoading(false);
                         }
@@ -172,10 +170,10 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
                 <ScrollView
@@ -183,52 +181,56 @@ export default function LoginScreen() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Minimalist Premium Header */}
-                    <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.header}>
+                    <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.header}>
                         <Text style={styles.brandText}>LEARNAXIA</Text>
                         <Text style={styles.title}>
                             {isLogin ? t('auth.loginTitle', currentLang) : t('auth.registerTitle', currentLang)}
                         </Text>
                         <Text style={styles.subtitle}>
-                            {isLogin 
-                                ? t('auth.loginSubtitle', currentLang)
-                                : t('auth.registerSubtitle', currentLang)}
+                            {isLogin ? t('auth.loginSubtitle', currentLang) : t('auth.registerSubtitle', currentLang)}
                         </Text>
                     </Animated.View>
 
-                    {/* Clean Form */}
-                    <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.formContainer}>
+                    <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.formContainer}>
                         {!isLogin && (
                             <>
-                            <View style={[styles.inputGroup, focusedInput === 'name' && styles.inputGroupFocused]}>
-                                <Text style={styles.label}>{t('auth.fullNamePlaceholder', currentLang)}</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Emre Yılmaz"
-                                    placeholderTextColor="#475569"
-                                    value={name}
-                                    onChangeText={setName}
-                                    editable={!loading}
-                                    autoCapitalize="words"
-                                    onFocus={() => setFocusedInput('name')}
-                                    onBlur={() => setFocusedInput(null)}
-                                />
-                            </View>
-                            <View style={[styles.inputGroup, focusedInput === 'handle' && styles.inputGroupFocused]}>
-                                <Text style={styles.label}>{t('auth.handlePlaceholder', currentLang) || 'Kullanıcı Adı (opsiyonel)'}</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="emre_dev"
-                                    placeholderTextColor="#475569"
-                                    value={handle}
-                                    onChangeText={(text) => setHandle(text.replace(/[^a-zA-Z0-9_]/g, ''))}
-                                    editable={!loading}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    onFocus={() => setFocusedInput('handle')}
-                                    onBlur={() => setFocusedInput(null)}
-                                />
-                            </View>
+                                <View style={[styles.inputGroup, focusedInput === 'handle' && styles.inputGroupFocused]}>
+                                    <Text style={styles.label}>
+                                        {currentLang === 'tr' ? 'Kullanıcı Adı (@handle) *' : 'Username (@handle) *'}
+                                    </Text>
+                                    <View style={styles.handleInputRow}>
+                                        <Text style={styles.atPrefix}>@</Text>
+                                        <TextInput
+                                            style={[styles.input, { flex: 1 }]}
+                                            placeholder="emre_dev"
+                                            placeholderTextColor="#52525B"
+                                            value={handle}
+                                            onChangeText={(text) => setHandle(text.replace(/[^a-zA-Z0-9_]/g, ''))}
+                                            editable={!loading}
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                            onFocus={() => setFocusedInput('handle')}
+                                            onBlur={() => setFocusedInput(null)}
+                                        />
+                                    </View>
+                                </View>
+
+                                <View style={[styles.inputGroup, focusedInput === 'name' && styles.inputGroupFocused]}>
+                                    <Text style={styles.label}>
+                                        {currentLang === 'tr' ? 'Ad / Görünen Ad (İsteğe Bağlı)' : 'Display Name (Optional)'}
+                                    </Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Emre Yılmaz"
+                                        placeholderTextColor="#52525B"
+                                        value={name}
+                                        onChangeText={setName}
+                                        editable={!loading}
+                                        autoCapitalize="words"
+                                        onFocus={() => setFocusedInput('name')}
+                                        onBlur={() => setFocusedInput(null)}
+                                    />
+                                </View>
                             </>
                         )}
 
@@ -237,7 +239,7 @@ export default function LoginScreen() {
                             <TextInput
                                 style={styles.input}
                                 placeholder="ornek@posta.com"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#52525B"
                                 value={email}
                                 onChangeText={setEmail}
                                 autoCapitalize="none"
@@ -250,7 +252,10 @@ export default function LoginScreen() {
 
                         <View style={[styles.inputGroup, focusedInput === 'password' && styles.inputGroupFocused]}>
                             <View style={styles.labelRow}>
-                                <Text style={styles.label}>{t('auth.passwordPlaceholder', currentLang)}</Text>
+                                <Text style={styles.label}>
+                                    {t('auth.passwordPlaceholder', currentLang)}
+                                    {!isLogin ? (currentLang === 'tr' ? ' (en az 8 karakter)' : ' (min 8 chars)') : ''}
+                                </Text>
                                 {isLogin && (
                                     <TouchableOpacity onPress={handleForgotPassword} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                                         <Text style={styles.forgotPasswordText}>{t('auth.forgotPassword', currentLang)}</Text>
@@ -260,7 +265,7 @@ export default function LoginScreen() {
                             <TextInput
                                 style={styles.input}
                                 placeholder="••••••••"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#52525B"
                                 secureTextEntry
                                 value={password}
                                 onChangeText={setPassword}
@@ -270,7 +275,6 @@ export default function LoginScreen() {
                             />
                         </View>
 
-                        {/* Premium Solid Button */}
                         <TouchableOpacity
                             activeOpacity={0.8}
                             onPress={handleSubmit}
@@ -286,7 +290,6 @@ export default function LoginScreen() {
                             )}
                         </TouchableOpacity>
 
-                        {/* Social Divider & Google Sign In */}
                         <View style={styles.socialContainer}>
                             <View style={styles.divider}>
                                 <View style={styles.dividerLine} />
@@ -316,16 +319,15 @@ export default function LoginScreen() {
                         </View>
                     </Animated.View>
 
-                    {/* Footer */}
-                    <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.footer}>
+                    <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.footer}>
                         <Text style={styles.footerText}>
                             {isLogin ? t('auth.noAccount', currentLang) : t('auth.alreadyHaveAccount', currentLang)}
                         </Text>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             onPress={() => {
                                 Haptics.selectionAsync();
                                 setIsLogin(!isLogin);
-                            }} 
+                            }}
                             style={styles.footerAction}
                         >
                             <Text style={styles.footerActionText}>
@@ -333,7 +335,6 @@ export default function LoginScreen() {
                             </Text>
                         </TouchableOpacity>
                     </Animated.View>
-
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
@@ -346,148 +347,160 @@ const styles = StyleSheet.create({
         backgroundColor: '#09090B',
     },
     keyboardView: {
-        flex: 1
+        flex: 1,
     },
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',
         paddingHorizontal: 28,
-        paddingTop: 60,
-        paddingBottom: 40
+        paddingTop: 56,
+        paddingBottom: 40,
     },
     header: {
-        marginBottom: 48,
-        marginTop: 20
+        marginBottom: 40,
+        marginTop: 12,
     },
     brandText: {
-        color: '#F4F4F5',
-        fontSize: 14,
+        color: '#38BDF8',
+        fontSize: 13,
         fontWeight: '700',
-        letterSpacing: 2,
-        marginBottom: 16,
-        opacity: 0.8
+        letterSpacing: 1.5,
+        marginBottom: 14,
     },
     title: {
         color: '#F4F4F5',
-        fontSize: 32,
-        fontWeight: '600',
+        fontSize: 30,
+        fontWeight: '700',
         letterSpacing: -0.5,
-        marginBottom: 8
+        marginBottom: 8,
     },
     subtitle: {
         color: '#A1A1AA',
         fontSize: 15,
-        fontWeight: '400'
+        fontWeight: '400',
     },
     formContainer: {
-        gap: 24,
+        gap: 20,
     },
     inputGroup: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#27272A',
-        paddingBottom: 8
+        backgroundColor: '#121215',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
     },
     inputGroupFocused: {
-        borderBottomColor: '#6366F1',
+        borderColor: '#38BDF8',
+    },
+    handleInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    atPrefix: {
+        color: '#38BDF8',
+        fontSize: 16,
+        fontWeight: '700',
     },
     labelRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8
+        marginBottom: 6,
     },
     label: {
         color: '#A1A1AA',
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '500',
-        marginBottom: 8
+        marginBottom: 6,
     },
     forgotPasswordText: {
-        color: '#818CF8',
-        fontSize: 13,
-        fontWeight: '600'
+        color: '#38BDF8',
+        fontSize: 12,
+        fontWeight: '600',
     },
     input: {
         color: '#F4F4F5',
-        fontSize: 16,
-        height: 32,
-        padding: 0
+        fontSize: 15,
+        minHeight: 28,
+        padding: 0,
     },
     submitButton: {
-        backgroundColor: '#6366F1',
-        height: 56,
+        backgroundColor: '#38BDF8',
+        height: 54,
         borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 8
+        marginTop: 4,
     },
     submitButtonDisabled: {
-        opacity: 0.7
+        opacity: 0.7,
     },
     submitButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '700'
+        color: '#09090B',
+        fontSize: 15,
+        fontWeight: '700',
     },
     socialContainer: {
-        marginTop: 16
+        marginTop: 8,
     },
     divider: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20
+        marginBottom: 16,
     },
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#27272A'
+        backgroundColor: '#27272A',
     },
     dividerText: {
         color: '#71717A',
         fontSize: 12,
-        paddingHorizontal: 16,
-        fontWeight: '500'
+        paddingHorizontal: 14,
+        fontWeight: '500',
     },
     socialButton: {
-        height: 56,
-        borderRadius: 14,
+        backgroundColor: '#121215',
         borderWidth: 1,
         borderColor: '#27272A',
+        height: 52,
+        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#121215'
     },
     socialButtonDisabled: {
-        opacity: 0.6
+        opacity: 0.7,
     },
     socialButtonContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 12
+        gap: 10,
     },
     socialButtonText: {
         color: '#F4F4F5',
         fontSize: 15,
-        fontWeight: '600'
+        fontWeight: '600',
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 48,
-        gap: 6
+        marginTop: 28,
+        gap: 6,
     },
     footerText: {
-        color: '#A1A1AA',
-        fontSize: 14
+        color: '#71717A',
+        fontSize: 14,
     },
     footerAction: {
-        paddingVertical: 8
+        paddingVertical: 4,
+        paddingHorizontal: 6,
     },
     footerActionText: {
-        color: '#F4F4F5',
+        color: '#38BDF8',
         fontSize: 14,
-        fontWeight: '600'
-    }
+        fontWeight: '700',
+    },
 });

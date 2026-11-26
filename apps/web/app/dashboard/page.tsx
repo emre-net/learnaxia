@@ -14,6 +14,7 @@ import {
     PenTool,
     PlusCircle,
     Map,
+    Compass,
     Trophy,
     GraduationCap,
 } from "lucide-react";
@@ -41,6 +42,7 @@ interface RecentModule {
     title: string;
     type: string;
     lastStudied: string;
+    itemCount?: number;
 }
 
 // Gradient avatar helpers
@@ -126,14 +128,32 @@ export default function DashboardPage() {
             id: "solve",
             label: "Soru Çöz",
             icon: Camera,
-            color: "#818cf8",
-            border: "border-indigo-500/70",
-            bg: "bg-indigo-500/15",
+            color: "#38bdf8",
+            border: "border-sky-400/70",
+            bg: "bg-sky-500/15",
             href: "/dashboard/create/solve-photo",
         },
         {
+            id: "journey",
+            label: "AI Rotası",
+            icon: Map,
+            color: "#a855f7",
+            border: "border-purple-500/70",
+            bg: "bg-purple-500/15",
+            href: "/dashboard/learning/create",
+        },
+        {
+            id: "discover",
+            label: "Keşfet",
+            icon: Compass,
+            color: "#34d399",
+            border: "border-emerald-400/70",
+            bg: "bg-emerald-500/15",
+            href: "/dashboard/discover",
+        },
+        {
             id: "note",
-            label: "Not Al",
+            label: "Yeni Not",
             icon: PenTool,
             color: "#f59e0b",
             border: "border-amber-500/70",
@@ -144,19 +164,10 @@ export default function DashboardPage() {
             id: "module",
             label: "Yeni Modül",
             icon: PlusCircle,
-            color: "#38bdf8",
-            border: "border-sky-500/70",
-            bg: "bg-sky-500/15",
+            color: "#818cf8",
+            border: "border-indigo-400/70",
+            bg: "bg-indigo-500/15",
             href: "/dashboard/create",
-        },
-        {
-            id: "journey",
-            label: "Yeni Rota",
-            icon: Map,
-            color: "#a855f7",
-            border: "border-purple-500/70",
-            bg: "bg-purple-500/15",
-            href: "/dashboard/learning/create",
         },
         {
             id: "leaderboard",
@@ -169,49 +180,6 @@ export default function DashboardPage() {
         },
     ];
 
-    const statCards = [
-        {
-            title: t('settings.duration'),
-            value: loading ? null : `${stats.totalStudyMinutes} dk`,
-            desc: "Platformda geçirilen süre",
-            icon: Clock,
-            iconColor: "text-cyan-400",
-            iconBg: "bg-cyan-500/10",
-            borderColor: "border-cyan-500/40",
-            textColor: "text-cyan-400",
-        },
-        {
-            title: t('dashboard.modules'),
-            value: loading ? null : stats.modulesStarted,
-            desc: "İlerleme kaydettiğin setler",
-            icon: BookOpen,
-            iconColor: "text-blue-400",
-            iconBg: "bg-blue-500/10",
-            borderColor: "border-blue-500/40",
-            textColor: "text-blue-400",
-        },
-        {
-            title: "Başarı Oranı",
-            value: loading ? null : `%${stats.averageAccuracy}`,
-            desc: "Genel doğruluk oranınız",
-            icon: TrendingUp,
-            iconColor: "text-purple-400",
-            iconBg: "bg-purple-500/10",
-            borderColor: "border-purple-500/40",
-            textColor: "text-purple-400",
-        },
-        {
-            title: "Toplam Çözüm",
-            value: loading ? null : stats.totalSolved,
-            desc: "Çözülen toplam soru sayısı",
-            icon: CheckCircle2,
-            iconColor: "text-amber-400",
-            iconBg: "bg-amber-500/10",
-            borderColor: "border-amber-500/40",
-            textColor: "text-amber-400",
-        },
-    ];
-
     return (
         <div className="flex-1 space-y-6 max-w-7xl mx-auto w-full">
             {/* Onboarding Modal */}
@@ -220,7 +188,7 @@ export default function DashboardPage() {
             {/* 1. Header Welcome Bar */}
             <div className="rounded-2xl border border-white/[0.08] bg-[#121215] p-5 md:p-6 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${avatarGradient} flex items-center justify-center text-lg md:text-xl font-black text-white shadow-lg shrink-0`}>
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${avatarGradient} flex items-center justify-center text-lg md:text-xl font-bold text-white shadow-lg shrink-0`}>
                         {initials}
                     </div>
                     <div>
@@ -229,16 +197,16 @@ export default function DashboardPage() {
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
                             <Flame className="w-4 h-4 text-amber-400" />
-                            <span className="text-xs md:text-sm text-[#a1a1aa]">Çalışmaya devam et, harika gidiyorsun!</span>
+                            <span className="text-xs md:text-sm text-[#a1a1aa]">Bugün odaklanmak için harika bir gün!</span>
                         </div>
                     </div>
                 </div>
 
                 {isAdmin && (
-                    <Button asChild variant="outline" className="rounded-full border-blue-500/30 text-blue-400 hover:bg-blue-900/20 font-bold gap-2 btn-press shrink-0 text-xs md:text-sm">
+                    <Button asChild variant="outline" className="rounded-full border-sky-500/30 text-sky-400 hover:bg-sky-500/10 font-semibold gap-2 btn-press shrink-0 text-xs md:text-sm">
                         <Link href="/admin">
                             <ShieldCheck className="w-4 h-4" />
-                            Admin Panel <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] ml-1">NEW</Badge>
+                            Admin Panel
                         </Link>
                     </Button>
                 )}
@@ -268,14 +236,13 @@ export default function DashboardPage() {
 
             {/* 3. Hero: Kaldığın Yerden Devam Et (İçerik Odaklı) */}
             {mostRecentModule ? (
-                <div className="rounded-2xl border border-white/10 bg-[#121215] p-5 md:p-6 shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="rounded-2xl border border-white/[0.08] bg-[#121215] p-5 md:p-6 shadow-xl relative overflow-hidden group">
                     <div className="flex items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold">
                             <Play className="w-3 h-3 fill-sky-400" />
                             <span>Kaldığın Yerden Devam Et</span>
                         </div>
-                        <span className="text-xs text-[#71717a]">
+                        <span className="text-xs text-zinc-400">
                             {new Date(mostRecentModule.lastStudied).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
                         </span>
                     </div>
@@ -284,96 +251,100 @@ export default function DashboardPage() {
                         {mostRecentModule.title}
                     </h3>
 
-                    <div className="flex items-center justify-between gap-4 pt-2">
-                        <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[#a1a1aa]">
-                            {mostRecentModule.type === "GAP"
-                                ? "Boşluk Doldurma"
-                                : mostRecentModule.type === "MC"
-                                ? "Çoktan Seçmeli"
-                                : mostRecentModule.type === "TRUE_FALSE"
-                                ? "Doğru / Yanlış"
-                                : "Flashcard"}
-                        </span>
+                    <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium px-3 py-1 rounded-lg bg-[#18181b] border border-white/[0.08] text-zinc-300">
+                                {mostRecentModule.type === "GAP"
+                                    ? "Boşluk Doldurma"
+                                    : mostRecentModule.type === "MC"
+                                    ? "Çoktan Seçmeli"
+                                    : mostRecentModule.type === "TRUE_FALSE"
+                                    ? "Doğru / Yanlış"
+                                    : "Flashcard"}
+                            </span>
+                            {typeof mostRecentModule.itemCount === "number" && (
+                                <span className="text-xs text-zinc-400 px-2.5 py-1 rounded-lg bg-[#18181b] border border-white/[0.06]">
+                                    {mostRecentModule.itemCount} içerik
+                                </span>
+                            )}
+                        </div>
 
-                        <Button asChild className="rounded-full bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold px-6 shadow-lg shadow-indigo-500/25 gap-2 btn-press">
+                        <Button asChild className="rounded-full bg-[#f4f4f5] hover:bg-zinc-200 text-zinc-950 font-bold px-6 gap-2 btn-press">
                             <Link href={`/study/${mostRecentModule.id}`}>
-                                <Play className="w-4 h-4 fill-white" />
+                                <Play className="w-4 h-4 fill-zinc-950" />
                                 Hemen Çalış
                             </Link>
                         </Button>
                     </div>
                 </div>
             ) : (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-[#121215]/50 p-6 flex items-center justify-between gap-6">
+                <div className="rounded-2xl border border-dashed border-zinc-800 bg-[#121215]/70 p-6 flex items-center justify-between gap-6">
                     <div className="space-y-2 max-w-lg">
                         <h3 className="text-lg font-bold text-[#f4f4f5]">Bugün Yeni Bir Şey Öğren</h3>
                         <p className="text-sm text-[#a1a1aa]">
                             İlk modülünü oluşturabilir, fotoğrafla soru çözdürebilir veya topluluk setlerini keşfedebilirsin.
                         </p>
-                        <Button asChild size="sm" className="rounded-full bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold gap-1.5 mt-2">
+                        <Button asChild size="sm" className="rounded-full bg-[#f4f4f5] hover:bg-zinc-200 text-zinc-950 font-bold gap-1.5 mt-2">
                             <Link href="/dashboard/create">
                                 <Plus className="w-4 h-4" />
                                 İçerik Üret
                             </Link>
                         </Button>
                     </div>
-                    <GraduationCap className="w-14 h-14 text-white/10 shrink-0 hidden sm:block" />
+                    <GraduationCap className="w-14 h-14 text-zinc-800 shrink-0 hidden sm:block" />
                 </div>
             )}
 
-            {/* 4. Daily Review SM2 Alert */}
-            <div className="w-full">
-                <DailyReviewWidget />
-            </div>
-
-            {/* 5. Momentum Score Card */}
-            <div className="w-full">
-                <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">Momentum & Seviye</h3>
-                    <Link href="/dashboard/leaderboard" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
-                        Liderlik Tablosu →
-                    </Link>
+            {/* 4. Akıllı Tekrar & Momentum & Odaklanma (İçerik Odaklı Yerleşim) */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                <div className="xl:col-span-7 space-y-6">
+                    <DailyReviewWidget />
+                    <ScoreCard />
                 </div>
-                <ScoreCard />
-            </div>
-
-            {/* 6. Focus & Quick Stats Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Pomodoro / Focus Area */}
-                <div className="xl:col-span-1">
+                <div className="xl:col-span-5">
                     <FocusWidget />
                 </div>
-
-                {/* Stats Area — 2x2 Dark Zinc Cards */}
-                <div className="xl:col-span-2 grid gap-4 grid-cols-1 sm:grid-cols-2">
-                    {statCards.map((card) => (
-                        <Card
-                            key={card.title}
-                            className={`bg-[#121215] border border-white/[0.08] card-hover border-l-4 ${card.borderColor} group cursor-default`}
-                        >
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-[#a1a1aa]">{card.title}</CardTitle>
-                                <div className={`p-2 rounded-xl ${card.iconBg} transition-transform duration-300 group-hover:scale-110`}>
-                                    <card.icon className={`h-4 w-4 ${card.iconColor}`} />
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {loading ? (
-                                    <div className="space-y-2">
-                                        <div className="h-8 w-24 bg-white/5 rounded-lg animate-pulse" />
-                                        <div className="h-3 w-32 bg-white/5 rounded animate-pulse" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className={`text-2xl font-bold ${card.textColor}`}>{card.value}</div>
-                                        <p className="text-xs text-[#71717a] mt-1">{card.desc}</p>
-                                    </>
-                                )}
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
             </div>
+
+            {/* 5. Son Aktiviteler (Mobil ile Birebir Eşit) */}
+            {recentModules.length > 0 && (
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold text-[#f4f4f5]">Son Aktiviteler</h3>
+                        <Link href="/dashboard/library" className="text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors">
+                            Tümünü Gör →
+                        </Link>
+                    </div>
+                    <div className="flex items-stretch gap-3.5 overflow-x-auto no-scrollbar pb-2">
+                        {recentModules.slice(0, 6).map((mod) => (
+                            <Link
+                                key={mod.id}
+                                href={`/study/${mod.id}`}
+                                className="min-w-[210px] max-w-[230px] shrink-0 rounded-2xl border border-white/[0.08] bg-[#121215] hover:border-sky-500/40 p-4 flex flex-col justify-between gap-3 transition-colors"
+                            >
+                                <div className="space-y-2">
+                                    <span className="inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-[#18181b] text-sky-400 border border-white/[0.06]">
+                                        {mod.type === "GAP"
+                                            ? "Boşluk Doldurma"
+                                            : mod.type === "MC"
+                                            ? "Çoktan Seçmeli"
+                                            : mod.type === "TRUE_FALSE"
+                                            ? "Doğru / Yanlış"
+                                            : "Flashcard"}
+                                    </span>
+                                    <h4 className="text-sm font-semibold text-zinc-100 line-clamp-2">
+                                        {mod.title}
+                                    </h4>
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
+                                    <span>{mod.itemCount ?? 0} içerik</span>
+                                    <span className="text-sky-400 font-medium">Çalış →</span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

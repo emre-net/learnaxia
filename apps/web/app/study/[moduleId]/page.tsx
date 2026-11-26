@@ -69,9 +69,9 @@ function StudyInterface() {
             <div className="flex-1 w-full flex flex-col items-center justify-center max-w-5xl">
                 {(() => {
                     const itemType = currentItem.type as string;
-                    if (mode === 'QUIZ' || itemType === 'MC') return <QuizRenderer item={currentItem} />;
                     if (itemType === 'TRUE_FALSE' || itemType === 'TF') return <TrueFalseRenderer item={currentItem} />;
                     if (itemType === 'GAP') return <GapRenderer item={currentItem} />;
+                    if (mode === 'QUIZ' || itemType === 'MC') return <QuizRenderer item={currentItem} />;
                     return <FlashcardRenderer item={currentItem} />;
                 })()}
 

@@ -1,63 +1,61 @@
 import 'react-native-reanimated';
 import React, { useState } from 'react';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '../context/AuthContext';
+import { LanguageProvider } from '@/hooks/use-language';
 import { AnimatedSplash } from '@/components/ui/animated-splash';
 
-// Sadece dev modunda non-critical uyarıları bastır
-// AxiosError, Network Error gibi kritik hatalar kasıtlı olarak burada gizlenmez —
-// API interceptor'larının bu hataları yakalaması ve loglaması beklenir.
-if (__DEV__) {
-  LogBox.ignoreAllLogs();
-}
-
 export const unstable_settings = {
-  initialRouteName: 'login',
+  initialRouteName: 'index',
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [isSplashComplete, setIsSplashComplete] = useState(false);
 
   return (
-    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#09090B' }}>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'fade',
-              contentStyle: { backgroundColor: '#09090B' }
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
-            <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create' }} />
-            <Stack.Screen name="study/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="journey/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="journey/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="leaderboard" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="notes/new" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="modules/[id]" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="modules/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="collections/[id]" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="collections/new" options={{ animation: 'slide_from_right' }} />
-          </Stack>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#09090B' }}>
+      <SafeAreaProvider style={{ flex: 1, backgroundColor: '#09090B' }}>
+        <AuthProvider>
+          <LanguageProvider>
+            <ThemeProvider value={DarkTheme}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'fade',
+                  contentStyle: { backgroundColor: '#09090B' },
+                }}
+              >
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
+                <Stack.Screen name="create" options={{ presentation: 'modal', title: 'Create' }} />
+                <Stack.Screen name="study/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="study/daily" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="journey/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="journey/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="leaderboard" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="notes/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="notes/new" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="modules/[id]" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="modules/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                <Stack.Screen name="collections/[id]" options={{ animation: 'slide_from_right' }} />
+                <Stack.Screen name="collections/new" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+              </Stack>
 
-          {!isSplashComplete && (
-            <AnimatedSplash onComplete={() => setIsSplashComplete(true)} />
-          )}
+              {!isSplashComplete && (
+                <AnimatedSplash onComplete={() => setIsSplashComplete(true)} />
+              )}
 
-          <StatusBar style="light" backgroundColor="#09090B" />
-        </ThemeProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+              <StatusBar style="light" backgroundColor="#09090B" />
+            </ThemeProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -7,9 +7,11 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, Check, X, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo } from "react";
-import ReactMarkdown from "react-markdown";
+import { useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { playStudySound } from "@/lib/audio";
+import { resolveTrueFalseAnswer } from "@learnaxia/shared";
+import { RichMathText } from "@/components/shared/rich-math-text";
 
 export function TrueFalseRenderer({ item }: { item: any }) {
     const {
@@ -20,7 +22,7 @@ export function TrueFalseRenderer({ item }: { item: any }) {
         setCorrectCount,
         correctCount,
         setWrongCount,
-        wrongCount
+        wrongCount,
     } = useStudyStore();
 
     const { t } = useTranslation();
@@ -28,173 +30,157 @@ export function TrueFalseRenderer({ item }: { item: any }) {
     const c = item?.content || {};
     const actualC = c.content || c;
 
-    // Extract statement
     let statementText = actualC.statement || actualC.question || actualC.Question || actualC.front || actualC.text || "";
-    if (typeof statementText === 'object') statementText = JSON.stringify(statementText);
-    statementText = statementText || "🤔 Önerme Bulunamadı";
+    if (typeof statementText === "object") statementText = JSON.stringify(statementText);
+    statementText = statementText || "Önerme bulunamadı";
 
-    // Extract correct boolean value
-    const isTrueAnswer = useMemo(() => {
-        if (typeof actualC.isTrue === 'boolean') return actualC.isTrue;
-        if (typeof actualC.isTrue === 'string') return actualC.isTrue.toLowerCase() === 'true';
-        if (typeof actualC.answer === 'boolean') return actualC.answer;
-        if (typeof actualC.answer === 'string') return actualC.answer.toLowerCase() === 'true';
-        if (typeof actualC.correctAnswer === 'boolean') return actualC.correctAnswer;
-        if (typeof actualC.correctAnswer === 'string') return actualC.correctAnswer.toLowerCase() === 'true';
-        return true;
-    }, [actualC]);
-
+    const imageUrl = actualC.image || actualC.imageUrl || "";
+    const isTrueAnswer = useMemo(() => resolveTrueFalseAnswer(actualC), [actualC]);
     const explanation = actualC.explanation || actualC.Explanation || "";
 
-    const handleSelect = (userChoice: boolean) => {
+    const handleSelect = useCallback((userChoice: boolean) => {
         if (feedback) return;
 
         const choiceStr = userChoice ? "True" : "False";
         setSelectedOption(choiceStr);
 
         const isCorrect = userChoice === isTrueAnswer;
-        setFeedback(isCorrect ? 'CORRECT' : 'WRONG');
-        playStudySound(isCorrect ? 'SUCCESS' : 'FAILURE');
+        setFeedback(isCorrect ? "CORRECT" : "WRONG");
+        playStudySound(isCorrect ? "SUCCESS" : "FAILURE");
 
         if (isCorrect) {
             setCorrectCount(correctCount + 1);
         } else {
             setWrongCount(wrongCount + 1);
         }
-    };
+    }, [feedback, isTrueAnswer, correctCount, wrongCount, setSelectedOption, setFeedback, setCorrectCount, setWrongCount]);
 
-    // Keyboard support: 1/T/D for True, 2/F/Y for False
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (feedback) return;
             const key = e.key.toLowerCase();
-            if (key === '1' || key === 't' || key === 'd') {
+            if (key === "1" || key === "t" || key === "d") {
                 handleSelect(true);
-            } else if (key === '2' || key === 'f' || key === 'y') {
+            } else if (key === "2" || key === "f" || key === "y") {
                 handleSelect(false);
             }
         };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [feedback, isTrueAnswer]);
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [feedback, handleSelect]);
 
     const isSelectedTrue = selectedOption === "True";
     const isSelectedFalse = selectedOption === "False";
 
     return (
         <div className="w-full max-w-2xl flex flex-col gap-6">
-            {/* Önerme Kartı */}
-            <Card className="p-8 text-center border-2 shadow-sm bg-card/60 backdrop-blur-sm">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary mb-6">
+            <Card className="p-6 sm:p-8 text-center bg-[#121215] border border-white/[0.06] rounded-2xl shadow-none space-y-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 mx-auto">
                     <HelpCircle className="h-3.5 w-3.5" />
                     Doğru mu, Yanlış mı?
                 </div>
-                <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground prose dark:prose-invert max-w-none leading-relaxed">
-                    <ReactMarkdown>{String(statementText)}</ReactMarkdown>
+                {imageUrl && (imageUrl.startsWith("data:") || imageUrl.startsWith("http")) && (
+                    <div className="relative h-56 w-full overflow-hidden rounded-xl bg-[#18181b] border border-white/[0.06]">
+                        <Image unoptimized fill src={imageUrl} alt="Soru görseli" className="object-contain" />
+                    </div>
+                )}
+                <div className="text-xl sm:text-2xl font-bold text-[#f4f4f5] leading-relaxed">
+                    <RichMathText text={String(statementText)} />
                 </div>
             </Card>
 
-            {/* İkili Seçenek Butonları */}
             <div className="grid grid-cols-2 gap-4">
-                {/* DOĞRU BUTONU */}
-                <motion.div
-                    whileHover={!feedback ? { scale: 1.02 } : {}}
-                    whileTap={!feedback ? { scale: 0.98 } : {}}
-                >
+                <motion.div whileHover={!feedback ? { scale: 1.015 } : {}} whileTap={!feedback ? { scale: 0.985 } : {}}>
                     <Button
                         type="button"
                         variant="outline"
                         disabled={!!feedback}
                         onClick={() => handleSelect(true)}
                         className={cn(
-                            "w-full h-24 text-xl font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 border-2",
-                            !feedback && "hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400",
+                            "w-full h-24 text-lg sm:text-xl font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all duration-200 border bg-[#121215] border-white/[0.08] text-[#f4f4f5]",
+                            !feedback && "hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-300",
                             isSelectedTrue && !feedback && "ring-2 ring-emerald-500 border-emerald-500 bg-emerald-500/10",
-                            feedback && isTrueAnswer && "bg-emerald-600 hover:bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20",
-                            feedback && isSelectedTrue && !isTrueAnswer && "bg-rose-600 hover:bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-500/20",
+                            feedback && isTrueAnswer && "bg-emerald-500/15 hover:bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+                            feedback && isSelectedTrue && !isTrueAnswer && "bg-rose-500/15 hover:bg-rose-500/15 text-rose-300 border-rose-500/40",
                             feedback && !isSelectedTrue && !isTrueAnswer && "opacity-40"
                         )}
                     >
                         <div className="flex items-center gap-2">
-                            <Check className="h-6 w-6 stroke-[3]" />
-                            <span>{t('study.true')}</span>
+                            <Check className="h-5 w-5 stroke-[3]" />
+                            <span>{t("study.true")}</span>
                         </div>
-                        <span className="text-[11px] font-mono font-medium opacity-60 uppercase tracking-wider">
+                        <span className="text-xs font-mono text-zinc-400">
                             Kısayol: [D] veya [1]
                         </span>
                     </Button>
                 </motion.div>
 
-                {/* YANLIŞ BUTONU */}
-                <motion.div
-                    whileHover={!feedback ? { scale: 1.02 } : {}}
-                    whileTap={!feedback ? { scale: 0.98 } : {}}
-                >
+                <motion.div whileHover={!feedback ? { scale: 1.015 } : {}} whileTap={!feedback ? { scale: 0.985 } : {}}>
                     <Button
                         type="button"
                         variant="outline"
                         disabled={!!feedback}
                         onClick={() => handleSelect(false)}
                         className={cn(
-                            "w-full h-24 text-xl font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 border-2",
-                            !feedback && "hover:border-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400",
+                            "w-full h-24 text-lg sm:text-xl font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-all duration-200 border bg-[#121215] border-white/[0.08] text-[#f4f4f5]",
+                            !feedback && "hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-300",
                             isSelectedFalse && !feedback && "ring-2 ring-rose-500 border-rose-500 bg-rose-500/10",
-                            feedback && !isTrueAnswer && "bg-emerald-600 hover:bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20",
-                            feedback && isSelectedFalse && isTrueAnswer && "bg-rose-600 hover:bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-500/20",
+                            feedback && !isTrueAnswer && "bg-emerald-500/15 hover:bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+                            feedback && isSelectedFalse && isTrueAnswer && "bg-rose-500/15 hover:bg-rose-500/15 text-rose-300 border-rose-500/40",
                             feedback && !isSelectedFalse && isTrueAnswer && "opacity-40"
                         )}
                     >
                         <div className="flex items-center gap-2">
-                            <X className="h-6 w-6 stroke-[3]" />
-                            <span>{t('study.false')}</span>
+                            <X className="h-5 w-5 stroke-[3]" />
+                            <span>{t("study.false")}</span>
                         </div>
-                        <span className="text-[11px] font-mono font-medium opacity-60 uppercase tracking-wider">
+                        <span className="text-xs font-mono text-zinc-400">
                             Kısayol: [Y] veya [2]
                         </span>
                     </Button>
                 </motion.div>
             </div>
 
-            {/* Geribildirim ve Açıklama Alanı */}
             <AnimatePresence>
                 {feedback && (
                     <motion.div
-                        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 12, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         className={cn(
-                            "p-6 rounded-2xl text-center font-semibold text-base shadow-lg border-2",
-                            feedback === 'CORRECT'
-                                ? "bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
-                                : "bg-rose-50 text-rose-900 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
+                            "p-5 rounded-2xl text-center font-semibold text-base border",
+                            feedback === "CORRECT"
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                                : "bg-rose-500/10 text-rose-300 border-rose-500/30"
                         )}
                     >
-                        <div className="flex items-center justify-center gap-2.5 text-lg font-bold mb-2">
-                            {feedback === 'CORRECT' ? (
-                                <>
-                                    <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                                    <span>Tebrikler, Doğru Cevap!</span>
-                                </>
-                            ) : (
-                                <>
-                                    <XCircle className="h-6 w-6 text-rose-600 dark:text-rose-400" />
-                                    <span>
-                                        Yanlış! Doğru cevap: <span className="underline">{isTrueAnswer ? t('study.true') : t('study.false')}</span> olmalıydı.
-                                    </span>
-                                </>
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="flex items-center gap-2.5 text-lg font-bold">
+                                {feedback === "CORRECT" ? (
+                                    <>
+                                        <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
+                                        <span>{t("study.correct")}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <XCircle className="h-6 w-6 text-rose-400 shrink-0" />
+                                        <span>
+                                            {t("study.wrong", {
+                                                answer: isTrueAnswer ? t("study.true") : t("study.false"),
+                                            })}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            {explanation && (
+                                <div className="text-sm font-normal text-zinc-300 mt-1 max-w-lg">
+                                    <RichMathText text={String(explanation)} compact />
+                                </div>
                             )}
                         </div>
-
-                        {explanation && (
-                            <p className="mt-3 text-sm text-muted-foreground/90 font-normal leading-relaxed text-left bg-background/50 p-3.5 rounded-xl border">
-                                <span className="font-semibold text-foreground block mb-1">Açıklama:</span>
-                                {explanation}
-                            </p>
-                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
 }
-

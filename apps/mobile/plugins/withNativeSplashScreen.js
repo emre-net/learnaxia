@@ -9,7 +9,7 @@ const VECTOR_XML = `<?xml version="1.0" encoding="utf-8"?>
     android:viewportWidth="200"
     android:viewportHeight="200">
     <!-- BACKGROUND -->
-    <path android:pathData="M0,0 h200 v200 h-200 z" android:fillColor="#000000" />
+    <path android:pathData="M0,0 h200 v200 h-200 z" android:fillColor="#09090B" />
     
     <group android:name="all_elements" android:pivotX="100" android:pivotY="100">
         
@@ -45,7 +45,7 @@ const VECTOR_XML = `<?xml version="1.0" encoding="utf-8"?>
 
         <!-- BULB CENTER -->
         <group android:name="bulb" android:pivotX="100" android:pivotY="100">
-            <path android:pathData="M85,85 h30 v30 h-30 z" android:fillColor="#000000" />
+            <path android:pathData="M85,85 h30 v30 h-30 z" android:fillColor="#09090B" />
             <path android:pathData="M95,115 c0,2.75 2.25,5 5,5 h0 c2.75,0 5,-2.25 5,-5 v-5 h-10 z" android:strokeColor="#F8FAFC" android:strokeWidth="2"/>
             <path android:pathData="M100,70 c-10,0 -18,8 -18,18 c0,6 3,11 8,14 v13 c0,2.75 2.25,5 5,5 h0 c2.75,0 5,-2.25 5,-5 v-13 c5,-3 8,-8 8,-14 c0,-10 -8,-18 -18,-18 z" android:strokeColor="#F8FAFC" android:strokeWidth="2"/>
             <!-- Spark -->

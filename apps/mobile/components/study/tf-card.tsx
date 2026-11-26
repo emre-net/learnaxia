@@ -1,34 +1,47 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { t } from '@learnaxia/shared';
+import { useLanguage } from '@/hooks/use-language';
+import { NativeRichText } from '@/components/ui/rich-math-text';
 
 interface TrueFalseCardProps {
     statement: string;
-    correctAnswer: boolean; // true = Doğru, false = Yanlış
+    correctAnswer: boolean;
     explanation?: string;
+    imageUrl?: string;
     onAnswer: (isCorrect: boolean) => void;
 }
 
-export function TrueFalseCard({ statement, correctAnswer, explanation, onAnswer }: TrueFalseCardProps) {
+export function TrueFalseCard({ statement, correctAnswer, explanation, imageUrl, onAnswer }: TrueFalseCardProps) {
+    const { language } = useLanguage();
     const [selected, setSelected] = useState<boolean | null>(null);
     const [revealed, setRevealed] = useState(false);
 
-    const handleSelect = useCallback((value: boolean) => {
-        if (revealed) return;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setSelected(value);
-        setRevealed(true);
+    useEffect(() => {
+        setSelected(null);
+        setRevealed(false);
+    }, [statement, correctAnswer]);
 
-        const isCorrect = value === correctAnswer;
-        if (isCorrect) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } else {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        }
-        onAnswer(isCorrect);
-    }, [revealed, correctAnswer, onAnswer]);
+    const handleSelect = useCallback(
+        (value: boolean) => {
+            if (revealed) return;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSelected(value);
+            setRevealed(true);
+
+            const isCorrect = value === correctAnswer;
+            if (isCorrect) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            } else {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            }
+            onAnswer(isCorrect);
+        },
+        [revealed, correctAnswer, onAnswer]
+    );
 
     const getButtonStyle = (value: boolean) => {
         if (!revealed) return styles.choiceBtn;
@@ -38,72 +51,83 @@ export function TrueFalseCard({ statement, correctAnswer, explanation, onAnswer 
     };
 
     const getTextColor = (value: boolean) => {
-        if (!revealed) return '#F8FAFC';
+        if (!revealed) return '#F4F4F5';
         if (value === correctAnswer) return '#10B981';
         if (value === selected) return '#EF4444';
-        return '#475569';
+        return '#52525B';
     };
+
+    const trueLabel = t('study.true', language);
+    const falseLabel = t('study.false', language);
+    const hasValidImage = Boolean(imageUrl && (imageUrl.startsWith('data:') || imageUrl.startsWith('http')));
 
     return (
         <View style={styles.container}>
-            {/* Etiket */}
             <View style={styles.label}>
-                <Text style={styles.labelText}>DOĞRU / YANLIŞ</Text>
+                <Text style={styles.labelText}>{trueLabel} / {falseLabel}</Text>
             </View>
 
-            {/* Önerme Metni */}
-            <Text style={styles.statementText}>{statement}</Text>
+            {hasValidImage && (
+                <View style={styles.imageWrap}>
+                    <Image source={{ uri: imageUrl }} style={styles.cardImage} resizeMode="contain" />
+                </View>
+            )}
 
-            {/* Seçim Butonları */}
-            <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.choiceRow}>
+            <View style={styles.statementBox}>
+                <NativeRichText text={statement} style={styles.statementText} />
+            </View>
+
+            <Animated.View entering={FadeInDown.delay(80).duration(300)} style={styles.choiceRow}>
                 <TouchableOpacity
-                    activeOpacity={0.7}
+                    activeOpacity={0.75}
                     onPress={() => handleSelect(true)}
                     disabled={revealed}
                     style={getButtonStyle(true)}
                 >
                     <MaterialIcons
-                        name={revealed && true === correctAnswer ? 'check-circle' : 'check'}
-                        size={28}
+                        name={revealed && correctAnswer === true ? 'check-circle' : 'check'}
+                        size={26}
                         color={getTextColor(true)}
                     />
-                    <Text style={[styles.choiceText, { color: getTextColor(true) }]}>Doğru</Text>
+                    <Text style={[styles.choiceText, { color: getTextColor(true) }]}>{trueLabel}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    activeOpacity={0.7}
+                    activeOpacity={0.75}
                     onPress={() => handleSelect(false)}
                     disabled={revealed}
                     style={getButtonStyle(false)}
                 >
                     <MaterialIcons
-                        name={revealed && false === correctAnswer ? 'check-circle' : 'close'}
-                        size={28}
+                        name={revealed && correctAnswer === false ? 'check-circle' : 'close'}
+                        size={26}
                         color={getTextColor(false)}
                     />
-                    <Text style={[styles.choiceText, { color: getTextColor(false) }]}>Yanlış</Text>
+                    <Text style={[styles.choiceText, { color: getTextColor(false) }]}>{falseLabel}</Text>
                 </TouchableOpacity>
             </Animated.View>
 
-            {/* Sonuç göstergesi */}
             {revealed && (
-                <Animated.View entering={FadeIn.duration(300)} style={styles.resultBadge}>
+                <Animated.View entering={FadeIn.duration(250)} style={styles.resultBadge}>
                     <MaterialIcons
                         name={selected === correctAnswer ? 'emoji-events' : 'info-outline'}
                         size={18}
                         color={selected === correctAnswer ? '#10B981' : '#EF4444'}
                     />
                     <Text style={[styles.resultText, { color: selected === correctAnswer ? '#10B981' : '#EF4444' }]}>
-                        {selected === correctAnswer ? 'Doğru cevap!' : `Yanlış — Doğru cevap: ${correctAnswer ? 'Doğru' : 'Yanlış'}`}
+                        {selected === correctAnswer
+                            ? t('study.correct', language)
+                            : t('study.wrong', language, { answer: correctAnswer ? trueLabel : falseLabel })}
                     </Text>
                 </Animated.View>
             )}
 
-            {/* Açıklama */}
             {revealed && explanation && (
-                <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.explanationBox}>
+                <Animated.View entering={FadeIn.duration(300)} style={styles.explanationBox}>
                     <MaterialIcons name="lightbulb-outline" size={16} color="#F59E0B" />
-                    <Text style={styles.explanationText}>{explanation}</Text>
+                    <View style={{ flex: 1 }}>
+                        <NativeRichText text={explanation} style={styles.explanationText} compact />
+                    </View>
                 </Animated.View>
             )}
         </View>
@@ -112,58 +136,73 @@ export function TrueFalseCard({ statement, correctAnswer, explanation, onAnswer 
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         width: '100%',
-        paddingHorizontal: 24,
-        paddingVertical: 24,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
         alignItems: 'center',
     },
     label: {
         paddingHorizontal: 12,
-        paddingVertical: 6,
+        paddingVertical: 5,
         borderRadius: 99,
-        backgroundColor: '#1E293B',
-        marginBottom: 32,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        marginBottom: 18,
     },
     labelText: {
-        color: '#94A3B8',
+        color: '#38BDF8',
         fontWeight: '700',
-        fontSize: 11,
-        textTransform: 'uppercase',
-        letterSpacing: 2,
+        fontSize: 12,
+    },
+    imageWrap: {
+        height: 150,
+        width: '100%',
+        borderRadius: 14,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        marginBottom: 16,
+        overflow: 'hidden',
+    },
+    cardImage: {
+        width: '100%',
+        height: '100%',
+    },
+    statementBox: {
+        width: '100%',
+        marginBottom: 24,
+        alignItems: 'center',
     },
     statementText: {
-        color: '#F8FAFC',
-        fontSize: 22,
-        fontWeight: '600',
+        color: '#F4F4F5',
+        fontSize: 20,
+        fontWeight: '700',
         textAlign: 'center',
-        lineHeight: 32,
-        letterSpacing: -0.3,
-        marginBottom: 40,
-        paddingHorizontal: 8,
+        lineHeight: 29,
     },
     choiceRow: {
         flexDirection: 'row',
-        gap: 16,
+        gap: 12,
         width: '100%',
     },
     choiceBtn: {
         flex: 1,
-        paddingVertical: 28,
-        borderRadius: 20,
-        backgroundColor: '#0F0F0F',
+        paddingVertical: 24,
+        borderRadius: 18,
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#1E293B',
+        borderColor: '#27272A',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
     },
     choiceBtnCorrect: {
         flex: 1,
-        paddingVertical: 28,
-        borderRadius: 20,
-        backgroundColor: '#052E16',
-        borderWidth: 1,
+        paddingVertical: 24,
+        borderRadius: 18,
+        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+        borderWidth: 1.5,
         borderColor: '#10B981',
         alignItems: 'center',
         justifyContent: 'center',
@@ -171,10 +210,10 @@ const styles = StyleSheet.create({
     },
     choiceBtnWrong: {
         flex: 1,
-        paddingVertical: 28,
-        borderRadius: 20,
-        backgroundColor: '#1C0A0A',
-        borderWidth: 1,
+        paddingVertical: 24,
+        borderRadius: 18,
+        backgroundColor: 'rgba(239, 68, 68, 0.12)',
+        borderWidth: 1.5,
         borderColor: '#EF4444',
         alignItems: 'center',
         justifyContent: 'center',
@@ -188,36 +227,34 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        marginTop: 24,
-        paddingHorizontal: 16,
+        marginTop: 18,
+        paddingHorizontal: 14,
         paddingVertical: 10,
-        borderRadius: 99,
-        backgroundColor: '#0A0A0A',
+        borderRadius: 12,
+        backgroundColor: '#121215',
         borderWidth: 1,
-        borderColor: '#111111',
+        borderColor: '#27272A',
     },
     resultText: {
         fontSize: 14,
         fontWeight: '600',
     },
     explanationBox: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'flex-start',
         gap: 8,
-        marginTop: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
+        marginTop: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: '#1A1400',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderWidth: 1,
-        borderColor: '#422006',
-        width: '100%',
+        borderColor: 'rgba(245, 158, 11, 0.28)',
     },
     explanationText: {
-        color: '#FCD34D',
+        color: '#FDE68A',
         fontSize: 13,
-        fontWeight: '500',
-        lineHeight: 20,
-        flex: 1,
+        lineHeight: 19,
     },
 });

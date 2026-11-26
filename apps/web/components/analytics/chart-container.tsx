@@ -12,10 +12,10 @@ interface ChartContainerProps {
 
 export function ChartContainer({ title, description, children, className }: ChartContainerProps) {
     return (
-        <Card className={cn("overflow-hidden glass border-white/[0.08]", className)}>
+        <Card className={cn("overflow-hidden bg-[#121215] border-white/[0.08]", className)}>
             <CardHeader className="px-5 py-4 border-b border-white/[0.06]">
-                <CardTitle className="text-sm font-semibold text-slate-200">{title}</CardTitle>
-                {description && <CardDescription className="text-xs text-slate-500 mt-0.5">{description}</CardDescription>}
+                <CardTitle className="text-sm font-semibold text-zinc-100">{title}</CardTitle>
+                {description && <CardDescription className="text-xs text-zinc-400 mt-0.5">{description}</CardDescription>}
             </CardHeader>
             <CardContent className="p-5">
                 {children}

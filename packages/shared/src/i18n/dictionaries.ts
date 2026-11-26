@@ -31,6 +31,7 @@ const en = {
         },
         flipHint: "Space or Click to Flip",
         keyboardHint: "Use keys 1-4 to rate",
+        swipeHint: "Swipe right: Good  •  Swipe left: Again",
         summary: {
             title: "Session Complete!",
             subtitle: "Great job keeping up with your studies.",
@@ -193,8 +194,8 @@ const en = {
             noModules: "No Modules",
             noCollections: "No Collections",
             noNotes: "No Notes",
-            noModulesDesc: "You can bring your library to life by adding new modules via the web.",
-            noCollectionsDesc: "You haven't created a collection yet. You can create one via the web.",
+            noModulesDesc: "Create your first study module or discover community sets to start learning.",
+            noCollectionsDesc: "Organize your modules cleanly by creating your first collection.",
             noNotesDesc: "You haven't created any notes yet. Press the + button at the top right to write anything with the modern block editor!"
         },
         modulesTab: {
@@ -596,7 +597,7 @@ const en = {
         accuracyRate: "ACCURACY RATE",
         totalSolved: "TOTAL SOLVED",
         weeklyProgress: "WEEKLY PROGRESS",
-        weeklyProgressDesc: "You studied 12% more than last week.",
+        weeklyProgressDesc: "Your recent 7-day active study overview.",
         moduleMastery: "MODULE MASTERY"
     }
 };
@@ -633,6 +634,7 @@ const tr = {
         },
         flipHint: "Çevirmek için Boşluk veya Tıkla",
         keyboardHint: "Puanlamak için 1-4 tuşlarını kullanın",
+        swipeHint: "Sağa kaydır: İyi  •  Sola kaydır: Tekrar",
         summary: {
             title: "Çalışma Tamamlandı!",
             subtitle: "Harika iş çıkardın.",
@@ -795,8 +797,8 @@ const tr = {
             noModules: "Modül Yok",
             noCollections: "Koleksiyon Yok",
             noNotes: "Not Yok",
-            noModulesDesc: "Web üzerinden yeni modüller ekleyerek kütüphaneni canlandırabilirsin.",
-            noCollectionsDesc: "Henüz koleksiyon oluşturmadın. Web üzerinden koleksiyon oluşturabilirsin.",
+            noModulesDesc: "İlk çalışma modülünü oluştur veya topluluk setlerini keşfederek öğrenmeye başla.",
+            noCollectionsDesc: "Modüllerini düzenli tutmak için ilk koleksiyonunu oluştur.",
             noNotesDesc: "Henüz not oluşturmadın. Sağ üstteki + butonuna basarak modern blok editörüyle dilediğini yaz!"
         },
         modulesTab: {
@@ -1198,12 +1200,14 @@ const tr = {
         accuracyRate: "DOĞRU ORANI",
         totalSolved: "TOPLAM ÇÖZÜLEN",
         weeklyProgress: "HAFTALIK İLERLEME",
-        weeklyProgressDesc: "Geçen haftaya göre %12 daha fazla çalıştınız.",
+        weeklyProgressDesc: "Son 7 günlük çalışma özetiniz.",
         moduleMastery: "MODÜL USTALIĞI"
     }
 };
 
 export type Language = 'en' | 'tr';
+
+export const DEFAULT_LANGUAGE: Language = 'tr';
 
 export const getDictionary = (lang: string) => {
     if (lang === 'en') return en;

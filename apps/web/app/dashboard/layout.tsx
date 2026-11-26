@@ -21,10 +21,10 @@ export default function DashboardLayout({
             <main className="lg:pl-72 flex-1 min-h-screen overflow-y-auto pb-36 lg:pb-0 bg-[#09090b]">
                 <div className="h-full">
                     {/* Mobile & Tablet top header (< 1024px) */}
-                    <div className="flex items-center gap-3 px-4 py-3 lg:hidden border-b border-white/[0.07] bg-[#09090b]/85 backdrop-blur-md sticky top-0 z-50">
+                    <div className="flex items-center gap-3 px-4 py-3 lg:hidden border-b border-white/[0.07] bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-50">
                         <MobileSidebar />
-                        <Link href="/dashboard" className="font-black text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-500 uppercase">
-                            LRX
+                        <Link href="/dashboard" className="font-bold text-base tracking-tight text-zinc-100">
+                            Learnaxia
                         </Link>
                         <div className="ml-auto">
                             <UserNav />

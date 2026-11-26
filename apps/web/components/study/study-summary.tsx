@@ -26,10 +26,13 @@ export function StudySummary() {
 
     const total = correctCount + wrongCount;
     const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+    const isDailyMixed = moduleId === 'DAILY_MIXED';
+    const wrongRetryHref = isDailyMixed ? '/study/daily' : `/study/${moduleId}?mode=WRONG_ONLY`;
+    const backHref = isDailyMixed ? '/dashboard' : `/dashboard/modules/${moduleId}`;
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
-            <Card className="w-full max-w-lg p-8 text-center flex flex-col items-center gap-6 shadow-2xl border-2 border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-3xl">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-[#09090b]">
+            <Card className="w-full max-w-lg p-8 text-center flex flex-col items-center gap-6 shadow-2xl border border-zinc-800 bg-[#121215] rounded-3xl">
                 <div className="relative">
                     <div className="absolute inset-0 bg-emerald-400 blur-2xl opacity-20 rounded-full"></div>
                     <CheckCircle2 className="h-20 w-20 text-emerald-500 relative z-10 animate-bounce" />
@@ -122,15 +125,15 @@ export function StudySummary() {
                         </Button>
 
                         {wrongCount > 0 ? (
-                            <Button className="h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl" asChild onClick={endSession}>
-                                <Link href={`/study/${moduleId}?mode=WRONG_ONLY`}>
+                            <Button className="h-12 bg-amber-600 hover:bg-amber-500 text-zinc-950 font-semibold rounded-xl" asChild onClick={endSession}>
+                                <Link href={wrongRetryHref}>
                                     <AlertTriangle className="mr-2 h-4 w-4" /> {dict.reviewWrong.replace('{count}', wrongCount.toString())}
                                 </Link>
                             </Button>
                         ) : (
-                            <Button className="h-12 rounded-xl" asChild onClick={endSession}>
-                                <Link href={`/dashboard/modules/${moduleId}`}>
-                                    <Home className="mr-2 h-4 w-4" /> {dict.backToModule}
+                            <Button className="h-12 rounded-xl bg-sky-500 hover:bg-sky-400 text-zinc-950 font-semibold" asChild onClick={endSession}>
+                                <Link href={backHref}>
+                                    <Home className="mr-2 h-4 w-4" /> {moduleId === 'DAILY_MIXED' ? 'Ana Sayfaya Dön' : dict.backToModule}
                                 </Link>
                             </Button>
                         )}

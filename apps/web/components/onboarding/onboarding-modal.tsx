@@ -113,9 +113,9 @@ export function OnboardingModal({ completed }: OnboardingModalProps) {
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
                         className="fixed inset-0 z-[201] flex items-center justify-center p-4 pointer-events-none"
                     >
-                        <div className="pointer-events-auto w-full max-w-md bg-[#080e1c] border border-white/10 rounded-3xl shadow-2xl shadow-black/60 overflow-hidden">
-                            {/* Gradient top bar */}
-                            <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-400" />
+                        <div className="pointer-events-auto w-full max-w-md bg-[#121215] border border-white/10 rounded-3xl shadow-2xl shadow-black/60 overflow-hidden">
+                            {/* Subtle sky top bar */}
+                            <div className="h-1 w-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500" />
 
                             <div className="p-8">
                                 {/* Close */}

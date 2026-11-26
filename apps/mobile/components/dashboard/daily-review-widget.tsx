@@ -4,11 +4,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { t } from '@learnaxia/shared';
+import { useLanguage } from '@/hooks/use-language';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
-
-const currentLang = 'tr'; // Default to Turkish for now
 
 interface DueModule {
     module: {
@@ -28,6 +27,7 @@ interface DailyQueueData {
 
 export function DailyReviewWidget() {
     const router = useRouter();
+    const { language: currentLang } = useLanguage();
     const [data, setData] = useState<DailyQueueData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

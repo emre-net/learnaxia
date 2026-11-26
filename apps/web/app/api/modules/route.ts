@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { ModuleService } from "@/domains/module/module.service";
 import prisma from "@/lib/prisma";
+import { CATEGORIES } from "@learnaxia/shared";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -18,11 +19,28 @@ const CreateModuleSchema = z.object({
              .refine(val => !/<script>|<\/script>|<[^>]+>/i.test(val), { message: "Güvenlik İhlali: HTML veya Script etiketlerine izin verilmez" }),
     description: z.string().optional(),
     type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE']),
+    visibility: z.enum(['PUBLIC', 'PRIVATE']).optional().default('PRIVATE'),
     isForkable: z.boolean().optional(),
     status: z.enum(['DRAFT', 'ACTIVE']).optional(),
     items: z.array(ItemSchema).min(1, "Modül en az 1 soru/içerik barındırmalıdır"),
     category: z.string().optional(),
     subCategory: z.string().optional(),
+}).superRefine((val, ctx) => {
+    if (val.visibility === 'PUBLIC') {
+        if (!val.category || !CATEGORIES[val.category]) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['category'],
+                message: "Herkese açık modüller için geçerli kategori seçimi zorunludur"
+            });
+        } else if (!val.subCategory || !CATEGORIES[val.category].includes(val.subCategory)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['subCategory'],
+                message: "Herkese açık modüller için geçerli alt kategori seçimi zorunludur"
+            });
+        }
+    }
 });
 
 export async function POST(req: Request) {

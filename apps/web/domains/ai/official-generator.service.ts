@@ -29,7 +29,7 @@ export interface GeneratedOfficialModuleResult {
     }>;
 }
 
-const DEFAULT_AI_MODEL = process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
+const DEFAULT_AI_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
 export class OfficialModuleGeneratorService {
     private static getClient(): OpenAI {
@@ -126,7 +126,7 @@ Lütfen YALNIZCA aşağıdaki JSON formatında yanıt ver:
             if (matchedCat) {
                 finalCategory = matchedCat;
             } else {
-                finalCategory = "Genel Kültür";
+                finalCategory = "Diğer";
                 finalSubCategory = "Diğer";
             }
         } else if (!CATEGORIES[finalCategory].includes(finalSubCategory)) {
@@ -271,6 +271,7 @@ Lütfen YALNIZCA aşağıdaki JSON formatında yanıt ver:
                     validatedItems.push({
                         question: String(question).trim(),
                         options: validOptions,
+                        answer: correctAnswer,
                         correctAnswer,
                         explanation: item.explanation ? String(item.explanation).trim() : undefined
                     });
@@ -278,10 +279,12 @@ Lütfen YALNIZCA aşağıdaki JSON formatında yanıt ver:
             } else if (type === 'TRUE_FALSE') {
                 const statement = item.statement || item.question;
                 if (statement) {
-                    const isTrue = item.correctAnswer === true || String(item.correctAnswer).toLowerCase() === 'true';
+                    const isTrue = item.correctAnswer === true || item.isTrue === true || String(item.answer ?? item.correctAnswer ?? 'true').toLowerCase() === 'true';
                     validatedItems.push({
                         statement: String(statement).trim(),
                         question: String(statement).trim(),
+                        isTrue,
+                        answer: isTrue ? 'True' : 'False',
                         correctAnswer: isTrue,
                         explanation: item.explanation ? String(item.explanation).trim() : undefined
                     });
@@ -431,8 +434,8 @@ Lütfen YALNIZCA aşağıdaki JSON formatında yanıt ver:
             title: createdModule.title,
             description: createdModule.description || '',
             type: createdModule.type as QuestionType,
-            category: createdModule.category || 'Genel',
-            subCategory: createdModule.subCategory || 'Genel',
+            category: createdModule.category || 'Diğer',
+            subCategory: createdModule.subCategory || 'Diğer',
             itemCount: createdModule.items.length,
             items: createdModule.items.map(item => ({
                 id: item.id,

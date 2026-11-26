@@ -11,6 +11,7 @@ type Note = {
     itemId?: string;
     title?: string;
     content: string;
+    visibility?: "PUBLIC" | "PRIVATE";
     createdAt: string;
     updatedAt: string;
     module?: { title: string };
@@ -21,12 +22,14 @@ type CreateNoteDto = {
     itemId?: string;
     title?: string;
     content: string;
+    visibility?: "PUBLIC" | "PRIVATE";
 };
 
 type UpdateNoteDto = {
     id: string;
     title?: string;
     content?: string;
+    visibility?: "PUBLIC" | "PRIVATE";
 };
 
 async function fetchNotes(filters?: { moduleId?: string; itemId?: string }) {
@@ -54,7 +57,11 @@ async function updateNote(data: UpdateNoteDto) {
     const res = await fetch(`/api/notes/${data.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: data.title, content: data.content }),
+        body: JSON.stringify({
+            ...(data.title !== undefined ? { title: data.title } : {}),
+            ...(data.content !== undefined ? { content: data.content } : {}),
+            ...(data.visibility !== undefined ? { visibility: data.visibility } : {}),
+        }),
     });
     if (!res.ok) throw new Error("Failed to update note");
     return res.json();

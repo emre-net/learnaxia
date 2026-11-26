@@ -9,10 +9,10 @@ export const metadata = {
 
 export default function ResetPasswordPage() {
     return (
-        <div className="min-h-screen bg-[#020817] flex items-center justify-center p-4">
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] mix-blend-screen animate-pulse animation-delay-2000" />
+        <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-sky-500/8 rounded-full blur-[120px]" />
+                <div className="absolute bottom-1/4 right-1/4 w-[480px] h-[480px] bg-indigo-500/8 rounded-full blur-[140px]" />
             </div>
 
             <div className="w-full max-w-[440px] relative z-10">

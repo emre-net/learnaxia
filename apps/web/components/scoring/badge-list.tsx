@@ -25,6 +25,7 @@ export function BadgeList({
         <div className={`flex flex-wrap gap-2 ${className}`}>
             {keysToShow.map(key => {
                 const badge = BADGE_DEFINITIONS[key];
+                if (!badge) return null;
                 const earned = earnedSet.has(key);
 
                 return (
@@ -35,37 +36,33 @@ export function BadgeList({
                             group relative flex items-center gap-1.5 rounded-full px-3 py-1
                             border transition-all duration-200
                             ${earned
-                                ? "border-white/10 bg-white/5 hover:bg-white/10"
-                                : "border-white/5 bg-white/[0.02] opacity-35 grayscale"
+                                ? "border-zinc-700/80 bg-[#18181b] hover:bg-zinc-800"
+                                : "border-zinc-800/60 bg-zinc-900/40 opacity-40 grayscale"
                             }
                             ${isLg ? "text-sm" : "text-xs"}
                         `}
-                        style={earned ? { borderColor: `${badge.color}30` } : {}}
+                        style={earned ? { borderColor: `${badge.color}40` } : {}}
                     >
-                        {/* Emoji */}
                         <span className={isLg ? "text-base" : "text-sm"}>
                             {badge.emoji}
                         </span>
 
-                        {/* Label */}
                         <span
                             className="font-medium"
-                            style={{ color: earned ? badge.color : "#ffffff60" }}
+                            style={{ color: earned ? badge.color : "#a1a1aa" }}
                         >
                             {badge.label}
                         </span>
 
-                        {/* Tooltip (hover) */}
                         <div className="
                             pointer-events-none absolute bottom-full left-1/2 z-50 mb-2
                             -translate-x-1/2 whitespace-nowrap rounded-lg
-                            bg-[#1A1A2E] border border-white/10 px-3 py-2
-                            text-xs text-white/70 opacity-0 shadow-xl
+                            bg-[#18181b] border border-zinc-700/80 px-3 py-2
+                            text-xs text-zinc-300 opacity-0 shadow-xl
                             transition-opacity duration-150 group-hover:opacity-100
                         ">
                             {badge.description}
-                            {/* Arrow */}
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-[#1A1A2E] border-r border-b border-white/10" />
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-[#18181b] border-r border-b border-zinc-700/80" />
                         </div>
                     </div>
                 );

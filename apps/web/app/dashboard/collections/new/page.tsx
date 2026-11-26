@@ -53,11 +53,9 @@ export default function NewCollectionPage() {
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch modules');
             const data = await res.json();
+            const rawList = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
 
-            console.log(`[Wizard] API returned ${data.length} items for scope: ${scope}`);
-
-            // Normalize data: If scope=library, data is UserModuleLibrary[]. If discover, it's Module[].
-            return data.map((item: any) => {
+            return rawList.map((item: any) => {
                 const module = item.module || item; // item.module for library, item for discover
                 if (!module || !module.id) {
                     console.warn("[Wizard] Invalid item structure:", item);

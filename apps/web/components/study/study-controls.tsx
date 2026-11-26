@@ -164,27 +164,51 @@ export function StudyControls({ onNext }: { onNext: (result: any) => void }) {
 
     return (
         <div className="flex flex-col gap-4 mt-8 w-full max-w-2xl animate-in slide-in-from-bottom-4">
-            <div className="grid grid-cols-4 gap-4">
-                <Button variant="destructive" disabled={isProcessing} className="flex flex-col h-20 gap-1 hover:bg-red-600" onClick={() => handleRate(1)}>
-                    <RotateCcw className="h-5 w-5" />
-                    <span>{dict.rate.again}</span>
-                    <span className="text-xs opacity-70">{dict.rate.againTime}</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Button
+                    variant="outline"
+                    disabled={isProcessing}
+                    className="flex flex-col h-20 gap-1 bg-rose-500/12 hover:bg-rose-500/20 text-rose-300 border-rose-500/35 rounded-2xl"
+                    onClick={() => handleRate(1)}
+                >
+                    <div className="flex items-center gap-1.5">
+                        <RotateCcw className="h-4 w-4" />
+                        <span className="font-bold">{dict.rate.again}</span>
+                    </div>
+                    <span className="text-xs opacity-75">{dict.rate.againTime}</span>
                 </Button>
-                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-orange-100 hover:bg-orange-200 text-orange-900 border-orange-200" onClick={() => handleRate(2)}>
-                    <span className="text-lg font-bold">{dict.rate.hard}</span>
-                    <span className="text-xs opacity-70">{dict.rate.hardTime}</span>
+                <Button
+                    variant="outline"
+                    disabled={isProcessing}
+                    className="flex flex-col h-20 gap-1 bg-amber-500/12 hover:bg-amber-500/20 text-amber-300 border-amber-500/35 rounded-2xl"
+                    onClick={() => handleRate(2)}
+                >
+                    <span className="text-base font-bold">{dict.rate.hard}</span>
+                    <span className="text-xs opacity-75">{dict.rate.hardTime}</span>
                 </Button>
-                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-200" onClick={() => handleRate(4)}>
-                    <span className="text-lg font-bold">{dict.rate.good}</span>
-                    <span className="text-xs opacity-70">{dict.rate.goodTime}</span>
+                <Button
+                    variant="outline"
+                    disabled={isProcessing}
+                    className="flex flex-col h-20 gap-1 bg-sky-500/12 hover:bg-sky-500/20 text-sky-300 border-sky-500/35 rounded-2xl"
+                    onClick={() => handleRate(4)}
+                >
+                    <span className="text-base font-bold">{dict.rate.good}</span>
+                    <span className="text-xs opacity-75">{dict.rate.goodTime}</span>
                 </Button>
-                <Button variant="secondary" disabled={isProcessing} className="flex flex-col h-20 gap-1 bg-green-100 hover:bg-green-200 text-green-900 border-green-200" onClick={() => handleRate(5)}>
-                    <Check className="h-5 w-5" />
-                    <span>{dict.rate.easy}</span>
-                    <span className="text-xs opacity-70">{dict.rate.easyTime}</span>
+                <Button
+                    variant="outline"
+                    disabled={isProcessing}
+                    className="flex flex-col h-20 gap-1 bg-emerald-500/12 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/35 rounded-2xl"
+                    onClick={() => handleRate(5)}
+                >
+                    <div className="flex items-center gap-1.5">
+                        <Check className="h-4 w-4" />
+                        <span className="font-bold">{dict.rate.easy}</span>
+                    </div>
+                    <span className="text-xs opacity-75">{dict.rate.easyTime}</span>
                 </Button>
             </div>
-            <div className="text-center text-xs text-muted-foreground mt-2">
+            <div className="text-center text-xs text-zinc-400 mt-1">
                 {dict.keyboardHint}
             </div>
         </div>

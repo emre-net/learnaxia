@@ -115,6 +115,12 @@ Aşağıdaki dosyalar geçmişteki şablonlardan veya farklı ajanların denemel
 7. `apps/web/lib/i18n/dictionaries.ts` (`@learnaxia/shared` ile mükerrer - Tekilleştirilmeli)
 8. `apps/mobile/assets/images/react-logo*.png` (Kullanılmayan expo logoları - Atıl)
 
+### Faz 1 Temizlik & Parite Özeti (Tamamlananlar)
+* Mobil atıl Expo şablon dosyaları, çöp dökümler (`crash_dump.txt`, `crash_log.txt`), `assets/images/react-logo*.png`, `hooks/use-language.ts` (JSX context provider ile değiştirildi) ve kullanılmayan `react-native-webview` bağımlılığı temizlendi.
+* Web kullanılmayan editör/takvim kütüphaneleri (`@tiptap/*`, `react-quill`, `groq-sdk`, `@nextui-org/react`, `react-big-calendar`, `components/ui/rich-text-editor.tsx`) kaldırıldı; `dexie` (`guest-db.ts`) ile `@blocknote/core` + hoisted `@tiptap` paketlerinin webpack/çalışma zamanı gereksinimi olan `prosemirror-view`, `yjs`, `y-prosemirror`, `y-protocols` korundu.
+* Skor/rozet (`TIERS`, `BADGE_DEFINITIONS`), auth şemaları, not ayrıştırıcı, boşluk doldurma/Doğru-Yanlış değerlendirmesi ve LaTeX/Markdown okuyucu `@learnaxia/shared` içinde tekilleştirildi.
+* Keşfet, Kütüphane (5 varlık tam parite), Profil, Çalışma (`MC`/`TF`/`GAP`/4-seviye SM-2 + yatay kaydırma), Not+Çizim ve Rota ekranları Dark Zinc (`#09090b` / `#121215` / `#18181b` / `#38bdf8`) tasarımına geçirildi.
+
 ---
 
 ## 🛡️ 7. Gelecek Ajanlar İçin Kesin Kurallar (Instructions for Future Agents)

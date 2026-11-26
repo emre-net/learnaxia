@@ -1,64 +1,80 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
-    View, Text, TouchableOpacity, Dimensions, StyleSheet, StatusBar,
-    KeyboardAvoidingView, Platform
+    View, Text, TouchableOpacity, ScrollView,
+    StyleSheet, StatusBar, KeyboardAvoidingView, Platform, Alert, Image
 } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { BrandLoader } from '@/components/ui/brand-loader';
 import { useRouter } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Animated, {
-    FadeInDown, Layout, SlideInRight, SlideOutLeft,
-    useSharedValue, useAnimatedStyle, withTiming,
-    interpolate, Extrapolation
+    FadeInDown, Layout,
+    SlideInRight, SlideOutLeft,
+    useSharedValue, useAnimatedStyle, withTiming, withSpring,
+    interpolate, Extrapolation, runOnJS,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
-import { t } from '@learnaxia/shared';
+import { t, resolveTrueFalseAnswer } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
+import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { MCCard } from '@/components/study/mc-card';
 import { TrueFalseCard } from '@/components/study/tf-card';
 import { GapCard } from '@/components/study/gap-card';
+import { NativeRichText } from '@/components/ui/rich-math-text';
 
-const { width } = Dimensions.get('window');
+interface DailyStudyItem {
+    id: string;
+    type: string;
+    moduleId?: string;
+    sessionId?: string;
+    content: {
+        question?: string;
+        answer?: string | boolean;
+        front?: string;
+        back?: string;
+        content?: string;
+        correctAnswer?: string | boolean;
+        options?: string[];
+        explanation?: string;
+        statement?: string;
+        text?: string;
+        answers?: string[];
+        isTrue?: boolean;
+        image?: string;
+        imageUrl?: string;
+    };
+}
 
-type QualityOption = { quality: number; label: string; icon: string; color: string; bgColor: string };
-
-const QUALITY_OPTIONS: QualityOption[] = [
-    { quality: 1, label: 'Bilmiyorum', icon: 'close', color: '#EF4444', bgColor: '#1A0A0A' },
-    { quality: 3, label: 'Zordu', icon: 'remove', color: '#F59E0B', bgColor: '#1A1400' },
-    { quality: 5, label: 'Kolay', icon: 'done-all', color: '#10B981', bgColor: '#0A1A10' },
-];
+const SM2_BUTTONS = [
+    { quality: 1, key: 'study.again', fallback: 'Tekrar', color: '#FB7185', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(244, 63, 94, 0.35)' },
+    { quality: 2, key: 'study.hard', fallback: 'Zor', color: '#FBBF24', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.35)' },
+    { quality: 4, key: 'study.good', fallback: 'İyi', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.35)' },
+    { quality: 5, key: 'study.easy', fallback: 'Kolay', color: '#34D399', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.35)' },
+] as const;
 
 export default function DailyStudyScreen() {
     const router = useRouter();
     const { language } = useLanguage();
+    const { user } = useAuth();
+    const showTimer = (user as any)?.settings?.showStudyTimer !== false;
 
-    const [studyModule, setStudyModule] = useState<{
-        title: string;
-        items: Array<{
-            id: string;
-            type: string;
-            content: {
-                question?: string; answer?: string; front?: string; back?: string;
-                content?: string; correctAnswer?: string; options?: string[];
-                explanation?: string; statement?: string; text?: string; answers?: string[];
-                isTrue?: boolean;
-            };
-        }>;
-    } | null>(null);
+    const [studyModule, setStudyModule] = useState<{ title: string; items: DailyStudyItem[] } | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [sessionMap, setSessionMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
     const [startTime, setStartTime] = useState<number>(Date.now());
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [sessionComplete, setSessionComplete] = useState(false);
     const [correctCount, setCorrectCount] = useState(0);
     const [totalAnswered, setTotalAnswered] = useState(0);
 
-    // ─── 3D Flip Animation for Flashcard ─────────────────────────────────────
     const flipProgress = useSharedValue(0);
+    const dragX = useSharedValue(0);
 
     const frontAnimStyle = useAnimatedStyle(() => ({
         transform: [{ rotateY: `${interpolate(flipProgress.value, [0, 1], [0, 180], Extrapolation.CLAMP)}deg` }],
@@ -69,29 +85,56 @@ export default function DailyStudyScreen() {
         transform: [{ rotateY: `${interpolate(flipProgress.value, [0, 1], [180, 360], Extrapolation.CLAMP)}deg` }],
         backfaceVisibility: 'hidden',
         position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     }));
 
-    const triggerFlip = useCallback((toAnswer: boolean) => {
-        flipProgress.value = withTiming(toAnswer ? 1 : 0, { duration: 380 });
-    }, [flipProgress]);
+    const swipeCardStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateX: dragX.value },
+            { rotateZ: `${interpolate(dragX.value, [-180, 0, 180], [-7, 0, 7], Extrapolation.CLAMP)}deg` },
+        ],
+    }));
+
+    const rightOverlayStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(dragX.value, [25, 110], [0, 1], Extrapolation.CLAMP),
+    }));
+
+    const leftOverlayStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(dragX.value, [-110, -25], [1, 0], Extrapolation.CLAMP),
+    }));
+
+    const triggerFlip = useCallback(
+        (toAnswer: boolean) => {
+            flipProgress.value = withTiming(toAnswer ? 1 : 0, { duration: 360 });
+        },
+        [flipProgress]
+    );
+
+    useEffect(() => {
+        if (loading || sessionComplete || !showTimer) return;
+        const timer = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+        return () => clearInterval(timer);
+    }, [loading, sessionComplete, showTimer]);
 
     useEffect(() => {
         const initStudy = async () => {
             try {
                 const sessionRes = await api.post('/mobile/study/start-daily');
-                if (sessionRes.data.items && sessionRes.data.items.length > 0) {
+                if (sessionRes.data?.items && sessionRes.data.items.length > 0) {
                     setStudyModule({
                         title: t('dashboard.dailyReview.title', language) || 'Günlük Tekrar',
-                        items: sessionRes.data.items
+                        items: sessionRes.data.items,
                     });
-                    setSessionId(sessionRes.data.sessionId);
+                    setSessionId(sessionRes.data.sessionId || null);
+                    setSessionMap(sessionRes.data.sessionMap || {});
                     setStartTime(Date.now());
                 } else {
-                    setError('Tekrar edilecek kart bulunamadı.');
+                    setError('Bugün için tekrar edilecek kart kalmadı.');
                 }
             } catch (err: any) {
-                console.error('[DailyStudyScreen] Failed to initialize daily study:', err);
                 setError(err?.response?.data?.error || 'Günlük tekrar yüklenemedi.');
             } finally {
                 setLoading(false);
@@ -100,47 +143,120 @@ export default function DailyStudyScreen() {
         initStudy();
     }, [language]);
 
+    const logItemAnswer = useCallback(
+        (quality: number) => {
+            const isCorrect = quality >= 3;
+            setTotalAnswered((prev) => prev + 1);
+            if (isCorrect) setCorrectCount((prev) => prev + 1);
+
+            const item = studyModule?.items?.[currentIndex];
+            const targetSessionId =
+                (item?.moduleId && sessionMap[item.moduleId]) ||
+                item?.sessionId ||
+                sessionId;
+
+            if (targetSessionId && item) {
+                const durationMs = Date.now() - startTime;
+                api.post('/mobile/study/log', {
+                    sessionId: targetSessionId,
+                    itemId: item.id,
+                    quality,
+                    durationMs,
+                }).catch((err) => {
+                    if (__DEV__) console.error('[DailyStudyScreen] Failed to log result:', err);
+                });
+            }
+            return isCorrect;
+        },
+        [studyModule, currentIndex, sessionMap, sessionId, startTime]
+    );
+
+    const advanceCard = useCallback(() => {
+        if (currentIndex < (studyModule?.items?.length || 0) - 1) {
+            setCurrentIndex((prev) => prev + 1);
+            setShowAnswer(false);
+            triggerFlip(false);
+            dragX.value = 0;
+            setStartTime(Date.now());
+        } else {
+            setSessionComplete(true);
+        }
+    }, [currentIndex, studyModule?.items?.length, triggerFlip, dragX]);
+
+    const gradeFlashcard = useCallback(
+        (quality: number) => {
+            const isCorrect = logItemAnswer(quality);
+            if (isCorrect) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            advanceCard();
+        },
+        [logItemAnswer, advanceCard]
+    );
+
+    const handleInteractiveAnswer = useCallback(
+        (isCorrect: boolean) => {
+            logItemAnswer(isCorrect ? 4 : 1);
+            setShowAnswer(true);
+        },
+        [logItemAnswer]
+    );
+
     const handleFlip = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setShowAnswer(prev => {
+        setShowAnswer((prev) => {
             const next = !prev;
             triggerFlip(next);
             return next;
         });
     }, [triggerFlip]);
 
-    const nextCard = useCallback(async (quality: number = 3) => {
-        const isCorrect = quality >= 3;
-        setTotalAnswered(prev => prev + 1);
-        if (isCorrect) setCorrectCount(prev => prev + 1);
-
-        if (isCorrect) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const handleExitPress = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        if (totalAnswered > 0 && !sessionComplete) {
+            Alert.alert(
+                'Günlük Tekrardan Çık',
+                'İlerlemeniz kaydedildi. Oturumu sonlandırmak istiyor musunuz?',
+                [
+                    { text: 'Devam Et', style: 'cancel' },
+                    { text: 'Çık', style: 'destructive', onPress: () => router.back() },
+                ]
+            );
         } else {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            router.back();
         }
+    }, [totalAnswered, sessionComplete, router]);
 
-        // Log result
-        if (sessionId && studyModule?.items?.[currentIndex]) {
-            const itemId = studyModule.items[currentIndex].id;
-            const durationMs = Date.now() - startTime;
-            api.post('/mobile/study/log', {
-                sessionId,
-                itemId,
-                quality,
-                durationMs
-            }).catch(err => console.error('[DailyStudyScreen] Failed to log result:', err));
-        }
+    const panGesture = useMemo(
+        () =>
+            Gesture.Pan()
+                .activeOffsetX([-20, 20])
+                .failOffsetY([-15, 15])
+                .onUpdate((e) => {
+                    dragX.value = e.translationX;
+                })
+                .onEnd((e) => {
+                    if (e.translationX > 105) {
+                        dragX.value = withTiming(380, { duration: 180 }, () => {
+                            dragX.value = 0;
+                            runOnJS(gradeFlashcard)(4);
+                        });
+                    } else if (e.translationX < -105) {
+                        dragX.value = withTiming(-380, { duration: 180 }, () => {
+                            dragX.value = 0;
+                            runOnJS(gradeFlashcard)(1);
+                        });
+                    } else {
+                        dragX.value = withSpring(0, { damping: 16, stiffness: 160 });
+                    }
+                }),
+        [dragX, gradeFlashcard]
+    );
 
-        if (currentIndex < (studyModule?.items?.length || 0) - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setShowAnswer(false);
-            triggerFlip(false);
-            setStartTime(Date.now());
-        } else {
-            setSessionComplete(true);
-        }
-    }, [currentIndex, sessionId, startTime, studyModule, triggerFlip]);
+    const formatTimer = (sec: number) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    };
 
     if (loading) {
         return (
@@ -154,17 +270,14 @@ export default function DailyStudyScreen() {
         return (
             <Screen style={styles.centerScreen}>
                 <View style={styles.iconCircle}>
-                    <MaterialIcons name="done-all" size={48} color="#10B981" />
+                    <MaterialIcons name="done-all" size={44} color="#10B981" />
                 </View>
                 <Text style={styles.emptyTitle}>Harika İş Çıkardın!</Text>
                 <Text style={styles.emptyDesc}>
                     {error || 'Bugün için tekrar edilecek kart kalmadı.'}
                 </Text>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.backBtn}
-                >
-                    <Ionicons name="arrow-back" size={18} color="#F8FAFC" style={{ marginRight: 8 }} />
+                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                    <Ionicons name="arrow-back" size={18} color="#F4F4F5" style={{ marginRight: 8 }} />
                     <Text style={styles.backBtnText}>Ana Ekrana Dön</Text>
                 </TouchableOpacity>
             </Screen>
@@ -175,10 +288,10 @@ export default function DailyStudyScreen() {
         const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
         return (
             <Screen style={styles.centerScreen}>
-                <StatusBar barStyle="light-content" />
-                <Animated.View entering={FadeInDown.duration(600)} style={{ alignItems: 'center', width: '100%', paddingHorizontal: 24 }}>
+                <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+                <Animated.View entering={FadeInDown.duration(500)} style={{ alignItems: 'center', width: '100%', paddingHorizontal: 24 }}>
                     <View style={styles.iconCircle}>
-                        <MaterialIcons name="emoji-events" size={44} color="#38BDF8" />
+                        <MaterialIcons name="emoji-events" size={42} color="#38BDF8" />
                     </View>
                     <Text style={styles.sessionTitle}>Günlük Tekrar Tamamlandı!</Text>
                     <Text style={styles.sessionSub}>Bugünkü hedefine başarıyla ulaştın.</Text>
@@ -189,19 +302,16 @@ export default function DailyStudyScreen() {
                             <Text style={styles.statLbl}>Doğruluk</Text>
                         </View>
                         <View style={styles.statBox}>
-                            <Text style={styles.statVal}>{totalAnswered}</Text>
-                            <Text style={styles.statLbl}>Toplam</Text>
+                            <Text style={styles.statVal}>{correctCount}/{totalAnswered}</Text>
+                            <Text style={styles.statLbl}>Doğru</Text>
                         </View>
                         <View style={styles.statBox}>
-                            <Text style={styles.statVal}>{correctCount}</Text>
-                            <Text style={styles.statLbl}>Doğru</Text>
+                            <Text style={styles.statVal}>{formatTimer(elapsedSeconds)}</Text>
+                            <Text style={styles.statLbl}>Süre</Text>
                         </View>
                     </View>
 
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        style={styles.doneBtn}
-                    >
+                    <TouchableOpacity onPress={() => router.back()} style={styles.doneBtn}>
                         <Text style={styles.doneBtnText}>Ana Ekrana Dön</Text>
                     </TouchableOpacity>
                 </Animated.View>
@@ -216,25 +326,22 @@ export default function DailyStudyScreen() {
     const isGap = itemType === 'GAP';
     const isInteractive = isMC || isTrueFalse || isGap;
     const isFlashcard = !isInteractive;
+
+    const c = currentItem.content || {};
+    const img = c.image || c.imageUrl || '';
+    const hasValidImage = Boolean(img && (img.startsWith('data:') || img.startsWith('http')));
     const progress = ((currentIndex + 1) / studyModule.items.length) * 100;
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
-                {/* Header */}
                 <View style={styles.header}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                            router.back();
-                        }}
-                        style={styles.closeBtn}
-                    >
-                        <Ionicons name="close" size={22} color="#F8FAFC" />
+                    <TouchableOpacity onPress={handleExitPress} style={styles.closeBtn}>
+                        <Ionicons name="close" size={22} color="#F4F4F5" />
                     </TouchableOpacity>
 
                     <View style={styles.headerCenter}>
@@ -246,151 +353,142 @@ export default function DailyStudyScreen() {
                             <Text style={styles.progressText}>
                                 {currentIndex + 1} / {studyModule.items.length}
                             </Text>
+                            {showTimer && (
+                                <Text style={styles.timerBadge}>{formatTimer(elapsedSeconds)}</Text>
+                            )}
                         </View>
                     </View>
 
                     <View style={{ width: 40, height: 40 }} />
                 </View>
 
-                {/* Main Content Area */}
                 <View style={styles.cardArea}>
                     <Animated.View
                         key={currentIndex}
-                        entering={SlideInRight.duration(350)}
-                        exiting={SlideOutLeft.duration(350)}
+                        entering={SlideInRight.duration(300)}
+                        exiting={SlideOutLeft.duration(260)}
                         layout={Layout.springify()}
-                        style={{ width: '100%' }}
+                        style={{ flex: 1, width: '100%' }}
                     >
-                        {/* MC — Çoktan Seçmeli */}
                         {isMC ? (
-                            <View style={[styles.cardWrapper, { justifyContent: 'flex-start' }]}>
+                            <ScrollView contentContainerStyle={styles.scrollCardInner} keyboardShouldPersistTaps="handled">
                                 <MCCard
-                                    question={currentItem.content.question || 'Soru eksik'}
-                                    options={currentItem.content.options || []}
-                                    correctAnswer={currentItem.content.correctAnswer || currentItem.content.answer || ''}
-                                    explanation={currentItem.content.explanation}
-                                    onAnswer={(isCorrect) => {
-                                        setShowAnswer(true);
-                                        if (isCorrect) setCorrectCount(prev => prev + 1);
-                                        setTotalAnswered(prev => prev + 1);
-                                    }}
+                                    question={c.question || 'Soru eksik'}
+                                    options={c.options || []}
+                                    correctAnswer={String(c.answer ?? c.correctAnswer ?? '')}
+                                    explanation={c.explanation}
+                                    imageUrl={img}
+                                    onAnswer={handleInteractiveAnswer}
                                 />
-                            </View>
+                            </ScrollView>
                         ) : isTrueFalse ? (
-                            /* TRUE_FALSE — Doğru / Yanlış */
-                            <View style={[styles.cardWrapper, { justifyContent: 'center' }]}>
+                            <ScrollView contentContainerStyle={styles.scrollCardInner} keyboardShouldPersistTaps="handled">
                                 <TrueFalseCard
-                                    statement={currentItem.content.statement || currentItem.content.question || 'Önerme eksik'}
-                                    correctAnswer={
-                                        typeof currentItem.content.isTrue === 'boolean'
-                                            ? currentItem.content.isTrue
-                                            : (currentItem.content.answer || currentItem.content.correctAnswer || 'True').toString().toLowerCase() === 'true'
-                                    }
-                                    explanation={currentItem.content.explanation}
-                                    onAnswer={(isCorrect) => {
-                                        setShowAnswer(true);
-                                        if (isCorrect) setCorrectCount(prev => prev + 1);
-                                        setTotalAnswered(prev => prev + 1);
-                                    }}
+                                    statement={c.statement || c.question || c.text || 'Önerme eksik'}
+                                    correctAnswer={resolveTrueFalseAnswer(c)}
+                                    explanation={c.explanation}
+                                    imageUrl={img}
+                                    onAnswer={handleInteractiveAnswer}
                                 />
-                            </View>
+                            </ScrollView>
                         ) : isGap ? (
-                            /* GAP — Boşluk Doldurma */
-                            <View style={[styles.cardWrapper, { justifyContent: 'center' }]}>
+                            <ScrollView contentContainerStyle={styles.scrollCardInner} keyboardShouldPersistTaps="handled">
                                 <GapCard
-                                    text={currentItem.content.text || currentItem.content.question || ''}
-                                    answers={currentItem.content.answers || [currentItem.content.answer || '']}
-                                    onAnswer={(isCorrect) => {
-                                        setShowAnswer(true);
-                                        if (isCorrect) setCorrectCount(prev => prev + 1);
-                                        setTotalAnswered(prev => prev + 1);
-                                    }}
+                                    text={c.text || c.question || ''}
+                                    answers={c.answers || (c.answer ? [String(c.answer)] : [])}
+                                    explanation={c.explanation}
+                                    imageUrl={img}
+                                    onAnswer={handleInteractiveAnswer}
                                 />
-                            </View>
+                            </ScrollView>
                         ) : (
-                            /* FLASHCARD — 3D Flip */
-                            <TouchableOpacity
-                                activeOpacity={1}
-                                onPress={handleFlip}
-                                style={[styles.cardWrapper, { transform: [{ perspective: 1200 }] }]}
-                            >
-                                <View style={{ flex: 1, width: '100%' }}>
-                                    {/* Soru Yüzü */}
-                                    <Animated.View style={[styles.cardFace, frontAnimStyle]}>
-                                        <View style={styles.badgeLabel}>
-                                            <Text style={styles.badgeLabelText}>SORU</Text>
-                                        </View>
-                                        <Text style={styles.cardText}>
-                                            {currentItem.content.question || currentItem.content.front || 'Soru eksik'}
-                                        </Text>
-                                        <View style={styles.tapHint}>
-                                            <Ionicons name="hand-right-outline" size={14} color="#64748B" />
-                                            <Text style={styles.tapHintText}>Cevap için dokun</Text>
-                                        </View>
-                                    </Animated.View>
+                            <View style={{ flex: 1, justifyContent: 'center' }}>
+                                <GestureDetector gesture={panGesture}>
+                                    <Animated.View style={swipeCardStyle}>
+                                        <TouchableOpacity activeOpacity={0.96} onPress={handleFlip} style={styles.flashcard}>
+                                            <Animated.View style={[styles.cardFace, frontAnimStyle]}>
+                                                <View style={styles.label}>
+                                                    <Text style={styles.labelText}>{t('study.question', language)}</Text>
+                                                </View>
+                                                {hasValidImage && (
+                                                    <View style={styles.cardImageWrap}>
+                                                        <Image source={{ uri: img }} style={styles.cardImage} resizeMode="contain" />
+                                                    </View>
+                                                )}
+                                                <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+                                                    <NativeRichText
+                                                        text={String(c.front || c.question || c.content || 'Soru yok')}
+                                                        style={styles.cardText}
+                                                    />
+                                                </ScrollView>
+                                                <View style={styles.tapHint}>
+                                                    <Ionicons name="sync-outline" size={14} color="#71717A" />
+                                                    <Text style={styles.tapHintText}>{t('study.tapToFlip', language)}</Text>
+                                                </View>
+                                            </Animated.View>
 
-                                    {/* Cevap Yüzü */}
-                                    <Animated.View style={[styles.cardFace, backAnimStyle]}>
-                                        <View style={[styles.badgeLabel, { backgroundColor: '#111111' }]}>
-                                            <Text style={[styles.badgeLabelText, { color: '#10B981' }]}>CEVAP</Text>
-                                        </View>
-                                        <Text style={[styles.cardText, { color: '#F8FAFC' }]}>
-                                            {currentItem.content.answer || currentItem.content.back || 'Cevap eksik'}
-                                        </Text>
-                                        {currentItem.content.explanation ? (
-                                            <Text style={styles.cardExplanation}>{currentItem.content.explanation}</Text>
-                                        ) : null}
+                                            <Animated.View style={[styles.cardFace, styles.cardFaceBack, backAnimStyle]}>
+                                                <View style={[styles.label, { borderColor: 'rgba(56, 189, 248, 0.3)' }]}>
+                                                    <Text style={[styles.labelText, { color: '#38BDF8' }]}>
+                                                        {t('study.answer', language)}
+                                                    </Text>
+                                                </View>
+                                                <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+                                                    <NativeRichText
+                                                        text={String(c.back || c.answer || 'Cevap yok')}
+                                                        style={styles.cardText}
+                                                    />
+                                                </ScrollView>
+                                                <View style={styles.tapHint}>
+                                                    <Ionicons name="sync-outline" size={14} color="#38BDF8" />
+                                                    <Text style={[styles.tapHintText, { color: '#38BDF8' }]}>
+                                                        {t('study.swipeHint', language)}
+                                                    </Text>
+                                                </View>
+                                            </Animated.View>
+
+                                            <Animated.View style={[styles.swipeTagRight, rightOverlayStyle]} pointerEvents="none">
+                                                <Text style={styles.swipeTagRightText}>İyi</Text>
+                                            </Animated.View>
+                                            <Animated.View style={[styles.swipeTagLeft, leftOverlayStyle]} pointerEvents="none">
+                                                <Text style={styles.swipeTagLeftText}>Tekrar</Text>
+                                            </Animated.View>
+                                        </TouchableOpacity>
                                     </Animated.View>
-                                </View>
-                            </TouchableOpacity>
+                                </GestureDetector>
+                            </View>
                         )}
                     </Animated.View>
                 </View>
 
-                {/* Bottom Controls */}
-                <View style={styles.bottomBar}>
-                    {isInteractive ? (
-                        /* Etkileşimli Kartlar: Doğrudan Sıradaki / Bitir Butonu */
-                        <TouchableOpacity
-                            onPress={() => nextCard(3)}
-                            activeOpacity={0.8}
-                            disabled={!showAnswer}
-                            style={[
-                                styles.nextBtn,
-                                !showAnswer && { opacity: 0.35, backgroundColor: '#1E293B' }
-                            ]}
-                        >
-                            <Text style={styles.nextBtnText}>
-                                {currentIndex === (studyModule?.items?.length || 1) - 1 ? 'BİTİR' : 'SIRADAKİ'}
-                            </Text>
-                            <MaterialIcons name="arrow-forward" size={20} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    ) : showAnswer ? (
-                        /* Flashcard Çevrildiğinde: SM2 Değerlendirme Butonları */
-                        <View style={styles.qualityRow}>
-                            {QUALITY_OPTIONS.map((opt) => (
+                <View style={styles.controls}>
+                    {isFlashcard && showAnswer ? (
+                        <View style={styles.sm2Grid}>
+                            {SM2_BUTTONS.map((btn) => (
                                 <TouchableOpacity
-                                    key={opt.quality}
-                                    onPress={() => nextCard(opt.quality)}
-                                    style={[styles.qualityBtn, { borderColor: `${opt.color}40`, backgroundColor: opt.bgColor }]}
-                                    activeOpacity={0.7}
+                                    key={btn.quality}
+                                    onPress={() => gradeFlashcard(btn.quality)}
+                                    style={[styles.sm2Btn, { backgroundColor: btn.bg, borderColor: btn.border }]}
                                 >
-                                    <MaterialIcons name={opt.icon as any} size={22} color={opt.color} />
-                                    <Text style={[styles.qualityBtnText, { color: opt.color }]}>{opt.label}</Text>
+                                    <Text style={[styles.sm2BtnText, { color: btn.color }]}>
+                                        {t(btn.key as any, language) || btn.fallback}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
-                    ) : (
-                        /* Flashcard Kapalıyken: Çevir Butonu */
-                        <TouchableOpacity
-                            onPress={handleFlip}
-                            activeOpacity={0.8}
-                            style={styles.flipBtn}
-                        >
-                            <Ionicons name="sync-outline" size={18} color="#F8FAFC" style={{ marginRight: 8 }} />
-                            <Text style={styles.flipBtnText}>Cevabı Göster</Text>
+                    ) : isFlashcard ? (
+                        <TouchableOpacity onPress={handleFlip} activeOpacity={0.8} style={styles.nextBtn}>
+                            <Text style={styles.nextBtnText}>{t('study.showAnswer', language) || 'Cevabı Göster'}</Text>
+                            <Ionicons name="eye-outline" size={18} color="#09090B" />
                         </TouchableOpacity>
-                    )}
+                    ) : showAnswer ? (
+                        <TouchableOpacity onPress={advanceCard} activeOpacity={0.8} style={styles.nextBtn}>
+                            <Text style={styles.nextBtnText}>
+                                {currentIndex === studyModule.items.length - 1 ? 'Bitir' : 'Sıradaki'}
+                            </Text>
+                            <Ionicons name="arrow-forward" size={18} color="#09090B" />
+                        </TouchableOpacity>
+                    ) : null}
                 </View>
             </KeyboardAvoidingView>
         </Screen>
@@ -398,277 +496,102 @@ export default function DailyStudyScreen() {
 }
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        backgroundColor: '#09090B',
-    },
+    screen: { flex: 1, backgroundColor: '#09090B' },
     centerScreen: {
-        flex: 1,
-        backgroundColor: '#09090B',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 24,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#121215',
-        borderWidth: 1,
-        borderColor: '#27272A',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 24,
-    },
-    emptyTitle: {
-        color: '#F4F4F5',
-        fontSize: 22,
-        fontWeight: '800',
-        textAlign: 'center',
-        marginBottom: 8,
-    },
-    emptyDesc: {
-        color: '#A1A1AA',
-        textAlign: 'center',
-        marginBottom: 32,
-        lineHeight: 22,
-    },
-    backBtn: {
-        paddingHorizontal: 28,
-        paddingVertical: 14,
-        backgroundColor: '#121215',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#27272A',
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    backBtnText: {
-        color: '#F4F4F5',
-        fontWeight: '700',
-    },
-    sessionTitle: {
-        color: '#F4F4F5',
-        fontSize: 26,
-        fontWeight: '800',
-        marginBottom: 6,
-    },
-    sessionSub: {
-        color: '#A1A1AA',
-        fontSize: 14,
-        marginBottom: 32,
-        textAlign: 'center',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 36,
-        width: '100%',
-    },
-    statBox: {
-        flex: 1,
-        backgroundColor: '#121215',
-        borderRadius: 16,
-        padding: 16,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#27272A',
-    },
-    statVal: {
-        color: '#818CF8',
-        fontSize: 24,
-        fontWeight: '800',
-        marginBottom: 4,
-    },
-    statLbl: {
-        color: '#71717A',
-        fontSize: 11,
-        fontWeight: '700',
-        textTransform: 'uppercase',
-    },
-    doneBtn: {
-        width: '100%',
-        backgroundColor: '#6366F1',
-        paddingVertical: 16,
-        borderRadius: 16,
-        alignItems: 'center',
-    },
-    doneBtnText: {
-        color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 16,
+        flex: 1, backgroundColor: '#09090B', justifyContent: 'center',
+        alignItems: 'center', paddingHorizontal: 24,
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#18181B',
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12,
     },
     closeBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#121215',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#27272A',
+        width: 40, height: 40, borderRadius: 20, backgroundColor: '#121215',
+        borderWidth: 1, borderColor: '#27272A', alignItems: 'center', justifyContent: 'center',
     },
-    headerCenter: {
-        flex: 1,
-        alignItems: 'center',
-        paddingHorizontal: 12,
-    },
-    moduleTitle: {
-        color: '#818CF8',
-        fontSize: 12,
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        letterSpacing: 1.5,
-        marginBottom: 6,
-    },
-    progressRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
+    headerCenter: { flex: 1, alignItems: 'center', paddingHorizontal: 10 },
+    moduleTitle: { color: '#A1A1AA', fontSize: 12, fontWeight: '700', marginBottom: 6 },
+    progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     progressTrack: {
-        height: 4,
-        width: 90,
-        backgroundColor: '#27272A',
-        borderRadius: 2,
-        overflow: 'hidden',
-        marginRight: 8,
+        height: 4, width: 76, backgroundColor: '#27272A', borderRadius: 99, overflow: 'hidden',
     },
-    progressFill: {
-        height: '100%',
-        backgroundColor: '#6366F1',
-        borderRadius: 2,
-    },
-    progressText: {
-        color: '#71717A',
-        fontSize: 11,
-        fontWeight: '700',
-    },
-    cardArea: {
-        flex: 1,
-        paddingHorizontal: 20,
-        justifyContent: 'center',
-    },
-    cardWrapper: {
-        width: '100%',
-        minHeight: 380,
-        borderRadius: 28,
-        backgroundColor: '#121215',
-        borderWidth: 1,
-        borderColor: '#27272A',
-        padding: 24,
-        alignItems: 'center',
+    progressFill: { height: '100%', backgroundColor: '#38BDF8', borderRadius: 99 },
+    progressText: { color: '#71717A', fontSize: 11, fontWeight: '600' },
+    timerBadge: { color: '#38BDF8', fontSize: 11, fontWeight: '700', fontFamily: 'monospace' },
+    cardArea: { flex: 1, paddingHorizontal: 18 },
+    scrollCardInner: { flexGrow: 1, justifyContent: 'center', paddingVertical: 12 },
+    flashcard: {
+        width: '100%', minHeight: 420, borderRadius: 28,
+        backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A', overflow: 'hidden',
     },
     cardFace: {
-        flex: 1,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        justifyContent: 'space-between', alignItems: 'center', padding: 26,
+        backfaceVisibility: 'hidden', backgroundColor: '#121215',
     },
-    badgeLabel: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 99,
-        backgroundColor: '#18181B',
-        borderWidth: 1,
-        borderColor: '#27272A',
-        marginBottom: 24,
+    cardFaceBack: { backgroundColor: '#141418' },
+    label: {
+        paddingHorizontal: 12, paddingVertical: 5, borderRadius: 99,
+        backgroundColor: '#18181B', borderWidth: 1, borderColor: '#27272A',
     },
-    badgeLabelText: {
-        color: '#818CF8',
-        fontSize: 10,
-        fontWeight: '800',
-        letterSpacing: 2,
+    labelText: { color: '#A1A1AA', fontWeight: '700', fontSize: 11 },
+    cardImageWrap: {
+        width: '100%', height: 130, borderRadius: 12, backgroundColor: '#18181B',
+        overflow: 'hidden', marginTop: 10,
     },
+    cardImage: { width: '100%', height: '100%' },
     cardText: {
-        color: '#F4F4F5',
-        fontSize: 24,
-        fontWeight: '700',
-        textAlign: 'center',
-        lineHeight: 36,
+        color: '#F4F4F5', fontSize: 22, fontWeight: '700', textAlign: 'center', lineHeight: 31,
     },
-    cardExplanation: {
-        color: '#A1A1AA',
-        fontSize: 13,
-        textAlign: 'center',
-        marginTop: 16,
-        lineHeight: 20,
+    tapHint: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    tapHintText: { color: '#71717A', fontSize: 12, fontWeight: '500' },
+    swipeTagRight: {
+        position: 'absolute', top: 22, left: 22, paddingHorizontal: 12, paddingVertical: 6,
+        borderRadius: 10, borderWidth: 1.5, borderColor: '#38BDF8', backgroundColor: 'rgba(56, 189, 248, 0.16)',
     },
-    tapHint: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 32,
-        opacity: 0.5,
+    swipeTagRightText: { color: '#38BDF8', fontWeight: '800', fontSize: 13 },
+    swipeTagLeft: {
+        position: 'absolute', top: 22, right: 22, paddingHorizontal: 12, paddingVertical: 6,
+        borderRadius: 10, borderWidth: 1.5, borderColor: '#FB7185', backgroundColor: 'rgba(244, 63, 94, 0.16)',
     },
-    tapHintText: {
-        color: '#71717A',
-        fontSize: 12,
-        fontWeight: '600',
+    swipeTagLeftText: { color: '#FB7185', fontWeight: '800', fontSize: 13 },
+    controls: {
+        paddingHorizontal: 18, paddingBottom: 30, paddingTop: 14,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     },
-    bottomBar: {
-        paddingHorizontal: 20,
-        paddingBottom: 32,
-        paddingTop: 16,
-        alignItems: 'center',
+    sm2Grid: { flex: 1, flexDirection: 'row', gap: 6 },
+    sm2Btn: {
+        flex: 1, height: 48, borderRadius: 14, borderWidth: 1,
+        alignItems: 'center', justifyContent: 'center',
     },
+    sm2BtnText: { fontSize: 12, fontWeight: '700' },
     nextBtn: {
-        width: '100%',
-        backgroundColor: '#6366F1',
-        height: 54,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
+        backgroundColor: '#38BDF8', paddingHorizontal: 28, height: 48, borderRadius: 24,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     },
-    nextBtnText: {
-        color: '#FFFFFF',
-        fontWeight: '800',
-        fontSize: 15,
-        letterSpacing: 1,
+    nextBtnText: { color: '#09090B', fontWeight: '700', fontSize: 14 },
+    iconCircle: {
+        width: 82, height: 82, borderRadius: 28, backgroundColor: '#121215',
+        borderWidth: 1, borderColor: '#27272A', alignItems: 'center', justifyContent: 'center', marginBottom: 18,
     },
-    qualityRow: {
-        flexDirection: 'row',
-        gap: 12,
-        width: '100%',
+    emptyTitle: { color: '#F4F4F5', fontSize: 22, fontWeight: '800', marginBottom: 8 },
+    emptyDesc: { color: '#A1A1AA', fontSize: 14, textAlign: 'center', marginBottom: 24 },
+    backBtn: {
+        flexDirection: 'row', alignItems: 'center', backgroundColor: '#121215',
+        borderWidth: 1, borderColor: '#27272A', paddingHorizontal: 22, paddingVertical: 14, borderRadius: 14,
     },
-    qualityBtn: {
-        flex: 1,
-        height: 60,
-        borderRadius: 16,
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 4,
+    backBtnText: { color: '#F4F4F5', fontWeight: '700', fontSize: 14 },
+    sessionTitle: { color: '#F4F4F5', fontSize: 24, fontWeight: '800', marginBottom: 6, textAlign: 'center' },
+    sessionSub: { color: '#A1A1AA', fontSize: 14, marginBottom: 22, textAlign: 'center' },
+    statsRow: { flexDirection: 'row', gap: 10, width: '100%', marginBottom: 24 },
+    statBox: {
+        flex: 1, backgroundColor: '#121215', borderWidth: 1, borderColor: '#27272A',
+        borderRadius: 16, padding: 14, alignItems: 'center',
     },
-    qualityBtnText: {
-        fontSize: 12,
-        fontWeight: '700',
+    statVal: { color: '#F4F4F5', fontSize: 20, fontWeight: '800', marginBottom: 4 },
+    statLbl: { color: '#71717A', fontSize: 12, fontWeight: '600' },
+    doneBtn: {
+        width: '100%', backgroundColor: '#38BDF8', paddingVertical: 16, borderRadius: 16, alignItems: 'center',
     },
-    flipBtn: {
-        width: '100%',
-        backgroundColor: '#121215',
-        height: 54,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#27272A',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    flipBtnText: {
-        color: '#F4F4F5',
-        fontWeight: '700',
-        fontSize: 15,
-    },
+    doneBtnText: { color: '#09090B', fontWeight: '700', fontSize: 15 },
 });

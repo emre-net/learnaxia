@@ -1,27 +1,51 @@
-
 import { auth } from "@/auth";
+import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { ModuleService } from "@/domains/module/module.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-const FlashcardContent = z.object({ front: z.string().min(1), back: z.string().min(1) });
+const FlashcardContent = z.union([
+    z.object({ front: z.string().min(1), back: z.string().min(1) }),
+    z.object({ question: z.string().min(1), answer: z.string().min(1) }),
+]);
+
 const MCContent = z.object({
     question: z.string().min(1),
     options: z.array(z.string()).min(2).max(6),
-    answer: z.string(),
+    answer: z.string().min(1),
+    explanation: z.string().optional(),
+    solution: z.string().optional(),
 });
-const GapContent = z.object({ text: z.string().min(1), answers: z.array(z.string()).min(1) });
-const TFContent = z.object({ statement: z.string().min(1), isTrue: z.boolean() });
+
+const GapContent = z.object({
+    text: z.string().min(1),
+    answers: z.array(z.string()).min(1).optional(),
+    question: z.string().optional(),
+});
+
+const TFContent = z.object({
+    statement: z.string().min(1).optional(),
+    question: z.string().min(1).optional(),
+    isTrue: z.boolean().optional(),
+    answer: z.union([z.boolean(), z.string()]).optional(),
+    correctAnswer: z.union([z.boolean(), z.string()]).optional(),
+    explanation: z.string().optional(),
+}).refine((val) => Boolean(val.statement || val.question), {
+    message: "Doğru/Yanlış önermesi zorunludur",
+});
 
 const CreateItemSchema = z.object({
-    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TF']),
-    content: z.union([FlashcardContent, MCContent, GapContent, TFContent])
+    type: z.enum(['FLASHCARD', 'MC', 'GAP', 'TRUE_FALSE', 'TF']),
+    content: z.union([FlashcardContent, MCContent, GapContent, TFContent, z.record(z.string(), z.any())]),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
+        const mobileUser = await getMobileUser(req);
+        const session = mobileUser ? null : await auth();
+        const userId = mobileUser?.id || session?.user?.id;
+
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -29,7 +53,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         const body = await req.json();
         const validatedData = CreateItemSchema.parse(body);
 
-        const newItem = await ModuleService.addItem(session.user.id, id, validatedData);
+        const normalizedType = validatedData.type === 'TF' ? 'TRUE_FALSE' : validatedData.type;
+        const newItem = await ModuleService.addItem(userId, id, {
+            type: normalizedType,
+            content: validatedData.content,
+        });
 
         return NextResponse.json(newItem, { status: 201 });
     } catch (error) {

@@ -10,8 +10,8 @@ const ProviderGenerationSchema = z.object({
     items: z.array(z.any()),
 });
 
-const DEFAULT_AI_MODEL = process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
-const DEFAULT_VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b";
+const DEFAULT_AI_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const DEFAULT_VISION_MODEL = process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
 
 export class OpenAIAIProvider implements AIProvider {
     name = "OpenAI";

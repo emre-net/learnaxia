@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
     RefreshControl, TextInput, StyleSheet, ScrollView
@@ -6,11 +6,13 @@ import {
 import { Screen } from '@/components/ui/screen';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
 import { BrandLoader } from '@/components/ui/brand-loader';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { t } from '@learnaxia/shared';
+import { t, MAIN_CATEGORIES, parseNoteContent } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
+import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import { OfflineStorageService } from '@/services/offline-storage.service';
 import { SolutionModal } from '@/components/create/solution-modal';
 
 type ModuleData = {
@@ -18,7 +20,10 @@ type ModuleData = {
     title: string;
     description: string | null;
     type?: string;
-    owner?: { name: string; image: string | null };
+    category?: string | null;
+    subCategory?: string | null;
+    ownerId?: string;
+    owner?: { id?: string; name: string; handle?: string; image: string | null };
     _count: { items: number };
     createdAt: string;
 };
@@ -27,7 +32,9 @@ type CollectionData = {
     id: string;
     title: string;
     description: string | null;
-    owner?: { name: string; image: string | null };
+    category?: string | null;
+    ownerId?: string;
+    owner?: { id?: string; name: string; handle?: string; image: string | null };
     _count: { items: number };
     createdAt: string;
 };
@@ -59,10 +66,16 @@ type SolvedQuestionData = {
 };
 
 type TabType = 'modules' | 'collections' | 'notes' | 'journeys' | 'solutions';
+type RoleFilter = 'ALL' | 'CREATED' | 'SAVED';
+type TypeFilter = 'ALL' | 'FLASHCARD' | 'MC' | 'TRUE_FALSE' | 'GAP';
 type ListItem = ModuleData | CollectionData | NoteData | JourneyData | SolvedQuestionData;
+
+const VALID_TABS: TabType[] = ['modules', 'collections', 'notes', 'journeys', 'solutions'];
 
 export default function LibraryScreen() {
     const { language } = useLanguage();
+    const { user } = useAuth();
+    const params = useLocalSearchParams<{ tab?: string }>();
     const [modules, setModules] = useState<ModuleData[]>([]);
     const [collections, setCollections] = useState<CollectionData[]>([]);
     const [notes, setNotes] = useState<NoteData[]>([]);
@@ -75,23 +88,49 @@ export default function LibraryScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('modules');
     const [searchQuery, setSearchQuery] = useState('');
-    const [fetchError, setFetchError] = useState(false);
+    const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
+    const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
+    const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+    const [isOfflineFallback, setIsOfflineFallback] = useState(false);
     const router = useRouter();
     const PAGE_SIZE = 12;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+    useEffect(() => {
+        if (params.tab && VALID_TABS.includes(params.tab as TabType)) {
+            setActiveTab(params.tab as TabType);
+        }
+    }, [params.tab]);
+
     const fetchLibrary = useCallback(async () => {
-        setFetchError(false);
+        setIsOfflineFallback(false);
         try {
             const response = await api.get('/mobile/library');
-            setModules(response.data.modules || []);
-            setCollections(response.data.collections || []);
-            setNotes(response.data.notes || []);
-            setJourneys(response.data.journeys || []);
-            setSolutions(response.data.solvedQuestions || []);
+            const fetchedModules: ModuleData[] = response.data.modules || [];
+            const fetchedCollections: CollectionData[] = response.data.collections || [];
+            const fetchedNotes: NoteData[] = response.data.notes || [];
+            const fetchedJourneys: JourneyData[] = response.data.journeys || [];
+            const fetchedSolutions: SolvedQuestionData[] = response.data.solvedQuestions || [];
+
+            setModules(fetchedModules);
+            setCollections(fetchedCollections);
+            setNotes(fetchedNotes);
+            setJourneys(fetchedJourneys);
+            setSolutions(fetchedSolutions);
+
+            // Non-blocking offline snapshot sync
+            OfflineStorageService.cacheNotes(fetchedNotes).catch(() => {});
         } catch (error) {
-            console.error('Failed to fetch library', error);
-            setFetchError(true);
+            if (__DEV__) console.warn('[LibraryScreen] Network fallback:', error);
+            const [cachedMods, cachedNotes] = await Promise.all([
+                OfflineStorageService.getAllCachedModules(),
+                OfflineStorageService.getCachedNotes(),
+            ]);
+            if (cachedMods.length > 0 || cachedNotes.length > 0) {
+                setModules(cachedMods);
+                setNotes(cachedNotes);
+            }
+            setIsOfflineFallback(true);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -109,24 +148,40 @@ export default function LibraryScreen() {
         fetchLibrary();
     }, [fetchLibrary]);
 
-    const filteredModules = modules.filter(m =>
-        !searchQuery || m.title.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = searchQuery.trim().toLowerCase();
+
+    const filteredModules = modules.filter((m) => {
+        if (q && !m.title.toLowerCase().includes(q) && !(m.description || '').toLowerCase().includes(q)) return false;
+        const ownerId = m.ownerId || m.owner?.id;
+        if (roleFilter === 'CREATED' && user?.id && ownerId !== user.id) return false;
+        if (roleFilter === 'SAVED' && user?.id && ownerId === user.id) return false;
+        if (typeFilter !== 'ALL' && (m.type || '').toUpperCase() !== typeFilter) return false;
+        if (categoryFilter !== 'ALL' && m.category !== categoryFilter) return false;
+        return true;
+    });
+
+    const filteredCollections = collections.filter((c) => {
+        if (q && !c.title.toLowerCase().includes(q) && !(c.description || '').toLowerCase().includes(q)) return false;
+        const ownerId = c.ownerId || c.owner?.id;
+        if (roleFilter === 'CREATED' && user?.id && ownerId !== user.id) return false;
+        if (roleFilter === 'SAVED' && user?.id && ownerId === user.id) return false;
+        if (categoryFilter !== 'ALL' && c.category !== categoryFilter) return false;
+        return true;
+    });
+
+    const filteredNotes = notes.filter((n) => {
+        if (!q) return true;
+        const titleMatch = n.title?.toLowerCase().includes(q);
+        const bodyMatch = parseNoteContent(n.content).plainText.toLowerCase().includes(q);
+        return Boolean(titleMatch || bodyMatch);
+    });
+
+    const filteredJourneys = journeys.filter((j) =>
+        !q || j.title.toLowerCase().includes(q)
     );
 
-    const filteredCollections = collections.filter(c =>
-        !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const filteredNotes = notes.filter(n =>
-        !searchQuery || (n.title && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-
-    const filteredJourneys = journeys.filter(j =>
-        !searchQuery || j.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const filteredSolutions = solutions.filter(s =>
-        !searchQuery || s.questionText.toLowerCase().includes(searchQuery.toLowerCase()) || s.solution.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredSolutions = solutions.filter((s) =>
+        !q || s.questionText.toLowerCase().includes(q) || s.solution.toLowerCase().includes(q)
     );
 
     const currentData: ListItem[] =
@@ -142,15 +197,14 @@ export default function LibraryScreen() {
 
     const pagedData = currentData.slice(0, visibleCount);
     const hasMore = visibleCount < currentData.length;
+    const loadMore = () => setVisibleCount((prev) => prev + PAGE_SIZE);
 
-    const loadMore = () => setVisibleCount(prev => prev + PAGE_SIZE);
-
-    const tabs: { id: TabType; label: string; count: number; icon: string }[] = [
+    const tabs: { id: TabType; label: string; count: number; icon: any }[] = [
         { id: 'modules', label: t('library.tabs.modules', language), count: modules.length, icon: 'layers-outline' },
         { id: 'collections', label: t('library.tabs.collections', language), count: collections.length, icon: 'folder-open-outline' },
         { id: 'notes', label: t('library.tabs.notes', language), count: notes.length, icon: 'document-text-outline' },
-        { id: 'journeys', label: 'Rotalar', count: journeys.length, icon: 'map-outline' },
-        { id: 'solutions', label: 'AI Çözümleri', count: solutions.length, icon: 'sparkles-outline' },
+        { id: 'journeys', label: t('library.tabs.journeys', language), count: journeys.length, icon: 'map-outline' },
+        { id: 'solutions', label: t('library.tabs.aiSolutions', language), count: solutions.length, icon: 'sparkles-outline' },
     ];
 
     const handleTabChange = (tab: TabType) => {
@@ -166,169 +220,148 @@ export default function LibraryScreen() {
         );
     }
 
+    const getModuleTypeBadgeLabel = (type?: string) => {
+        switch (type?.toUpperCase()) {
+            case 'MC': return t('library.types.mc', language);
+            case 'FLASHCARD': return t('library.types.flashcard', language);
+            case 'TRUE_FALSE': return t('library.types.true_false', language);
+            case 'GAP': return t('library.types.gap', language);
+            default: return t('library.types.module', language);
+        }
+    };
+
     const renderModuleItem = ({ item }: { item: ModuleData }) => (
         <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.75}
             style={styles.cardContainer}
             onPress={() => router.push(`/modules/${item.id}` as any)}
         >
             <View style={styles.cardHeader}>
                 <View style={styles.badgeWrapper}>
-                    <Text style={styles.badgeText}>
-                        {item.type === 'MC'
-                            ? t('library.types.mc', language)
-                            : item.type === 'FLASHCARD'
-                                ? t('library.types.flashcard', language)
-                                : item.type === 'TRUE_FALSE'
-                                    ? t('library.types.true_false', language)
-                                    : item.type === 'GAP'
-                                        ? t('library.types.gap', language)
-                                        : item.type || t('library.types.module', language)}
-                    </Text>
+                    <Text style={styles.badgeText}>{getModuleTypeBadgeLabel(item.type)}</Text>
                 </View>
                 <Text style={styles.dateText}>
-                    {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    {new Date(item.createdAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                 </Text>
             </View>
 
             <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+
             {item.description && (
                 <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
             )}
 
             <View style={styles.cardFooter}>
                 <View style={styles.footerInfo}>
-                    <Ionicons name="document-text-outline" size={15} color="#94A3B8" />
+                    <Ionicons name="albums-outline" size={15} color="#94A3B8" />
                     <Text style={styles.footerInfoText}>
                         {item._count?.items || 0} {t('library.items', language)}
                     </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color="#64748B" />
+                <Ionicons name="chevron-forward" size={16} color="#71717A" />
             </View>
         </TouchableOpacity>
     );
 
     const renderCollectionItem = ({ item }: { item: CollectionData }) => (
         <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.75}
             style={styles.cardContainer}
             onPress={() => router.push(`/collections/${item.id}` as any)}
         >
             <View style={styles.cardHeader}>
-                <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(56, 189, 248, 0.12)' }]}>
-                    <Text style={[styles.badgeText, { color: '#38BDF8' }]}>{t('library.types.collection', language)}</Text>
+                <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
+                    <Text style={[styles.badgeText, { color: '#10B981' }]}>{t('library.types.collection', language)}</Text>
                 </View>
                 <Text style={styles.dateText}>
-                    {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    {new Date(item.createdAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                 </Text>
             </View>
 
             <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+
             {item.description && (
                 <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
             )}
 
             <View style={styles.cardFooter}>
                 <View style={styles.footerInfo}>
-                    <Ionicons name="folder-outline" size={15} color="#94A3B8" />
+                    <Ionicons name="folder-open-outline" size={15} color="#94A3B8" />
                     <Text style={styles.footerInfoText}>
-                        {item._count?.items || 0} Set
+                        {item._count?.items || 0} {t('library.tabs.modules', language)}
                     </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color="#64748B" />
+                <Ionicons name="chevron-forward" size={16} color="#71717A" />
             </View>
         </TouchableOpacity>
     );
 
-    const renderNoteItem = ({ item }: { item: NoteData }) => (
-        <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.cardContainer}
-            onPress={() => router.push(`/notes/${item.id}` as any)}
-        >
-            <View style={styles.cardHeader}>
-                <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
-                    <Text style={[styles.badgeText, { color: '#F59E0B' }]}>{t('library.types.note', language)}</Text>
+    const renderNoteItem = ({ item }: { item: NoteData }) => {
+        const parsed = parseNoteContent(item.content);
+        return (
+            <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.cardContainer}
+                onPress={() => router.push(`/notes/${item.id}` as any)}
+            >
+                <View style={styles.cardHeader}>
+                    <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
+                        <Text style={[styles.badgeText, { color: '#F59E0B' }]}>{t('library.types.note', language)}</Text>
+                    </View>
+                    <Text style={styles.dateText}>
+                        {new Date(item.updatedAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                    </Text>
                 </View>
-                <Text style={styles.dateText}>
-                    {new Date(item.updatedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+
+                <Text style={styles.cardTitle} numberOfLines={2}>
+                    {item.title || t('library.notes.untitledNote', language)}
                 </Text>
-            </View>
 
-            <Text style={styles.cardTitle} numberOfLines={2}>
-                {item.title || t('library.notes.untitledNote', language)}
-            </Text>
+                {parsed.drawing && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                        <Ionicons name="create-outline" size={13} color="#F59E0B" />
+                        <Text style={{ fontSize: 11, color: '#F59E0B', fontWeight: '600' }}>
+                            {language === 'tr' ? 'El Yazısı / Çizim' : 'Handwriting / Drawing'}
+                        </Text>
+                    </View>
+                )}
 
-            {(() => {
-                if (!item.content) return null;
-                let hasDrawing = false;
-                try {
-                    const parsed = JSON.parse(item.content);
-                    if (parsed?.drawing) hasDrawing = true;
-                    if (Array.isArray(parsed)) {
-                        const txt = parsed.map((b: any) => {
-                            if (b.type === 'drawing') hasDrawing = true;
-                            return Array.isArray(b.content) ? b.content.map((c: any) => c.text || '').join('') : '';
-                        }).filter(Boolean).join(' ');
-                        return (
-                            <>
-                                {hasDrawing && (
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-                                        <Ionicons name="create-outline" size={13} color="#F59E0B" />
-                                        <Text style={{ fontSize: 11, color: '#F59E0B', fontWeight: '600' }}>El Yazısı / Çizim</Text>
-                                    </View>
-                                )}
-                                {txt ? <Text style={styles.cardDescription} numberOfLines={2}>{txt}</Text> : null}
-                            </>
-                        );
-                    }
-                    if (parsed && typeof parsed === 'object') {
-                        return (
-                            <>
-                                {hasDrawing && (
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-                                        <Ionicons name="create-outline" size={13} color="#F59E0B" />
-                                        <Text style={{ fontSize: 11, color: '#F59E0B', fontWeight: '600' }}>El Yazısı / Çizim</Text>
-                                    </View>
-                                )}
-                                {parsed.text ? <Text style={styles.cardDescription} numberOfLines={2}>{parsed.text}</Text> : null}
-                            </>
-                        );
-                    }
-                } catch { }
-                const clean = item.content.replace(/<[^>]*>?/gm, '').trim();
-                return clean ? <Text style={styles.cardDescription} numberOfLines={2}>{clean}</Text> : null;
-            })()}
+                {parsed.plainText ? (
+                    <Text style={styles.cardDescription} numberOfLines={2}>{parsed.plainText}</Text>
+                ) : null}
 
-            <View style={styles.cardFooter}>
-                <View style={styles.footerInfo}>
-                    <Ionicons name="pencil-outline" size={15} color="#94A3B8" />
-                    <Text style={styles.footerInfoText}>Düzenle</Text>
+                <View style={styles.cardFooter}>
+                    <View style={styles.footerInfo}>
+                        <Ionicons name="pencil-outline" size={15} color="#94A3B8" />
+                        <Text style={styles.footerInfoText}>{t('common.edit', language)}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color="#71717A" />
                 </View>
-                <Ionicons name="chevron-forward" size={16} color="#64748B" />
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     const renderJourneyItem = ({ item }: { item: JourneyData }) => (
         <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.75}
             style={styles.cardContainer}
             onPress={() => router.push(`/journey/${item.id}` as any)}
         >
             <View style={styles.cardHeader}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(168, 85, 247, 0.12)' }]}>
-                        <Text style={[styles.badgeText, { color: '#A855F7' }]}>ÖĞRENME ROTASI</Text>
+                        <Text style={[styles.badgeText, { color: '#A855F7' }]}>{t('library.tabs.journeys', language)}</Text>
                     </View>
                     {item.completedAt && (
                         <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-                            <Text style={{ fontSize: 9, fontWeight: '700', color: '#10B981' }}>TAMAMLANDI</Text>
+                            <Text style={{ fontSize: 10, fontWeight: '700', color: '#10B981' }}>
+                                {language === 'tr' ? 'Tamamlandı' : 'Completed'}
+                            </Text>
                         </View>
                     )}
                 </View>
                 <Text style={styles.dateText}>
-                    {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    {new Date(item.createdAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                 </Text>
             </View>
 
@@ -341,7 +374,7 @@ export default function LibraryScreen() {
                 <View style={styles.footerInfo}>
                     <Ionicons name="map-outline" size={15} color="#A855F7" />
                     <Text style={styles.footerInfoText}>
-                        {item._count?.slides || 0} Adım
+                        {item._count?.slides || 0} {language === 'tr' ? 'Adım' : 'Steps'}
                     </Text>
                 </View>
                 <Ionicons name="play-circle-outline" size={18} color="#A855F7" />
@@ -351,7 +384,7 @@ export default function LibraryScreen() {
 
     const renderSolutionItem = ({ item }: { item: SolvedQuestionData }) => (
         <TouchableOpacity
-            activeOpacity={0.7}
+            activeOpacity={0.75}
             style={styles.cardContainer}
             onPress={() => {
                 setSelectedSolution(item);
@@ -359,29 +392,29 @@ export default function LibraryScreen() {
             }}
         >
             <View style={styles.cardHeader}>
-                <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(99, 102, 241, 0.15)' }]}>
-                    <Ionicons name="sparkles" size={10} color="#818CF8" style={{ marginRight: 4 }} />
-                    <Text style={[styles.badgeText, { color: '#818CF8' }]}>AI ÇÖZÜMÜ</Text>
+                <View style={[styles.badgeWrapper, { backgroundColor: 'rgba(56, 189, 248, 0.12)' }]}>
+                    <Ionicons name="sparkles" size={10} color="#38BDF8" style={{ marginRight: 4 }} />
+                    <Text style={[styles.badgeText, { color: '#38BDF8' }]}>{t('library.tabs.aiSolutions', language)}</Text>
                 </View>
                 <Text style={styles.dateText}>
-                    {new Date(item.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    {new Date(item.createdAt).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                 </Text>
             </View>
 
             <Text style={styles.cardTitle} numberOfLines={2}>
-                {item.questionText || 'Fotoğrafla Çözülen Soru'}
+                {item.questionText || (language === 'tr' ? 'Fotoğrafla Çözülen Soru' : 'Solved Photo Question')}
             </Text>
 
-            <Text style={styles.cardDescription} numberOfLines={2}>
-                {item.solution}
-            </Text>
+            <Text style={styles.cardDescription} numberOfLines={2}>{item.solution}</Text>
 
             <View style={styles.cardFooter}>
                 <View style={styles.footerInfo}>
-                    <Ionicons name="eye-outline" size={15} color="#818CF8" />
-                    <Text style={[styles.footerInfoText, { color: '#818CF8' }]}>Çözümü Gör</Text>
+                    <Ionicons name="eye-outline" size={15} color="#38BDF8" />
+                    <Text style={[styles.footerInfoText, { color: '#38BDF8' }]}>
+                        {language === 'tr' ? 'Çözümü Gör' : 'View Solution'}
+                    </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color="#64748B" />
+                <Ionicons name="chevron-forward" size={16} color="#71717A" />
             </View>
         </TouchableOpacity>
     );
@@ -413,12 +446,22 @@ export default function LibraryScreen() {
                 )}
             </View>
 
-            {/* Search Bar */}
+            {isOfflineFallback && (
+                <View style={styles.offlineBanner}>
+                    <Ionicons name="cloud-offline-outline" size={14} color="#FBBF24" />
+                    <Text style={styles.offlineBannerText}>
+                        {language === 'tr'
+                            ? 'Çevrimdışı mod: Yerel önbellekteki içerikler gösteriliyor.'
+                            : 'Offline mode: Showing cached library items.'}
+                    </Text>
+                </View>
+            )}
+
             <View style={styles.searchContainer}>
                 <Ionicons name="search" size={18} color="#71717A" />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Kütüphanende ara..."
+                    placeholder={language === 'tr' ? 'Kütüphanende ara...' : 'Search in your library...'}
                     placeholderTextColor="#71717A"
                     value={searchQuery}
                     onChangeText={(text) => { setSearchQuery(text); setVisibleCount(PAGE_SIZE); }}
@@ -431,13 +474,9 @@ export default function LibraryScreen() {
                 )}
             </View>
 
-            {/* Tab Bar - Fluid Horizontal Scrollable Pill Track (No Text Truncation) */}
+            {/* 5 Entities Scrollable Pill Track */}
             <View style={styles.tabsContainer}>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.tabsScrollContent}
-                >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScrollContent}>
                     {tabs.map((tab) => {
                         const isActive = activeTab === tab.id;
                         return (
@@ -447,11 +486,7 @@ export default function LibraryScreen() {
                                 onPress={() => handleTabChange(tab.id)}
                                 activeOpacity={0.7}
                             >
-                                <Ionicons
-                                    name={tab.icon as any}
-                                    size={14}
-                                    color={isActive ? '#09090B' : '#A1A1AA'}
-                                />
+                                <Ionicons name={tab.icon} size={14} color={isActive ? '#09090B' : '#A1A1AA'} />
                                 <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
                                     {tab.label}
                                 </Text>
@@ -465,6 +500,61 @@ export default function LibraryScreen() {
                     })}
                 </ScrollView>
             </View>
+
+            {/* Modules & Collections Role / Category / Question Type Filters */}
+            {(activeTab === 'modules' || activeTab === 'collections') && (
+                <View style={styles.filtersBlock}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScrollContent}>
+                        {(['ALL', 'CREATED', 'SAVED'] as RoleFilter[]).map((rf) => {
+                            const active = roleFilter === rf;
+                            const lbl =
+                                rf === 'ALL'
+                                    ? (language === 'tr' ? 'Tümü' : 'All')
+                                    : rf === 'CREATED'
+                                        ? t('library.tabs.created', language)
+                                        : t('library.tabs.saved', language);
+                            return (
+                                <TouchableOpacity
+                                    key={rf}
+                                    style={[styles.subFilterPill, active && styles.subFilterPillActive]}
+                                    onPress={() => setRoleFilter(rf)}
+                                >
+                                    <Text style={[styles.subFilterText, active && styles.subFilterTextActive]}>{lbl}</Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                        {activeTab === 'modules' &&
+                            (['FLASHCARD', 'MC', 'TRUE_FALSE', 'GAP'] as TypeFilter[]).map((tf) => {
+                                const active = typeFilter === tf;
+                                return (
+                                    <TouchableOpacity
+                                        key={tf}
+                                        style={[styles.subFilterPill, active && styles.subFilterPillActive]}
+                                        onPress={() => setTypeFilter(active ? 'ALL' : tf)}
+                                    >
+                                        <Text style={[styles.subFilterText, active && styles.subFilterTextActive]}>
+                                            {getModuleTypeBadgeLabel(tf)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        {MAIN_CATEGORIES.map((cat) => {
+                            const active = categoryFilter === cat;
+                            return (
+                                <TouchableOpacity
+                                    key={cat}
+                                    style={[styles.subFilterPill, active && styles.subFilterPillActive]}
+                                    onPress={() => setCategoryFilter(active ? 'ALL' : cat)}
+                                >
+                                    <Text style={[styles.subFilterText, active && styles.subFilterTextActive]}>
+                                        {cat}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                </View>
+            )}
 
             <FlatList
                 style={styles.list}
@@ -481,34 +571,36 @@ export default function LibraryScreen() {
                                     activeTab === 'modules'
                                         ? 'layers-outline'
                                         : activeTab === 'collections'
-                                        ? 'folder-open-outline'
-                                        : activeTab === 'notes'
-                                        ? 'document-text-outline'
-                                        : activeTab === 'journeys'
-                                        ? 'map-outline'
-                                        : 'sparkles-outline'
+                                            ? 'folder-open-outline'
+                                            : activeTab === 'notes'
+                                                ? 'document-text-outline'
+                                                : activeTab === 'journeys'
+                                                    ? 'map-outline'
+                                                    : 'sparkles-outline'
                                 }
                                 size={32}
-                                color="#818CF8"
+                                color="#38BDF8"
                             />
                         </View>
                         <Text style={styles.emptyTitle}>
-                            {searchQuery ? 'Sonuç Bulunamadı' : 'Burada henüz bir içerik yok'}
+                            {searchQuery
+                                ? (language === 'tr' ? 'Sonuç Bulunamadı' : 'No Results Found')
+                                : (language === 'tr' ? 'Burada henüz bir içerik yok' : 'Nothing here yet')}
                         </Text>
                         <Text style={styles.emptyDesc}>
                             {searchQuery
-                                ? `"${searchQuery}" ile eşleşen içerik bulunamadı.`
+                                ? `"${searchQuery}" için eşleşme bulunamadı.`
                                 : activeTab === 'modules'
-                                ? 'Kendi modülünüzü oluşturun veya Keşfet sekmesinden yeni setler keşfedin.'
-                                : activeTab === 'collections'
-                                ? 'Modüllerinizi düzenli tutmak için yeni bir koleksiyon başlatın.'
-                                : activeTab === 'notes'
-                                ? 'Hızlı notlar alarak öğrenme sürecinizi hızlandırın.'
-                                : activeTab === 'journeys'
-                                ? 'Yapay zeka ile adım adım interaktif bir öğrenme rotası oluşturun.'
-                                : 'Kameradan veya galeriden bir soru çözdürdüğünüzde burada arşivlenecektir.'}
+                                    ? 'Kendi modülünüzü oluşturun veya Keşfet sekmesinden yeni setler ekleyin.'
+                                    : activeTab === 'collections'
+                                        ? 'Modüllerinizi düzenli tutmak için yeni bir koleksiyon başlatın.'
+                                        : activeTab === 'notes'
+                                            ? 'Hızlı notlar alarak öğrenme sürecinizi hızlandırın.'
+                                            : activeTab === 'journeys'
+                                                ? 'Yapay zeka ile adım adım interaktif bir öğrenme rotası oluşturun.'
+                                                : 'Kameradan veya galeriden bir soru çözdürdüğünüzde burada arşivlenecektir.'}
                         </Text>
-                        {!searchQuery && !fetchError && (
+                        {!searchQuery && !isOfflineFallback && (
                             <TouchableOpacity
                                 style={styles.emptyActionBtn}
                                 onPress={() => {
@@ -524,12 +616,12 @@ export default function LibraryScreen() {
                                     {activeTab === 'modules'
                                         ? 'Modül Oluştur'
                                         : activeTab === 'collections'
-                                        ? 'Koleksiyon Oluştur'
-                                        : activeTab === 'notes'
-                                        ? 'Not Yaz'
-                                        : activeTab === 'journeys'
-                                        ? 'Yeni Rota Başlat'
-                                        : 'Soru Çözdür'}
+                                            ? 'Koleksiyon Oluştur'
+                                            : activeTab === 'notes'
+                                                ? 'Not Yaz'
+                                                : activeTab === 'journeys'
+                                                    ? 'Yeni Rota Başlat'
+                                                    : 'Soru Çözdür'}
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -538,7 +630,9 @@ export default function LibraryScreen() {
                 ListFooterComponent={
                     hasMore ? (
                         <TouchableOpacity onPress={loadMore} style={styles.loadMoreBtn}>
-                            <Text style={styles.loadMoreText}>Daha Fazla Göster</Text>
+                            <Text style={styles.loadMoreText}>
+                                {language === 'tr' ? 'Daha Fazla Göster' : 'Load More'}
+                            </Text>
                         </TouchableOpacity>
                     ) : null
                 }
@@ -546,13 +640,20 @@ export default function LibraryScreen() {
                 onEndReachedThreshold={0.3}
             />
 
-            {/* AI Çözüm Detay Modalı */}
             <SolutionModal
                 visible={solutionModalVisible}
-                result={selectedSolution ? { questionText: selectedSolution.questionText, solution: selectedSolution.solution } : null}
+                result={selectedSolution}
                 onClose={() => {
                     setSolutionModalVisible(false);
                     setSelectedSolution(null);
+                }}
+                onDeleted={(deletedId) => {
+                    setSolutions((prev) => prev.filter((s) => s.id !== deletedId));
+                    setSolutionModalVisible(false);
+                    setSelectedSolution(null);
+                }}
+                onNoteSaved={() => {
+                    fetchLibrary();
                 }}
             />
         </Screen>
@@ -594,12 +695,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    offlineBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+        borderColor: 'rgba(245, 158, 11, 0.3)',
+        borderWidth: 1,
+        marginHorizontal: 20,
+        marginBottom: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+    },
+    offlineBannerText: {
+        color: '#FBBF24',
+        fontSize: 12,
+        fontWeight: '500',
+        flex: 1,
+    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#121215',
         marginHorizontal: 20,
-        marginBottom: 14,
+        marginBottom: 12,
         paddingHorizontal: 14,
         height: 44,
         borderRadius: 12,
@@ -614,7 +734,10 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     tabsContainer: {
-        marginBottom: 14,
+        marginBottom: 10,
+    },
+    filtersBlock: {
+        marginBottom: 12,
     },
     tabsScrollContent: {
         paddingHorizontal: 20,
@@ -660,6 +783,26 @@ const styles = StyleSheet.create({
     tabCountTextActive: {
         color: '#09090B',
     },
+    subFilterPill: {
+        paddingHorizontal: 11,
+        paddingVertical: 5,
+        borderRadius: 14,
+        backgroundColor: '#121215',
+        borderWidth: 1,
+        borderColor: '#27272A',
+    },
+    subFilterPillActive: {
+        backgroundColor: 'rgba(56, 189, 248, 0.14)',
+        borderColor: '#38BDF8',
+    },
+    subFilterText: {
+        color: '#A1A1AA',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    subFilterTextActive: {
+        color: '#38BDF8',
+    },
     list: {
         flex: 1,
     },
@@ -691,9 +834,8 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         color: '#38BDF8',
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: '700',
-        letterSpacing: 0.5,
     },
     dateText: {
         color: '#71717A',

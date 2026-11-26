@@ -67,30 +67,15 @@ export function CollectionsTab({
         );
     }
 
-    if (!isLoading && items.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-lg p-8 text-center animate-in fade-in-50">
-                <Layers className="h-10 w-10 text-muted-foreground opacity-50 mb-4" />
-                <h3 className="text-lg font-semibold">{t('library.collectionsTab.notFoundTitle')}</h3>
-                <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-                    {t('library.collectionsTab.notFoundDesc')}
-                </p>
-                <Button asChild>
-                    <Link href="/dashboard/create">{t('library.modulesTab.goToWorkshop')}</Link>
-                </Button>
-            </div>
-        );
-    }
-
     return (
         <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-            <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
-                    <TabsTrigger value="all">{t('library.modulesTab.all')}</TabsTrigger>
-                    <TabsTrigger value="created">{t('library.modulesTab.created')}</TabsTrigger>
-                    <TabsTrigger value="forked">{t('library.modulesTab.saved')}</TabsTrigger>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <TabsList className="flex w-fit max-w-full overflow-x-auto no-scrollbar bg-[#121215] border border-white/[0.08] p-1">
+                    <TabsTrigger value="all" className="shrink-0 whitespace-nowrap">{t('library.modulesTab.all')}</TabsTrigger>
+                    <TabsTrigger value="created" className="shrink-0 whitespace-nowrap">{t('library.modulesTab.created')}</TabsTrigger>
+                    <TabsTrigger value="forked" className="shrink-0 whitespace-nowrap">{t('library.modulesTab.saved')}</TabsTrigger>
                 </TabsList>
-                <Button asChild className="hidden sm:flex">
+                <Button asChild className="hidden sm:flex bg-[#f4f4f5] hover:bg-zinc-200 text-zinc-950 font-semibold">
                     <Link href="/dashboard/collections/new">
                         <Plus className="mr-2 h-4 w-4" /> {t('library.collectionsTab.newCollection')}
                     </Link>
@@ -98,11 +83,24 @@ export function CollectionsTab({
             </div>
 
             <TabsContent value={activeSubTab} className="mt-0">
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
-                    {items.map((item) => (
-                        <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
-                    ))}
-                </div>
+                {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center min-h-[360px] border border-dashed border-zinc-800 rounded-2xl bg-[#121215]/70 p-8 text-center">
+                        <Layers className="h-10 w-10 text-zinc-500 mb-4" />
+                        <h3 className="text-lg font-semibold text-zinc-100">{t('library.collectionsTab.notFoundTitle')}</h3>
+                        <p className="text-zinc-400 text-sm mb-5 max-w-sm mx-auto mt-1">
+                            {t('library.collectionsTab.notFoundDesc')}
+                        </p>
+                        <Button asChild className="bg-[#f4f4f5] hover:bg-zinc-200 text-zinc-950 font-semibold">
+                            <Link href="/dashboard/collections/new">{t('library.collectionsTab.newCollection')}</Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                        {items.map((item) => (
+                            <CollectionCard key={item.collectionId} item={item} viewMode={viewMode} />
+                        ))}
+                    </div>
+                )}
             </TabsContent>
 
             {hasNextPage && (

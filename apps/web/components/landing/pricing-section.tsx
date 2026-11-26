@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -91,9 +92,12 @@ export function PricingSection() {
                             <Button
                                 size="lg"
                                 variant={tier.popular ? "default" : "outline"}
-                                className={`w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${tier.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
+                                className={`w-full h-12 rounded-2xl font-bold transition-all active:scale-95 ${tier.popular ? 'bg-sky-500 hover:bg-sky-400 text-zinc-950' : 'border-zinc-700 hover:bg-zinc-800/60'}`}
+                                asChild
                             >
-                                {tier.cta}
+                                <Link href={tier.name === "Kurumsal" ? "/contact" : "/login?tab=register"}>
+                                    {tier.cta}
+                                </Link>
                             </Button>
                         </motion.div>
                     ))}

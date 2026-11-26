@@ -93,54 +93,54 @@
   }
 
   .dark {
-    /* Premium Ocean Palette - Dark Mode (The real 'Ocean' vibe) */
-    --background: 222 47% 4%; /* Midnight Sea */
-    --foreground: 210 40% 98%;
+    /* LearnAxia Dark Zinc Palette (#09090b canvas / #121215 card / #18181b elevated / #38bdf8 accent) */
+    --background: 240 10% 3.9%;
+    --foreground: 240 5% 96%;
 
-    --card: 222 47% 7%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 8% 7.5%;
+    --card-foreground: 240 5% 96%;
 
-    --popover: 222 47% 7%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 240 5% 96%;
 
-    --primary: 217 91% 60%; /* Luminous Abyss Blue */
-    --primary-foreground: 222 47% 4%;
+    --primary: 199 89% 60%;
+    --primary-foreground: 240 10% 4%;
 
-    --secondary: 217 32% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 240 5% 96%;
 
-    --muted: 217 32% 12%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 224 76% 20%; /* Deep Navy (for dark mode ghost hover) */
-    --accent-foreground: 210 40% 98%;
+    --accent: 240 5% 16%;
+    --accent-foreground: 240 5% 96%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 35%;
+    --destructive-foreground: 240 5% 96%;
 
-    --border: 217 32% 14%;
-    --input: 217 32% 14%;
-    --ring: 224 76% 48%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 199 89% 60%;
 
-    /* ── Surface katmanları — derinlik hissi için ── */
-    --surface-1: 222 47% 6%;    /* en derin — sayfa arkaplanı */
-    --surface-2: 222 47% 9%;    /* kart arkaplanı */
-    --surface-3: 222 47% 13%;   /* hover / aktif durum */
-    --surface-4: 222 47% 17%;   /* input / badge */
+    /* Surface layers */
+    --surface-1: 240 10% 3.9%;
+    --surface-2: 240 8% 7.5%;
+    --surface-3: 240 6% 10%;
+    --surface-4: 240 4% 16%;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 dark:bg-slate-950/20 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-xl;
+    @apply bg-white/80 dark:bg-[#121215]/90 backdrop-blur-md border border-zinc-200 dark:border-white/[0.08] shadow-xl;
   }
   
   .ocean-gradient {
-    @apply bg-gradient-to-br from-primary via-secondary to-accent;
+    @apply bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-500;
   }
   
   .sea-glow {
-    @apply shadow-[0_0_20px_rgba(30,144,255,0.3)] dark:shadow-[0_0_30px_rgba(30,144,255,0.1)];
+    @apply shadow-[0_0_20px_rgba(56,189,248,0.2)] dark:shadow-[0_0_28px_rgba(56,189,248,0.1)];
   }
 
   /* ── Micro-interactions ───────────────────────────────────────────────────────── */
@@ -157,9 +157,9 @@
       dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)];
   }
 
-  /* Aktif sidebar item — subtle full-width glow */
+  /* Aktif sidebar item — subtle accent border */
   .sidebar-active {
-    @apply bg-blue-500/10 text-blue-400 border-l-2 border-blue-500 rounded-r-none pl-[calc(theme(spacing.3)-2px)];
+    @apply bg-sky-500/10 text-sky-400 border-l-2 border-sky-400 rounded-r-none pl-[calc(theme(spacing.3)-2px)];
   }
 
   /* ── Skeleton loading ────────────────────────────────────────────────────────── */

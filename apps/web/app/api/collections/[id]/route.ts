@@ -1,4 +1,3 @@
-
 import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { CollectionService } from "@/domains/collection/collection.service";
@@ -13,9 +12,12 @@ async function getUserId(req: Request): Promise<string | null> {
 }
 
 const UpdateCollectionSchema = z.object({
-    title: z.string().optional(),
+    title: z.string().min(1).optional(),
     description: z.string().optional(),
     visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
+    isPublic: z.boolean().optional(),
+    category: z.string().optional(),
+    subCategory: z.string().optional(),
     moduleIds: z.array(z.string()).optional()
 });
 
@@ -52,7 +54,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const body = await req.json();
         const validatedData = UpdateCollectionSchema.parse(body);
 
-        const updatedCollection = await CollectionService.update(userId, id, validatedData);
+        const isPublic = validatedData.isPublic ?? (
+            validatedData.visibility !== undefined ? validatedData.visibility === "PUBLIC" : undefined
+        );
+
+        const updatedCollection = await CollectionService.update(userId, id, {
+            title: validatedData.title,
+            description: validatedData.description,
+            isPublic,
+            category: validatedData.category,
+            subCategory: validatedData.subCategory,
+            moduleIds: validatedData.moduleIds,
+        });
 
         return NextResponse.json(updatedCollection);
     } catch (error) {
@@ -60,6 +73,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             return NextResponse.json({ error: "Validation Error", details: error.issues }, { status: 400 });
         }
         console.error("Update Collection Error:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const userId = await getUserId(req);
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { id } = await params;
+        await CollectionService.delete(userId, id);
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Delete Collection Error:", error);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }

@@ -28,11 +28,11 @@ export function EditProfileDialog({ user, trigger }: EditProfileDialogProps) {
     const { toast } = useToast();
     const router = useRouter();
 
-    // Sync state with prop when user data loads
+    // Sync state with prop when user data loads or clears
     useEffect(() => {
-        if (user.name) setName(user.name);
-        if (user.handle) setHandle(user.handle);
-        if (user.image) setImage(user.image);
+        setName(user.name || "");
+        setHandle(user.handle || "");
+        setImage(user.image || "");
     }, [user.name, user.handle, user.image]);
 
     const handleSave = async () => {

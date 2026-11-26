@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawingCanvas } from '@/components/drawing';
-import { DrawingCanvasData } from '@learnaxia/shared';
+import { DrawingCanvasData, serializeNoteContent } from '@learnaxia/shared';
 
 const NOTE_CACHE_PREFIX = 'learnaxia_note_';
 
@@ -20,6 +20,7 @@ export default function NewNoteScreen() {
     const router = useRouter();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PRIVATE');
     const [drawingData, setDrawingData] = useState<DrawingCanvasData | null>(null);
     const [showDrawing, setShowDrawing] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -36,15 +37,11 @@ export default function NewNoteScreen() {
         setSaving(true);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-        let finalContent: string;
-        if (drawingData && drawingData.paths.length > 0) {
-            finalContent = JSON.stringify({
-                text: content.trim(),
-                drawing: drawingData,
-            });
-        } else {
-            finalContent = content.trim();
-        }
+        const finalContent = serializeNoteContent({
+            editedText: content.trim(),
+            textWasEdited: true,
+            drawing: drawingData,
+        });
 
         const noteTitle = title.trim() || 'İsimsiz Not';
 
@@ -52,31 +49,30 @@ export default function NewNoteScreen() {
             const res = await api.post('/mobile/notes', {
                 title: noteTitle,
                 content: finalContent,
+                visibility,
             });
 
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
             if (res.data?.id) {
-                // Cache note locally
                 await AsyncStorage.setItem(
                     `${NOTE_CACHE_PREFIX}${res.data.id}`,
-                    JSON.stringify({ id: res.data.id, title: noteTitle, content: finalContent })
+                    JSON.stringify({ id: res.data.id, title: noteTitle, content: finalContent, visibility })
                 );
                 router.replace(`/notes/${res.data.id}` as any);
             } else {
                 router.back();
             }
         } catch (error) {
-            console.warn('[NewNoteScreen] Remote save failed, saving locally:', error);
-            // Save locally if offline
+            if (__DEV__) console.warn('[NewNoteScreen] Remote save failed, saving locally:', error);
             const localId = `local_note_${Date.now()}`;
             await AsyncStorage.setItem(
                 `${NOTE_CACHE_PREFIX}${localId}`,
-                JSON.stringify({ id: localId, title: noteTitle, content: finalContent })
+                JSON.stringify({ id: localId, title: noteTitle, content: finalContent, visibility })
             );
             Alert.alert(
                 'Çevrimdışı Kaydedildi',
-                'İnternet bağlantısı kurulamadı ancak notunuz cihazınıza başarıyla kaydedildi.',
+                'İnternet bağlantısı kurulamadığı için not cihazınıza kaydedildi.',
                 [{ text: 'Tamam', onPress: () => router.back() }]
             );
             setSaving(false);
@@ -85,38 +81,45 @@ export default function NewNoteScreen() {
 
     const toggleDrawingArea = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        setShowDrawing(prev => !prev);
+        setShowDrawing((prev) => !prev);
     };
 
     return (
         <Screen style={styles.screen}>
-            <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
 
-            {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.closeBtn}
-                >
-                    <MaterialIcons name="close" size={20} color="#D1D5DB" />
+                <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
+                    <MaterialIcons name="close" size={20} color="#E4E4E7" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Yeni Not</Text>
-                <TouchableOpacity
-                    onPress={handleSave}
-                    disabled={saving || !hasContent}
-                    style={[
-                        styles.saveBtn,
-                        (saving || !hasContent) && styles.saveBtnDisabled
-                    ]}
-                >
-                    {saving
-                        ? <BrandLoader size={16} showBlur={false} />
-                        : <MaterialIcons name="check" size={16} color="white" />
-                    }
-                    <Text style={styles.saveBtnText}>
-                        {saving ? 'Kaydediliyor' : 'Kaydet'}
-                    </Text>
-                </TouchableOpacity>
+                <View style={styles.headerActions}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            setVisibility((v) => (v === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC'));
+                        }}
+                        style={styles.visBtn}
+                    >
+                        <Ionicons
+                            name={visibility === 'PUBLIC' ? 'globe-outline' : 'lock-closed-outline'}
+                            size={17}
+                            color={visibility === 'PUBLIC' ? '#10B981' : '#A1A1AA'}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={handleSave}
+                        disabled={saving || !hasContent}
+                        style={[styles.saveBtn, (saving || !hasContent) && styles.saveBtnDisabled]}
+                    >
+                        {saving ? (
+                            <BrandLoader size={16} showBlur={false} />
+                        ) : (
+                            <MaterialIcons name="check" size={16} color="#09090B" />
+                        )}
+                        <Text style={styles.saveBtnText}>{saving ? 'Kaydediliyor' : 'Kaydet'}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <KeyboardAvoidingView
@@ -128,14 +131,10 @@ export default function NewNoteScreen() {
                     contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Başlık */}
                     <TextInput
-                        style={[
-                            styles.titleInput,
-                            focusedField === 'title' && styles.titleInputFocused
-                        ]}
+                        style={[styles.titleInput, focusedField === 'title' && styles.titleInputFocused]}
                         placeholder="Not Başlığı"
-                        placeholderTextColor="rgba(255,255,255,0.25)"
+                        placeholderTextColor="#52525B"
                         value={title}
                         onChangeText={setTitle}
                         editable={!saving}
@@ -145,14 +144,12 @@ export default function NewNoteScreen() {
                         maxLength={100}
                     />
 
-                    {/* Ayırıcı */}
                     <View style={styles.divider} />
 
-                    {/* Metin İçeriği */}
                     <TextInput
                         style={styles.contentInput}
                         placeholder="Notunuzu buraya yazın..."
-                        placeholderTextColor="rgba(255,255,255,0.2)"
+                        placeholderTextColor="#52525B"
                         value={content}
                         onChangeText={setContent}
                         multiline
@@ -162,13 +159,12 @@ export default function NewNoteScreen() {
                         onBlur={() => setFocusedField(null)}
                     />
 
-                    {/* Çizim Tuvali / Alanı */}
                     {showDrawing ? (
                         <View style={styles.drawingSection}>
                             <View style={styles.drawingSectionHeader}>
                                 <View style={styles.drawingTitleRow}>
                                     <MaterialIcons name="brush" size={16} color="#38BDF8" />
-                                    <Text style={styles.drawingSectionTitle}>EL YAZISI VE ÇİZİM ALANI</Text>
+                                    <Text style={styles.drawingSectionTitle}>El Yazısı ve Çizim Alanı</Text>
                                 </View>
                                 <TouchableOpacity onPress={toggleDrawingArea} style={styles.hideDrawingBtn}>
                                     <Text style={styles.hideDrawingText}>Gizle</Text>
@@ -182,13 +178,12 @@ export default function NewNoteScreen() {
                             />
                         </View>
                     ) : (
-                        <TouchableOpacity
-                            onPress={toggleDrawingArea}
-                            style={styles.addDrawingBtn}
-                        >
+                        <TouchableOpacity onPress={toggleDrawingArea} style={styles.addDrawingBtn}>
                             <MaterialIcons name="gesture" size={18} color="#38BDF8" />
                             <Text style={styles.addDrawingBtnText}>
-                                {drawingData && drawingData.paths.length > 0 ? 'Çizimi Görüntüle / Düzenle' : '+ El Yazısı veya Çizim Alanı Ekle'}
+                                {drawingData && drawingData.paths.length > 0
+                                    ? 'Çizimi Görüntüle / Düzenle'
+                                    : '+ El Yazısı veya Çizim Alanı Ekle'}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -207,7 +202,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
+        paddingHorizontal: 16,
         paddingTop: 12,
         paddingBottom: 14,
         borderBottomWidth: 1,
@@ -228,13 +223,28 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    visBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        backgroundColor: '#121215',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     saveBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#6366F1',
-        paddingHorizontal: 16,
+        backgroundColor: '#38BDF8',
+        paddingHorizontal: 14,
         paddingVertical: 9,
-        borderRadius: 20,
+        borderRadius: 16,
         gap: 6,
     },
     saveBtnDisabled: {
@@ -242,44 +252,44 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     saveBtnText: {
-        color: '#FFFFFF',
+        color: '#09090B',
         fontSize: 13,
         fontWeight: '700',
     },
     scrollContent: {
         paddingHorizontal: 20,
-        paddingVertical: 20,
-        paddingBottom: 100,
+        paddingTop: 20,
+        paddingBottom: 60,
     },
     titleInput: {
         color: '#F4F4F5',
         fontSize: 22,
         fontWeight: '700',
-        paddingVertical: 10,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: 'transparent',
     },
     titleInputFocused: {
-        color: '#FFFFFF',
+        borderBottomColor: '#38BDF8',
     },
     divider: {
         height: 1,
-        backgroundColor: '#27272A',
-        marginVertical: 12,
+        backgroundColor: '#18181B',
+        marginVertical: 14,
     },
     contentInput: {
-        color: '#E2E8F0',
-        fontSize: 15,
+        color: '#E4E4E7',
+        fontSize: 16,
         lineHeight: 24,
-        minHeight: 180,
-        textAlignVertical: 'top',
-        paddingVertical: 8,
+        minHeight: 160,
     },
     drawingSection: {
-        marginTop: 18,
+        marginTop: 24,
     },
     drawingSectionHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: 8,
     },
     drawingTitleRow: {
@@ -288,17 +298,19 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     drawingSectionTitle: {
-        color: '#818CF8',
-        fontSize: 11,
+        color: '#38BDF8',
+        fontSize: 12,
         fontWeight: '700',
-        letterSpacing: 0.8,
     },
     hideDrawingBtn: {
-        padding: 4,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        backgroundColor: '#18181B',
     },
     hideDrawingText: {
         color: '#A1A1AA',
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: '600',
     },
     addDrawingBtn: {
@@ -306,16 +318,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-        backgroundColor: '#121215',
+        backgroundColor: 'rgba(56, 189, 248, 0.08)',
         borderWidth: 1,
-        borderColor: '#27272A',
+        borderColor: 'rgba(56, 189, 248, 0.25)',
+        borderStyle: 'dashed',
         borderRadius: 14,
-        paddingVertical: 14,
+        paddingVertical: 16,
         marginTop: 24,
     },
     addDrawingBtnText: {
-        color: '#818CF8',
-        fontSize: 13,
+        color: '#38BDF8',
+        fontSize: 14,
         fontWeight: '600',
     },
 });

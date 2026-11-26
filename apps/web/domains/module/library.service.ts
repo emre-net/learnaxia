@@ -152,4 +152,17 @@ export class LibraryService {
             }
         });
     }
+
+    /**
+     * Removes a saved module from the user's library (never removes OWNER entry).
+     */
+    static async removeFromLibrary(userId: string, moduleId: string) {
+        return await prisma.userModuleLibrary.deleteMany({
+            where: {
+                userId,
+                moduleId,
+                role: 'SAVED'
+            }
+        });
+    }
 }

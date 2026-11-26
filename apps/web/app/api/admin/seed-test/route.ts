@@ -58,8 +58,8 @@ export async function GET() {
                 isVerified: true,
                 ownerId: owner.id,
                 creatorId: owner.id,
-                category: 'Eğitim',
-                subCategory: 'Test'
+                category: 'Sınavlar (YKS/LGS/KPSS)',
+                subCategory: 'TYT'
             }
         });
 
@@ -78,8 +78,8 @@ export async function GET() {
                 visibility: 'PUBLIC',
                 isVerified: true,
                 ownerId: owner.id,
-                category: 'Test',
-                subCategory: 'Genel'
+                category: 'Matematik & Fen',
+                subCategory: 'Matematik'
             }
         });
 

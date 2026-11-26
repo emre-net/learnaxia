@@ -51,10 +51,10 @@ export async function GET(req: Request) {
                         prisma.note.count({ where: { ...where, visibility: 'PUBLIC' } as any })
                     ]);
                 } catch (colErr: any) {
-                    console.warn("[DiscoverAPI] Querying notes without visibility constraint:", colErr?.message);
+                    console.warn("[DiscoverAPI] Primary NOTE query failed:", colErr?.message);
                     [notes, total] = await Promise.all([
                         prisma.note.findMany({
-                            where,
+                            where: { ...where, visibility: 'PUBLIC' } as any,
                             include: {
                                 user: { select: { handle: true, image: true, id: true, name: true } },
                                 module: { select: { title: true, id: true } }
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
                             skip: offset,
                             orderBy: { createdAt: "desc" }
                         }),
-                        prisma.note.count({ where })
+                        prisma.note.count({ where: { ...where, visibility: 'PUBLIC' } as any })
                     ]);
                 }
 
