@@ -22,6 +22,7 @@ import { useTranslation } from "@/lib/i18n/i18n";
 import { CATEGORIES, MAIN_CATEGORIES } from "@learnaxia/shared";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
+import { TokenWalletCard } from "@/components/tokens/token-wallet-card";
 
 // --- Schema ---
 const aiConfigSchema = z.object({
@@ -121,6 +122,8 @@ export function AICreationWizard() {
 
     // ... (onFileUpload remains same) ...
 
+    const [walletRefresh, setWalletRefresh] = useState(0);
+
     const onGenerate = async (data: AIConfig) => {
         setStep("GENERATING");
         try {
@@ -140,10 +143,12 @@ export function AICreationWizard() {
 
             if (!res.ok) {
                 const error = await res.json();
+                setWalletRefresh((n) => n + 1);
                 throw new Error(error.error || "Generation failed");
             }
 
             const result = await res.json();
+            setWalletRefresh((n) => n + 1);
             // Assign UUIDs to generated items
             const itemsWithIds = result.items.map((item: any) => ({
                 ...item,
@@ -213,7 +218,8 @@ export function AICreationWizard() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto py-8">
+        <div className="max-w-3xl mx-auto py-8 space-y-6">
+            <TokenWalletCard compact refreshSignal={walletRefresh} />
             {step === "CONFIG" && (
                 <Card className="border-purple-500/20 shadow-lg shadow-purple-500/10">
                     {/* Header... */}

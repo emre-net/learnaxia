@@ -10,6 +10,7 @@ import { BrandLoader } from "@/components/ui/brand-loader";
 import { useToast } from "@/components/ui/use-toast";
 import { useTranslation } from "@/lib/i18n/i18n";
 import { RichMathText } from "@/components/shared/rich-math-text";
+import { TokenWalletCard } from "@/components/tokens/token-wallet-card";
 
 async function resizeImageToDataUrl(file: File, maxDim = 640): Promise<string> {
     return new Promise((resolve) => {
@@ -171,6 +172,8 @@ function SolvePhotoContent() {
                     <p className="text-sm text-zinc-400">{t("solvePhoto.description")}</p>
                 </div>
             </div>
+
+            <TokenWalletCard compact refreshSignal={result ? 1 : 0} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Upload Section */}

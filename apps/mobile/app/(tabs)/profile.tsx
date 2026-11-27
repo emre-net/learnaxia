@@ -21,6 +21,9 @@ import {
     extractApiErrorMessage,
 } from '@learnaxia/shared';
 import { useLanguage } from '@/hooks/use-language';
+import { useTokenWallet } from '@/hooks/use-token-wallet';
+import { TokenWalletBanner } from '@/components/tokens/token-wallet-banner';
+import { OfflineStorageService } from '@/services/offline-storage.service';
 import api from '@/lib/api';
 import Constants from 'expo-constants';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -31,7 +34,10 @@ export default function ProfileScreen() {
     const router = useRouter();
     const { user, logout, refreshProfile } = useAuth();
     const { language, setLanguage } = useLanguage();
+    const { refreshWallet } = useTokenWallet();
     const isTr = language === 'tr';
+    const [syncCounts, setSyncCounts] = useState({ pending: 0, dead: 0 });
+    const [syncingQueue, setSyncingQueue] = useState(false);
 
     const [profileData, setProfileData] = useState<{
         stats?: { modules: number; collections: number; notes?: number; journeys?: number; solvedQuestions?: number };
@@ -164,13 +170,17 @@ export default function ProfileScreen() {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const [profileRes, scoreRes, settingsRes] = await Promise.all([
+            const [profileRes, scoreRes, settingsRes, pending, dead] = await Promise.all([
                 api.get('/mobile/user/profile').catch(() => ({ data: null })),
                 api.get('/scores/me').catch(() => ({ data: null })),
                 api.get('/user/settings').catch(() => ({ data: null })),
+                OfflineStorageService.getPendingQueueCount(),
+                OfflineStorageService.getDeadLetterCount(),
             ]);
             setProfileData(profileRes.data);
             setScoreData(scoreRes.data);
+            setSyncCounts({ pending, dead });
+            refreshWallet();
             if (settingsRes.data) {
                 setUserSettings({
                     soundEnabled: settingsRes.data.soundEnabled ?? true,
@@ -490,6 +500,9 @@ export default function ProfileScreen() {
                     </ScrollView>
                 </View>
 
+                {/* AI Token Wallet & Rewarded Ads */}
+                <TokenWalletBanner variant="card" />
+
                 {/* Performance & Competition Actions */}
                 <View style={styles.actionGrid}>
                     <TouchableOpacity
@@ -633,6 +646,51 @@ export default function ProfileScreen() {
                             <Text style={styles.settingsItemText}>{t('profile.settings.notifications', language)}</Text>
                             <Ionicons name="chevron-forward" size={18} color="#71717A" />
                         </TouchableOpacity>
+
+                        {(syncCounts.pending > 0 || syncCounts.dead > 0) && (
+                            <>
+                                <View style={styles.settingsDivider} />
+                                <TouchableOpacity
+                                    style={styles.settingsItem}
+                                    disabled={syncingQueue}
+                                    onPress={async () => {
+                                        setSyncingQueue(true);
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        try {
+                                            if (syncCounts.dead > 0) {
+                                                await OfflineStorageService.retryDeadLetters();
+                                            }
+                                            const res = await OfflineStorageService.processSyncQueue(api);
+                                            const [pending, dead] = await Promise.all([
+                                                OfflineStorageService.getPendingQueueCount(),
+                                                OfflineStorageService.getDeadLetterCount(),
+                                            ]);
+                                            setSyncCounts({ pending, dead });
+                                            Alert.alert(
+                                                'Senkronizasyon',
+                                                `${res.synced} cevap gönderildi, ${pending + dead} bekliyor.`
+                                            );
+                                        } finally {
+                                            setSyncingQueue(false);
+                                        }
+                                    }}
+                                >
+                                    <View>
+                                        <Text style={styles.settingsItemText}>
+                                            {isTr ? 'Çevrimdışı Senkron Kuyruğu' : 'Offline Sync Queue'}
+                                        </Text>
+                                        <Text style={styles.settingsItemSubtext}>
+                                            {isTr
+                                                ? `Bekleyen: ${syncCounts.pending} • Yeniden denenecek: ${syncCounts.dead}`
+                                                : `Pending: ${syncCounts.pending} • Failed: ${syncCounts.dead}`}
+                                        </Text>
+                                    </View>
+                                    <Text style={{ color: '#38BDF8', fontSize: 13, fontWeight: '700' }}>
+                                        {syncingQueue ? '...' : (isTr ? 'Eşitle' : 'Sync')}
+                                    </Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
 
                         <View style={styles.settingsDivider} />
 

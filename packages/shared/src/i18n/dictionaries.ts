@@ -599,6 +599,18 @@ const en = {
         weeklyProgress: "WEEKLY PROGRESS",
         weeklyProgressDesc: "Your recent 7-day active study overview.",
         moduleMastery: "MODULE MASTERY"
+    },
+    tokens: {
+        walletTitle: "AI Token Wallet",
+        dailyFree: "Daily Free",
+        bonusBalance: "Bonus Tokens",
+        totalAvailable: "Available Tokens",
+        watchAdCta: "Watch Short Ad (+{amount} Tokens)",
+        adCapReached: "Daily ad reward limit reached ({max}/{max}). Try again tomorrow!",
+        insufficientTitle: "Not Enough AI Tokens",
+        insufficientBody: "This AI action requires {required} tokens, you currently have {available}. Watch a short rewarded ad on Mobile or wait for tomorrow's free daily reset.",
+        alwaysFreeNote: "Manual study, flashcards, notes, and drawings are always 100% free and unlimited.",
+        verifyingReward: "Verifying rewarded ad credit..."
     }
 };
 
@@ -1202,6 +1214,18 @@ const tr = {
         weeklyProgress: "HAFTALIK İLERLEME",
         weeklyProgressDesc: "Son 7 günlük çalışma özetiniz.",
         moduleMastery: "MODÜL USTALIĞI"
+    },
+    tokens: {
+        walletTitle: "AI Jeton Cüzdanı",
+        dailyFree: "Günlük Ücretsiz",
+        bonusBalance: "Bonus Jeton",
+        totalAvailable: "Kullanılabilir Jeton",
+        watchAdCta: "Kısa Reklam İzle (+{amount} Jeton)",
+        adCapReached: "Günlük reklam ödülü sınırına ulaştınız ({max}/{max}). Yarın tekrar deneyin!",
+        insufficientTitle: "Yetersiz AI Jetonu",
+        insufficientBody: "Bu AI işlemi için {required} jeton gerekiyor, mevcut bakiyeniz {available}. Mobilde ödüllü reklam izleyerek bonus jeton kazanabilir veya günlük yenilenmeyi bekleyebilirsiniz.",
+        alwaysFreeNote: "Elle oluşturma, SM-2 çalışma, not ve çizimler her zaman %100 ücretsiz ve sınırsızdır.",
+        verifyingReward: "Reklam ödülü sunucudan doğrulanıyor..."
     }
 };
 

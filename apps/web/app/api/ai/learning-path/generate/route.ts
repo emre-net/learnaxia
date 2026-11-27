@@ -4,6 +4,7 @@ import { getMobileUser } from '@/lib/auth/mobile-jwt';
 import prisma from '@/lib/prisma';
 import { AIService } from '@/domains/ai/ai.service';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from '@/domains/token/token.service';
 
 export async function POST(req: Request) {
     try {
@@ -52,14 +53,23 @@ export async function POST(req: Request) {
         }
 
         // 1. Execute Syllabus Generation via AI
-        const syllabus = await AIService.generateSyllabus(topic, goal || '', depth, userLang);
+        const { result: syllabus, wallet } = await withTokenCharge(
+            userId,
+            "AI_JOURNEY_SYLLABUS",
+            () => AIService.generateSyllabus(topic, goal || '', depth, userLang),
+            { topic: String(topic).slice(0, 80), depth }
+        );
 
         return NextResponse.json({
             success: true,
-            syllabus
+            syllabus,
+            wallet,
         });
 
     } catch (error: unknown) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error('[LEARNING_PATH_GENERATE_ERROR]:', error);
         return NextResponse.json({ error: 'Internal server error while generating syllabus' }, { status: 500 });
     }

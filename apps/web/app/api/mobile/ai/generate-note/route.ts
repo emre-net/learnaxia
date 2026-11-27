@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
 import { NoteService } from "@/domains/note/note.service";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -40,18 +41,25 @@ export async function POST(req: Request) {
         const { text, title, language } = GenerateNoteSchema.parse(body);
         const userId = user.id;
 
-        // 1. Generate AI Note Content
-        const noteContent = await AIService.generateNote(text, language);
+        const { result: note, wallet } = await withTokenCharge(
+            userId,
+            "AI_NOTE",
+            async () => {
+                const noteContent = await AIService.generateNote(text, language);
+                return NoteService.create(userId, {
+                    title: title || "AI Not - " + new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US'),
+                    content: noteContent
+                });
+            },
+            { title: title?.slice(0, 80), platform: "mobile" }
+        );
 
-        // 2. Create the Note entry
-        const note = await NoteService.create(userId, {
-            title: title || "AI Not - " + new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US'),
-            content: noteContent
-        });
-
-        return NextResponse.json({ success: true, noteId: note.id });
+        return NextResponse.json({ success: true, noteId: note.id, wallet });
 
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error("Mobile AI Note Generation Error:", error);
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });

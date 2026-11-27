@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import crypto from 'crypto';
+import { extractAdMobSignedContent, verifyAdMobSignatureWithPem } from '../../lib/ads/admob-ssv';
 
 test.describe('API Security', () => {
     test('module creation requires auth (POST)', async ({ request }) => {
@@ -51,11 +53,59 @@ test.describe('API Security', () => {
         });
         expect(adminRes.status()).toBe(401);
 
+        const adminUserRes = await request.patch('http://localhost:3000/api/admin/users/fake-id', {
+            data: { grantTokens: 50 },
+        });
+        expect(adminUserRes.status()).toBe(401);
+
         const forkRes = await request.post('http://localhost:3000/api/modules/fake-id/fork');
         expect(forkRes.status()).toBe(401);
 
         const dailyRes = await request.post('http://localhost:3000/api/mobile/study/start-daily');
         expect(dailyRes.status()).toBe(401);
+
+        const balRes = await request.get('http://localhost:3000/api/tokens/balance');
+        expect(balRes.status()).toBe(401);
+
+        const histRes = await request.get('http://localhost:3000/api/tokens/history');
+        expect(histRes.status()).toBe(401);
+    });
+
+    test('AdMob SSV webhook rejects missing params and spoofed signatures, and ECDSA P-256 verifier validates properly', async ({ request }) => {
+        const missingRes = await request.get('http://localhost:3000/api/ads/admob-ssv');
+        expect(missingRes.status()).toBe(400);
+
+        const spoofRes = await request.get(
+            'http://localhost:3000/api/ads/admob-ssv?ad_network=5450213213286189855&ad_unit=1234&custom_data=user1&reward_amount=20&reward_item=tokens&timestamp=1700000000000&transaction_id=tx-spoof-1&user_id=user1&signature=MEUCIQDfakeSig&key_id=123456'
+        );
+        expect(spoofRes.status()).toBe(403);
+
+        // Cryptographic ECDSA P-256 verification self-check
+        const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+        const rawQueryPrefix = 'ad_network=5450213213286189855&reward_amount=20&transaction_id=tx-real-1&user_id=u1';
+        const derSig = crypto.sign('sha256', Buffer.from(rawQueryPrefix, 'utf8'), privateKey);
+        const urlSafeSig = derSig.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const fullUrl = `https://learnaxia.com/api/ads/admob-ssv?${rawQueryPrefix}&signature=${urlSafeSig}&key_id=999`;
+
+        const extracted = extractAdMobSignedContent(fullUrl);
+        expect(extracted).not.toBeNull();
+        expect(extracted?.signedContent).toBe(rawQueryPrefix);
+        expect(
+            verifyAdMobSignatureWithPem({
+                signedContent: extracted!.signedContent,
+                signatureBase64: extracted!.signatureBase64,
+                publicKey: publicKey.export({ format: 'pem', type: 'spki' }).toString(),
+            })
+        ).toBe(true);
+
+        // Tampered payload must fail signature check
+        expect(
+            verifyAdMobSignatureWithPem({
+                signedContent: rawQueryPrefix.replace('reward_amount=20', 'reward_amount=9999'),
+                signatureBase64: extracted!.signatureBase64,
+                publicKey: publicKey.export({ format: 'pem', type: 'spki' }).toString(),
+            })
+        ).toBe(false);
     });
 
 });

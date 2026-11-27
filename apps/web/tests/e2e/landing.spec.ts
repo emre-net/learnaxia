@@ -45,4 +45,11 @@ test.describe('Landing Page', () => {
         const hero = page.locator('h1');
         await expect(hero).toBeVisible();
     });
+
+    test('pricing page aligns with free education and AI token economy', async ({ page }) => {
+        await page.goto('/pricing');
+        await expect(page.getByText('Herkes İçin Ücretsiz, Sürdürülebilir AI')).toBeVisible();
+        await expect(page.getByText('AI Jeton Ekonomisi')).toBeVisible();
+        await expect(page.getByText('₺99')).toHaveCount(0);
+    });
 });

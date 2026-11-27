@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { OpenAIAIProvider } from "@/domains/ai/openai.provider";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 
 const GenerateSlideSchema = z.object({
     journeyId: z.string(),
@@ -63,11 +64,11 @@ export async function POST(req: Request) {
 
         const provider = new OpenAIAIProvider();
 
-        const slideResult = await provider.generateJourneySlide(
-            item.title,
-            topic,
-            depth,
-            language
+        const { result: slideResult, wallet } = await withTokenCharge(
+            userId,
+            "AI_JOURNEY_SLIDE",
+            () => provider.generateJourneySlide(item.title, topic, depth, language),
+            { journeyId, order: item.order }
         );
 
         const newSlide = await prisma.learningSlide.create({
@@ -82,10 +83,14 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             success: true,
-            slideId: newSlide.id
+            slideId: newSlide.id,
+            wallet,
         });
 
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error("Generate Slide API Error:", error);
 
         // Return 500 JSON properly (Vercel won't timeout since this is fast)

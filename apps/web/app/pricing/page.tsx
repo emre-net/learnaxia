@@ -3,8 +3,8 @@ import { Footer } from "@/components/landing/footer";
 import { PricingSection } from "@/components/landing/pricing-section";
 
 export const metadata = {
-    title: "Fiyatlandırma & Planlar | Learnaxia",
-    description: "Learnaxia'nın tüm gücünü ücretsiz deneyimleyin veya Pro plan ile sınırları zorlayın.",
+    title: "Ücretsiz Model & AI Jeton Ekonomisi | Learnaxia",
+    description: "Learnaxia tüm öğrenciler için ücretsizdir. AI üretimleri günlük ücretsiz jeton ve isteğe bağlı ödüllü reklam desteğiyle çalışır.",
 };
 
 export default function PricingPage() {

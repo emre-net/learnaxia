@@ -20,8 +20,8 @@ test.describe('Authentication Flow', () => {
     test('shows terms and privacy links', async ({ page }) => {
         await page.goto('/login');
 
-        const termsLink = page.getByRole('link', { name: /Kullanım Şartları/i });
-        const privacyLink = page.getByRole('link', { name: /Gizlilik Politikası/i });
+        const termsLink = page.getByRole('link', { name: /Kullanım Şartları/i }).first();
+        const privacyLink = page.getByRole('link', { name: /Gizlilik Politikası/i }).first();
         await expect(termsLink).toBeVisible();
         await expect(privacyLink).toBeVisible();
     });

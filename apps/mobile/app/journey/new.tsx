@@ -11,6 +11,8 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
 import { useLanguage } from '@/hooks/use-language';
+import { useTokenWallet } from '@/hooks/use-token-wallet';
+import { TokenWalletBanner } from '@/components/tokens/token-wallet-banner';
 import { extractApiErrorMessage } from '@learnaxia/shared';
 
 interface SyllabusStep {
@@ -23,6 +25,7 @@ interface SyllabusStep {
 export default function NewJourneyScreen() {
     const router = useRouter();
     const { language } = useLanguage();
+    const { refreshWallet, handleAiError } = useTokenWallet();
     const [topic, setTopic] = useState('');
     const [goal, setGoal] = useState('');
     const [depth, setDepth] = useState<'shallow' | 'standard' | 'deep'>('standard');
@@ -52,10 +55,11 @@ export default function NewJourneyScreen() {
             if (!Array.isArray(genRes.data?.syllabus) || genRes.data.syllabus.length === 0) {
                 throw new Error('Yol haritası üretilemedi.');
             }
+            refreshWallet();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             setSyllabus(genRes.data.syllabus);
         } catch (error) {
-            Alert.alert('Hata', extractApiErrorMessage(error, 'Yol haritası üretilirken bir sorun yaşandı.'));
+            handleAiError(error, 'Yol haritası üretilirken bir sorun yaşandı.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setSaving(false);
@@ -75,12 +79,13 @@ export default function NewJourneyScreen() {
                 language,
             });
             if (Array.isArray(res.data?.syllabus) && res.data.syllabus.length > 0) {
+                refreshWallet();
                 setSyllabus(res.data.syllabus);
                 setInstruction('');
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             }
         } catch (error) {
-            Alert.alert('Hata', extractApiErrorMessage(error, 'Müfredat güncellenemedi.'));
+            handleAiError(error, 'Müfredat güncellenemedi.');
         } finally {
             setSaving(false);
         }
@@ -157,6 +162,8 @@ export default function NewJourneyScreen() {
                             <Text style={styles.pageDesc}>
                                 Öğrenmek istediğin konuyu ve varsa hedefini yaz. AI senin için adım adım bir müfredat oluştursun.
                             </Text>
+
+                            <TokenWalletBanner variant="compact" />
 
                             <Text style={styles.sectionLabel}>Öğrenmek İstediğin Konu</Text>
                             <View style={[styles.inputContainer, focusedField === 'topic' && styles.inputFocused]}>

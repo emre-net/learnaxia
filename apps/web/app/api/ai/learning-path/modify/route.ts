@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -35,18 +36,26 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { topic, depth, instruction, syllabus, language } = ModifySyllabusSchema.parse(body);
 
-        const modifiedSyllabus = await AIService.generateSyllabus(
-            topic,
-            "", // goal not strictly needed for mods
-            depth as any,
-            language,
-            instruction,
-            syllabus
+        const { result: modifiedSyllabus, wallet } = await withTokenCharge(
+            userId,
+            "AI_JOURNEY_MODIFY",
+            () => AIService.generateSyllabus(
+                topic,
+                "",
+                depth as any,
+                language,
+                instruction,
+                syllabus
+            ),
+            { topic: topic.slice(0, 80) }
         );
 
-        return NextResponse.json({ syllabus: modifiedSyllabus });
+        return NextResponse.json({ syllabus: modifiedSyllabus, wallet });
 
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error("Modify Syllabus API Error:", error);
         return NextResponse.json({ error: "Müfredat güncellenemedi. Lütfen tekrar deneyin." }, { status: 500 });
     }

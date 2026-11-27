@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    RefreshControl, TextInput, StyleSheet, ScrollView
+    RefreshControl, TextInput, StyleSheet, ScrollView, Alert
 } from 'react-native';
 import { Screen } from '@/components/ui/screen';
 import { TAB_SCREEN_CONTENT_BOTTOM } from '@/constants/layout';
@@ -92,6 +92,8 @@ export default function LibraryScreen() {
     const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
     const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
     const [isOfflineFallback, setIsOfflineFallback] = useState(false);
+    const [syncCounts, setSyncCounts] = useState({ pending: 0, dead: 0 });
+    const [retryingSync, setRetryingSync] = useState(false);
     const router = useRouter();
     const PAGE_SIZE = 12;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -132,6 +134,11 @@ export default function LibraryScreen() {
             }
             setIsOfflineFallback(true);
         } finally {
+            const [pending, dead] = await Promise.all([
+                OfflineStorageService.getPendingQueueCount(),
+                OfflineStorageService.getDeadLetterCount(),
+            ]);
+            setSyncCounts({ pending, dead });
             setLoading(false);
             setRefreshing(false);
         }
@@ -454,6 +461,37 @@ export default function LibraryScreen() {
                             ? 'Çevrimdışı mod: Yerel önbellekteki içerikler gösteriliyor.'
                             : 'Offline mode: Showing cached library items.'}
                     </Text>
+                </View>
+            )}
+
+            {(syncCounts.pending > 0 || syncCounts.dead > 0) && (
+                <View style={[styles.offlineBanner, { borderColor: 'rgba(56, 189, 248, 0.35)', backgroundColor: 'rgba(56, 189, 248, 0.1)' }]}>
+                    <Ionicons name="cloud-upload-outline" size={14} color="#38BDF8" />
+                    <Text style={[styles.offlineBannerText, { color: '#E4E4E7' }]}>
+                        {syncCounts.dead > 0
+                            ? `${syncCounts.pending} bekleyen, ${syncCounts.dead} hata almış çalışma kaydı var.`
+                            : `${syncCounts.pending} çevrimdışı çalışma cevabı senkron bekliyor.`}
+                    </Text>
+                    <TouchableOpacity
+                        disabled={retryingSync}
+                        onPress={async () => {
+                            setRetryingSync(true);
+                            try {
+                                if (syncCounts.dead > 0) {
+                                    await OfflineStorageService.retryDeadLetters();
+                                }
+                                const res = await OfflineStorageService.processSyncQueue(api);
+                                await fetchLibrary();
+                                Alert.alert('Senkronizasyon', `${res.synced} kayıt sunucuya aktarıldı.`);
+                            } finally {
+                                setRetryingSync(false);
+                            }
+                        }}
+                    >
+                        <Text style={{ color: '#38BDF8', fontSize: 12, fontWeight: '800' }}>
+                            {retryingSync ? '...' : (syncCounts.dead > 0 ? 'Yeniden Dene' : 'Şimdi Eşitle')}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             )}
 

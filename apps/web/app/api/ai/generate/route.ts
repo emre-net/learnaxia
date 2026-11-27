@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
@@ -65,9 +66,17 @@ export async function POST(req: Request) {
 
         try {
             const normalizedTypes = types.map(t => t === 'TF' ? 'TRUE_FALSE' : t);
-            const items = await AIService.generateContent(topic, normalizedTypes, count, focusMode, language);
-            return NextResponse.json({ items });
+            const { result: items, wallet } = await withTokenCharge(
+                userId,
+                "AI_MODULE",
+                () => AIService.generateContent(topic, normalizedTypes, count, focusMode, language),
+                { topic: topic.slice(0, 80), count }
+            );
+            return NextResponse.json({ items, wallet });
         } catch (aiError: any) {
+            if (aiError instanceof InsufficientTokensError) {
+                return insufficientTokensResponse(aiError);
+            }
             console.error("AI Generation Failed:", aiError);
 
             await prisma.systemLog.create({

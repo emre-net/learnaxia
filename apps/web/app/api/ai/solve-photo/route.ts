@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
 import { AIError } from "@/domains/ai/ai.interface";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -57,19 +58,29 @@ export async function POST(req: Request) {
 
         // Process Request
         let result;
+        let wallet;
         try {
             const user = await prisma.user.findUnique({ where: { id: userId } });
             const language = user?.language || "tr";
 
-            result = await AIService.solvePhoto(buffer, file.type, language);
+            const charged = await withTokenCharge(
+                userId,
+                "AI_PHOTO_SOLVE",
+                () => AIService.solvePhoto(buffer, file.type, language)
+            );
+            result = charged.result;
+            wallet = charged.wallet;
         } catch (aiError) {
             console.error("AI Photo Solve Failed:", aiError);
             throw aiError;
         }
 
-        return NextResponse.json(result);
+        return NextResponse.json({ ...result, wallet });
 
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error("Solve Photo API Error:", error);
 
         if (error instanceof AIError) {

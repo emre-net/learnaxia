@@ -10,6 +10,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import api from '@/lib/api';
+import { useTokenWallet } from '@/hooks/use-token-wallet';
+import { TokenWalletBanner } from '@/components/tokens/token-wallet-banner';
 import {
     CATEGORIES,
     MAIN_CATEGORIES,
@@ -88,6 +90,7 @@ function createDefaultItem(): NewItem {
 
 export default function NewModuleScreen() {
     const router = useRouter();
+    const { refreshWallet, handleAiError } = useTokenWallet();
     const params = useLocalSearchParams<{ ai?: string; editId?: string }>();
     const isAiMode = params?.ai === 'true';
     const editId = params?.editId;
@@ -231,13 +234,14 @@ export default function NewModuleScreen() {
                     return isFirstEmpty ? newItems : [...prev, ...newItems];
                 });
 
+                refreshWallet();
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 Alert.alert('Tamamlandı', `${newItems.length} adet soru yapay zeka tarafından başarıyla üretildi ve eklendi.`);
             } else {
                 throw new Error('İçerik üretilemedi.');
             }
         } catch (error) {
-            Alert.alert('Üretim Hatası', extractApiErrorMessage(error, 'Yapay zeka ile içerik üretilirken bir hata oluştu.'));
+            handleAiError(error, 'Yapay zeka ile içerik üretilirken bir hata oluştu.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsAiGenerating(false);
@@ -467,17 +471,20 @@ export default function NewModuleScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     {isAiMode && !isEditing && (
-                        <View style={styles.aiModeBanner}>
-                            <View style={styles.aiModeBannerIcon}>
-                                <Ionicons name="sparkles" size={18} color="#C084FC" />
+                        <>
+                            <TokenWalletBanner variant="compact" />
+                            <View style={styles.aiModeBanner}>
+                                <View style={styles.aiModeBannerIcon}>
+                                    <Ionicons name="sparkles" size={18} color="#C084FC" />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.aiModeBannerTitle}>Yapay Zeka Asistanı Aktif</Text>
+                                    <Text style={styles.aiModeBannerDesc}>
+                                        Modül başlığını yazıp soru tipini belirleyin; ardından alttaki &quot;Yapay Zeka (AI)&quot; butonuna basarak tüm kartları otomatik oluşturun.
+                                    </Text>
+                                </View>
                             </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.aiModeBannerTitle}>Yapay Zeka Asistanı Aktif</Text>
-                                <Text style={styles.aiModeBannerDesc}>
-                                    Modül başlığını yazıp soru tipini belirleyin; ardından alttaki &quot;Yapay Zeka (AI)&quot; butonuna basarak tüm kartları otomatik oluşturun.
-                                </Text>
-                            </View>
-                        </View>
+                        </>
                     )}
 
                     <Text style={styles.sectionLabel}>

@@ -6,9 +6,10 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import api from '@/lib/api';
-import { extractApiErrorMessage } from '@learnaxia/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguage } from '@/hooks/use-language';
+import { useTokenWallet } from '@/hooks/use-token-wallet';
+import { TokenWalletBanner } from '@/components/tokens/token-wallet-banner';
 import { SolutionModal } from '@/components/create/solution-modal';
 import { CameraScreen } from '@/components/create/camera-screen';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +17,7 @@ import * as Haptics from 'expo-haptics';
 export default function CreateScreen() {
     const router = useRouter();
     const { language } = useLanguage();
+    const { refreshWallet, handleAiError } = useTokenWallet();
     const [cameraPermission, requestPermission] = useCameraPermissions();
     const [showCamera, setShowCamera] = useState(false);
     const [showSolutionModal, setShowSolutionModal] = useState(false);
@@ -70,6 +72,7 @@ export default function CreateScreen() {
                 });
 
                 if (genRes.data.noteId) {
+                    refreshWallet();
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     Alert.alert('Başarılı', 'Not başarıyla üretildi!');
                     router.push(`/notes/${genRes.data.noteId}` as any);
@@ -78,7 +81,7 @@ export default function CreateScreen() {
                 }
             }
         } catch (err) {
-            Alert.alert('Hata', extractApiErrorMessage(err, 'Belge işlenirken bir hata oluştu.'));
+            handleAiError(err, 'Belge işlenirken bir hata oluştu.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsGenerating(false);
@@ -112,13 +115,14 @@ export default function CreateScreen() {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
+                refreshWallet();
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 setVisionResult(response.data);
                 setShowCamera(false);
                 setShowSolutionModal(true);
             }
         } catch (error) {
-            Alert.alert('Hata', extractApiErrorMessage(error, 'Fotoğraf işlenemedi.'));
+            handleAiError(error, 'Fotoğraf işlenemedi.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsGenerating(false);
@@ -156,12 +160,13 @@ export default function CreateScreen() {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
+                refreshWallet();
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 setVisionResult(response.data);
                 setShowSolutionModal(true);
             }
         } catch (error) {
-            Alert.alert('Hata', extractApiErrorMessage(error, 'Galeri görüntüsü işlenemedi.'));
+            handleAiError(error, 'Galeri görüntüsü işlenemedi.');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } finally {
             setIsGenerating(false);
@@ -206,6 +211,8 @@ export default function CreateScreen() {
                         Öğrenme materyallerini zeka ile dönüştür veya kendi notlarını oluştur.
                     </Text>
                 </View>
+
+                <TokenWalletBanner variant="compact" />
 
                 <View style={styles.bentoGrid}>
                     <TouchableOpacity style={[styles.bentoCard, styles.bentoLarge]} onPress={openCamera}>

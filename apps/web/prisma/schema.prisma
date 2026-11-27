@@ -16,6 +16,11 @@ model User {
   role              String                  @default("USER")
   status            String                  @default("ACTIVE")
   sessionVersion    Int                     @default(1)
+  aiBonusTokens     Int                     @default(0)
+  dailyFreeUsed     Int                     @default(0)
+  dailyFreeResetAt  DateTime                @default(now())
+  dailyAdRewardsCount Int                   @default(0)
+  dailyAdResetAt    DateTime                @default(now())
   settings          Json?
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
@@ -53,6 +58,7 @@ model User {
   studySessionLogs    StudySessionLog[]
   contentAdoptionsByMe       ContentAdoptionLog[] @relation("AdoptionStudent")
   contentAdoptionsOfMyContent ContentAdoptionLog[] @relation("AdoptionOwner")
+  tokenTransactions          TokenTransaction[]
 
   @@index([email])
   @@index([handle])
@@ -634,4 +640,22 @@ model ContentAdoptionLog {
   @@index([moduleId])
   @@index([studentId])
   @@map("content_adoption_logs")
+}
+
+/// AI Jeton & Ödüllü Reklam İşlem Defteri (AdMob SSV idempotency + harcama/iade izi)
+model TokenTransaction {
+  id           String   @id @default(uuid())
+  userId       String
+  amount       Int      // Harcamalarda negatif, ödül/iade/tanımlamalarda pozitif
+  balanceAfter Int
+  source       String   // DAILY_FREE | BONUS_SPEND | REWARDED_AD | ADMIN_GRANT | REFUND
+  action       String?  // AI_MODULE | AI_NOTE | AI_PHOTO_SOLVE | AI_JOURNEY_SYLLABUS | AI_JOURNEY_MODIFY | AI_JOURNEY_SLIDE
+  externalTxId String?  @unique // AdMob SSV transaction_id
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("token_transactions")
 }

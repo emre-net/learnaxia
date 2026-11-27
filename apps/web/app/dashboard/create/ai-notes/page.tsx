@@ -10,6 +10,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n/i18n"
 import { motion } from "framer-motion"
+import { TokenWalletCard } from "@/components/tokens/token-wallet-card"
 
 export default function AiNotePage() {
     const [status, setStatus] = useState<"IDLE" | "EXTRACTING" | "GENERATING">("IDLE");
@@ -104,6 +105,8 @@ export default function AiNotePage() {
                     </p>
                 </div>
             </motion.div>
+
+            <TokenWalletCard compact />
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <motion.div

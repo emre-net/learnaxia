@@ -16,6 +16,7 @@ import { ProfileHeader } from "./profile-header";
 import { AccountSection } from "./account-section";
 import { SystemPreferences } from "./system-preferences";
 import { AnalyticsSection } from "./analytics-section";
+import { TokenWalletCard } from "@/components/tokens/token-wallet-card";
 
 interface SettingsContentProps {
     user: {
@@ -150,7 +151,12 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
                 {/* Content Area */}
                 <div className="md:col-span-3 space-y-6">
-                    {activeTab === "account" && <AccountSection user={user} />}
+                    {activeTab === "account" && (
+                        <>
+                            <TokenWalletCard />
+                            <AccountSection user={user} />
+                        </>
+                    )}
                     {activeTab === "settings" && (
                         <SystemPreferences
                             language={language}

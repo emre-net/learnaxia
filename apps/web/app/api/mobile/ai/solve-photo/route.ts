@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getMobileUser } from '@/lib/auth/mobile-jwt';
 import { AIService } from '@/domains/ai/ai.service';
 import { AIError } from '@/domains/ai/ai.interface';
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from '@/domains/token/token.service';
 
 export const maxDuration = 60;
 
@@ -44,8 +45,6 @@ export async function POST(req: Request) {
         const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
         const language = dbUser?.language || "tr";
 
-        const result = await AIService.solvePhoto(buffer, file.type, language);
-
         const validThumbnail =
             typeof thumbnailRaw === "string" &&
             thumbnailRaw.startsWith("data:image/") &&
@@ -53,22 +52,35 @@ export async function POST(req: Request) {
                 ? thumbnailRaw
                 : "";
 
-        const savedQuestion = await prisma.solvedQuestion.create({
-            data: {
-                userId: user.id,
-                imageUrl: validThumbnail,
-                questionText: result.questionText,
-                solution: result.solution
-            }
-        });
+        const { result: resolved, wallet } = await withTokenCharge(
+            user.id,
+            "AI_PHOTO_SOLVE",
+            async () => {
+                const result = await AIService.solvePhoto(buffer, file.type, language);
+                const savedQuestion = await prisma.solvedQuestion.create({
+                    data: {
+                        userId: user.id,
+                        imageUrl: validThumbnail,
+                        questionText: result.questionText,
+                        solution: result.solution
+                    }
+                });
+                return { result, savedQuestion };
+            },
+            { platform: "mobile" }
+        );
 
         return NextResponse.json({
-            id: savedQuestion.id,
-            imageUrl: savedQuestion.imageUrl,
-            questionText: result.questionText,
-            solution: result.solution,
+            id: resolved.savedQuestion.id,
+            imageUrl: resolved.savedQuestion.imageUrl,
+            questionText: resolved.result.questionText,
+            solution: resolved.result.solution,
+            wallet,
         });
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error('Mobile Vision API Error:', error);
         if (error instanceof AIError) {
             const safeMessages: Record<string, string> = {

@@ -101,17 +101,14 @@ export default function TermsPage() {
                         </section>
 
                         <section>
-                            <h2 className="text-2xl font-bold text-foreground mb-4">8. Ücretsiz ve Ücretli Hizmetler</h2>
+                            <h2 className="text-2xl font-bold text-foreground mb-4">8. Ücretsiz Eğitim Modeli ve AI Jeton Ekonomisi</h2>
                             <p className="mb-3">
-                                Learnaxia hem ücretsiz hem de (ilerleyen dönemde) ücretli abonelik planları sunabilir.
-                                Ücretli hizmetler için geçerli koşullar:
+                                Learnaxia temel öğrenme, çalışma, SM-2 tekrarı ve not alma araçlarını tüm kullanıcılarına ücretsiz sunar. Yapay zeka destekli üretim özelliklerinin sunucu maliyetlerini karşılamak için adil bir AI jeton kotası uygulanır:
                             </p>
                             <ul className="list-disc list-inside space-y-2">
-                                <li>Abonelik ücretleri, seçilen plana ve ödeme dönemine göre değişir ve önceden bildirilir.</li>
-                                <li>Ücretlendirme, abonelik başlangıcında veya yenileme tarihinde gerçekleşir.</li>
-                                <li>İptal, bir sonraki fatura döneminden önce yapılmalıdır.</li>
-                                <li>Dijital içerik niteliğindeki hizmetler için yasal istisnalar saklı kalmak kaydıyla iade yapılmaz.</li>
-                                <li>Teknik bir hata nedeniyle fazla tahsilat durumunda 14 iş günü içinde iade gerçekleştirilir.</li>
+                                <li>Her kullanıcıya günlük yenilenen ücretsiz AI jeton hakkı tanımlanır.</li>
+                                <li>Ek AI jetonu ihtiyacı halinde mobil uygulamada isteğe bağlı ödüllü reklamlar izlenerek bonus jeton kazanılabilir.</li>
+                                <li>Otomatik bot, sahte reklam geri bildirimi veya sistem suistimali tespit edilen hesapların jeton/erişim hakları askıya alınabilir.</li>
                             </ul>
                         </section>
 

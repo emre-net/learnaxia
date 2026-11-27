@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getMobileUser } from "@/lib/auth/mobile-jwt";
 import { AIService } from "@/domains/ai/ai.service";
 import { NoteService } from "@/domains/note/note.service";
+import { InsufficientTokensError, insufficientTokensResponse, withTokenCharge } from "@/domains/token/token.service";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -31,13 +32,14 @@ export async function POST(req: Request) {
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+        const authedUserId: string = userId;
 
         const body = await req.json();
         const { text, title, language } = GenerateNoteSchema.parse(body);
 
         // S6: Rate limit — saatte 10 AI isteği
         const rateLimit = await checkRateLimit({
-            key: `ai-note:${userId}`,
+            key: `ai-note:${authedUserId}`,
             limit: 10,
             windowMs: 60 * 60 * 1000
         });
@@ -45,18 +47,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Saatlik AI kullanım limitinize ulaştınız.' }, { status: 429 });
         }
 
-        // 1. Generate AI Note Content (Markdown/HTML)
-        const noteContent = await AIService.generateNote(text, language);
+        const { result: note, wallet } = await withTokenCharge(
+            authedUserId,
+            "AI_NOTE",
+            async () => {
+                const noteContent = await AIService.generateNote(text, language);
+                return NoteService.create(authedUserId, {
+                    title: title || "AI Note - " + new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US'),
+                    content: noteContent
+                });
+            },
+            { title: title?.slice(0, 80) }
+        );
 
-        // 2. Create the Note entry in Database
-        const note = await NoteService.create(userId, {
-            title: title || "AI Note - " + new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US'),
-            content: noteContent
-        });
-
-        return NextResponse.json({ success: true, noteId: note.id });
+        return NextResponse.json({ success: true, noteId: note.id, wallet });
 
     } catch (error: any) {
+        if (error instanceof InsufficientTokensError) {
+            return insufficientTokensResponse(error);
+        }
         console.error("AI Note Generation API Error:", error);
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useTranslation } from "@/lib/i18n/i18n"
+import { TokenWalletCard } from "@/components/tokens/token-wallet-card"
 import {
     Select,
     SelectContent,
@@ -214,6 +215,8 @@ export default function CreateLearningPlanPage() {
                         Öğrenmek istediğiniz konuyu ve hedefinizi belirtin, sizin için anında adım adım, vizyoner bir müfredat oluşturalım.
                     </p>
                 </div>
+
+                <TokenWalletCard compact refreshSignal={syllabus.length} />
 
                 {errorMsg && (
                     <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 backdrop-blur-md rounded-2xl">
