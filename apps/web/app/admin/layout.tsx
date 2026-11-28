@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "./components/admin-sidebar";
+import { isAdminUser } from "@/lib/auth/is-admin";
 
 export default async function AdminLayout({
     children,
@@ -8,14 +9,7 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
-    const userRole = (session?.user as any)?.role;
-    const userEmail = session?.user?.email;
-
-    // Robust check — sadece rol veya ADMIN_EMAIL env ile kontrol
-    const isAdmin = userRole === "ADMIN" ||
-        userEmail === process.env.ADMIN_EMAIL;
-
-    if (!isAdmin) {
+    if (!isAdminUser({ role: (session?.user as any)?.role, email: session?.user?.email })) {
         redirect("/dashboard");
     }
 

@@ -33,12 +33,24 @@ const nextAuth = NextAuth({
                     return false;
                 }
             }
+
+            if (user?.email) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { email: user.email },
+                    select: { status: true, deletedAt: true },
+                });
+                if (dbUser && (dbUser.deletedAt || dbUser.status !== "ACTIVE")) {
+                    console.warn(`[Auth Security] Login rejected for inactive/suspended user: ${user.email}`);
+                    return false;
+                }
+            }
             return true;
         },
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
                 token.role = (user as any).role;
+                token.sessionVersion = (user as any).sessionVersion ?? 1;
                 if (user.email) token.email = user.email;
                 if (user.name) token.name = user.name;
                 if ((user as any).handle) token.handle = (user as any).handle;
@@ -49,6 +61,7 @@ const nextAuth = NextAuth({
                     if (dbUser) {
                         token.id = dbUser.id;
                         token.role = dbUser.role;
+                        token.sessionVersion = dbUser.sessionVersion ?? 1;
                     }
                 } catch(e) {}
             }
@@ -58,10 +71,12 @@ const nextAuth = NextAuth({
             if (user && session.user) {
                 session.user.id = user.id;
                 (session.user as any).role = (user as any).role;
+                (session.user as any).sessionVersion = (user as any).sessionVersion ?? 1;
                 if ((user as any).handle) (session.user as any).handle = (user as any).handle;
             } else if (token && session.user) {
                 session.user.id = token.id as string;
                 (session.user as any).role = token.role;
+                (session.user as any).sessionVersion = (token as any).sessionVersion ?? 1;
                 if (token.handle) (session.user as any).handle = token.handle;
                 if (token.email) session.user.email = token.email;
                 if (token.name) session.user.name = token.name;
@@ -108,13 +123,15 @@ const nextAuth = NextAuth({
                                 id: adminUser.id,
                                 email: adminUser.email,
                                 name: adminUser.name,
-                                role: "ADMIN"
+                                role: "ADMIN",
+                                sessionVersion: adminUser.sessionVersion ?? 1,
                             };
                         }
 
                         const user = await prisma.user.findUnique({ where: { email } });
                         if (!user || !user.password) return null;
                         if (!user.emailVerified) return null; // Email doğrulaması zorunlu
+                        if (user.deletedAt || user.status !== "ACTIVE") return null;
 
                         const passwordsMatch = await bcrypt.compare(password, user.password);
                         if (passwordsMatch) return user;
@@ -172,7 +189,19 @@ export const signOut = rawSignOut as any;
 export async function auth(): Promise<Session | null> {
     try {
         const session = await rawAuth() as Session | null;
-        if (session?.user) {
+        if (session?.user?.id) {
+            const dbUser = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { role: true, status: true, deletedAt: true, sessionVersion: true },
+            });
+            const tokenVersion = (session.user as { sessionVersion?: number }).sessionVersion ?? 1;
+            if (!dbUser || dbUser.deletedAt || dbUser.status !== "ACTIVE") {
+                return null;
+            }
+            if ((dbUser.sessionVersion ?? 1) !== tokenVersion) {
+                return null;
+            }
+            (session.user as { role?: string }).role = dbUser.role;
             return session;
         }
     } catch (e) {

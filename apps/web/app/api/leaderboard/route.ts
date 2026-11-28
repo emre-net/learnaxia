@@ -57,7 +57,8 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const period = (searchParams.get('period') ?? 'monthly') as Period;
         const tierFilter = searchParams.get('tier') ?? 'all';
-        const limit = Math.min(100, parseInt(searchParams.get('limit') ?? '50'));
+        const rawLimit = Number.parseInt(searchParams.get('limit') ?? '50', 10);
+        const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(100, rawLimit)) : 50;
 
         const periodFilter = getPeriodFilter(period);
 

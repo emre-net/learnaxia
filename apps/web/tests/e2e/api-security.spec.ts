@@ -108,4 +108,12 @@ test.describe('API Security', () => {
         ).toBe(false);
     });
 
+    test('cron recalculate-scores rejects missing secret on GET and POST', async ({ request }) => {
+        const getRes = await request.get('http://localhost:3000/api/cron/recalculate-scores');
+        expect(getRes.status()).toBe(403);
+
+        const postRes = await request.post('http://localhost:3000/api/cron/recalculate-scores');
+        expect(postRes.status()).toBe(403);
+    });
+
 });

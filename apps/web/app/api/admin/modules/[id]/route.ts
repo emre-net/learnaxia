@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { isAdminUser } from "@/lib/auth/is-admin";
 import { z } from "zod";
 
 const AdminModulePatchSchema = z.object({
@@ -13,10 +14,7 @@ async function requireAdmin() {
     if (!session?.user?.id) {
         return { error: new NextResponse("Unauthorized", { status: 401 }) };
     }
-    const isAdmin =
-        session.user.role === "ADMIN" ||
-        session.user.email === process.env.ADMIN_EMAIL;
-    if (!isAdmin) {
+    if (!isAdminUser({ role: session.user.role, email: session.user.email })) {
         return { error: new NextResponse("Forbidden", { status: 403 }) };
     }
     return { userId: session.user.id };

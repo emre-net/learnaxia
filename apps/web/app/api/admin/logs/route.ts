@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { isAdminUser } from "@/lib/auth/is-admin";
 
 export async function GET(req: NextRequest) {
     try {
         const session = await auth();
-        const userEmail = session?.user?.email;
-        const userRole = (session?.user as any)?.role;
-
-        // Yetki Kontrolü: Rol ADMIN olmalı veya e-posta ADMIN_EMAIL env ile eşleşmeli
-        const isAdmin = userRole === 'ADMIN' ||
-            userEmail === process.env.ADMIN_EMAIL;
 
         if (!session?.user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (!isAdmin) {
+        if (!isAdminUser({ role: (session.user as any).role, email: session.user.email })) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
@@ -25,8 +20,8 @@ export async function GET(req: NextRequest) {
         const env = searchParams.get("env");
         const service = searchParams.get("service");
         const search = searchParams.get("search");
-        const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "50");
+        const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50", 10) || 50));
 
         const skip = (page - 1) * limit;
 

@@ -30,9 +30,12 @@ export default function LogsPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    // Check both Role and ADMIN_EMAIL env — never hardcode personal emails
-    const isAdmin = (session?.user as any)?.role === "ADMIN" ||
-        session?.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    // Check both Role and explicit non-empty NEXT_PUBLIC_ADMIN_EMAIL (server /admin/layout also enforces isAdminUser)
+    const configuredAdminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
+    const isAdmin =
+        (session?.user as any)?.role === "ADMIN" ||
+        (Boolean(configuredAdminEmail) &&
+            session?.user?.email?.trim().toLowerCase() === configuredAdminEmail);
 
     const [logs, setLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

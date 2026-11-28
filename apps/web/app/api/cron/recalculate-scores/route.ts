@@ -11,10 +11,14 @@ import { NextResponse } from "next/server";
  * Dün aktif olan tüm kullanıcıların skorunu yeniden hesaplar.
  * Batch: 50 kullanıcı aynı anda, rate limit aşımını önlemek için.
  */
-export async function POST(req: Request) {
-    // Güvenlik: sadece yetkili cron tetikleyicisi çağırabilir
-    const secret = req.headers.get('x-cron-secret');
-    if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+async function handleRecalculate(req: Request) {
+    // Güvenlik: x-cron-secret veya Bearer CRON_SECRET ile doğrulanır
+    const cronSecret = process.env.CRON_SECRET;
+    const headerSecret = req.headers.get('x-cron-secret');
+    const authHeader = req.headers.get('authorization');
+    const bearerSecret = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+
+    if (!cronSecret || (headerSecret !== cronSecret && bearerSecret !== cronSecret)) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -76,4 +80,12 @@ export async function POST(req: Request) {
         console.error("[Cron] recalculate-scores failed:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
+}
+
+export async function POST(req: Request) {
+    return handleRecalculate(req);
+}
+
+export async function GET(req: Request) {
+    return handleRecalculate(req);
 }

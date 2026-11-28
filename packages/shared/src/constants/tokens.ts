@@ -49,3 +49,51 @@ export interface TokenTransactionRecord {
   action: string | null;
   createdAt: string;
 }
+
+const ACTION_LABELS_TR: Record<string, string> = {
+  AI_MODULE: 'AI Modül Üretimi',
+  AI_NOTE: 'AI Not Çıkarma',
+  AI_PHOTO_SOLVE: 'AI Fotoğraf Çözümü',
+  AI_JOURNEY_SYLLABUS: 'AI Rota Müfredatı',
+  AI_JOURNEY_MODIFY: 'AI Rota Düzenleme',
+  AI_JOURNEY_SLIDE: 'AI Rota Slaytı',
+};
+
+const ACTION_LABELS_EN: Record<string, string> = {
+  AI_MODULE: 'AI Module Generation',
+  AI_NOTE: 'AI Note Summary',
+  AI_PHOTO_SOLVE: 'AI Photo Solver',
+  AI_JOURNEY_SYLLABUS: 'AI Journey Syllabus',
+  AI_JOURNEY_MODIFY: 'AI Journey Edit',
+  AI_JOURNEY_SLIDE: 'AI Journey Slide',
+};
+
+const SOURCE_LABELS_TR: Record<string, string> = {
+  DAILY_FREE: 'Günlük Ücretsiz Kota',
+  BONUS_SPEND: 'Bonus Jeton Harcaması',
+  REWARDED_AD: 'Ödüllü Reklam Bonusu',
+  ADMIN_GRANT: 'Yönetici Jeton Hediyesi',
+  REFUND: 'Otomatik AI İadesi',
+};
+
+const SOURCE_LABELS_EN: Record<string, string> = {
+  DAILY_FREE: 'Daily Free Allowance',
+  BONUS_SPEND: 'Bonus Token Spend',
+  REWARDED_AD: 'Rewarded Ad Bonus',
+  ADMIN_GRANT: 'Admin Bonus Grant',
+  REFUND: 'Automatic AI Refund',
+};
+
+export function getTokenTransactionLabel(
+  source: string,
+  action?: string | null,
+  lang: 'tr' | 'en' = 'tr'
+): string {
+  const actionMap = lang === 'en' ? ACTION_LABELS_EN : ACTION_LABELS_TR;
+  const sourceMap = lang === 'en' ? SOURCE_LABELS_EN : SOURCE_LABELS_TR;
+  const sourceText = sourceMap[source] || source;
+  if (action && actionMap[action]) {
+    return `${actionMap[action]} • ${sourceText}`;
+  }
+  return sourceText;
+}

@@ -1,8 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { TOKEN_CONFIG } from '@learnaxia/shared';
+import { TOKEN_CONFIG, TokenTransactionRecord, getTokenTransactionLabel } from '@learnaxia/shared';
 import { useTokenWallet } from '@/hooks/use-token-wallet';
+import { useLanguage } from '@/hooks/use-language';
+import api from '@/lib/api';
 
 interface TokenWalletBannerProps {
     variant?: 'compact' | 'card';
@@ -10,6 +12,23 @@ interface TokenWalletBannerProps {
 
 export function TokenWalletBanner({ variant = 'compact' }: TokenWalletBannerProps) {
     const { wallet, loading, watchingAd, watchRewardedAd } = useTokenWallet();
+    const { language } = useLanguage();
+    const [historyModalVisible, setHistoryModalVisible] = useState(false);
+    const [history, setHistory] = useState<TokenTransactionRecord[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
+    const openHistoryModal = async () => {
+        setHistoryModalVisible(true);
+        setLoadingHistory(true);
+        try {
+            const res = await api.get<{ transactions?: TokenTransactionRecord[] }>('/tokens/history?limit=20');
+            setHistory(Array.isArray(res.data?.transactions) ? res.data.transactions : []);
+        } catch {
+            setHistory([]);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
 
     const total = wallet?.totalAvailable ?? TOKEN_CONFIG.DAILY_FREE_TOKENS;
     const dailyRemaining = wallet?.dailyFreeRemaining ?? TOKEN_CONFIG.DAILY_FREE_TOKENS;
@@ -65,7 +84,17 @@ export function TokenWalletBanner({ variant = 'compact' }: TokenWalletBannerProp
                         <Text style={styles.cardSub}>Elle oluşturma, tekrar ve notlar sınırsızdır</Text>
                     </View>
                 </View>
-                <Text style={styles.bigTotal}>{loading ? '—' : total}</Text>
+                <View style={styles.headerRight}>
+                    <TouchableOpacity
+                        style={styles.historyBtn}
+                        onPress={openHistoryModal}
+                        activeOpacity={0.75}
+                    >
+                        <Ionicons name="time-outline" size={14} color="#A1A1AA" />
+                        <Text style={styles.historyBtnText}>Hareketler</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.bigTotal}>{loading ? '—' : total}</Text>
+                </View>
             </View>
 
             <View style={styles.splitRow}>
@@ -102,6 +131,58 @@ export function TokenWalletBanner({ variant = 'compact' }: TokenWalletBannerProp
                     </>
                 )}
             </TouchableOpacity>
+
+            <Modal
+                visible={historyModalVisible}
+                animationType="slide"
+                transparent
+                onRequestClose={() => setHistoryModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalSheet}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Jeton Hareketleri</Text>
+                            <TouchableOpacity
+                                style={styles.modalCloseBtn}
+                                onPress={() => setHistoryModalVisible(false)}
+                            >
+                                <Ionicons name="close" size={20} color="#A1A1AA" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {loadingHistory ? (
+                            <View style={styles.modalState}>
+                                <ActivityIndicator size="small" color="#38BDF8" />
+                            </View>
+                        ) : history.length === 0 ? (
+                            <View style={styles.modalState}>
+                                <Text style={styles.emptyHistoryText}>Henüz jeton hareketi kaydı yok.</Text>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={history}
+                                keyExtractor={(item) => item.id}
+                                contentContainerStyle={{ gap: 8, paddingBottom: 16 }}
+                                renderItem={({ item }) => (
+                                    <View style={styles.txRow}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.txTitle} numberOfLines={1}>
+                                                {getTokenTransactionLabel(item.source, item.action, language)}
+                                            </Text>
+                                            <Text style={styles.txSub}>
+                                                {new Date(item.createdAt).toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')} • Bakiye: {item.balanceAfter}
+                                            </Text>
+                                        </View>
+                                        <Text style={[styles.txAmount, { color: item.amount >= 0 ? '#34D399' : '#E4E4E7' }]}>
+                                            {item.amount >= 0 ? `+${item.amount}` : item.amount}
+                                        </Text>
+                                    </View>
+                                )}
+                            />
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -234,6 +315,93 @@ const styles = StyleSheet.create({
     fullAdBtnText: {
         color: '#09090B',
         fontSize: 13,
+        fontWeight: '800',
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    historyBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 10,
+    },
+    historyBtnText: {
+        color: '#A1A1AA',
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(9, 9, 11, 0.8)',
+    },
+    modalSheet: {
+        backgroundColor: '#121215',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        borderWidth: 1,
+        borderColor: '#27272A',
+        padding: 20,
+        maxHeight: '75%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    modalTitle: {
+        color: '#F4F4F5',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    modalCloseBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#18181B',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalState: {
+        paddingVertical: 32,
+        alignItems: 'center',
+    },
+    emptyHistoryText: {
+        color: '#71717A',
+        fontSize: 13,
+    },
+    txRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#18181B',
+        borderWidth: 1,
+        borderColor: '#27272A',
+        borderRadius: 12,
+        padding: 12,
+        gap: 10,
+    },
+    txTitle: {
+        color: '#F4F4F5',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    txSub: {
+        color: '#71717A',
+        fontSize: 11,
+        marginTop: 2,
+    },
+    txAmount: {
+        fontSize: 14,
         fontWeight: '800',
     },
 });

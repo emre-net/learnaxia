@@ -1,17 +1,15 @@
 
 import { auth } from "@/auth";
+import { isAdminUser } from "@/lib/auth/is-admin";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        const userRole = (session?.user as any)?.role;
-        const userEmail = session?.user?.email;
         const isAdmin =
-            session?.user?.handle === 'learnaxia' ||
-            userRole === 'ADMIN' ||
-            (process.env.ADMIN_EMAIL && userEmail === process.env.ADMIN_EMAIL);
+            session?.user?.handle === "learnaxia" ||
+            isAdminUser(session?.user as { role?: string | null; email?: string | null });
 
         if (!session?.user || !isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

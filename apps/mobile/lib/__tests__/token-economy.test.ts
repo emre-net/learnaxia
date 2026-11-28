@@ -1,4 +1,4 @@
-import { TOKEN_CONFIG, t } from '@learnaxia/shared';
+import { TOKEN_CONFIG, t, getTokenTransactionLabel } from '@learnaxia/shared';
 import { isInsufficientTokensError } from '../../hooks/use-token-wallet';
 import { RewardedAdService } from '../../services/rewarded-ad.service';
 
@@ -46,6 +46,12 @@ describe('AI Token Economy & Rewarded Ads Contract Tests', () => {
         expect(isInsufficientTokensError({ response: { status: 400, data: { code: 'INSUFFICIENT_TOKENS' } } })).toBe(true);
         expect(isInsufficientTokensError({ response: { status: 500 } })).toBe(false);
         expect(isInsufficientTokensError(null)).toBe(false);
+    });
+
+    it('formats token transaction labels consistently in tr and en', () => {
+        expect(getTokenTransactionLabel('DAILY_FREE', 'AI_MODULE', 'tr')).toContain('AI Modül Üretimi');
+        expect(getTokenTransactionLabel('REWARDED_AD', null, 'en')).toBe('Rewarded Ad Bonus');
+        expect(getTokenTransactionLabel('REFUND', 'AI_NOTE', 'tr')).toContain('Otomatik AI İadesi');
     });
 
     it('degrades gracefully when native Google Mobile Ads binary is not present in Jest', async () => {

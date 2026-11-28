@@ -44,11 +44,11 @@ export async function POST(req: Request) {
         // Kullanıcı var mı? (Var/yok bilgisini response'a verme — timing attack önlemi)
         const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() },
-            select: { id: true, email: true, name: true, password: true, deletedAt: true }
+            select: { id: true, email: true, name: true, password: true, status: true, deletedAt: true }
         });
 
         // Kullanıcı yoksa, yok gibi davranma — güvenlik
-        if (!user || user.deletedAt || !user.password) {
+        if (!user || user.deletedAt || user.status !== 'ACTIVE' || !user.password) {
             // Yine de 200 dön (enumeration attack'ı önler)
             return NextResponse.json({ ok: true });
         }

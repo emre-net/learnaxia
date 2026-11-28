@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { isAdminUser } from "@/lib/auth/is-admin";
 import { TokenService } from "@/domains/token/token.service";
 import { z } from "zod";
 
@@ -16,10 +17,7 @@ async function requireAdmin() {
     if (!session?.user?.id) {
         return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
     }
-    const isAdmin =
-        session.user.role === "ADMIN" ||
-        (process.env.ADMIN_EMAIL && session.user.email === process.env.ADMIN_EMAIL);
-    if (!isAdmin) {
+    if (!isAdminUser({ role: session.user.role, email: session.user.email })) {
         return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
     }
     return { adminId: session.user.id };
@@ -45,12 +43,22 @@ export async function PATCH(
         }
 
         if (data.status || data.role) {
-            await prisma.user.update({
-                where: { id },
-                data: {
-                    ...(data.status ? { status: data.status } : {}),
-                    ...(data.role ? { role: data.role } : {}),
-                },
+            const shouldRevokeSessions = data.status === "SUSPENDED" || Boolean(data.role);
+            await prisma.$transaction(async (tx) => {
+                await tx.user.update({
+                    where: { id },
+                    data: {
+                        ...(data.status ? { status: data.status } : {}),
+                        ...(data.role ? { role: data.role } : {}),
+                        ...(shouldRevokeSessions ? { sessionVersion: { increment: 1 } } : {}),
+                    },
+                });
+                if (data.status === "SUSPENDED") {
+                    await tx.mobileRefreshToken.updateMany({
+                        where: { userId: id, revokedAt: null },
+                        data: { revokedAt: new Date() },
+                    });
+                }
             });
         }
 

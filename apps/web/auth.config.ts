@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth"
 import Google from "next-auth/providers/google"
+import { isAdminUser } from "./lib/auth/is-admin"
 
 export const authConfig: NextAuthConfig = {
     pages: {
@@ -15,14 +16,9 @@ export const authConfig: NextAuthConfig = {
 
             if (isOnAdmin) {
                 if (isLoggedIn) {
-                    const userRole = (auth.user as any)?.role;
-                    const userEmail = auth.user?.email;
-
-                    // Priority: ADMIN role or matching the configured ADMIN_EMAIL
-                    const isAdmin = userRole === "ADMIN" || userEmail === process.env.ADMIN_EMAIL;
-
-                    if (isAdmin) return true;
-
+                    if (isAdminUser({ role: (auth.user as any)?.role, email: auth.user?.email })) {
+                        return true;
+                    }
                     return Response.redirect(new URL('/dashboard', nextUrl));
                 }
                 return false;

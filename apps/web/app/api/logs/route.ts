@@ -6,7 +6,6 @@ import { checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
     try {
         const ip = req.headers.get("x-forwarded-for") || "anonymous";
-        const now = Date.now();
 
         // M5: DB tabanlı rate limiting — serverless cold start'ta sıfırlanmaz
         // IP başına dakikada 20 log
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const logs = Array.isArray(body) ? body : [body];
+        const logs = (Array.isArray(body) ? body : [body]).slice(0, 10);
 
         // Kullanıcı Bilgisi
         const session = await auth();

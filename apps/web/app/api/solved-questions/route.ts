@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
         const history = await prisma.solvedQuestion.findMany({
             where: { userId },
             orderBy: { createdAt: "desc" },
+            take: 100,
             include: {
                 notes: true
             }

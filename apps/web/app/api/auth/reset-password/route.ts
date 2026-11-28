@@ -28,26 +28,32 @@ export async function POST(req: Request) {
         const email = verificationToken.identifier.replace("reset:", "");
 
         const user = await prisma.user.findUnique({
-            where: { email }
+            where: { email },
+            select: { id: true, status: true, deletedAt: true }
         });
 
-        if (!user) {
+        if (!user || user.deletedAt || user.status !== "ACTIVE") {
             return NextResponse.json({ error: "Kullanıcı bulunamadı." }, { status: 404 });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                password: hashedPassword,
-                sessionVersion: { increment: 1 } // Eski oturumları geçersiz kıl
-            }
-        });
-
-        await prisma.verificationToken.delete({
-            where: { token }
-        });
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    password: hashedPassword,
+                    sessionVersion: { increment: 1 } // Eski web oturumlarını geçersiz kıl
+                }
+            }),
+            prisma.mobileRefreshToken.updateMany({
+                where: { userId: user.id, revokedAt: null },
+                data: { revokedAt: new Date() } // Eski mobil refresh token'larını iptal et
+            }),
+            prisma.verificationToken.delete({
+                where: { token }
+            }),
+        ]);
 
         return NextResponse.json({ success: "Şifreniz başarıyla güncellendi!" });
     } catch (error: any) {

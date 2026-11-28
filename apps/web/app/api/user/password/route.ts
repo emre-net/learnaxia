@@ -25,10 +25,10 @@ export async function POST(req: Request) {
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, password: true },
+            select: { id: true, password: true, status: true, deletedAt: true },
         });
 
-        if (!user) {
+        if (!user || user.deletedAt || user.status !== "ACTIVE") {
             return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
         }
 
@@ -45,13 +45,19 @@ export async function POST(req: Request) {
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await prisma.user.update({
-            where: { id: userId },
-            data: {
-                password: hashedPassword,
-                sessionVersion: { increment: 1 },
-            },
-        });
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: {
+                    password: hashedPassword,
+                    sessionVersion: { increment: 1 },
+                },
+            }),
+            prisma.mobileRefreshToken.updateMany({
+                where: { userId, revokedAt: null },
+                data: { revokedAt: new Date() },
+            }),
+        ]);
 
         return NextResponse.json({ success: true, message: "Şifreniz başarıyla güncellendi." });
     } catch (error) {

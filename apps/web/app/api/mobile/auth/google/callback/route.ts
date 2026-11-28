@@ -142,15 +142,16 @@ export async function GET(req: Request) {
                 email: true,
                 name: true,
                 role: true,
+                status: true,
                 sessionVersion: true,
                 deletedAt: true,
                 emailVerified: true,
             },
         });
 
-        if (!user || user.deletedAt) {
-            const errorUrl = `${targetRedirect}${targetRedirect.includes('?') ? '&' : '?'}error=user_not_found`;
-            return new Response(renderRedirectHtml(errorUrl, true, 'Kullanıcı hesabı bulunamadı veya silinmiş.'), {
+        if (!user || user.deletedAt || user.status !== 'ACTIVE') {
+            const errorUrl = `${targetRedirect}${targetRedirect.includes('?') ? '&' : '?'}error=user_unavailable`;
+            return new Response(renderRedirectHtml(errorUrl, true, 'Kullanıcı hesabı bulunamadı veya askıya alınmış.'), {
                 headers: { 'Content-Type': 'text/html; charset=utf-8' },
             });
         }

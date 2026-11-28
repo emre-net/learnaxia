@@ -1,4 +1,5 @@
 import { jwtVerify } from 'jose';
+import prisma from '@/lib/prisma';
 
 // Secret validation is deferred to runtime (not module-load time)
 // so Next.js can safely import this module during build without throwing.
@@ -19,8 +20,38 @@ export async function getMobileUser(req: Request) {
   const token = authHeader.split(' ')[1];
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
-    return payload as { id: string; email: string; name: string; role?: string };
-  } catch (error) {
+    const userId = typeof payload.id === 'string' ? payload.id : null;
+    if (!userId) return null;
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        status: true,
+        deletedAt: true,
+        sessionVersion: true,
+      },
+    });
+
+    if (!dbUser || dbUser.deletedAt || dbUser.status !== 'ACTIVE') {
+      return null;
+    }
+
+    const tokenVersion = typeof payload.tokenVersion === 'number' ? payload.tokenVersion : 1;
+    if ((dbUser.sessionVersion ?? 1) !== tokenVersion) {
+      return null;
+    }
+
+    return {
+      id: dbUser.id,
+      email: dbUser.email ?? (typeof payload.email === 'string' ? payload.email : ''),
+      name: dbUser.name ?? (typeof payload.name === 'string' ? payload.name : ''),
+      role: dbUser.role,
+    };
+  } catch {
     return null;
   }
 }

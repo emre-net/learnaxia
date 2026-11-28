@@ -27,11 +27,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "E-posta adresi gereklidir." }, { status: 400 });
         }
 
+        const normalizedEmail = email.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-            where: { email }
+            where: { email: normalizedEmail },
+            select: { id: true, email: true, name: true, handle: true, status: true, deletedAt: true }
         });
 
-        if (!user) {
+        if (!user || user.deletedAt || user.status !== "ACTIVE" || !user.email) {
             return NextResponse.json({ success: "Eğer bu e-posta adresi sistemimizde kayıtlıysa, şifre sıfırlama bağlantısı gönderilecektir." });
         }
 
@@ -40,12 +43,12 @@ export async function POST(req: Request) {
 
         // Varsa eskisini sil
         await prisma.verificationToken.deleteMany({
-            where: { identifier: `reset:${email}` }
+            where: { identifier: `reset:${user.email}` }
         });
 
         await prisma.verificationToken.create({
             data: {
-                identifier: `reset:${email}`,
+                identifier: `reset:${user.email}`,
                 token,
                 expires
             }

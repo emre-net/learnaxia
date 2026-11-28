@@ -40,9 +40,10 @@ const EVENT_HANDLER_PATTERN = /^on/i;
 const DANGEROUS_PROTOCOL = /^(javascript|vbscript|data):/i;
 
 function sanitizeNode(node: Element): void {
-    // Tehlikeli tagları tamamen kaldır
+    // Tehlikeli veya izin verilmeyen tagları unwrap etmeden önce alt elementleri temizle
     const tagName = node.tagName.toLowerCase();
     if (!ALLOWED_TAGS.has(tagName)) {
+        Array.from(node.children).forEach(child => sanitizeNode(child as Element));
         node.replaceWith(...Array.from(node.childNodes));
         return;
     }
@@ -66,8 +67,9 @@ function sanitizeNode(node: Element): void {
             continue;
         }
 
-        // href/src için protocol kontrolü
-        if ((name === 'href' || name === 'src') && DANGEROUS_PROTOCOL.test(value.trim())) {
+        // href/src için kontrol karakterlerinden arındırılmış protocol kontrolü
+        const normalizedProtocol = value.replace(/[\u0000-\u0020]+/g, '');
+        if ((name === 'href' || name === 'src') && DANGEROUS_PROTOCOL.test(normalizedProtocol)) {
             attrsToRemove.push(attr.name);
             continue;
         }
@@ -85,17 +87,24 @@ function sanitizeNode(node: Element): void {
     Array.from(node.children).forEach(child => sanitizeNode(child as Element));
 }
 
+function sanitizeSsrFallback(html: string): string {
+    return html
+        .replace(/<(script|style|iframe|object|embed|svg|form|base)\b[\s\S]*?<\/\1>/gi, '')
+        .replace(/<(script|style|iframe|object|embed|svg|form|base)\b[^>]*\/?>/gi, '')
+        .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/(href|src)\s*=\s*(["'])\s*(?:javascript|vbscript|data):[^"']*\2/gi, '');
+}
+
 /**
  * AI tarafından üretilen HTML'i sanitize eder.
  * Tarayıcı ortamında DOMParser kullanır.
- * Server-side rendering'de (SSR) no-op olarak davranır — sadece client component'lerde kullanılmalıdır.
+ * SSR ortamında tehlikeli etiket ve event handler'ları temizleyen güvenli fallback uygular.
  */
 export function sanitizeHtml(html: string): string {
     if (!html) return '';
 
-    // SSR ortamında DOMParser yok — güvenli HTML zaten server'da AI tarafından üretiliyor
     if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
-        return html;
+        return sanitizeSsrFallback(html);
     }
 
     try {
@@ -103,7 +112,7 @@ export function sanitizeHtml(html: string): string {
         const doc = parser.parseFromString(html, 'text/html');
 
         // <script> ve <style> taglarını tamamen kaldır
-        doc.querySelectorAll('script, style, iframe, object, embed, form, base').forEach(el => el.remove());
+        doc.querySelectorAll('script, style, iframe, object, embed, svg, form, base').forEach(el => el.remove());
 
         // Body içindeki her elementi sanitize et
         Array.from(doc.body.children).forEach(child => sanitizeNode(child as Element));
